@@ -10,10 +10,55 @@
     <packaging>jar</packaging>
 
     <name>dynamic-discovery-client</name>
-    <description>Library for discovering PEPPOL infrastructure dynamically</description>
+    <description>Library for discovering data dynamically based on e-SENS BDXL specification</description>
 
-    <properties></properties>
+    <properties>
+        <httpclient.version>4.5.2</httpclient.version>
+        <dnsjava.version>2.1.7</dnsjava.version>
+        <bouncycastle.version>1.55</bouncycastle.version>
+        <guava.version>18.0</guava.version>
+        <commons-codec.version>1.9</commons-codec.version>
+        <commons-lang3.version>3.4</commons-lang3.version>
+    </properties>
 
     <dependencies>
+        <!-- DNS -->
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>${dnsjava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons-codec.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+
     </dependencies>
 </project>

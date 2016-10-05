@@ -1,5 +1,51 @@
+import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
+import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
+import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcher;
+import eu.europa.ec.dynamicdiscovery.locator.BDXRLocator;
+import eu.europa.ec.dynamicdiscovery.locator.BusdoxLocator;
+import eu.europa.ec.dynamicdiscovery.model.*;
+import eu.europa.ec.dynamicdiscovery.security.ProxyConfiguration;
+
+import java.util.List;
+
 /**
  * Created by rodrfla on 30/09/2016.
  */
 public class Teste {
+
+    public static void main(String[] args) throws Exception {
+        final DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+               // .locator(new BusdoxLocator("acc.edelivery.tech.ec.europa.eu"))
+                .fetcher(new URLFetcher(new ProxyConfiguration("158.169.9.13", 8012, "j50b107", "34i6fv7")))
+                .build();
+
+        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("0037:01841111111111"));
+        //final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
+        for (DocumentIdentifier doc : documentIdentifiers) {
+            System.out.println(doc.toString());
+        }
+        //  final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
+        final ProcessIdentifier processIdentifier = new ProcessIdentifier("urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+
+        final ServiceMetadata sm = smpClient.getServiceMetadata(new ParticipantIdentifier("0037:01841111111111"), documentIdentifiers.get(0));
+        System.out.println(sm.getDocumentIdentifier());
+        System.out.println(sm.getParticipantIdentifier());
+
+        for (Endpoint endpoint : sm.getEndpoints()) {
+            System.out.println(endpoint.getProcessIdentifier());
+            System.out.println(endpoint.getTransportProfile());
+            System.out.println(endpoint.toString());
+            Endpoint endpointDummy = sm.getEndpoint(endpoint.getProcessIdentifier(), endpoint.getTransportProfile(), TransportProfile.AS2_1_0); //bdxr-transport-ebms3-as4-v1p0
+            System.out.println("ENDPOINT " + endpointDummy);
+        }
+
+        // Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile("bdxr-transport-ebms3-as4-v1p0"), TransportProfile.AS4); //bdxr-transport-ebms3-as4-v1p0
+
+        // final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
+        System.out.println(documentIdentifiers.size());
+    }
+
+
 }
