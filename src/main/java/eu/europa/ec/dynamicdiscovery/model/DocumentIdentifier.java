@@ -4,7 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class DocumentIdentifier {
     private static final long serialVersionUID = -3748163459655880167L;

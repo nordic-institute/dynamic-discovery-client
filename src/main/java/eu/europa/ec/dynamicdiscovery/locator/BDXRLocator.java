@@ -5,6 +5,8 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.*;
 
 import java.io.UnsupportedEncodingException;
@@ -15,9 +17,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class BDXRLocator extends AbstractLocator {
+    private static Logger logger = LoggerFactory.getLogger(BDXRLocator.class);
 
     public BDXRLocator() {
         super();
@@ -33,7 +36,7 @@ public class BDXRLocator extends AbstractLocator {
             uri = cnameLookup(participantIdentifier);
         }
         if (uri == null) {
-            throw new DNSLookupException(String.format("DNS Lookup was not able to retrieve information using NAPTR and/or CNAME for the participant [ %s ]" , new Object[]{participantIdentifier.getIdentifier()}));
+            throw new DNSLookupException(String.format("DNS Lookup was not able to retrieve information using NAPTR and/or CNAME for the participant [ %s ]", new Object[]{participantIdentifier.getIdentifier()}));
         }
 
         return uri;
@@ -52,7 +55,8 @@ public class BDXRLocator extends AbstractLocator {
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new RuntimeException(exc.getMessage(), exc);
         } catch (TechnicalException exc) {
-            //logs
+            //It was not possible to lookup using NAPTR, CNAME lookup will be used
+            logger.error(exc.getMessage(), exc);
         }
         return uri;
     }

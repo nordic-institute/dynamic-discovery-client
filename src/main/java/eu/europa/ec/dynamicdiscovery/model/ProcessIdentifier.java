@@ -1,14 +1,15 @@
 package eu.europa.ec.dynamicdiscovery.model;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class ProcessIdentifier {
     private static final long serialVersionUID = 7486398061021950763L;
     private String identifier;
     private String scheme;
 
-    public  ProcessIdentifier(String identifier, String scheme) {
+    public ProcessIdentifier(String identifier, String scheme) {
         this.identifier = identifier;
         this.scheme = scheme;
     }
@@ -22,25 +23,26 @@ public class ProcessIdentifier {
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
-        } else if(o != null && this.getClass() == o.getClass()) {
-            ProcessIdentifier that = (ProcessIdentifier)o;
-            if(this.identifier != null) {
-                if(!this.identifier.equals(that.identifier)) {
+        } else if (o != null && this.getClass() == o.getClass()) {
+            ProcessIdentifier that = (ProcessIdentifier) o;
+            if (this.identifier != null) {
+                if (!this.identifier.equals(that.identifier)) {
                     return false;
                 }
-            } else if(that.identifier != null) {
+            } else if (that.identifier != null) {
                 return false;
             }
 
             boolean var10000;
-            label51: {
-                if(this.scheme != null) {
-                    if(!this.scheme.equals(that.scheme)) {
+            label51:
+            {
+                if (this.scheme != null) {
+                    if (!this.scheme.equals(that.scheme)) {
                         break label51;
                     }
-                } else if(that.scheme != null) {
+                } else if (that.scheme != null) {
                     break label51;
                 }
 
@@ -56,8 +58,8 @@ public class ProcessIdentifier {
     }
 
     public int hashCode() {
-        int result = this.identifier != null?this.identifier.hashCode():0;
-        result = 31 * result + (this.scheme != null?this.scheme.hashCode():0);
+        int result = this.identifier != null ? this.identifier.hashCode() : 0;
+        result = 31 * result + (this.scheme != null ? this.scheme.hashCode() : 0);
         return result;
     }
 

@@ -1,12 +1,12 @@
 package eu.europa.ec.dynamicdiscovery.reader;
 
-import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.security.XmldsigVerifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.apache.commons.codec.binary.Base64;
-
 import org.busdox.servicemetadata.publishing._1.*;
 import org.w3c.dom.Document;
 
@@ -15,7 +15,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.dom.DOMSource;
-import java.io.*;
+import java.io.ByteArrayInputStream;
 import java.net.URLDecoder;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -25,17 +25,19 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 
-public class BusdoxReader implements IMetadataReader {
+public class BusdoxReader extends AbstractReader {
     public static final String NAMESPACE = "http://busdox.org/serviceMetadata/publishing/1.0/";
     private static JAXBContext jaxbContext;
 
     public BusdoxReader() {
+        super();
     }
 
-    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws Exception {
+    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws BindException {
         try {
             Unmarshaller e = jaxbContext.createUnmarshaller();
             ServiceGroupType serviceGroup = (ServiceGroupType) ((JAXBElement) e.unmarshal(CommonUtil.trim(fetcherResponse.getInputStream()))).getValue();
@@ -55,7 +57,7 @@ public class BusdoxReader implements IMetadataReader {
         }
     }
 
-    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws Exception, SecurityException {
+    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws BindException, SecurityException {
         try {
             Document e = CommonUtil.parse(fetcherResponse.getInputStream());
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();

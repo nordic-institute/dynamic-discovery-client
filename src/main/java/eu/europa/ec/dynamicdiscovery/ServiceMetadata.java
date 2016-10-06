@@ -8,7 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class ServiceMetadata {
     private static final long serialVersionUID = -7523336374349545534L;

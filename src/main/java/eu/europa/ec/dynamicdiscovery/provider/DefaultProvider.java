@@ -6,7 +6,8 @@ import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import java.net.URI;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class DefaultProvider implements IMetadataProvider {
     public DefaultProvider() {

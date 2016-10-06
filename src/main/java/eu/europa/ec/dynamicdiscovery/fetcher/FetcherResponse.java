@@ -3,7 +3,8 @@ package eu.europa.ec.dynamicdiscovery.fetcher;
 import java.io.InputStream;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class FetcherResponse {
     private InputStream inputStream;

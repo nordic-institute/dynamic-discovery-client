@@ -1,20 +1,22 @@
 package eu.europa.ec.dynamicdiscovery.reader;
 
-import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.security.XmldsigVerifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-
 import org.oasis_open.docs.bdxr.ns.smp._2014._07.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.dom.DOMSource;
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -24,35 +26,41 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by rodrfla on 03/10/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
-public class BdxrReader {
-    public static final String NAMESPACE = "http://docs.oasis-open.org/bdxr/ns/SMP/2014/07";
-    private static JAXBContext jaxbContext;
+public class BdxrReader extends AbstractReader {
+    private static Logger logger = LoggerFactory.getLogger(BdxrReader.class);
 
     public BdxrReader() {
+        super();
     }
 
-    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) {
+    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws BindException {
         try {
+            List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
             Unmarshaller e = jaxbContext.createUnmarshaller();
             ServiceGroupType serviceGroup = (ServiceGroupType) ((JAXBElement) e.unmarshal(fetcherResponse.getInputStream())).getValue();
-            ArrayList documentIdentifiers = new ArrayList();
-            Iterator var5 = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().iterator();
-
-            while (var5.hasNext()) {
-                ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) var5.next();
-                String[] parts = URLDecoder.decode(reference.getHref().split("/services/")[1], "UTF-8").split("::", 2);
-                documentIdentifiers.add(new DocumentIdentifier(parts[1], parts[0]));
+            ServiceMetadataReferenceCollectionType serviceMetadataReferenceCollection = serviceGroup.getServiceMetadataReferenceCollection();
+            if (serviceGroup != null && serviceMetadataReferenceCollection != null) {
+                List<ServiceMetadataReferenceType> serviceMetadataReference = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference();
+                if (serviceMetadataReference != null && !serviceMetadataReference.isEmpty()) {
+                    Iterator iterator = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().iterator();
+                    while (iterator.hasNext()) {
+                        ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) iterator.next();
+                        String[] parts = URLDecoder.decode(reference.getHref().split("/services/")[1], "UTF-8").split("::", 2);
+                        documentIdentifiers.add(new DocumentIdentifier(parts[1], parts[0]));
+                    }
+                }
             }
-
             return documentIdentifiers;
-        } catch (Exception var8) {
-            throw new RuntimeException(var8.getMessage(), var8);
+        } catch (UnsupportedEncodingException | JAXBException exc) {
+            logger.error("Document Identifier Parser Exception", exc);
+            throw new BindException(exc.getMessage(), exc);
         }
     }
 
-    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws Exception, SecurityException {
+    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws BindException, SecurityException {
         try {
             Document e = CommonUtil.parse(fetcherResponse.getInputStream());
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -95,11 +103,4 @@ public class BdxrReader {
         }
     }
 
-    static {
-        try {
-            jaxbContext = JAXBContext.newInstance(new Class[]{ServiceGroupType.class, SignedServiceMetadataType.class, ServiceMetadataType.class});
-        } catch (JAXBException var1) {
-            throw new RuntimeException(var1.getMessage(), var1);
-        }
-    }
 }

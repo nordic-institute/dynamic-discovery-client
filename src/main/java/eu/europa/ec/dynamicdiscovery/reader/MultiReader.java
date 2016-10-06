@@ -1,7 +1,8 @@
 package eu.europa.ec.dynamicdiscovery.reader;
 
-import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 
 import java.io.ByteArrayInputStream;
@@ -12,19 +13,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class MultiReader implements IMetadataReader {
     // private static Logger logger = LoggerFactory.getLogger(MultiReader.class);
     private static final Pattern rootTagPattern = Pattern.compile("<(\\w*:{0,1}[^<?]*)>", 8);
     private static final Pattern namespacePattern = Pattern.compile("xmlns:{0,1}([a-z0-9]*)\\w*=\\w*\"(.+?)\"", 8);
-    private BusdoxReader busdoxReader = new BusdoxReader();
-    private BdxrReader bdxrReader = new BdxrReader();
+    private BusdoxReader busdoxReader;
+    private BdxrReader bdxrReader;
 
     public MultiReader() {
+        super();
+        busdoxReader = new BusdoxReader();
+        bdxrReader = new BdxrReader();
     }
 
-    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws Exception {
+    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws BindException {
         if (fetcherResponse.getNamespace() == null) {
             fetcherResponse = this.detect(fetcherResponse);
         }
@@ -34,11 +39,11 @@ public class MultiReader implements IMetadataReader {
         } else if ("http://docs.oasis-open.org/bdxr/ns/SMP/2014/07".equalsIgnoreCase(fetcherResponse.getNamespace())) {
             return this.bdxrReader.parseDocumentIdentifiers(fetcherResponse);
         } else {
-            throw new Exception(String.format("Unknown namespace: %s", new Object[]{fetcherResponse.getNamespace()}));
+            throw new BindException(String.format("Unknown namespace: %s", new Object[]{fetcherResponse.getNamespace()}));
         }
     }
 
-    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws Exception {//, SecurityException {
+    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws BindException {//, SecurityException {
         if (fetcherResponse.getNamespace() == null) {
             fetcherResponse = this.detect(fetcherResponse);
         }
@@ -48,11 +53,11 @@ public class MultiReader implements IMetadataReader {
         } else if ("http://docs.oasis-open.org/bdxr/ns/SMP/2014/07".equalsIgnoreCase(fetcherResponse.getNamespace())) {
             return this.bdxrReader.parseServiceMetadata(fetcherResponse);
         } else {
-            throw new Exception(String.format("Unknown namespace: %s", new Object[]{fetcherResponse.getNamespace()}));
+            throw new BindException(String.format("Unknown namespace: %s", new Object[]{fetcherResponse.getNamespace()}));
         }
     }
 
-    public FetcherResponse detect(FetcherResponse fetcherResponse) throws Exception {
+    public FetcherResponse detect(FetcherResponse fetcherResponse) throws BindException {
         try {
             byte[] e = new byte[1024];
             fetcherResponse.getInputStream().read(e);
@@ -72,9 +77,9 @@ public class MultiReader implements IMetadataReader {
                 }
             }
 
-            throw new Exception("Unable to detect namespace.");
+            throw new BindException("Unable to detect namespace.");
         } catch (IOException var7) {
-            throw new Exception(var7.getMessage(), var7);
+            throw new BindException(var7.getMessage(), var7);
         }
     }
 }

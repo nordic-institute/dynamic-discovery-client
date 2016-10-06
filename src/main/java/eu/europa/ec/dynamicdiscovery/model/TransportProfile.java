@@ -1,7 +1,8 @@
 package eu.europa.ec.dynamicdiscovery.model;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class TransportProfile {
 
@@ -15,17 +16,18 @@ public class TransportProfile {
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
-        } else if(o != null && this.getClass() == o.getClass()) {
+        } else if (o != null && this.getClass() == o.getClass()) {
             boolean var10000;
-            label35: {
-                TransportProfile that = (TransportProfile)o;
-                if(this.identifier != null) {
-                    if(this.identifier.equals(that.identifier)) {
+            label35:
+            {
+                TransportProfile that = (TransportProfile) o;
+                if (this.identifier != null) {
+                    if (this.identifier.equals(that.identifier)) {
                         break label35;
                     }
-                } else if(that.identifier == null) {
+                } else if (that.identifier == null) {
                     break label35;
                 }
 
@@ -41,7 +43,7 @@ public class TransportProfile {
     }
 
     public int hashCode() {
-        return this.identifier != null?this.identifier.hashCode():0;
+        return this.identifier != null ? this.identifier.hashCode() : 0;
     }
 
     @Override

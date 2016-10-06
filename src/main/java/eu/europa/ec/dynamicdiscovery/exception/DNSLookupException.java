@@ -2,7 +2,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
  *
- * Created by rodrfla on 05/10/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class DNSLookupException extends TechnicalException {
 

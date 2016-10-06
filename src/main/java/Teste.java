@@ -3,9 +3,7 @@ import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcher;
 import eu.europa.ec.dynamicdiscovery.locator.BDXRLocator;
-import eu.europa.ec.dynamicdiscovery.locator.BusdoxLocator;
 import eu.europa.ec.dynamicdiscovery.model.*;
-import eu.europa.ec.dynamicdiscovery.security.ProxyConfiguration;
 
 import java.util.List;
 
@@ -25,17 +23,17 @@ public class Teste {
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178")); //"0037:01841111111111")
         //final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
         for (DocumentIdentifier doc : documentIdentifiers) {
-            System.out.println(doc.toString());
+            System.out.println("11"+doc.toString());
         }
         //  final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
         final ProcessIdentifier processIdentifier = new ProcessIdentifier("urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
 
         final ServiceMetadata sm = smpClient.getServiceMetadata(new ParticipantIdentifier("9925:0367302178"), documentIdentifiers.get(0));
-        System.out.println(sm.getDocumentIdentifier());
-        System.out.println(sm.getParticipantIdentifier());
+        System.out.println("22"+sm.getDocumentIdentifier());
+        System.out.println("22"+sm.getParticipantIdentifier());
 
         for (Endpoint endpoint : sm.getEndpoints()) {
-            System.out.println(endpoint.getProcessIdentifier());
+            System.out.println("33"+endpoint.getProcessIdentifier());
             System.out.println(endpoint.getTransportProfile());
             System.out.println(endpoint.toString());
             Endpoint endpointDummy = sm.getEndpoint(endpoint.getProcessIdentifier(), endpoint.getTransportProfile(), TransportProfile.AS2_1_0); //bdxr-transport-ebms3-as4-v1p0

@@ -4,7 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class ParticipantIdentifier {
     private static final long serialVersionUID = -8052874032415088055L;
@@ -37,25 +38,26 @@ public class ParticipantIdentifier {
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
-        } else if(o != null && this.getClass() == o.getClass()) {
-            ParticipantIdentifier that = (ParticipantIdentifier)o;
-            if(this.identifier != null) {
-                if(!this.identifier.equals(that.identifier)) {
+        } else if (o != null && this.getClass() == o.getClass()) {
+            ParticipantIdentifier that = (ParticipantIdentifier) o;
+            if (this.identifier != null) {
+                if (!this.identifier.equals(that.identifier)) {
                     return false;
                 }
-            } else if(that.identifier != null) {
+            } else if (that.identifier != null) {
                 return false;
             }
 
             boolean var10000;
-            label51: {
-                if(this.scheme != null) {
-                    if(!this.scheme.equals(that.scheme)) {
+            label51:
+            {
+                if (this.scheme != null) {
+                    if (!this.scheme.equals(that.scheme)) {
                         break label51;
                     }
-                } else if(that.scheme != null) {
+                } else if (that.scheme != null) {
                     break label51;
                 }
 
@@ -71,8 +73,8 @@ public class ParticipantIdentifier {
     }
 
     public int hashCode() {
-        int result = this.identifier != null?this.identifier.hashCode():0;
-        result = 31 * result + (this.scheme != null?this.scheme.hashCode():0);
+        int result = this.identifier != null ? this.identifier.hashCode() : 0;
+        result = 31 * result + (this.scheme != null ? this.scheme.hashCode() : 0);
         return result;
     }
 }

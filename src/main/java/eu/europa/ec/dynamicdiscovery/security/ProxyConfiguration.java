@@ -15,7 +15,7 @@ import org.apache.http.impl.client.HttpClients;
 import java.net.URI;
 
 /**
- * Created by rodrfla on 05/10/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class ProxyConfiguration {
 

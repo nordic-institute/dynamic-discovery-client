@@ -3,7 +3,8 @@ package eu.europa.ec.dynamicdiscovery.model;
 import java.security.cert.X509Certificate;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class Endpoint {
     private static final long serialVersionUID = 5892469135654700883L;

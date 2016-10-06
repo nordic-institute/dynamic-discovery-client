@@ -11,7 +11,8 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class DynamicDiscovery {
     //private static Logger logger = LoggerFactory.getLogger(LookupClient.class);
@@ -30,7 +31,7 @@ public class DynamicDiscovery {
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws Exception {
         URI location = this.metadataLocator.lookup(participantIdentifier);
         URI provider = this.metadataProvider.resolveDocumentIdentifiers(location, participantIdentifier);
-      //  logger.debug("{}", provider);
+        //  logger.debug("{}", provider);
         return this.metadataReader.parseDocumentIdentifiers(this.metadataFetcher.fetch(provider));
     }
 
