@@ -1,6 +1,8 @@
 package eu.europa.ec.dynamicdiscovery.locator;
 
 import eu.europa.ec.dynamicdiscovery.IMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 
 import java.net.URI;
@@ -22,9 +24,9 @@ public abstract class AbstractLocator implements IMetadataLocator {
         this.hostname = hostname;
     }
 
-    public abstract URI lookup(ParticipantIdentifier identifier) throws Exception;
+    public abstract URI lookup(ParticipantIdentifier identifier) throws TechnicalException;
 
-    public URI lookup(String identifier) throws Exception {
+    public URI lookup(String identifier) throws TechnicalException {
         return this.lookup(new ParticipantIdentifier(identifier));
     }
 }

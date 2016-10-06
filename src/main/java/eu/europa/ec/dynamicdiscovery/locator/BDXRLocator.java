@@ -1,15 +1,18 @@
 package eu.europa.ec.dynamicdiscovery.locator;
 
+import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
+import org.apache.commons.lang3.StringUtils;
+import org.xbill.DNS.*;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by rodrfla on 30/09/2016.
@@ -24,55 +27,62 @@ public class BDXRLocator extends AbstractLocator {
         super(hostname);
     }
 
-    public URI lookup(ParticipantIdentifier participantIdentifier) throws Exception {
-        try {
-            String e = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
-          //  lookupManager();
-           // System.exit(0);
-            return new URI(String.format("http://%s.%s.%s", new Object[]{e, participantIdentifier.getScheme(), super.hostname}));
-        } catch (URISyntaxException var3) {
-            throw new Exception(var3.getMessage(), var3);
+    public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        URI uri = naptrLookup(participantIdentifier);
+        if (uri != null) {
+            uri = cnameLookup(participantIdentifier);
         }
+        if (uri == null) {
+            throw new DNSLookupException(String.format("DNS Lookup was not able to retrieve information using NAPTR and/or CNAME for the participant [ %s ]" , new Object[]{participantIdentifier.getIdentifier()}));
+        }
+
+        return uri;
     }
 
+    private URI cnameLookup(ParticipantIdentifier participantIdentifier) {
+        return new BusdoxLocator().lookup(participantIdentifier);
+    }
 
-    public void lookupManager() throws InterruptedException,
-            UnknownHostException, TextParseException {
+    private URI naptrLookup(ParticipantIdentifier participantIdentifier) {
+        URI uri = null;
+        try {
+            String participantIdHashed = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
+            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s", new Object[]{participantIdHashed, participantIdentifier.getScheme(), super.hostname}));
+            uri = new URI(smpURI);
+        } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
+            throw new RuntimeException(exc.getMessage(), exc);
+        } catch (TechnicalException exc) {
+            //logs
+        }
+        return uri;
+    }
 
-        // Resolver resolver = new SimpleResolver("ec.europa.eu");
-        //  Lookup.setDefaultResolver(resolver);
+    private String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
 
-        //  Lookup.setDefaultSearchPath(LOCAL_SEARCH_PATH);
-        //  Lookup.setDefaultCache(new Cache(), DClass.IN);
-
-        Lookup lookup = new Lookup("ec.europa.eu", Type.ANY);
+        Lookup lookup = new Lookup(uri, Type.NAPTR);
         Record[] records = lookup.run();
 
-        if (lookup.getResult() == Lookup.SUCCESSFUL) {
-            for (Record record : records) {
-                System.out
-                        .println("record: " + record);
-              /*  NAPTRRecord naptrRecord = (NAPTRRecord) record;
-                if (naptrRecord.getFlags().contains("a")) {
-                    // replacement contains A/AAAA target
-                    Name nodeName = naptrRecord.getReplacement();
-                    System.out
-                            .println("Candidate node: " + nodeName.toString());
+        if (lookup.getResult() != Lookup.SUCCESSFUL) {
+            throw new DNSLookupException(String.format("DNS Lookup for participant [ %s ] and NATPR record [ %s ] failed. Lookup CODE [ %s ]", new Object[]{participantIdentifier.getIdentifier(), uri, lookup.getResult()}));
+        }
 
-                    Lookup addressLookup = new Lookup(nodeName, Type.A);
-                    addressLookup.setCredibility(Credibility.ANY);
-                    Record[] addressRecords = addressLookup.run();
-                    if (addressLookup.getResult() == Lookup.SUCCESSFUL) {
-                        for (Record addressRecord : addressRecords) {
-                            String nodeAddress = ((ARecord) addressRecord)
-                                    .getAddress().getHostAddress();
-                            System.out.println("\t" + nodeAddress);
-                        }
-                    }
-                }
-                System.out.println();*/
+        String smpAddress = null;
+        String naptrRegex = null;
+        for (Record record : records) {
+            NAPTRRecord naptrRecord = (NAPTRRecord) record;
+            String regex = ".*?(http:\\/\\/.*[^!])";
+            naptrRegex = naptrRecord.getRegexp();
+            Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Matcher m = p.matcher(naptrRecord.getRegexp());
+            if (m.find()) {
+                smpAddress = m.group(1);
             }
         }
 
+        if (StringUtils.isEmpty(smpAddress)) {
+            throw new DNSLookupException(String.format("DNS Lookup for NATPR record failed, CODE: ", new Object[]{naptrRegex}));
+        }
+
+        return smpAddress;
     }
 }

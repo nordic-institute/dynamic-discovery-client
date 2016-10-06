@@ -38,10 +38,22 @@ public class BusdoxReader implements IMetadataReader {
 
     public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws Exception {
         try {
+/*
+            BufferedReader br = null;
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+
+            br = new BufferedReader(new InputStreamReader(fetcherResponse.getInputStream()));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            System.out.println("*"+sb.toString()+"+");*/
             Unmarshaller e = jaxbContext.createUnmarshaller();
             ServiceGroupType serviceGroup = (ServiceGroupType) ((JAXBElement) e.unmarshal(CommonUtil.trim(fetcherResponse.getInputStream()))).getValue();
             ArrayList documentIdentifiers = new ArrayList();
             Iterator var5 = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().iterator();
+
 
             while (var5.hasNext()) {
                 ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) var5.next();
@@ -51,6 +63,7 @@ public class BusdoxReader implements IMetadataReader {
 
             return documentIdentifiers;
         } catch (Exception var8) {
+            //var8.printStackTrace();
             throw new RuntimeException(var8.getMessage(), var8);
         }
     }
