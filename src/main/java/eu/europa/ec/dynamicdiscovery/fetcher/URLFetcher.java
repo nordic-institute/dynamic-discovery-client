@@ -1,6 +1,5 @@
 package eu.europa.ec.dynamicdiscovery.fetcher;
 
-import eu.europa.ec.dynamicdiscovery.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.security.ProxyConfiguration;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

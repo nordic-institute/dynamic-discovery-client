@@ -1,6 +1,5 @@
 package eu.europa.ec.dynamicdiscovery.provider;
 
-import eu.europa.ec.dynamicdiscovery.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 

@@ -31,27 +31,6 @@ public class CommonUtil {
         return documentBuilderFactory.newDocumentBuilder().parse(inputStream);
     }
 
-    public static Proxy proxyAuthentication(final String proxyServerAddress, final int port, final String user, final String password) throws Exception {
-
-        if ((user == null || user.isEmpty()) || (password == null || password.isEmpty())) {
-            throw new Exception("Credential for Proxy Authentication is missing.");
-        }
-
-        if ((proxyServerAddress == null || proxyServerAddress.isEmpty()) || port == 0) {
-            throw new Exception("Configuration for Proxy Authentication is missing.");
-        }
-
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyServerAddress, port));
-        Authenticator authenticator = new Authenticator() {
-            public PasswordAuthentication getPasswordAuthentication() {
-                return (new PasswordAuthentication(user,
-                        password.toCharArray()));
-            }
-        };
-        Authenticator.setDefault(authenticator);
-        return proxy;
-    }
-
     public static InputStream trim(InputStream inputStream) throws IOException {
         int ch;
         StringBuilder sb = new StringBuilder();

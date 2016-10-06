@@ -1,7 +1,6 @@
 package eu.europa.ec.dynamicdiscovery.reader;
 
 import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 

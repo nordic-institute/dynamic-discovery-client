@@ -1,9 +1,13 @@
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
+import eu.europa.ec.dynamicdiscovery.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcher;
 import eu.europa.ec.dynamicdiscovery.locator.BusdoxLocator;
+import eu.europa.ec.dynamicdiscovery.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.provider.DefaultProvider;
+import eu.europa.ec.dynamicdiscovery.provider.IMetadataProvider;
+import eu.europa.ec.dynamicdiscovery.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.reader.MultiReader;
 
 /**

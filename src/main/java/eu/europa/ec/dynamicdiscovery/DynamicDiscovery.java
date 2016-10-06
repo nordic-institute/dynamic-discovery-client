@@ -1,7 +1,11 @@
 package eu.europa.ec.dynamicdiscovery;
 
+import eu.europa.ec.dynamicdiscovery.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.provider.IMetadataProvider;
+import eu.europa.ec.dynamicdiscovery.reader.IMetadataReader;
 
 import java.net.URI;
 import java.util.List;

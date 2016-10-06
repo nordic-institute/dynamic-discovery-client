@@ -1,7 +1,6 @@
 package eu.europa.ec.dynamicdiscovery.reader;
 
 import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.security.XmldsigVerifier;
@@ -38,22 +37,10 @@ public class BusdoxReader implements IMetadataReader {
 
     public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws Exception {
         try {
-/*
-            BufferedReader br = null;
-            StringBuilder sb = new StringBuilder();
-
-            String line;
-
-            br = new BufferedReader(new InputStreamReader(fetcherResponse.getInputStream()));
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            System.out.println("*"+sb.toString()+"+");*/
             Unmarshaller e = jaxbContext.createUnmarshaller();
             ServiceGroupType serviceGroup = (ServiceGroupType) ((JAXBElement) e.unmarshal(CommonUtil.trim(fetcherResponse.getInputStream()))).getValue();
             ArrayList documentIdentifiers = new ArrayList();
             Iterator var5 = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().iterator();
-
 
             while (var5.hasNext()) {
                 ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) var5.next();
