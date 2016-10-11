@@ -13,6 +13,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,12 +24,12 @@ import java.util.regex.Pattern;
 public class BDXRLocator extends AbstractLocator {
     private static Logger logger = LoggerFactory.getLogger(BDXRLocator.class);
 
-    public BDXRLocator() {
-        super();
+    public BDXRLocator(IDNSLookup dnsLookup) {
+        super(dnsLookup);
     }
 
-    public BDXRLocator(String hostname) {
-        super(hostname);
+    public BDXRLocator(String hostname, IDNSLookup dnsLookup) {
+        super(hostname, dnsLookup);
     }
 
     public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
@@ -56,19 +58,20 @@ public class BDXRLocator extends AbstractLocator {
             throw new RuntimeException(exc.getMessage(), exc);
         } catch (TechnicalException exc) {
             //It was not possible to lookup using NAPTR, CNAME lookup will be used
-            logger.error(exc.getMessage(), exc);
+            logger.debug(exc.getMessage(), exc);
         }
         return uri;
     }
 
     private String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
+        lookupFetcher(participantIdentifier, uri);
+        return getDnsLookup().lookupFetcher(participantIdentifier, uri);
 
-        Lookup lookup = new Lookup(uri, Type.NAPTR);
-        Record[] records = lookup.run();
+    }
 
-        if (lookup.getResult() != Lookup.SUCCESSFUL) {
-            throw new DNSLookupException(String.format("DNS Lookup for participant [ %s ] and NATPR record [ %s ] failed. Lookup CODE [ %s ]", new Object[]{participantIdentifier.getIdentifier(), uri, lookup.getResult()}));
-        }
+
+    public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
+        List<Record> records = getAllRecords(uri, participantIdentifier);
 
         String smpAddress = null;
         String naptrRegex = null;
@@ -88,5 +91,24 @@ public class BDXRLocator extends AbstractLocator {
         }
 
         return smpAddress;
+    }
+
+
+    public List<Record> getAllRecords(Object... parameters) throws DNSLookupException, TextParseException {
+
+        if (parameters == null || parameters.length != 2) {
+            throw new DNSLookupException(String.format("Parameters for NAPTR Loopup are NULL or Incorrect [%s].", new Object[]{parameters}));
+        }
+        String uri = (String) parameters[0];
+        String participantId = ((ParticipantIdentifier) parameters[1]).getIdentifier();
+
+        Lookup lookup = new Lookup("ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.edelivery.tech.ec.europa.eu", Type.NAPTR);
+        Record[] records = lookup.run();
+
+        if (lookup.getResult() != Lookup.SUCCESSFUL) {
+            throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", new Object[]{participantId, lookup.getResult()}));
+        }
+
+        return Arrays.asList(records);
     }
 }

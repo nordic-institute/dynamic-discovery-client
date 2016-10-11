@@ -11,21 +11,27 @@ import java.net.URI;
  */
 public abstract class AbstractLocator implements IMetadataLocator {
 
-    public static final String OPENPEPPOL_PRODUCTION = "edelivery.tech.ec.europa.eu";
-    public static final String OPENPEPPOL_TEST = "acc.edelivery.tech.ec.europa.eu";
+    public static final String PRODUCTION = "edelivery.tech.ec.europa.eu";
+    public static final String TEST = "acc.edelivery.tech.ec.europa.eu";
     protected String hostname;
+    protected IDNSLookup dnsLookup;
 
-    public AbstractLocator() {
-        this(OPENPEPPOL_PRODUCTION);
+    public AbstractLocator(IDNSLookup dnsLookup) {
+        this(PRODUCTION, dnsLookup);
     }
 
-    public AbstractLocator(String hostname) {
+    public AbstractLocator(String hostname, IDNSLookup dnsLookup) {
         this.hostname = hostname;
+        this.dnsLookup = dnsLookup;
     }
 
     public abstract URI lookup(ParticipantIdentifier identifier) throws TechnicalException;
 
     public URI lookup(String identifier, String scheme) throws TechnicalException {
         return this.lookup(new ParticipantIdentifier(identifier, scheme));
+    }
+
+    public IDNSLookup getDnsLookup() {
+        return dnsLookup;
     }
 }

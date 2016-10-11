@@ -15,11 +15,11 @@ import java.security.NoSuchAlgorithmException;
 public class BusdoxLocator extends AbstractLocator {
 
     public BusdoxLocator() {
-        super();
+        super(null);
     }
 
     public BusdoxLocator(String hostname) {
-        super(hostname);
+        super(hostname, null);
     }
 
     public URI lookup(ParticipantIdentifier participantIdentifier) {

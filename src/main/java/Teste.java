@@ -3,6 +3,7 @@ import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcher;
 import eu.europa.ec.dynamicdiscovery.locator.BDXRLocator;
+import eu.europa.ec.dynamicdiscovery.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.*;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class Teste {
 
     public static void main(String[] args) throws Exception {
         final DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", new DefaultDNSLookup()))
                 //.locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
 //                .fetcher(new URLFetcher(new ProxyConfiguration("158.169.9.13", 8012, "j50b107", "34i6fv7")))
                 .fetcher(new URLFetcher())
