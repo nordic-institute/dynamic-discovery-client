@@ -24,6 +24,19 @@
     <name>dynamic-discovery-client</name>
     <description>Library for discovering data dynamically based on e-SENS BDXL specification</description>
 
+    <repositories>
+        <repository>
+            <id>cefdigital</id>
+            <url>https://joinup.ec.europa.eu/svn/cipaedelivery/trunk/sml/cipa-sml-server-library</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <properties>
         <httpclient.version>4.5.2</httpclient.version>
         <dnsjava.version>2.1.7</dnsjava.version>
@@ -38,6 +51,8 @@
         <cipa-peppol.version>3.2.0-SNAPSHOT</cipa-peppol.version>
         <wiremock.version>2.2.1</wiremock.version>
         <commons-io.version>2.5</commons-io.version>
+        <cipa-sml-server-library.version>3.2.0-SNAPSHOT</cipa-sml-server-library.version>
+
     </properties>
     <dependencies>
         <dependency>
@@ -101,10 +116,16 @@
             <version>${junit.version}</version>
         </dependency>
 
-        <dependency>
+        <!--dependency>
             <groupId>eu.europa.ec.cipa</groupId>
             <artifactId>cipa-peppol-types</artifactId>
             <version>${cipa-peppol.version}</version>
+        </dependency-->
+
+        <dependency>
+            <groupId>eu.europa.ec.cipa</groupId>
+            <artifactId>cipa-sml-server-library</artifactId>
+            <version>${cipa-sml-server-library.version}</version>
         </dependency>
 
         <dependency>

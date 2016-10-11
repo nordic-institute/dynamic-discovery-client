@@ -25,7 +25,7 @@ public abstract class AbstractLocator implements IMetadataLocator {
 
     public abstract URI lookup(ParticipantIdentifier identifier) throws TechnicalException;
 
-    public URI lookup(String identifier) throws TechnicalException {
-        return this.lookup(new ParticipantIdentifier(identifier));
+    public URI lookup(String identifier, String scheme) throws TechnicalException {
+        return this.lookup(new ParticipantIdentifier(identifier, scheme));
     }
 }

@@ -34,4 +34,5 @@ public class Constants {
             "</ServiceMetadataReferenceCollection>\n" +
             "<Extension/>\n" +
             "</ServiceGroup>";
+
 }

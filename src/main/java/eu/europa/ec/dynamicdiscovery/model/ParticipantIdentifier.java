@@ -17,10 +17,6 @@ public class ParticipantIdentifier {
         this.scheme = scheme;
     }
 
-    public ParticipantIdentifier(String identifier) {
-        this(identifier, "iso6523-actorid-upis");
-    }
-
     public String getIdentifier() {
         return this.identifier;
     }
