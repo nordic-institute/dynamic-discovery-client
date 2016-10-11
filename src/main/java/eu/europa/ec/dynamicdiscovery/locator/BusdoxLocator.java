@@ -1,9 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.locator;
 
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
-import org.xbill.DNS.TextParseException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;

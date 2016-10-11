@@ -10,7 +10,7 @@ import java.net.URI;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public interface IMetadataLocator {
-    URI lookup(String var1) throws TechnicalException;
+    URI lookup(String participantId, String scheme) throws TechnicalException;
 
-    URI lookup(ParticipantIdentifier var1) throws TechnicalException;
+    URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException;
 }
