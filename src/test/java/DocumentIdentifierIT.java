@@ -33,14 +33,14 @@ public class DocumentIdentifierIT extends AbstractTest {
 
     @Test
     public void getDocumentIdentifier() throws Exception {
-        WireMock.stubFor(post(WireMock.urlEqualTo(Constants.SERVICE_GROUP_URL_0088_123456789101112))
+        WireMock.stubFor(post(WireMock.urlEqualTo(Constants.SERVICE_GROUP_URL_9925_0367302178))
                 .willReturn(WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/soap+xml")
-                        .withBody(Constants.SERVICE_GROUP_BODY_0088_123456789101112)));
+                        .withBody(Constants.SERVICE_GROUP_BODY_9925_0367302178)));
 
         HttpClient client = HttpClientBuilder.create().build();
-        HttpPost request = new HttpPost("http://localhost:8080/" + Constants.SERVICE_GROUP_URL_0088_123456789101112);
+        HttpPost request = new HttpPost("http://localhost:8080/" + Constants.SERVICE_GROUP_URL_9925_0367302178);
         HttpResponse response = client.execute(request);
         logger.info("getStatusCode " + response.getStatusLine().getStatusCode());
         // logger.info(IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()));
@@ -49,7 +49,7 @@ public class DocumentIdentifierIT extends AbstractTest {
         //logger.info("records " + records.size());
         DefaultProvider provider = new DefaultProvider();
 
-        URI providerURI = provider.resolveDocumentIdentifiers(new URI("http://localhost:8080/" + Constants.SERVICE_GROUP_URL_0088_123456789101112), new ParticipantIdentifier("0088:123456789101112", "iso6523-actorid-upis"));
+        URI providerURI = provider.resolveDocumentIdentifiers(new URI("http://localhost:8080/" + Constants.SERVICE_GROUP_URL_9925_0367302178), new ParticipantIdentifier("0088:123456789101112", "iso6523-actorid-upis"));
 
         MultiReader reader = new MultiReader();
         FetcherResponse fetcherResponse = new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()), response.containsHeader("X-SMP-Namespace") ? response.getFirstHeader("X-SMP-Namespace").getValue() : null);
