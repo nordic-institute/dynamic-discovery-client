@@ -5,7 +5,7 @@ import org.xbill.DNS.Record;
 import org.xbill.DNS.TextParseException;
 
 /**
- * Created by FlavioSantos on 12-Oct-16.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class LookupClient implements ILookupClient {
 

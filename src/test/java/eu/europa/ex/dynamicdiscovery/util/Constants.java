@@ -1,7 +1,7 @@
 package eu.europa.ex.dynamicdiscovery.util;
 
 /**
- * Created by rodrfla on 10/10/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class Constants {
     public static final String SMP_DOMAIN = "http://localhost:8080/cipa-smp-full-webapp/";

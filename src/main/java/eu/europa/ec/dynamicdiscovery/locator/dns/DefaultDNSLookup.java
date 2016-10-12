@@ -13,11 +13,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by rodrfla on 11/10/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class DefaultDNSLookup implements IDNSLookup {
 
-    private LookupClient lookupClient;
+    private ILookupClient lookupClient;
 
     @Override
     public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {

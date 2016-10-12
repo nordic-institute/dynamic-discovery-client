@@ -18,7 +18,7 @@ import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class ServiceMetadataTest extends AbstractTest {
 
@@ -63,7 +63,6 @@ public class ServiceMetadataTest extends AbstractTest {
         Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
         Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
-
 
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataCnameNotOk() throws Exception {

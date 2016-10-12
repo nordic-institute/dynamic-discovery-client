@@ -11,13 +11,14 @@ import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
 import java.util.List;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class Example {
 
     public static void main(String[] args) throws Exception {
         final DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", new DefaultDNSLookup()))
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
+                //.locator(new BDXRLocator("edelivery.tech.ec.europa.eu", new DefaultDNSLookup()))
                 //.locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
                 //.fetcher(new URLFetcher(new ProxyConfiguration("192.168.1.01", 8059, "user", "password")))
                 .fetcher(new URLFetcher())

@@ -2,6 +2,7 @@ package eu.europa.ec.dynamicdiscovery.locator;
 
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
 import org.slf4j.Logger;
@@ -21,6 +22,14 @@ public class BDXRLocator extends AbstractLocator {
 
     public BDXRLocator(IDNSLookup dnsLookup) {
         super(dnsLookup);
+    }
+
+    public BDXRLocator() {
+        super(new DefaultDNSLookup());
+    }
+
+    public BDXRLocator(String hostname) {
+        this(hostname, new DefaultDNSLookup());
     }
 
     public BDXRLocator(String hostname, IDNSLookup dnsLookup) {

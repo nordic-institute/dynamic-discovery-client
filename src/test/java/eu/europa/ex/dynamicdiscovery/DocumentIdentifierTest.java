@@ -19,7 +19,7 @@ import java.util.List;
 import static org.mockito.Mockito.mock;
 
 /**
- * Created by rodrfla on 30/09/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class DocumentIdentifierTest extends AbstractTest {
 
