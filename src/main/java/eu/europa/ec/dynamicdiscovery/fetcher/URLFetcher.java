@@ -35,7 +35,7 @@ public class URLFetcher implements IMetadataFetcher {
         }
     }
 
-    private FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws Exception {
+    public FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws Exception {
         try {
             HttpResponse response = httpClient.execute(httpGet);
             switch (response.getStatusLine().getStatusCode()) {
