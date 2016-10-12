@@ -24,21 +24,18 @@ public class Teste {
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis")); //"0037:01841111111111")
         //final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
         for (DocumentIdentifier doc : documentIdentifiers) {
-            System.out.println("11" + doc.toString());
+            System.out.println("11" + doc);
         }
         //  final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
         final ProcessIdentifier processIdentifier = new ProcessIdentifier("urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
 
         final ServiceMetadata sm = smpClient.getServiceMetadata(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"), documentIdentifiers.get(0));
-        System.out.println("22" + sm.getDocumentIdentifier());
-        System.out.println("22" + sm.getParticipantIdentifier());
+        System.out.println("getDocumentIdentifier" + sm.getDocumentIdentifier());
+        System.out.println("getParticipantIdentifier" + sm.getParticipantIdentifier());
 
         for (Endpoint endpoint : sm.getEndpoints()) {
-            System.out.println("33" + endpoint.getProcessIdentifier());
-            System.out.println(endpoint.getTransportProfile());
-            System.out.println(endpoint.toString());
-            Endpoint endpointDummy = sm.getEndpoint(endpoint.getProcessIdentifier(), endpoint.getTransportProfile(), TransportProfile.AS2_1_0); //bdxr-transport-ebms3-as4-v1p0
-            System.out.println("ENDPOINT " + endpointDummy);
+
+            System.out.println("ENDPOINT " + endpoint);
         }
 
         // Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile("bdxr-transport-ebms3-as4-v1p0"), TransportProfile.AS4); //bdxr-transport-ebms3-as4-v1p0

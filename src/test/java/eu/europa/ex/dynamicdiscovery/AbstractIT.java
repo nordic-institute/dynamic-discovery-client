@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 /**
  * Created by rodrfla on 06/10/2016.
  */
-public abstract class AbstractTest {
+public abstract class AbstractIT {
 
     private static boolean initialized;
 

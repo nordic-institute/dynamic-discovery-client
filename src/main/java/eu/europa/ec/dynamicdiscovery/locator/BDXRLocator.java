@@ -34,7 +34,7 @@ public class BDXRLocator extends AbstractLocator {
 
     public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI uri = naptrLookup(participantIdentifier);
-        if (uri != null) {
+        if (uri == null) {
             uri = cnameLookup(participantIdentifier);
         }
         if (uri == null) {
@@ -64,51 +64,6 @@ public class BDXRLocator extends AbstractLocator {
     }
 
     private String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
-        lookupFetcher(participantIdentifier, uri);
         return getDnsLookup().lookupFetcher(participantIdentifier, uri);
-
-    }
-
-
-    public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
-        List<Record> records = getAllRecords(uri, participantIdentifier);
-
-        String smpAddress = null;
-        String naptrRegex = null;
-        for (Record record : records) {
-            NAPTRRecord naptrRecord = (NAPTRRecord) record;
-            String regex = ".*?(http:\\/\\/.*[^!])";
-            naptrRegex = naptrRecord.getRegexp();
-            Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-            Matcher m = p.matcher(naptrRecord.getRegexp());
-            if (m.find()) {
-                smpAddress = m.group(1);
-            }
-        }
-
-        if (StringUtils.isEmpty(smpAddress)) {
-            throw new DNSLookupException(String.format("DNS Lookup for NATPR record failed, CODE: ", new Object[]{naptrRegex}));
-        }
-
-        return smpAddress;
-    }
-
-
-    public List<Record> getAllRecords(Object... parameters) throws DNSLookupException, TextParseException {
-
-        if (parameters == null || parameters.length != 2) {
-            throw new DNSLookupException(String.format("Parameters for NAPTR Loopup are NULL or Incorrect [%s].", new Object[]{parameters}));
-        }
-        String uri = (String) parameters[0];
-        String participantId = ((ParticipantIdentifier) parameters[1]).getIdentifier();
-
-        Lookup lookup = new Lookup("ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.edelivery.tech.ec.europa.eu", Type.NAPTR);
-        Record[] records = lookup.run();
-
-        if (lookup.getResult() != Lookup.SUCCESSFUL) {
-            throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", new Object[]{participantId, lookup.getResult()}));
-        }
-
-        return Arrays.asList(records);
     }
 }
