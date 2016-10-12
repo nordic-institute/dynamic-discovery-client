@@ -4,19 +4,14 @@ import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.*;
+import org.xbill.DNS.TextParseException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
@@ -56,7 +51,7 @@ public class BDXRLocator extends AbstractLocator {
             uri = new URI(smpURI);
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new RuntimeException(exc.getMessage(), exc);
-        } catch (TechnicalException exc) {
+        } catch (TechnicalException | NullPointerException exc) {
             //It was not possible to lookup using NAPTR, CNAME lookup will be used
             logger.debug(exc.getMessage(), exc);
         }
