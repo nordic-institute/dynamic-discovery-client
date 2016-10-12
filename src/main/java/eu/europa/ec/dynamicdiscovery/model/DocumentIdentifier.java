@@ -15,16 +15,16 @@ public class DocumentIdentifier {
     private String xmlRootElement;
     private String xmlVersion;
 
-    public DocumentIdentifier(String documentIdentifier) {
-        this(documentIdentifier, "busdox-docid-qns");
-    }
-
     public DocumentIdentifier(String documentIdentifier, String scheme) {
         String[] parts = documentIdentifier.split("::|##");
-        this.xmlNamespace = parts[0];
-        this.xmlRootElement = parts[1];
-        this.customizationId = parts[2];
-        this.xmlVersion = parts[3];
+        //"urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1""
+        //urn::epsos##services:extended:epsos
+        this.xmlNamespace = parts[0]; //urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2
+        this.xmlRootElement = parts[1]; //CreditNote
+        this.customizationId = parts[2]; //urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0
+        if (parts.length > 3) {
+            this.xmlVersion = parts[3]; // 2.1
+        }
         this.scheme = scheme;
     }
 

@@ -28,7 +28,7 @@ public class DynamicDiscoveryService {
                 .build();*/
         try {
             final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
-            final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId);
+            final DocumentIdentifier documentIdentifier = new DocumentIdentifier(documentId,"busdox-docid-qns");
 
             final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
 

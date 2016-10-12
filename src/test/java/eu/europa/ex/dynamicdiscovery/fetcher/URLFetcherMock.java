@@ -23,7 +23,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
  * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class URLFetcherMock implements IMetadataFetcher {
-    private static Logger logger = LoggerFactory.getLogger(URLFetcherMock.class);
 
     public enum LookupType {
         NAPTR, CNAME;
@@ -78,7 +77,6 @@ public class URLFetcherMock implements IMetadataFetcher {
         }
         HttpPost request = new HttpPost(uriStr);
         HttpResponse response = client.execute(request);
-        logger.info("getStatusCode " + response.getStatusLine().getStatusCode());
 
         switch (response.getStatusLine().getStatusCode()) {
             case 200:

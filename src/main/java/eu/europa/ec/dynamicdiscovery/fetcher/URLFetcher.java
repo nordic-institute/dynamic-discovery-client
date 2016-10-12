@@ -1,5 +1,6 @@
 package eu.europa.ec.dynamicdiscovery.fetcher;
 
+import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.security.ProxyConfiguration;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -36,18 +37,15 @@ public class URLFetcher implements IMetadataFetcher {
     }
 
     public FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws Exception {
-        try {
-            HttpResponse response = httpClient.execute(httpGet);
-            switch (response.getStatusLine().getStatusCode()) {
-                case 200:
-                    return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()), response.containsHeader("X-SMP-Namespace") ? response.getFirstHeader("X-SMP-Namespace").getValue() : null);
-                case 404:
-                    throw new Exception("Not supported.");
-                default:
-                    throw new Exception(String.format("Received code %s for lookup.", new Object[]{Integer.valueOf(response.getStatusLine().getStatusCode())}));
-            }
-        } catch (Exception var3) {
-            throw new Exception(var3);
+
+        HttpResponse response = httpClient.execute(httpGet);
+        switch (response.getStatusLine().getStatusCode()) {
+            case 200:
+                return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()), response.containsHeader("X-SMP-Namespace") ? response.getFirstHeader("X-SMP-Namespace").getValue() : null);
+            case 404:
+                throw new DNSLookupException("Not supported.");
+            default:
+                throw new DNSLookupException(String.format("Received code %s for lookup.", new Object[]{Integer.valueOf(response.getStatusLine().getStatusCode())}));
         }
     }
 }
