@@ -4,10 +4,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.DocumentIdentifierType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ExtensionType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ParticipantIdentifierType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ProcessListType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(

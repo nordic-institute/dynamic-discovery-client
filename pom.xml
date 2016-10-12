@@ -101,12 +101,6 @@
             <version>${junit.version}</version>
         </dependency>
 
-        <!--dependency>
-            <groupId>eu.europa.ec.cipa</groupId>
-            <artifactId>cipa-peppol-types</artifactId>
-            <version>${cipa-peppol.version}</version>
-        </dependency-->
-
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-standalone</artifactId>
@@ -118,7 +112,5 @@
             <artifactId>commons-io</artifactId>
             <version>${commons-io.version}</version>
         </dependency>
-
-
     </dependencies>
 </project>

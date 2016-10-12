@@ -5,9 +5,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.busdox.servicemetadata.publishing._1.RedirectType;
-import org.busdox.servicemetadata.publishing._1.ServiceInformationType;
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
         name = "ServiceMetadataType",

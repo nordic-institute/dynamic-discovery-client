@@ -13,7 +13,7 @@
     <appender name="MainLogFile" class="org.apache.log4j.RollingFileAppender">
         <param name="append" value="true" />
         <param name="maxFileSize" value="5MB" />
-        <param name="File" value="${logFolder}/dynamic-discovery-client.log" />
+        <param name="File" value="c:/Logs/dynamic-discovery-client.log" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
                    value="%d [%p] %c %x - %m%n" />

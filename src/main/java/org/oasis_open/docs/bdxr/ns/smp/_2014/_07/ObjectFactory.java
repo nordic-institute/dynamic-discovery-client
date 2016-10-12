@@ -5,22 +5,6 @@ import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.DocumentIdentifierType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.EndpointType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ExtensionType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ParticipantIdentifierType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ProcessIdentifierType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ProcessListType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ProcessType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.RedirectType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceEndpointList;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceGroupType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceInformationType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadataReferenceCollectionType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadataReferenceType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadataType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.SignedServiceMetadataType;
-
 @XmlRegistry
 public class ObjectFactory {
     private static final QName _ParticipantIdentifier_QNAME = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2014/07", "ParticipantIdentifier");

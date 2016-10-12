@@ -1,9 +1,9 @@
 package org.w3._2005._08.addressing;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
+import java.util.HashMap;
+import java.util.Map;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(

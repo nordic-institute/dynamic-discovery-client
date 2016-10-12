@@ -5,9 +5,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.RedirectType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceInformationType;
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
         name = "ServiceMetadataType",

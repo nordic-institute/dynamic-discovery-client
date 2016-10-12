@@ -1,17 +1,14 @@
 package org.busdox.servicemetadata.manageservicemetadataservice._1;
 
+import org.busdox.servicemetadata.locator._1.ObjectFactory;
+import org.busdox.servicemetadata.locator._1.ServiceMetadataPublisherServiceType;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import org.busdox.servicemetadata.locator._1.ObjectFactory;
-import org.busdox.servicemetadata.locator._1.ServiceMetadataPublisherServiceType;
-import org.busdox.servicemetadata.manageservicemetadataservice._1.BadRequestFault;
-import org.busdox.servicemetadata.manageservicemetadataservice._1.InternalErrorFault;
-import org.busdox.servicemetadata.manageservicemetadataservice._1.NotFoundFault;
-import org.busdox.servicemetadata.manageservicemetadataservice._1.UnauthorizedFault;
 
 @WebService(name="ManageServiceMetadataServiceSoap", targetNamespace="http://busdox.org/serviceMetadata/ManageServiceMetadataService/1.0/")
 @SOAPBinding(parameterStyle=SOAPBinding.ParameterStyle.BARE)

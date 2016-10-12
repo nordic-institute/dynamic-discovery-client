@@ -1,11 +1,11 @@
 package org.oasis_open.docs.bdxr.ns.smp._2014._07;
 
+import org.w3._2000._09.xmldsig_.SignatureType;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadataType;
-import org.w3._2000._09.xmldsig_.SignatureType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(

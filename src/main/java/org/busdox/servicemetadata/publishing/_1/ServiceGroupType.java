@@ -1,13 +1,11 @@
 package org.busdox.servicemetadata.publishing._1;
 
+import org.busdox.transport.identifiers._1.ParticipantIdentifierType;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.busdox.servicemetadata.publishing._1.ExtensionType;
-import org.busdox.servicemetadata.publishing._1.ServiceMetadataReferenceCollectionType;
-import org.busdox.transport.identifiers._1.ParticipantIdentifierType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(

@@ -19,15 +19,6 @@ public class DefaultDNSLookup implements IDNSLookup {
 
     private LookupClient lookupClient;
 
-    /*
-        public DefaultDNSLookup() throws TextParseException {
-            this(null);
-        }
-
-        public DefaultDNSLookup(Lookup lookup) throws TextParseException {
-            this.lookup = lookup;
-        }
-    */
     @Override
     public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
         List<Record> records = getAllRecords(uri, participantIdentifier);

@@ -5,16 +5,6 @@ import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
-import org.w3._2005._08.addressing.AttributedAnyType;
-import org.w3._2005._08.addressing.AttributedQNameType;
-import org.w3._2005._08.addressing.AttributedURIType;
-import org.w3._2005._08.addressing.AttributedUnsignedLongType;
-import org.w3._2005._08.addressing.EndpointReferenceType;
-import org.w3._2005._08.addressing.MetadataType;
-import org.w3._2005._08.addressing.ProblemActionType;
-import org.w3._2005._08.addressing.ReferenceParametersType;
-import org.w3._2005._08.addressing.RelatesToType;
-
 @XmlRegistry
 public class ObjectFactory {
     private static final QName _ProblemIRI_QNAME = new QName("http://www.w3.org/2005/08/addressing", "ProblemIRI");

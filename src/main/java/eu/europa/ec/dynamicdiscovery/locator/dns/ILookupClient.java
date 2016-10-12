@@ -1,6 +1,5 @@
 package eu.europa.ec.dynamicdiscovery.locator.dns;
 
-import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.TextParseException;
 

@@ -7,7 +7,7 @@ import java.security.cert.X509Certificate;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class Endpoint {
-    private static final long serialVersionUID = 5892469135654700883L;
+
     private ProcessIdentifier processIdentifier;
     private TransportProfile transportProfile;
     private String address;

@@ -1,6 +1,5 @@
 package eu.europa.ex.dynamicdiscovery;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
@@ -10,15 +9,11 @@ import eu.europa.ec.dynamicdiscovery.locator.BusdoxLocator;
 import eu.europa.ec.dynamicdiscovery.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ex.dynamicdiscovery.AbstractTest;
-import eu.europa.ex.dynamicdiscovery.Constants;
 import eu.europa.ex.dynamicdiscovery.fetcher.URLFetcherMock;
+import eu.europa.ex.dynamicdiscovery.util.Constants;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.List;
 
 import static org.mockito.Mockito.mock;
 
@@ -27,13 +22,95 @@ import static org.mockito.Mockito.mock;
  */
 public class ServiceMetadataTest extends AbstractTest {
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    @Test
+    public void getServiceMetadataNaptrForEhealthOk() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp);
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .build();
+
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+
+        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
 
     @Test
-    public void getDocumentIdentifierByNaptrForEhealthOK() throws Exception {
+    public void getServiceMetadataCnameOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_GROUP_BODY_urn_ehealth_pt_ncpb_idp);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp, "b-0e2981c9c2044fd64711099b6f9dbe19.ehealth-actorid-qns.edelivery.tech.ec.europa.eu");
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
+                .fetcher(urlFetcherURL)
+                .build();
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+
+    @Test(expected = DNSLookupException.class)
+    public void getServiceMetadataCnameNotOk() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp, "b-123456.ehealth-actorid-qns.edelivery.tech.ec.europa.eu");
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
+                .fetcher(urlFetcherURL)
+                .build();
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+    @Test(expected = DNSLookupException.class)
+    public void getServiceMetadataNaptrNotOk() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp);
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "adfsdf54.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .build();
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+    @Test(expected = DNSLookupException.class)
+    public void getServiceMetadataNaptrParticipantIdentifierNotOk() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
@@ -41,38 +118,36 @@ public class ServiceMetadataTest extends AbstractTest {
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos", "ehealth-resid-qns");
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"));
-        for (DocumentIdentifier doc : documentIdentifiers) {
-            System.out.println("getIdentifier" + doc.getIdentifier());
-            System.out.println("getScheme" + doc.getScheme());
-        }
-        Assert.assertEquals(documentIdentifiers.size(), 11);
 
-        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifiers.get(0));
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 
-    @Test
-    public void getDocumentIdentifierByNaptrForEhealthOK2() throws Exception {
+    @Test(expected = DNSLookupException.class)
+    public void getServiceMetadataCnameParticipantIdentifierNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, Constants.SERVICE_GROUP_BODY_9925_0367302178);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"), "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "b-0e2981c9c2044fd64711099b6f9dbe19.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
 
-        Assert.assertEquals(documentIdentifiers.size(), 3);
-        for (DocumentIdentifier doc : documentIdentifiers) {
-            System.out.println("getIdentifier " + doc.getIdentifier());
-            System.out.println("getScheme " + doc.getScheme());
-        }
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
 
-        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifiers.get(0));
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 }

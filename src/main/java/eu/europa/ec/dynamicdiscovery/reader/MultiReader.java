@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class MultiReader implements IMetadataReader {
-    // private static Logger logger = LoggerFactory.getLogger(MultiReader.class);
     private static final Pattern rootTagPattern = Pattern.compile("<(\\w*:{0,1}[^<?]*)>", 8);
     private static final Pattern namespacePattern = Pattern.compile("xmlns:{0,1}([a-z0-9]*)\\w*=\\w*\"(.+?)\"", 8);
     private BusdoxReader busdoxReader;
@@ -64,13 +63,10 @@ public class MultiReader implements IMetadataReader {
             Matcher matcher = rootTagPattern.matcher(new String(e));
             if (matcher.find()) {
                 String rootElement = matcher.group(1).trim();
-                // logger.debug("Root element: {}", rootElement);
                 String rootNs = rootElement.split(" ", 2)[0].contains(":") ? rootElement.substring(0, rootElement.indexOf(":")) : "";
-                // logger.debug("Namespace: {}", rootNs);
                 Matcher nsMatcher = namespacePattern.matcher(rootElement);
 
                 while (nsMatcher.find()) {
-                    //   logger.debug(nsMatcher.group(0));
                     if (nsMatcher.group(1).equals(rootNs)) {
                         return new FetcherResponse(new SequenceInputStream(new ByteArrayInputStream(e), fetcherResponse.getInputStream()), nsMatcher.group(2));
                     }

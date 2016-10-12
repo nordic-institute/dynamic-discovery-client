@@ -51,9 +51,8 @@ public class BusdoxReader extends AbstractReader {
             }
 
             return documentIdentifiers;
-        } catch (Exception var8) {
-            //var8.printStackTrace();
-            throw new RuntimeException(var8.getMessage(), var8);
+        } catch (Exception exc) {
+            throw new RuntimeException(exc.getMessage(), exc);
         }
     }
 

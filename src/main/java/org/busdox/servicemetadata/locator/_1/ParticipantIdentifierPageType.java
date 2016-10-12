@@ -1,12 +1,13 @@
 package org.busdox.servicemetadata.locator._1;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.busdox.transport.identifiers._1.ParticipantIdentifierType;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import org.busdox.transport.identifiers._1.ParticipantIdentifierType;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

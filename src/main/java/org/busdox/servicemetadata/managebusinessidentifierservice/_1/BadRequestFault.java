@@ -1,7 +1,8 @@
 package org.busdox.servicemetadata.managebusinessidentifierservice._1;
 
-import javax.xml.ws.WebFault;
 import org.busdox.servicemetadata.locator._1.FaultType;
+
+import javax.xml.ws.WebFault;
 
 @WebFault(name="BadRequestFault", targetNamespace="http://busdox.org/serviceMetadata/locator/1.0/")
 public class BadRequestFault

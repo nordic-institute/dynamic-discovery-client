@@ -1,9 +1,5 @@
 package org.w3._2000._09.xmldsig_;
 
-import org.busdox.servicemetadata.locator._1.*;
-import org.busdox.servicemetadata.locator._1.FaultType;
-import org.busdox.servicemetadata.locator._1.MigrationRecordType;
-
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;

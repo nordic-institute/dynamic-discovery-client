@@ -8,7 +8,7 @@ import java.net.URLEncoder;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class ParticipantIdentifier {
-    private static final long serialVersionUID = -8052874032415088055L;
+
     private String identifier;
     private String scheme;
 

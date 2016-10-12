@@ -1,13 +1,8 @@
 package org.busdox.servicemetadata.manageservicemetadataservice._1;
 
-import java.net.URL;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
-import javax.xml.ws.WebEndpoint;
-import javax.xml.ws.WebServiceClient;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
-import org.busdox.servicemetadata.manageservicemetadataservice._1.ManageServiceMetadataServiceSoap;
+import javax.xml.ws.*;
+import java.net.URL;
 
 @WebServiceClient(name="ManageServiceMetadataService", targetNamespace="http://busdox.org/serviceMetadata/ManageServiceMetadataService/1.0/", wsdlLocation="META-INF/ManageServiceMetadataService-1.0.wsdl")
 public class ManageServiceMetadataService

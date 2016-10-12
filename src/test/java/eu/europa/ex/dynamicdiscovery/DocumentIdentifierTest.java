@@ -1,6 +1,5 @@
 package eu.europa.ex.dynamicdiscovery;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
@@ -10,14 +9,11 @@ import eu.europa.ec.dynamicdiscovery.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ex.dynamicdiscovery.fetcher.URLFetcherMock;
+import eu.europa.ex.dynamicdiscovery.util.Constants;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.net.UnknownHostException;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -27,37 +23,40 @@ import static org.mockito.Mockito.mock;
  */
 public class DocumentIdentifierTest extends AbstractTest {
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
-
     @Test
     public void getDocumentIdentifierByNaptrForEhealthOK() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_GROUP_BODY_urn_ehealth_pt_ncpb_idp);
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"));
-        Assert.assertEquals(documentIdentifiers.size(), 11);
+        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        Assert.assertEquals(11, documentIdentifiers.size());
     }
 
     @Test
     public void getDocumentIdentifierByNaptrForPeppolOK() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, Constants.SERVICE_GROUP_BODY_9925_0367302178);
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"), "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
-        Assert.assertEquals(documentIdentifiers.size(), 3);
+        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        Assert.assertEquals(3, documentIdentifiers.size());
 
     }
 
@@ -71,7 +70,7 @@ public class DocumentIdentifierTest extends AbstractTest {
                 .fetcher(urlFetcherURL)
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
-        Assert.assertEquals(documentIdentifiers.size(), 3);
+        Assert.assertEquals(3, documentIdentifiers.size());
     }
 
     @Test(expected = DNSLookupException.class)
@@ -86,7 +85,7 @@ public class DocumentIdentifierTest extends AbstractTest {
                 .fetcher(urlFetcherURL)
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
-        Assert.assertEquals(documentIdentifiers.size(), 3);
+        Assert.assertEquals(3, documentIdentifiers.size());
     }
 
     @Test(expected = DNSLookupException.class)
@@ -99,6 +98,6 @@ public class DocumentIdentifierTest extends AbstractTest {
                 .fetcher(urlFetcherURL)
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
-        Assert.assertEquals(documentIdentifiers.size(), 3);
+        Assert.assertEquals(3, documentIdentifiers.size());
     }
 }

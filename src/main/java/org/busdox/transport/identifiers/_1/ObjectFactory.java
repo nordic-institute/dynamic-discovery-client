@@ -5,10 +5,6 @@ import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
-import org.busdox.transport.identifiers._1.DocumentIdentifierType;
-import org.busdox.transport.identifiers._1.ParticipantIdentifierType;
-import org.busdox.transport.identifiers._1.ProcessIdentifierType;
-
 @XmlRegistry
 public class ObjectFactory {
     private static final QName _DocumentIdentifier_QNAME = new QName("http://busdox.org/transport/identifiers/1.0/", "DocumentIdentifier");

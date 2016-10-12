@@ -1,20 +1,13 @@
 package org.busdox.servicemetadata.managebusinessidentifierservice._1;
 
+import org.busdox.servicemetadata.locator._1.*;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import org.busdox.servicemetadata.locator._1.MigrationRecordType;
-import org.busdox.servicemetadata.locator._1.ObjectFactory;
-import org.busdox.servicemetadata.locator._1.PageRequestType;
-import org.busdox.servicemetadata.locator._1.ParticipantIdentifierPageType;
-import org.busdox.servicemetadata.locator._1.ServiceMetadataPublisherServiceForParticipantType;
-import org.busdox.servicemetadata.managebusinessidentifierservice._1.BadRequestFault;
-import org.busdox.servicemetadata.managebusinessidentifierservice._1.InternalErrorFault;
-import org.busdox.servicemetadata.managebusinessidentifierservice._1.NotFoundFault;
-import org.busdox.servicemetadata.managebusinessidentifierservice._1.UnauthorizedFault;
 
 @WebService(name="ManageBusinessIdentifierServiceSoap", targetNamespace="http://busdox.org/serviceMetadata/ManageBusinessIdentifierService/1.0/")
 @SOAPBinding(parameterStyle=SOAPBinding.ParameterStyle.BARE)

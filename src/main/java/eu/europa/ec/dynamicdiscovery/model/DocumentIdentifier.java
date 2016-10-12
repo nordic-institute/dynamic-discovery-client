@@ -1,5 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -8,7 +10,7 @@ import java.net.URLEncoder;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class DocumentIdentifier {
-    private static final long serialVersionUID = -3748163459655880167L;
+
     private String scheme;
     private String customizationId;
     private String xmlNamespace;
@@ -17,13 +19,13 @@ public class DocumentIdentifier {
 
     public DocumentIdentifier(String documentIdentifier, String scheme) {
         String[] parts = documentIdentifier.split("::|##");
-        //"urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1""
-        //urn::epsos##services:extended:epsos
-        this.xmlNamespace = parts[0]; //urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2
-        this.xmlRootElement = parts[1]; //CreditNote
-        this.customizationId = parts[2]; //urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0
-        if (parts.length > 3) {
-            this.xmlVersion = parts[3]; // 2.1
+        if (parts.length == 4) {
+            this.xmlNamespace = parts[0];
+            this.xmlRootElement = parts[1];
+            this.customizationId = parts[2];
+            this.xmlVersion = parts[3];
+        } else {
+            this.customizationId = documentIdentifier;
         }
         this.scheme = scheme;
     }
@@ -33,6 +35,9 @@ public class DocumentIdentifier {
     }
 
     public String getIdentifier() {
+        if (StringUtils.isEmpty(this.xmlNamespace) && StringUtils.isEmpty(this.xmlRootElement) && StringUtils.isEmpty(this.xmlVersion)) {
+            return this.customizationId;
+        }
         return String.format("%s::%s##%s::%s", new Object[]{this.xmlNamespace, this.xmlRootElement, this.customizationId, this.xmlVersion});
     }
 

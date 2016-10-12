@@ -12,7 +12,7 @@ import java.util.List;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class ServiceMetadata {
-    private static final long serialVersionUID = -7523336374349545534L;
+
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
     private List<ProcessIdentifier> processIdentifiers = new ArrayList();

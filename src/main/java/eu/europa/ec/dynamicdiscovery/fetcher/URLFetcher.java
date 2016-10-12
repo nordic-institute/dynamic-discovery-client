@@ -15,7 +15,6 @@ import java.net.URI;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class URLFetcher implements IMetadataFetcher {
-    //private static Logger logger = LoggerFactory.getLogger(ApacheFetcher.class);
     private HttpClient httpClient;
     private ProxyConfiguration proxyConfiguration;
 
@@ -27,7 +26,7 @@ public class URLFetcher implements IMetadataFetcher {
         this(null);
     }
 
-    public FetcherResponse fetch(URI uri) throws Exception {
+    public FetcherResponse fetch(URI uri) throws DNSLookupException {
         if (this.proxyConfiguration != null) {
             proxyConfiguration.build(uri);
             return connect(this.proxyConfiguration.getHttpclient(), this.proxyConfiguration.getHttpget());
@@ -36,16 +35,19 @@ public class URLFetcher implements IMetadataFetcher {
         }
     }
 
-    public FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws Exception {
-
-        HttpResponse response = httpClient.execute(httpGet);
-        switch (response.getStatusLine().getStatusCode()) {
-            case 200:
-                return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()), response.containsHeader("X-SMP-Namespace") ? response.getFirstHeader("X-SMP-Namespace").getValue() : null);
-            case 404:
-                throw new DNSLookupException("Not supported.");
-            default:
-                throw new DNSLookupException(String.format("Received code %s for lookup.", new Object[]{Integer.valueOf(response.getStatusLine().getStatusCode())}));
+    public FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws DNSLookupException {
+        try {
+            HttpResponse response = httpClient.execute(httpGet);
+            switch (response.getStatusLine().getStatusCode()) {
+                case 200:
+                    return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()), response.containsHeader("X-SMP-Namespace") ? response.getFirstHeader("X-SMP-Namespace").getValue() : null);
+                case 404:
+                    throw new DNSLookupException("Not supported.");
+                default:
+                    throw new DNSLookupException(String.format("Received code %s for lookup.", new Object[]{Integer.valueOf(response.getStatusLine().getStatusCode())}));
+            }
+        } catch (Exception exc) {
+            throw new DNSLookupException(exc.getMessage(), exc);
         }
     }
 }
