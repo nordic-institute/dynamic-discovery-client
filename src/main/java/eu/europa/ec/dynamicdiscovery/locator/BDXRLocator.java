@@ -25,7 +25,7 @@ public class BDXRLocator extends AbstractLocator {
     }
 
     public BDXRLocator() {
-        super(new DefaultDNSLookup());
+        this(new DefaultDNSLookup());
     }
 
     public BDXRLocator(String hostname) {
@@ -59,6 +59,7 @@ public class BDXRLocator extends AbstractLocator {
             String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s", new Object[]{participantIdHashed, participantIdentifier.getScheme(), super.hostname}));
             uri = new URI(smpURI);
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
+            logger.debug(exc.getMessage(), exc);
             throw new RuntimeException(exc.getMessage(), exc);
         } catch (TechnicalException | NullPointerException exc) {
             //It was not possible to lookup using NAPTR, CNAME lookup will be used

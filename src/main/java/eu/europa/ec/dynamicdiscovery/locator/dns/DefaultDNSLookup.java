@@ -27,7 +27,7 @@ public class DefaultDNSLookup implements IDNSLookup {
         String naptrRegex = null;
         for (Record record : records) {
             NAPTRRecord naptrRecord = (NAPTRRecord) record;
-            String regex = ".*?(http:\\/\\/.*[^!])";
+            String regex = ".*?(http.*[^!])";
             naptrRegex = naptrRecord.getRegexp();
             Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
             Matcher m = p.matcher(naptrRecord.getRegexp());
