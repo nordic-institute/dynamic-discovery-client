@@ -1,3 +1,5 @@
+package eu.europa.ex.dynamicdiscovery;
+
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
