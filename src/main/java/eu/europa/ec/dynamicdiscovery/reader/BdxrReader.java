@@ -13,16 +13,11 @@ import org.oasis_open.docs.bdxr.ns.smp._2014._07.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.URLDecoder;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -59,17 +54,24 @@ public class BdxrReader extends AbstractReader {
                 }
             }
             return documentIdentifiers;
-        } catch (SAXException | ParserConfigurationException | IOException | JAXBException exc) {
+        } catch (Exception exc) {
             logger.error("Document Identifier Parser Exception", exc);
             throw new BindException(exc.getMessage(), exc);
         }
     }
 
-    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws BindException, SecurityException {
+    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws BindException {
         try {
             Document document = CommonUtil.parse(fetcherResponse.getInputStream());
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            JAXBElement result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata.class);
+            JAXBElement result = null;
+
+            try {
+                result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata.class);
+            } catch (Exception exc) {
+                result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.SignedServiceMetadata.class);
+            }
+
             Object o = result.getValue();
             ServiceMetadata serviceMetadata = new ServiceMetadata();
             if (o instanceof SignedServiceMetadata) {
@@ -84,10 +86,10 @@ public class BdxrReader extends AbstractReader {
                 serviceMetadata.setParticipantIdentifier(new ParticipantIdentifier(serviceInformation.getParticipantIdentifier().getValue(), serviceInformation.getParticipantIdentifier().getScheme()));
                 serviceMetadata.setDocumentIdentifier(new DocumentIdentifier(serviceInformation.getDocumentIdentifier().getValue(), serviceInformation.getDocumentIdentifier().getScheme()));
                 CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-                Iterator var9 = serviceInformation.getProcessList().getProcesses().iterator();
+                Iterator iterator = serviceInformation.getProcessList().getProcesses().iterator();
 
-                while (var9.hasNext()) {
-                    ProcessType processType = (ProcessType) var9.next();
+                while (iterator.hasNext()) {
+                    ProcessType processType = (ProcessType) iterator.next();
                     eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier processIdentifier = new eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme());
                     Iterator var12 = processType.getServiceEndpointList().getEndpoints().iterator();
 
@@ -99,12 +101,8 @@ public class BdxrReader extends AbstractReader {
 
                 return serviceMetadata;
             }
-        } catch (JAXBException var14) {
-            throw new RuntimeException(var14.getMessage(), var14);
-        } catch (CertificateException var15) {
-            throw new RuntimeException(var15.getMessage(), var15);
-        } catch (Exception var16) {
-            throw new RuntimeException(var16.getMessage(), var16);
+        } catch (Exception exc) {
+            throw new BindException(exc.getMessage(), exc);
         }
     }
 }
