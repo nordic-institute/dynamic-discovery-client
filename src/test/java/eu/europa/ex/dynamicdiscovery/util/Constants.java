@@ -8,7 +8,7 @@ public class Constants {
     public static final String SMP_DOMAIN_ALIAS = "http://smp.ec.europa.eu/";
 
     public static final String SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105";
-    public static final String SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp = "<ns3:ServiceMetadata xmlns:ns3=\"http://busdox.org/serviceMetadata/publishing/1.0/\" xmlns=\"http://busdox.org/transport/identifiers/1.0/\" xmlns:ns2=\"http://www.w3.org/2005/08/addressing\" xmlns:ns4=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+    public static final String SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp = "<ns3:ServiceMetadata xmlns:ns3=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns=\"http://busdox.org/transport/identifiers/1.0/\" xmlns:ns2=\"http://www.w3.org/2005/08/addressing\" xmlns:ns4=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
             "<ns3:ServiceInformation>\n" +
             "<ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:pt:ncpb-idp</ParticipantIdentifier>\n" +
             "<DocumentIdentifier scheme=\"ehealth-resid-qns\">urn::epsos##services:extended:epsos::105</DocumentIdentifier>\n" +
@@ -61,7 +61,7 @@ public class Constants {
             "</ns3:ServiceMetadata>";
 
     public static final String SERVICE_GROUP_URL_9925_0367302178 = "/cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9925%3A0367302178";
-    public static final String SERVICE_GROUP_BODY_9925_0367302178 = "<ServiceGroup xmlns=\"http://busdox.org/serviceMetadata/publishing/1.0/\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
+    public static final String SERVICE_GROUP_BODY_9925_0367302178 = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
             "<ids:ParticipantIdentifier scheme=\"busdox-actorid-upis\">9925:0367302178</ids:ParticipantIdentifier>\n" +
             "<ServiceMetadataReferenceCollection>\n" +
             "<ServiceMetadataReference href=\"http://smp.fe.babelway.net/iso6523-actorid-upis::9925%3A0367302178/services/busdox-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1\"/>\n" +
@@ -70,22 +70,4 @@ public class Constants {
             "</ServiceMetadataReferenceCollection>\n" +
             "<Extension/>\n" +
             "</ServiceGroup>";
-
-    public static final String SERVICE_GROUP_URL_urn_ehealth_pt_ncpb_idp = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp";
-    public static final String SERVICE_GROUP_BODY_urn_ehealth_pt_ncpb_idp = "<ns2:ServiceGroup xmlns=\"http://busdox.org/transport/identifiers/1.0/\" xmlns:ns2=\"http://busdox.org/serviceMetadata/publishing/1.0/\" xmlns:ns3=\"http://www.w3.org/2005/08/addressing\" xmlns:ns4=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
-            "<ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:pt:ncpb-idp</ParticipantIdentifier>\n" +
-            "<ns2:ServiceMetadataReferenceCollection>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A106\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A11\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A21\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A31\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A41\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A42\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A51\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A52\"/>\n" +
-            "<ns2:ServiceMetadataReference href=\"http://ehealth.smp.e-sens.gr/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A97\"/>\n" +
-            "</ns2:ServiceMetadataReferenceCollection>\n" +
-            "</ns2:ServiceGroup>";
 }

@@ -5,6 +5,8 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,8 +25,16 @@ public class CommonUtil {
     public CommonUtil() {
     }
 
-    public static Document parse(InputStream inputStream) throws SAXException, IOException, ParserConfigurationException {
+    public static Document parse(InputStream inputStream) throws ParserConfigurationException, IOException, SAXException {
         return documentBuilderFactory.newDocumentBuilder().parse(inputStream);
+    }
+
+    public static Source convertToSource(InputStream inputStream) throws ParserConfigurationException, IOException, SAXException {
+        return new DOMSource(parse(inputStream));
+    }
+
+    public static Source convertToSource(Document document) throws ParserConfigurationException, IOException, SAXException {
+        return new DOMSource(document);
     }
 
     public static InputStream trim(InputStream inputStream) throws IOException {

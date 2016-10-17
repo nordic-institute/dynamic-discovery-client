@@ -7,8 +7,8 @@ import eu.europa.ec.dynamicdiscovery.locator.BusdoxLocator;
 import eu.europa.ec.dynamicdiscovery.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.provider.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.provider.IMetadataProvider;
+import eu.europa.ec.dynamicdiscovery.reader.BdxrReader;
 import eu.europa.ec.dynamicdiscovery.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.reader.MultiReader;
 
 /**
  * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
@@ -70,7 +70,7 @@ public class DynamicDiscoveryBuilder {
             }
 
             if (this.metadataReader == null) {
-                this.reader(new MultiReader());
+                this.reader(new BdxrReader());
             }
 
             return new DynamicDiscovery(this.metadataLocator, this.metadataProvider, this.metadataFetcher, this.metadataReader);

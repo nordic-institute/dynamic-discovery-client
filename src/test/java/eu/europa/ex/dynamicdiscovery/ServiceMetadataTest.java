@@ -23,7 +23,7 @@ import static org.mockito.Mockito.mock;
 public class ServiceMetadataTest extends AbstractTest {
 
     @Test
-    public void getServiceMetadataNaptrForEhealthOk() throws Exception {
+    public void getServiceMetadataNaptrOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_METADATA_BODY_urn_ehealth_pt_ncpb_idp);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
