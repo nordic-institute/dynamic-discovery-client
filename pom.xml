@@ -16,13 +16,10 @@
         <dnsjava.version>2.1.7</dnsjava.version>
         <bouncycastle.version>1.55</bouncycastle.version>
         <guava.version>18.0</guava.version>
-        <commons-codec.version>1.9</commons-codec.version>
         <commons-lang3.version>3.4</commons-lang3.version>
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
-        <cipa-peppol.version>3.2.0-SNAPSHOT</cipa-peppol.version>
         <wiremock.version>2.2.1</wiremock.version>
-        <commons-io.version>2.5</commons-io.version>
     </properties>
 
     <build>
@@ -105,12 +102,6 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons-codec.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
@@ -135,12 +126,6 @@
             <artifactId>wiremock-standalone</artifactId>
             <version>${wiremock.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
         </dependency>
     </dependencies>
 </project>
