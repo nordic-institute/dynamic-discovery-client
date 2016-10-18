@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.security;
+package eu.europa.ec.dynamicdiscovery.core.security;
 
 import javax.xml.crypto.*;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;

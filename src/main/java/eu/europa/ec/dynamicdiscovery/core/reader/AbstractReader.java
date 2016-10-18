@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.reader;
+package eu.europa.ec.dynamicdiscovery.core.reader;
 
 import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceGroup;
 import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata;

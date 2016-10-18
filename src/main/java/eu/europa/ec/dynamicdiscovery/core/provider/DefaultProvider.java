@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.provider;
+package eu.europa.ec.dynamicdiscovery.core.provider;
 
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
@@ -10,6 +10,7 @@ import java.net.URI;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class DefaultProvider implements IMetadataProvider {
+
     public DefaultProvider() {
     }
 

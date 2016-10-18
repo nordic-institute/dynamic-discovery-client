@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.security;
+package eu.europa.ec.dynamicdiscovery.core.security;
 
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import org.apache.commons.lang3.StringUtils;

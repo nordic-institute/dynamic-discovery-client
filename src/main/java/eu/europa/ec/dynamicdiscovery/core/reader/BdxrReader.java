@@ -1,17 +1,13 @@
-package eu.europa.ec.dynamicdiscovery.reader;
+package eu.europa.ec.dynamicdiscovery.core.reader;
 
-import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.security.XmldsigVerifier;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
-import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.Endpoint;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.TransportProfile;
-import eu.europa.ec.dynamicdiscovery.security.XmldsigVerifier;
+import eu.europa.ec.dynamicdiscovery.model.*;
+import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.oasis_open.docs.bdxr.ns.smp._2014._07.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBElement;
@@ -29,12 +25,10 @@ import java.util.List;
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class BdxrReader extends AbstractReader {
-    private static Logger logger = LoggerFactory.getLogger(BdxrReader.class);
 
     public BdxrReader() {
         super();
     }
-
 
     public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws BindException {
         try {
@@ -55,7 +49,6 @@ public class BdxrReader extends AbstractReader {
             }
             return documentIdentifiers;
         } catch (Exception exc) {
-            logger.error("Document Identifier Parser Exception", exc);
             throw new BindException(exc.getMessage(), exc);
         }
     }
@@ -64,25 +57,28 @@ public class BdxrReader extends AbstractReader {
         try {
             Document document = CommonUtil.parse(fetcherResponse.getInputStream());
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            JAXBElement result = null;
-
+            Object result = null;
+            org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata unmarshalledServiceMetadata = null;
             try {
-                result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata.class);
+                //result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata.class);
+                result = unmarshaller.unmarshal(CommonUtil.convertToSource(document));
             } catch (Exception exc) {
-                result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.SignedServiceMetadata.class);
+                exc.printStackTrace();
+                // result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.SignedServiceMetadata.class);
             }
 
-            Object o = result.getValue();
+            //  Object o = result.getValue();
             ServiceMetadata serviceMetadata = new ServiceMetadata();
-            if (o instanceof SignedServiceMetadata) {
+            if (result instanceof SignedServiceMetadata) {
                 serviceMetadata.setSigner(XmldsigVerifier.verify(document));
-                o = ((SignedServiceMetadata) o).getServiceMetadata();
+                unmarshalledServiceMetadata = ((SignedServiceMetadata) result).getServiceMetadata();
             }
 
-            if (!(o instanceof org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata)) {
+            if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata)) {
                 throw new Exception("ServiceMetadata element not found.");
             } else {
-                ServiceInformationType serviceInformation = ((org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata) o).getServiceInformation();
+                unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata) result;
+                ServiceInformationType serviceInformation = unmarshalledServiceMetadata.getServiceInformation();
                 serviceMetadata.setParticipantIdentifier(new ParticipantIdentifier(serviceInformation.getParticipantIdentifier().getValue(), serviceInformation.getParticipantIdentifier().getScheme()));
                 serviceMetadata.setDocumentIdentifier(new DocumentIdentifier(serviceInformation.getDocumentIdentifier().getValue(), serviceInformation.getDocumentIdentifier().getScheme()));
                 CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");

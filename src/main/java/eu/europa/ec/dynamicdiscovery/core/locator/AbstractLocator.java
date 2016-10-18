@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.locator;
+package eu.europa.ec.dynamicdiscovery.core.locator;
 
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
@@ -12,7 +12,7 @@ import java.net.URI;
 public abstract class AbstractLocator implements IMetadataLocator {
 
     public static final String PRODUCTION = "edelivery.tech.ec.europa.eu";
-    public static final String TEST = "acc.edelivery.tech.ec.europa.eu";
+    public static final String ACCEPTANCE = "acc.edelivery.tech.ec.europa.eu";
     protected String hostname;
     protected IDNSLookup dnsLookup;
 

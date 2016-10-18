@@ -1,6 +1,4 @@
-package eu.europa.ec.dynamicdiscovery;
-
-import eu.europa.ec.dynamicdiscovery.model.*;
+package eu.europa.ec.dynamicdiscovery.model;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -15,12 +13,15 @@ public class ServiceMetadata {
 
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
-    private List<ProcessIdentifier> processIdentifiers = new ArrayList();
-    private List<TransportProfile> transportProfiles = new ArrayList();
+    private List<ProcessIdentifier> processIdentifiers;
+    private List<TransportProfile> transportProfiles;
     private X509Certificate signer;
-    private List<Endpoint> endpoints = new ArrayList();
+    private List<Endpoint> endpoints;
 
     public ServiceMetadata() {
+        processIdentifiers = new ArrayList<>();
+        transportProfiles = new ArrayList<>();
+        endpoints = new ArrayList<>();
     }
 
     public ParticipantIdentifier getParticipantIdentifier() {

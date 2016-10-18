@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.locator;
+package eu.europa.ec.dynamicdiscovery.core.locator;
 
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;

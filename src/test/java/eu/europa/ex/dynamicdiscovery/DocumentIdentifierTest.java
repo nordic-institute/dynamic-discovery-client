@@ -2,10 +2,10 @@ package eu.europa.ex.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
+import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.BusdoxLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.locator.BDXRLocator;
-import eu.europa.ec.dynamicdiscovery.locator.BusdoxLocator;
-import eu.europa.ec.dynamicdiscovery.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ex.dynamicdiscovery.fetcher.URLFetcherMock;
@@ -32,6 +32,25 @@ public class DocumentIdentifierTest extends AbstractTest {
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .build();
+        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        Assert.assertEquals(3, documentIdentifiers.size());
+
+    }
+
+    @Test
+    public void getDocumentIdentifierByNaptrOK2() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_GROUP_BODY_urn_ehealth_pt_ncpb_idp);
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))

@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.fetcher;
+package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 

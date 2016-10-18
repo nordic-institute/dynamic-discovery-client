@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.locator.dns;
+package eu.europa.ec.dynamicdiscovery.core.locator.dns;
 
 import org.xbill.DNS.Record;
 import org.xbill.DNS.TextParseException;

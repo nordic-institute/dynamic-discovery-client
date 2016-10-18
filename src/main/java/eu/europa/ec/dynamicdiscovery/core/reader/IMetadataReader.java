@@ -1,8 +1,8 @@
-package eu.europa.ec.dynamicdiscovery.reader;
+package eu.europa.ec.dynamicdiscovery.core.reader;
 
-import eu.europa.ec.dynamicdiscovery.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
-import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 
 import java.util.List;

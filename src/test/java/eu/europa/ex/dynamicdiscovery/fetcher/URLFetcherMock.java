@@ -2,8 +2,8 @@ package eu.europa.ex.dynamicdiscovery.fetcher;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ex.dynamicdiscovery.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
