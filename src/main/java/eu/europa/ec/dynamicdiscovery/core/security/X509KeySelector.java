@@ -1,6 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.core.security;
 
 import javax.xml.crypto.*;
+import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 import java.security.Key;
@@ -10,7 +11,6 @@ import java.util.Iterator;
 
 /**
  * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
 public class X509KeySelector extends KeySelector {
     private X509Certificate certificate;
@@ -18,41 +18,46 @@ public class X509KeySelector extends KeySelector {
     X509KeySelector() {
     }
 
-    public KeySelectorResult select(KeyInfo keyInfo, KeySelector.Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {
+    public KeySelectorResult select(KeyInfo keyInfo,
+                                    KeySelector.Purpose purpose,
+                                    AlgorithmMethod method,
+                                    XMLCryptoContext context)
+            throws KeySelectorException {
         Iterator ki = keyInfo.getContent().iterator();
-
-        while (true) {
-            XMLStructure info;
-            do {
-                if (!ki.hasNext()) {
-                    throw new KeySelectorException("No key found!");
-                }
-
-                info = (XMLStructure) ki.next();
-            } while (!(info instanceof X509Data));
-
+        while (ki.hasNext()) {
+            XMLStructure info = (XMLStructure) ki.next();
+            if (!(info instanceof X509Data))
+                continue;
             X509Data x509Data = (X509Data) info;
             Iterator xi = x509Data.getContent().iterator();
-
             while (xi.hasNext()) {
                 Object o = xi.next();
-                if (o instanceof X509Certificate) {
-                    this.certificate = (X509Certificate) o;
-                    final PublicKey key = this.certificate.getPublicKey();
-                    if (algEquals(method.getAlgorithm(), key.getAlgorithm())) {
-                        return new KeySelectorResult() {
-                            public Key getKey() {
-                                return key;
-                            }
-                        };
-                    }
+                if (!(o instanceof X509Certificate))
+                    continue;
+                final PublicKey key = ((X509Certificate) o).getPublicKey();
+                // Make sure the algorithm is compatible
+                // with the method.
+                if (algEquals(method.getAlgorithm(), key.getAlgorithm())) {
+                    return new KeySelectorResult() {
+                        public Key getKey() {
+                            return key;
+                        }
+                    };
                 }
             }
         }
+        throw new KeySelectorException("No key found!");
     }
 
     static boolean algEquals(String algURI, String algName) {
-        return algName.equalsIgnoreCase("DSA") && algURI.equalsIgnoreCase("http://www.w3.org/2000/09/xmldsig#dsa-sha1") || algName.equalsIgnoreCase("RSA") && algURI.equalsIgnoreCase("http://www.w3.org/2000/09/xmldsig#rsa-sha1");
+        if ((algName.equalsIgnoreCase("DSA") &&
+                algURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1)) ||
+                (algName.equalsIgnoreCase("RSA") &&
+                        algURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1))) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public X509Certificate getCertificate() {

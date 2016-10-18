@@ -74,7 +74,7 @@ public class ServiceMetadataTest extends AbstractTest {
 
     @Test
     public void getSignedServiceMetadataNaptrOk() throws Exception {
-       /* URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_urn_germany_ncpb, Constants.SIGNED_SERVICE_METADATA_BODY_urn_germany_ncpb);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:germany:ncpb", "ehealth-participantid-qns");
@@ -91,7 +91,7 @@ public class ServiceMetadataTest extends AbstractTest {
         Assert.assertEquals("epsos-docid-qns::urn:epsos:services##epsos-21", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
         Assert.assertEquals("urn:germany:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-participantid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
-        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());*/
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 
     @Test(expected = DNSLookupException.class)
