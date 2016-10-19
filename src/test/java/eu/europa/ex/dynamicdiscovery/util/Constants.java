@@ -1,3 +1,21 @@
+/*
+ * Copyright 2016 Dynamic Discovery Client Project
+ *
+ * Licensed under the EUPL, Version 1.1 or – as soon they
+ * will be approved by the European Commission - subsequent
+ * versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the
+ * Licence.
+ * You may obtain a copy of the Licence at:
+ * http://ec.europa.eu/idabc/servlets/Docbb6d.pdf?id=31979
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the Licence is
+ * distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the Licence for the specific language governing
+ * permissions and limitations under the Licence.
+ */
 package eu.europa.ex.dynamicdiscovery.util;
 
 /**
@@ -71,8 +89,8 @@ public class Constants {
             "<Extension/>\n" +
             "</ServiceGroup>";
 
-    public static final String SERVICE_GROUP_URL_URN_EHEALTH_PT_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp";
-    public static final String SERVICE_GROUP_BODY_URN_EHEALTH_PT_NCPB_IDP = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
+    public static final String SERVICE_GROUP_URL_URN_EHEALTH_BE_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp";
+    public static final String SERVICE_GROUP_BODY_URN_EHEALTH_BE_NCPB_IDP = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
             "<ids:ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:be:ncpb-idp</ids:ParticipantIdentifier>\n" +
             "<ServiceMetadataReferenceCollection>\n" +
             "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105\"/>\n" +
