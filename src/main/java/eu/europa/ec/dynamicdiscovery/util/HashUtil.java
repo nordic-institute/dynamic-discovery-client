@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 
 /**
- * Created by rodrfla on 03/10/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class HashUtil {
 

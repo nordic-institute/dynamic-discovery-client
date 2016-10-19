@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by rodrfla on 03/10/2016.
+ * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class CommonUtil {
 

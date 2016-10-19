@@ -20,6 +20,14 @@
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <wiremock.version>2.2.1</wiremock.version>
+        <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
+        <sonar.jacoco.reportPath>${project.basedir}/target/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
+        <sonar.scm.disabled>true</sonar.scm.disabled>
+        <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
+        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar</sonar.host.url>
+        <sonar.sources>src/main/java</sonar.sources>
+        <surefire.argLine>-Xmx1G</surefire.argLine>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <build>
@@ -69,6 +77,55 @@
                             <sources>
                                 <source>${basedir}/target/generated/src/main/java</source>
                             </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <argLine>${surefireArgLine}</argLine>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <argLine>-XX:MaxPermSize=512m</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</destFile>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

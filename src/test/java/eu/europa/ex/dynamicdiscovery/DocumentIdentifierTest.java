@@ -45,7 +45,7 @@ public class DocumentIdentifierTest extends AbstractTest {
     @Test
     public void getDocumentIdentifierByNaptrOK2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_urn_ehealth_pt_ncpb_idp, Constants.SERVICE_GROUP_BODY_urn_ehealth_pt_ncpb_idp);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_URN_EHEALTH_PT_NCPB_IDP, Constants.SERVICE_GROUP_BODY_URN_EHEALTH_PT_NCPB_IDP);
 
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
 
@@ -58,6 +58,8 @@ public class DocumentIdentifierTest extends AbstractTest {
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
         Assert.assertEquals(3, documentIdentifiers.size());
+        Assert.assertEquals("urn::epsos##services:extended:epsos::105", documentIdentifiers.get(0).getDocumentIdentifier());
+        Assert.assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
 
     }
 
@@ -72,6 +74,8 @@ public class DocumentIdentifierTest extends AbstractTest {
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
         Assert.assertEquals(3, documentIdentifiers.size());
+        Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", documentIdentifiers.get(0).getDocumentIdentifier());
+        Assert.assertEquals("busdox-docid-qns", documentIdentifiers.get(1).getScheme());
     }
 
     @Test(expected = DNSLookupException.class)
