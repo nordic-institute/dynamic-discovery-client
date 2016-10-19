@@ -117,29 +117,18 @@ public class Constants {
             "                            <MinimumAuthenticationLevel>urn:epSOS:loa:1</MinimumAuthenticationLevel>\n" +
             "                            <ServiceActivationDate>2015-04-29T12:55:39Z</ServiceActivationDate>\n" +
             "                            <ServiceExpirationDate>2015-04-29T12:55:39Z</ServiceExpirationDate>\n" +
-            "<Certificate>\n" +
-            "MIID5zCCA1CgAwIBAgICA+QwDQYJKoZIhvcNAQENBQAwOjELMAkGA1UEBhMCRlIx\n" +
-            " EzARBgNVBAoMCklIRSBFdXJvcGUxFjAUBgNVBAMMDUlIRSBFdXJvcGUgQ0EwHhcN\n" +
-            " MTYwNjAxMTQzNTMxWhcNMjYwNjAxMTQzNTMxWjB9MQswCQYDVQQGEwJQVDEMMAoG\n" +
-            " A1UECgwDTW9IMQ0wCwYDVQQLDARTUE1TMQ0wCwYDVQQqDARKb2FvMQ4wDAYDVQQF\n" +
-            " EwVDdW5oYTEdMBsGA1UEAwwUcWFlcHNvcy5taW4tc2F1ZGUucHQxEzARBgNVBAwM\n" +
-            " ClZQTiBTZXJ2ZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDcopPo\n" +
-            " wWuBSEokl4UE9BTpA6gzdzQvZrHawcsesieUNuJUBY04dD9dsnWjppz8JOE64Jmj\n" +
-            " rxZp+QJxESL2LDrE99r74S+rHtUQG4AMrD6qcfVRmf/9kw9tiVTHc1SdP8ycXTDs\n" +
-            " QjeTyymdBvL5c6TiDJafC6C/jaaqlmxekzIIYhVyhlr1JQH3L9TOcEpaKgNPm+HI\n" +
-            " dzdrpJiayVJz6Th256ZV1rPvBHRhFxfaG5xh640YstTMvqnfVX8u+8KMcoQ/9TOm\n" +
-            " CkMAeUiR9PduCZYaK6cE5519l5g/yWZD84YIz1P8fio1DnS8W1keV5DwXvHXiDNu\n" +
-            " Jz84gzyDDox767rBAgMBAAGjggEzMIIBLzA+BgNVHR8ENzA1MDOgMaAvhi1odHRw\n" +
-            " czovL2dhemVsbGUuaWhlLm5ldC9wa2kvY3JsLzY0My9jYWNybC5jcmwwPAYJYIZI\n" +
-            " AYb4QgEEBC8WLWh0dHBzOi8vZ2F6ZWxsZS5paGUubmV0L3BraS9jcmwvNjQzL2Nh\n" +
-            " Y3JsLmNybDA8BglghkgBhvhCAQMELxYtaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQv\n" +
-            " cGtpL2NybC82NDMvY2FjcmwuY3JsMB8GA1UdIwQYMBaAFOwzDhPIIl6i4WuvQ3t6\n" +
-            " XdJ3cx1+MB0GA1UdDgQWBBQFn8LrGlDMCZ87E25x3y2+UzZWczAMBgNVHRMBAf8E\n" +
-            " AjAAMA4GA1UdDwEB/wQEAwIFIDATBgNVHSUEDDAKBggrBgEFBQcDATANBgkqhkiG\n" +
-            " 9w0BAQ0FAAOBgQBU7TdPBJmlgh+dS1YNJpUFezcaIDaf2c7POe2x2QsWfIayARhh\n" +
-            " gxEhSwemUFjhNYDx5sF6Us6lwcHsC1wiuWSyXxG5OonqBauDe/+sAkS2yetWUlM4\n" +
-            " a8YvefZ2X38Y1pIOa5Cfq1r8/G7n5liFweMFXhvc22YI6vk/VLEcZJAp2A==\n" +
-            "</Certificate>\n" +
+            "<Certificate>MIICpTCCAg6gAwIBAgIBATANBgkqhkiG9w0BAQUFADB4MQswCQYDVQQGEwJCRTELMAkGA1UECAwC\n" +
+            "            \"QkUxETAPBgNVBAcMCEJydXNzZWxzMQ4wDAYDVQQKDAVESUdJVDELMAkGA1UECwwCQjQxDzANBgNV\n" +
+            "            \"BAMMBnJvb3RDTjEbMBkGCSqGSIb3DQEJARYMcm9vdEB0ZXN0LmJlMB4XDTE1MDMxNzE2MTkwN1oX\n" +
+            "            \"DTI1MDMxNDE2MTkwN1owfDELMAkGA1UEBhMCQkUxCzAJBgNVBAgMAkJFMREwDwYDVQQHDAhCcnVz\n" +
+            "            \"c2VsczEOMAwGA1UECgwFRElHSVQxCzAJBgNVBAsMAkI0MREwDwYDVQQDDAhzZW5kZXJDTjEdMBsG\n" +
+            "            \"CSqGSIb3DQEJARYOc2VuZGVyQHRlc3QuYmUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBANxL\n" +
+            "            \"UPjIn7R0CsHf86kIwNzCu+6AdmWM8fBLUHL+VXT6ayr1kwgGbFMb/vUUX6a46jRCiZBM+9IK1Hpj\n" +
+            "            \"g9QX/QIQiWtvD+yDr6jUxahZ/w13kqFG/K81IVu9DwLBoiNwDvQ6l6UbvMvV+1nWy3gjRcKlFs/C\n" +
+            "            \"+E2uybgJxSM/sMkbAgMBAAGjOzA5MB8GA1UdIwQYMBaAFHCVSh4WnWR8MGBGedr+bJH96tc4MAkG\n" +
+            "            \"A1UdEwQCMAAwCwYDVR0PBAQDAgTwMA0GCSqGSIb3DQEBBQUAA4GBAK6idNRxyeBmqPoSKxq7Ck3e\n" +
+            "            \"j6R2QPyWbwZ+6/S7iCRt8PfgOu++Yu5YEjlUX1hlkbQKF/JuKTLqxNnKIE6Ef65+JP2ZaI9O2wdz\n" +
+            "            \"pRclAhAd00XbNKpyipr4jMdWmu2U8vyBBwn/utG1ZrLhAUiqnPvmaQrResiGHM2xzCmVwtse</Certificate>\n" +
             "                            <ServiceDescription>This is the epSOS Patient Service List for the German NCP</ServiceDescription>\n" +
             "                            <TechnicalContactUrl>http://germany/contact</TechnicalContactUrl>\n" +
             "                            <TechnicalInformationUrl>http://germany/contact</TechnicalInformationUrl>\n" +
@@ -162,7 +151,8 @@ public class Constants {
             "    <DigestValue>7/XTsHaBSOnJ/jXD5v0zL6VKYsk=</DigestValue>\n" +
             "   </Reference>\n" +
             "  </SignedInfo>\n" +
-            "  <SignatureValue>ZRW+yWq0BdSAsoyAvLMeeODEermYbOnL/G67eZZilf3LVPJ/sI7h1gyrjtEHFymsYcO9ltB91m+VwOWIaPK74A==</SignatureValue>\n" +
+            "  <SignatureValue>bx4gFDnkqOjexZAx35rgNhKyRqMpaPyQ9z/h5uXPM1ZQ4LZvu6/3khjenwITP981MlaXF2tp11KS\n" +
+            "kxOroJArTA==</SignatureValue>\n" +
             "  <KeyInfo>\n" +
             "   <X509Data>" +
             "       <X509SubjectName>1.2.840.113549.1.9.1=#160e73656e64657240746573742e6265,CN=senderCN,OU=B4,O=DIGIT,L=Brussels,ST=BE,C=BE</X509SubjectName>\n" +

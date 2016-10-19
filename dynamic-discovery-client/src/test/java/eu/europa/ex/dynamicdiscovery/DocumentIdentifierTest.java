@@ -21,7 +21,6 @@ package eu.europa.ex.dynamicdiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
-import eu.europa.ec.dynamicdiscovery.core.locator.BusdoxLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
@@ -87,7 +86,7 @@ public class DocumentIdentifierTest extends AbstractTest {
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_GROUP_URL_9925_0367302178, Constants.SERVICE_GROUP_BODY_9925_0367302178, "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
                 .fetcher(urlFetcherURL)
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
@@ -116,7 +115,7 @@ public class DocumentIdentifierTest extends AbstractTest {
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_GROUP_URL_9925_0367302178, Constants.SERVICE_GROUP_BODY_9925_0367302178, "b-12345678910.iso6523-actorid-upis.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
                 .fetcher(urlFetcherURL)
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));

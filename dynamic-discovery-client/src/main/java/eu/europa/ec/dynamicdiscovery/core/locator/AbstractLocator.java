@@ -18,34 +18,39 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator;
 
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.util.HashUtil;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  */
-public class BusdoxLocator extends AbstractLocator {
+public abstract class AbstractLocator implements IMetadataLocator {
 
-    public BusdoxLocator() {
-        super(null);
+    public static final String PRODUCTION = "edelivery.tech.ec.europa.eu";
+    public static final String ACCEPTANCE = "acc.edelivery.tech.ec.europa.eu";
+    protected String hostname;
+    protected IDNSLookup dnsLookup;
+
+    public AbstractLocator(IDNSLookup dnsLookup) {
+        this(PRODUCTION, dnsLookup);
     }
 
-    public BusdoxLocator(String hostname) {
-        super(hostname, null);
+    public AbstractLocator(String hostname, IDNSLookup dnsLookup) {
+        this.hostname = hostname;
+        this.dnsLookup = dnsLookup;
     }
 
-    public URI lookup(ParticipantIdentifier participantIdentifier) {
-        try {
-            String e = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
-            return new URI(String.format("http://b-%s.%s.%s", new Object[]{e, participantIdentifier.getScheme(), super.hostname}));
-        } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException exc) {
-            throw new RuntimeException(exc.getMessage(), exc);
-        }
+    public abstract URI lookup(ParticipantIdentifier identifier) throws TechnicalException;
+
+    public URI lookup(String identifier, String scheme) throws TechnicalException {
+        return this.lookup(new ParticipantIdentifier(identifier, scheme));
+    }
+
+    public IDNSLookup getDnsLookup() {
+        return dnsLookup;
     }
 }

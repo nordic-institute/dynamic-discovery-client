@@ -21,7 +21,6 @@ package eu.europa.ex.dynamicdiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
-import eu.europa.ec.dynamicdiscovery.core.locator.BusdoxLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
@@ -71,7 +70,7 @@ public class ServiceMetadataTest extends AbstractTest {
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_GERMANY_NCPB, Constants.SERVICE_METADATA_BODY_URN_GERMANY_NCPB, "b-ce918d50184b5b0327efe7660bd44fde.ehealth-participantid-qns.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
                 .fetcher(urlFetcherURL)
                 .build();
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:germany:ncpb", "ehealth-participantid-qns");
@@ -115,7 +114,7 @@ public class ServiceMetadataTest extends AbstractTest {
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP, Constants.SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP, "b-123456.ehealth-actorid-qns.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
                 .fetcher(urlFetcherURL)
                 .build();
 

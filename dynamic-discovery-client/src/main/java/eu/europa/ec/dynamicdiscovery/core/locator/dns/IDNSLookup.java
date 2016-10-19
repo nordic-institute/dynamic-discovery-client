@@ -16,7 +16,7 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package eu.europa.ec.dynamicdiscovery.core.locator;
+package eu.europa.ec.dynamicdiscovery.core.locator.dns;
 
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;

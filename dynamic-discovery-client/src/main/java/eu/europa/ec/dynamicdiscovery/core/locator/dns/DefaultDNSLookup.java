@@ -20,7 +20,6 @@ package eu.europa.ec.dynamicdiscovery.core.locator.dns;
 
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.core.locator.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.apache.commons.lang3.StringUtils;
 import org.xbill.DNS.*;

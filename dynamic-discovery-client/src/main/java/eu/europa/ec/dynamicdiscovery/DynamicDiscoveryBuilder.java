@@ -20,7 +20,7 @@ package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.BusdoxLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
@@ -50,11 +50,11 @@ public class DynamicDiscoveryBuilder {
     }
 
     public static DynamicDiscoveryBuilder forProduction() {
-        return newInstance().locator(new BusdoxLocator("edelivery.tech.ec.europa.eu"));
+        return newInstance().locator(new BDXRLocator("edelivery.tech.ec.europa.eu"));
     }
 
     public static DynamicDiscoveryBuilder forTest() {
-        return newInstance().locator(new BusdoxLocator("acc.edelivery.tech.ec.europa.eu"));
+        return newInstance().locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"));
     }
 
     public DynamicDiscoveryBuilder fetcher(IMetadataFetcher metadataFetcher) {
