@@ -18,8 +18,12 @@
         <guava.version>18.0</guava.version>
         <commons-lang3.version>3.4</commons-lang3.version>
         <mockito.version>1.10.19</mockito.version>
+        <jaxb2.version>2.3</jaxb2.version>
         <junit.version>4.12</junit.version>
+        <helper.version>1.12</helper.version>
+        <surefire.version>2.19.1</surefire.version>
         <wiremock.version>2.2.1</wiremock.version>
+        <jacoco.version>0.7.7.201606060606</jacoco.version>
         <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
         <sonar.jacoco.reportPath>${project.basedir}/target/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
         <sonar.scm.disabled>true</sonar.scm.disabled>
@@ -43,8 +47,8 @@
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
+                <version>${jaxb2.version}</version>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>2.2</version>
                 <executions>
                     <execution>
                         <id>xjc</id>
@@ -65,7 +69,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
+                <version>${helper.version}</version>
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -87,6 +91,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
                 <executions>
                     <execution>
                         <id>default-test</id>
@@ -106,6 +111,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
