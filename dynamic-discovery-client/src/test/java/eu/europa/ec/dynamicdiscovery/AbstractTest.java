@@ -16,7 +16,7 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package eu.europa.ex.dynamicdiscovery;
+package eu.europa.ec.dynamicdiscovery;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Rule;

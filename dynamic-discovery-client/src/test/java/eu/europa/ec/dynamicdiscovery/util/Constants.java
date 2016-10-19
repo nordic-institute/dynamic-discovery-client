@@ -16,7 +16,7 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package eu.europa.ex.dynamicdiscovery.util;
+package eu.europa.ec.dynamicdiscovery.util;
 
 /**
  * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu

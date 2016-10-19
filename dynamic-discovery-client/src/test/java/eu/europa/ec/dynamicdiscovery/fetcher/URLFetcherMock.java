@@ -16,13 +16,13 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package eu.europa.ex.dynamicdiscovery.fetcher;
+package eu.europa.ec.dynamicdiscovery.fetcher;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ex.dynamicdiscovery.util.Constants;
+import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

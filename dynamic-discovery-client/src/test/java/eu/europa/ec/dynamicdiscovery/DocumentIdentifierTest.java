@@ -16,17 +16,15 @@
  * See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-package eu.europa.ex.dynamicdiscovery;
+package eu.europa.ec.dynamicdiscovery;
 
-import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
-import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ex.dynamicdiscovery.fetcher.URLFetcherMock;
-import eu.europa.ex.dynamicdiscovery.util.Constants;
+import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcherMock;
+import eu.europa.ec.dynamicdiscovery.util.Constants;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
