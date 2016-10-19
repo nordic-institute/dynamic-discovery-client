@@ -16,9 +16,10 @@ import java.io.InputStream;
  */
 public class CommonUtil {
 
-    private static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+    private static DocumentBuilderFactory documentBuilderFactory;
 
     static {
+        documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
     }
 

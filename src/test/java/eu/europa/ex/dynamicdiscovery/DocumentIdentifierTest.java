@@ -47,10 +47,10 @@ public class DocumentIdentifierTest extends AbstractTest {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_URN_EHEALTH_PT_NCPB_IDP, Constants.SERVICE_GROUP_BODY_URN_EHEALTH_PT_NCPB_IDP);
 
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:be:ncpb-idp", "ehealth-actorid-qns");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "L6WYVSCV5TIX6VAH5YLULNSJJMKR2ZHM65J7RRCFZ6JYYCV7JXGQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))

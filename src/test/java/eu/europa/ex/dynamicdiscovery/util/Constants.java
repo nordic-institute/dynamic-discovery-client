@@ -71,13 +71,13 @@ public class Constants {
             "<Extension/>\n" +
             "</ServiceGroup>";
 
-    public static final String SERVICE_GROUP_URL_URN_EHEALTH_PT_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp";
+    public static final String SERVICE_GROUP_URL_URN_EHEALTH_PT_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp";
     public static final String SERVICE_GROUP_BODY_URN_EHEALTH_PT_NCPB_IDP = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
-            "<ids:ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:pt:ncpb-idp</ids:ParticipantIdentifier>\n" +
+            "<ids:ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:be:ncpb-idp</ids:ParticipantIdentifier>\n" +
             "<ServiceMetadataReferenceCollection>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105\"/>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A106\"/>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A21\"/>\n" +
+            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105\"/>\n" +
+            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A106\"/>\n" +
+            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A21\"/>\n" +
             "</ServiceMetadataReferenceCollection>\n" +
             "<Extension/>\n" +
             "</ServiceGroup>";
