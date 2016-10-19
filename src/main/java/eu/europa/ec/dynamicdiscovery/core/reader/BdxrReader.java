@@ -57,17 +57,9 @@ public class BdxrReader extends AbstractReader {
         try {
             Document document = CommonUtil.parse(fetcherResponse.getInputStream());
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Object result = null;
-            org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata unmarshalledServiceMetadata = null;
-            try {
-                //result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata.class);
-                result = unmarshaller.unmarshal(CommonUtil.convertToSource(document));
-            } catch (Exception exc) {
-                exc.printStackTrace();
-                // result = (JAXBElement) unmarshaller.unmarshal(CommonUtil.convertToSource(document), org.oasis_open.docs.bdxr.ns.smp._2014._07.SignedServiceMetadata.class);
-            }
 
-            //  Object o = result.getValue();
+            org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata unmarshalledServiceMetadata = null;
+            Object result = unmarshaller.unmarshal(CommonUtil.convertToSource(document));
             ServiceMetadata serviceMetadata = new ServiceMetadata();
             if (result instanceof SignedServiceMetadata) {
                 serviceMetadata.setSigner(XmldsigVerifier.verify(document));
