@@ -15,6 +15,7 @@
         <httpclient.version>4.5.2</httpclient.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <bouncycastle.version>1.55</bouncycastle.version>
+        <compiler.version>3.5.1</compiler.version>
         <guava.version>18.0</guava.version>
         <commons-lang3.version>3.4</commons-lang3.version>
         <mockito.version>1.10.19</mockito.version>
@@ -39,7 +40,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>${compiler.version}</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
