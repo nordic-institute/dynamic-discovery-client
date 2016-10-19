@@ -90,7 +90,6 @@ public class DocumentIdentifierTest extends AbstractTest {
                 .fetcher(urlFetcherURL)
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
-        Assert.assertEquals(3, documentIdentifiers.size());
     }
 
     @Test(expected = DNSLookupException.class)
@@ -103,6 +102,5 @@ public class DocumentIdentifierTest extends AbstractTest {
                 .fetcher(urlFetcherURL)
                 .build();
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis"));
-        Assert.assertEquals(3, documentIdentifiers.size());
     }
 }

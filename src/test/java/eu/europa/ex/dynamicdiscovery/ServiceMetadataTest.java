@@ -103,12 +103,7 @@ public class ServiceMetadataTest extends AbstractTest {
 
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
-
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
-        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
-        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
-        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 
     @Test(expected = DNSLookupException.class)
@@ -125,12 +120,7 @@ public class ServiceMetadataTest extends AbstractTest {
 
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
-
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
-        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
-        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
-        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 
     @Test(expected = DNSLookupException.class)
