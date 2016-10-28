@@ -54,7 +54,7 @@
                         <xjbSource>src/main/resources/commonServiceBinding.xjb</xjbSource>
                     </xjbSources>
                     <sources>
-                        <source>src/main/resources/bdx-smp-201407.xsd</source>
+                        <source>src/main/resources/bdx-smp-201605.xsd</source>
                     </sources>
                 </configuration>
             </plugin>

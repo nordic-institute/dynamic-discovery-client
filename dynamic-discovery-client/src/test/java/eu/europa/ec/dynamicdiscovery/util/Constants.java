@@ -26,7 +26,7 @@ public class Constants {
     public static final String SMP_DOMAIN_ALIAS = "http://smp.ec.europa.eu/";
 
     public static final String SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105";
-    public static final String SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP = "<ns3:ServiceMetadata xmlns:ns3=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns=\"http://busdox.org/transport/identifiers/1.0/\" xmlns:ns2=\"http://www.w3.org/2005/08/addressing\" xmlns:ns4=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+    public static final String SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP = "<ns3:ServiceMetadata xmlns:ns3=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" xmlns=\"http://busdox.org/transport/identifiers/1.0/\" xmlns:ns2=\"http://www.w3.org/2005/08/addressing\" xmlns:ns4=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
             "<ns3:ServiceInformation>\n" +
             "<ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:pt:ncpb-idp</ParticipantIdentifier>\n" +
             "<DocumentIdentifier scheme=\"ehealth-resid-qns\">urn::epsos##services:extended:epsos::105</DocumentIdentifier>\n" +
@@ -79,7 +79,7 @@ public class Constants {
             "</ns3:ServiceMetadata>";
 
     public static final String SERVICE_GROUP_URL_9925_0367302178 = "/cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9925%3A0367302178";
-    public static final String SERVICE_GROUP_BODY_9925_0367302178 = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
+    public static final String SERVICE_GROUP_BODY_9925_0367302178 = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
             "<ids:ParticipantIdentifier scheme=\"busdox-actorid-upis\">9925:0367302178</ids:ParticipantIdentifier>\n" +
             "<ServiceMetadataReferenceCollection>\n" +
             "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/iso6523-actorid-upis::9925%3A0367302178/services/busdox-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1\"/>\n" +
@@ -90,7 +90,7 @@ public class Constants {
             "</ServiceGroup>";
 
     public static final String SERVICE_GROUP_URL_URN_EHEALTH_BE_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp";
-    public static final String SERVICE_GROUP_BODY_URN_EHEALTH_BE_NCPB_IDP = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
+    public static final String SERVICE_GROUP_BODY_URN_EHEALTH_BE_NCPB_IDP = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
             "<ids:ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:be:ncpb-idp</ids:ParticipantIdentifier>\n" +
             "<ServiceMetadataReferenceCollection>\n" +
             "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105\"/>\n" +
@@ -101,7 +101,7 @@ public class Constants {
             "</ServiceGroup>";
 
     public static final String SIGNED_SERVICE_METADATA_URL_urn_germany_ncpb = "/cipa-smp-full-webapp/ehealth-participantid-qns%3A%3Aurn%3Agermany%3Ancpb/services/ehealth-resid-qns%3A%3Aurn%3Aepsos%3A%3Aservices%23%23epsos-21";
-    public static final String SIGNED_SERVICE_METADATA_BODY_urn_germany_ncpb = "<SignedServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" \n" +
+    public static final String SIGNED_SERVICE_METADATA_BODY_urn_germany_ncpb = "<SignedServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" \n" +
             "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:ns=\"urn:esens:smp\">\n" +
             "<ServiceMetadata xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wsswssecurity-utility-1.0.xsd\">\n" +
             "        <ServiceInformation>\n" +
@@ -174,7 +174,7 @@ public class Constants {
             "</SignedServiceMetadata>";
 
     public static final String SERVICE_METADATA_URL_URN_GERMANY_NCPB = "/cipa-smp-full-webapp/ehealth-participantid-qns%3A%3Aurn%3Agermany%3Ancpb/services/epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21";
-    public static final String SERVICE_METADATA_BODY_URN_GERMANY_NCPB = "<ServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2014/07\" \n" +
+    public static final String SERVICE_METADATA_BODY_URN_GERMANY_NCPB = "<ServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" \n" +
             "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
             "    xmlns:ns=\"urn:esens:smp\">\n" +
             "        <ServiceInformation>\n" +

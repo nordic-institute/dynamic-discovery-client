@@ -25,7 +25,7 @@ import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.*;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.*;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBElement;
@@ -76,7 +76,7 @@ public class BdxrReader extends AbstractReader {
             Document document = CommonUtil.parse(fetcherResponse.getInputStream());
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-            org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata unmarshalledServiceMetadata = null;
+            org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata unmarshalledServiceMetadata = null;
             Object result = unmarshaller.unmarshal(CommonUtil.convertToSource(document));
             ServiceMetadata serviceMetadata = new ServiceMetadata();
             if (result instanceof SignedServiceMetadata) {
@@ -84,10 +84,10 @@ public class BdxrReader extends AbstractReader {
                 unmarshalledServiceMetadata = ((SignedServiceMetadata) result).getServiceMetadata();
             }
 
-            if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata)) {
+            if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata)) {
                 throw new Exception("ServiceMetadata element not found.");
             } else {
-                unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata) result;
+                unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result;
                 ServiceInformationType serviceInformation = unmarshalledServiceMetadata.getServiceInformation();
                 serviceMetadata.setParticipantIdentifier(new ParticipantIdentifier(serviceInformation.getParticipantIdentifier().getValue(), serviceInformation.getParticipantIdentifier().getScheme()));
                 serviceMetadata.setDocumentIdentifier(new DocumentIdentifier(serviceInformation.getDocumentIdentifier().getValue(), serviceInformation.getDocumentIdentifier().getScheme()));

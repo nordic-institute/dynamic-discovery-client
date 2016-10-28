@@ -18,9 +18,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.reader;
 
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceGroup;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.ServiceMetadata;
-import org.oasis_open.docs.bdxr.ns.smp._2014._07.SignedServiceMetadata;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadata;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

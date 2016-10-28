@@ -49,14 +49,6 @@ public class DynamicDiscoveryBuilder {
         return new DynamicDiscoveryBuilder();
     }
 
-    public static DynamicDiscoveryBuilder forProduction() {
-        return newInstance().locator(new BDXRLocator("edelivery.tech.ec.europa.eu"));
-    }
-
-    public static DynamicDiscoveryBuilder forTest() {
-        return newInstance().locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"));
-    }
-
     public DynamicDiscoveryBuilder fetcher(IMetadataFetcher metadataFetcher) {
         this.metadataFetcher = metadataFetcher;
         return this;
