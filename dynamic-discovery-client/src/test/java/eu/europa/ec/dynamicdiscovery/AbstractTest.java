@@ -27,5 +27,5 @@ import org.junit.Rule;
 public abstract class AbstractTest {
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    public WireMockRule wireMockRule = new WireMockRule(8090);
 }

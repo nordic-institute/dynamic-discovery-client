@@ -22,7 +22,7 @@ package eu.europa.ec.dynamicdiscovery.util;
  * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
 public class Constants {
-    public static final String SMP_DOMAIN = "http://localhost:8080/cipa-smp-full-webapp/";
+    public static final String SMP_DOMAIN = "http://localhost:8090/cipa-smp-full-webapp/";
     public static final String SMP_DOMAIN_ALIAS = "http://smp.ec.europa.eu/";
 
     public static final String SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105";
