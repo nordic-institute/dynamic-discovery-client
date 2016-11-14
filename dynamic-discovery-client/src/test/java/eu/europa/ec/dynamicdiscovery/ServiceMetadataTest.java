@@ -40,32 +40,32 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getServiceMetadataNaptrOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_GERMANY_NCPB, Constants.SERVICE_METADATA_BODY_URN_GERMANY_NCPB);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:germany:ncpb", "ehealth-participantid-qns");
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "RWR4TB6ADUSN25GA64C5E53ZF5E3J2AYSFXZNTOKMJAXXCVLCMGQ.ehealth-participantid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .locator(new BDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
 
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos:services##epsos-21", "epsos-docid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
 
-        Assert.assertEquals("urn::epsos:services##epsos-21", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
-        Assert.assertEquals("epsos-docid-qns::urn::epsos:services##epsos-21", serviceMetadata.getDocumentIdentifier().getIdentifier());
-        Assert.assertEquals("epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceMetadata.getDocumentIdentifier().urlencoded());
-        Assert.assertEquals("epsos-docid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
-        Assert.assertEquals("urn:germany:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
-        Assert.assertEquals("ehealth-participantid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
         Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 
     @Test
     public void getServiceMetadataCnameOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_GERMANY_NCPB, Constants.SERVICE_METADATA_BODY_URN_GERMANY_NCPB, "b-ce918d50184b5b0327efe7660bd44fde.ehealth-participantid-qns.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-ce918d50184b5b0327efe7660bd44fde.ehealth-participantid-qns.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
@@ -109,7 +109,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataCnameNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP, Constants.SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP, "b-123456.ehealth-actorid-qns.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-123456.ehealth-actorid-qns.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
@@ -124,7 +124,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataNaptrNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP, Constants.SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "adfsdf54.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
@@ -141,7 +141,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataNaptrParticipantIdentifierNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP, Constants.SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
@@ -163,7 +163,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataCnameParticipantIdentifierNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP, Constants.SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "b-0e2981c9c2044fd64711099b6f9dbe19.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 

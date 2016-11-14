@@ -21,9 +21,9 @@ package eu.europa.ec.dynamicdiscovery;
 import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.util.Constants;
 import org.junit.Assert;
 import org.junit.Test;
@@ -60,7 +60,7 @@ public class DocumentIdentifierTest extends AbstractTest {
     @Test
     public void getDocumentIdentifierByNaptrOK2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_URN_EHEALTH_BE_NCPB_IDP, Constants.SERVICE_GROUP_BODY_URN_EHEALTH_BE_NCPB_IDP);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_URN_POLAND_NCPB, Constants.SERVICE_GROUP_BODY_URN_POLAND_NCPB);
 
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:be:ncpb-idp", "ehealth-actorid-qns");
 

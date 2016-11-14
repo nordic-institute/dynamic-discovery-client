@@ -38,8 +38,6 @@ import java.util.Iterator;
 
 public class XmldsigVerifier {
 
-    private static final String ns = "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05";
-
     public static X509Certificate verify(Document document) throws Exception {
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
         NodeList nl = document.getDocumentElement().getChildNodes();

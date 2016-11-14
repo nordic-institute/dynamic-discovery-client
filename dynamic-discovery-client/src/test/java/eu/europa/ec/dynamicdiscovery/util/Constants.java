@@ -25,201 +25,261 @@ public class Constants {
     public static final String SMP_DOMAIN = "http://localhost:8090/cipa-smp-full-webapp/";
     public static final String SMP_DOMAIN_ALIAS = "http://smp.ec.europa.eu/";
 
-    public static final String SERVICE_METADATA_URL_URN_EHEALTH_PT_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Apt%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105";
-    public static final String SERVICE_METADATA_BODY_URN_EHEALTH_PT_NCPB_IDP = "<ns3:ServiceMetadata xmlns:ns3=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" xmlns=\"http://busdox.org/transport/identifiers/1.0/\" xmlns:ns2=\"http://www.w3.org/2005/08/addressing\" xmlns:ns4=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
-            "<ns3:ServiceInformation>\n" +
-            "<ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:pt:ncpb-idp</ParticipantIdentifier>\n" +
-            "<DocumentIdentifier scheme=\"ehealth-resid-qns\">urn::epsos##services:extended:epsos::105</DocumentIdentifier>\n" +
-            "<ns3:ProcessList>\n" +
-            "<ns3:Process>\n" +
-            "<ProcessIdentifier scheme=\"ehealth-procid-qns\">urn:ehealth:ncp:vpngateway</ProcessIdentifier>\n" +
-            "<ns3:ServiceEndpointList>\n" +
-            "<ns3:Endpoint transportProfile=\"\">\n" +
-            "<ns2:EndpointReference>\n" +
-            "<ns2:Address>ipsec://cipa-smp-full-webapp.com</ns2:Address>\n" +
-            "</ns2:EndpointReference>\n" +
-            "<ns3:RequireBusinessLevelSignature>false</ns3:RequireBusinessLevelSignature>\n" +
-            "<ns3:MinimumAuthenticationLevel>urn:epSOS:loa:1</ns3:MinimumAuthenticationLevel>\n" +
-            "<ns3:ServiceActivationDate>2016-06-06T10:57:21Z</ns3:ServiceActivationDate>\n" +
-            "<ns3:ServiceExpirationDate>2026-06-06T10:57:21Z</ns3:ServiceExpirationDate>\n" +
-            "<ns3:Certificate>\n" +
-            "MIID5zCCA1CgAwIBAgICA+QwDQYJKoZIhvcNAQENBQAwOjELMAkGA1UEBhMCRlIx\n" +
-            " EzARBgNVBAoMCklIRSBFdXJvcGUxFjAUBgNVBAMMDUlIRSBFdXJvcGUgQ0EwHhcN\n" +
-            " MTYwNjAxMTQzNTMxWhcNMjYwNjAxMTQzNTMxWjB9MQswCQYDVQQGEwJQVDEMMAoG\n" +
-            " A1UECgwDTW9IMQ0wCwYDVQQLDARTUE1TMQ0wCwYDVQQqDARKb2FvMQ4wDAYDVQQF\n" +
-            " EwVDdW5oYTEdMBsGA1UEAwwUcWFlcHNvcy5taW4tc2F1ZGUucHQxEzARBgNVBAwM\n" +
-            " ClZQTiBTZXJ2ZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDcopPo\n" +
-            " wWuBSEokl4UE9BTpA6gzdzQvZrHawcsesieUNuJUBY04dD9dsnWjppz8JOE64Jmj\n" +
-            " rxZp+QJxESL2LDrE99r74S+rHtUQG4AMrD6qcfVRmf/9kw9tiVTHc1SdP8ycXTDs\n" +
-            " QjeTyymdBvL5c6TiDJafC6C/jaaqlmxekzIIYhVyhlr1JQH3L9TOcEpaKgNPm+HI\n" +
-            " dzdrpJiayVJz6Th256ZV1rPvBHRhFxfaG5xh640YstTMvqnfVX8u+8KMcoQ/9TOm\n" +
-            " CkMAeUiR9PduCZYaK6cE5519l5g/yWZD84YIz1P8fio1DnS8W1keV5DwXvHXiDNu\n" +
-            " Jz84gzyDDox767rBAgMBAAGjggEzMIIBLzA+BgNVHR8ENzA1MDOgMaAvhi1odHRw\n" +
-            " czovL2dhemVsbGUuaWhlLm5ldC9wa2kvY3JsLzY0My9jYWNybC5jcmwwPAYJYIZI\n" +
-            " AYb4QgEEBC8WLWh0dHBzOi8vZ2F6ZWxsZS5paGUubmV0L3BraS9jcmwvNjQzL2Nh\n" +
-            " Y3JsLmNybDA8BglghkgBhvhCAQMELxYtaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQv\n" +
-            " cGtpL2NybC82NDMvY2FjcmwuY3JsMB8GA1UdIwQYMBaAFOwzDhPIIl6i4WuvQ3t6\n" +
-            " XdJ3cx1+MB0GA1UdDgQWBBQFn8LrGlDMCZ87E25x3y2+UzZWczAMBgNVHRMBAf8E\n" +
-            " AjAAMA4GA1UdDwEB/wQEAwIFIDATBgNVHSUEDDAKBggrBgEFBQcDATANBgkqhkiG\n" +
-            " 9w0BAQ0FAAOBgQBU7TdPBJmlgh+dS1YNJpUFezcaIDaf2c7POe2x2QsWfIayARhh\n" +
-            " gxEhSwemUFjhNYDx5sF6Us6lwcHsC1wiuWSyXxG5OonqBauDe/+sAkS2yetWUlM4\n" +
-            " a8YvefZ2X38Y1pIOa5Cfq1r8/G7n5liFweMFXhvc22YI6vk/VLEcZJAp2A==\n" +
-            "</ns3:Certificate>\n" +
-            "<ns3:ServiceDescription></ns3:ServiceDescription>\n" +
-            "<ns3:TechnicalContactUrl></ns3:TechnicalContactUrl>\n" +
-            "<ns3:TechnicalInformationUrl></ns3:TechnicalInformationUrl>\n" +
-            "<ns3:Extension>\n" +
-            "<root xmlns=\"\" xmlns:ns5=\"http://busdox.org/transport/identifiers/1.0/\"/>\n" +
-            "</ns3:Extension>\n" +
-            "</ns3:Endpoint>\n" +
-            "</ns3:ServiceEndpointList>\n" +
-            "</ns3:Process>\n" +
-            "</ns3:ProcessList>\n" +
-            "</ns3:ServiceInformation>\n" +
-            "</ns3:ServiceMetadata>";
-
     public static final String SERVICE_GROUP_URL_9925_0367302178 = "/cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9925%3A0367302178";
-    public static final String SERVICE_GROUP_BODY_9925_0367302178 = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
-            "<ids:ParticipantIdentifier scheme=\"busdox-actorid-upis\">9925:0367302178</ids:ParticipantIdentifier>\n" +
+    public static final String SERVICE_GROUP_BODY_9925_0367302178 = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\">\n" +
+            "<ParticipantIdentifier scheme=\"iso6523-actorid-upis\">9925:0367302178</ParticipantIdentifier>" +
             "<ServiceMetadataReferenceCollection>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/iso6523-actorid-upis::9925%3A0367302178/services/busdox-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1\"/>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/iso6523-actorid-upis::9925%3A0367302178/services/busdox-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3AInvoice-2%3A%3AInvoice%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns010%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1\"/>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/iso6523-actorid-upis::9925%3A0367302178/services/busdox-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3AInvoice-2%3A%3AInvoice%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns010%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol4a%3Aver2.0%3A%3A2.1\"/>\n" +
-            "</ServiceMetadataReferenceCollection>\n" +
-            "<Extension/>\n" +
+            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21\"/>\n" +
+            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1\"/>\n" +
+            "</ServiceMetadataReferenceCollection>" +
             "</ServiceGroup>";
 
-    public static final String SERVICE_GROUP_URL_URN_EHEALTH_BE_NCPB_IDP = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp";
-    public static final String SERVICE_GROUP_BODY_URN_EHEALTH_BE_NCPB_IDP = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" xmlns:ids=\"http://busdox.org/transport/identifiers/1.0/\">\n" +
-            "<ids:ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:ehealth:be:ncpb-idp</ids:ParticipantIdentifier>\n" +
+    public static final String SERVICE_GROUP_URL_URN_POLAND_NCPB = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Apoland:ncpb";
+    public static final String SERVICE_GROUP_BODY_URN_POLAND_NCPB = "<ServiceGroup xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\">\n" +
+            "<ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:poland:ncpb</ParticipantIdentifier>" +
             "<ServiceMetadataReferenceCollection>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A105\"/>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A106\"/>\n" +
-            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp.com/ehealth-actorid-qns%3A%3Aurn%3Aehealth%3Abe%3Ancpb-idp/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A21\"/>\n" +
-            "</ServiceMetadataReferenceCollection>\n" +
-            "<Extension/>\n" +
+            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp/ehealth-actorid-qns::urn:poland:ncpb/services/epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21\"/>\n" +
+            "<ServiceMetadataReference href=\"http://cipa-smp-full-webapp/ehealth-actorid-qns::urn:poland:ncpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107\"/>\n" +
+            "</ServiceMetadataReferenceCollection>" +
             "</ServiceGroup>";
 
-    public static final String SIGNED_SERVICE_METADATA_URL_urn_germany_ncpb = "/cipa-smp-full-webapp/ehealth-participantid-qns%3A%3Aurn%3Agermany%3Ancpb/services/ehealth-resid-qns%3A%3Aurn%3Aepsos%3A%3Aservices%23%23epsos-21";
-    public static final String SIGNED_SERVICE_METADATA_BODY_urn_germany_ncpb = "<SignedServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" \n" +
-            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:ns=\"urn:esens:smp\">\n" +
-            "<ServiceMetadata xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wsswssecurity-utility-1.0.xsd\">\n" +
-            "        <ServiceInformation>\n" +
-            "            <ParticipantIdentifier scheme=\"ehealth-participantid-qns\">urn:germany:ncpb</ParticipantIdentifier>\n" +
-            "            <DocumentIdentifier scheme=\"epsos-docid-qns\">urn:epsos::services##epsos-21</DocumentIdentifier>\n" +
-            "            <ProcessList>\n" +
-            "                <Process>\n" +
-            "                    <ProcessIdentifier scheme=\"ehealth-procid-qns\">urn:germany:ncpb:epsosPatientService::List</ProcessIdentifier>\n" +
-            "                    <ServiceEndpointList>\n" +
-            "                        <Endpoint transportProfile=\"urn:ihe:iti:2013:xcpd\">\n" +
-            "                            <EndpointURI>http://germany/ncp/patient/list</EndpointURI>\n" +
-            "                            <RequireBusinessLevelSignature>false</RequireBusinessLevelSignature>\n" +
-            "                            <MinimumAuthenticationLevel>urn:epSOS:loa:1</MinimumAuthenticationLevel>\n" +
-            "                            <ServiceActivationDate>2015-04-29T12:55:39Z</ServiceActivationDate>\n" +
-            "                            <ServiceExpirationDate>2015-04-29T12:55:39Z</ServiceExpirationDate>\n" +
-            "<Certificate>MIICpTCCAg6gAwIBAgIBATANBgkqhkiG9w0BAQUFADB4MQswCQYDVQQGEwJCRTELMAkGA1UECAwC\n" +
-            "            \"QkUxETAPBgNVBAcMCEJydXNzZWxzMQ4wDAYDVQQKDAVESUdJVDELMAkGA1UECwwCQjQxDzANBgNV\n" +
-            "            \"BAMMBnJvb3RDTjEbMBkGCSqGSIb3DQEJARYMcm9vdEB0ZXN0LmJlMB4XDTE1MDMxNzE2MTkwN1oX\n" +
-            "            \"DTI1MDMxNDE2MTkwN1owfDELMAkGA1UEBhMCQkUxCzAJBgNVBAgMAkJFMREwDwYDVQQHDAhCcnVz\n" +
-            "            \"c2VsczEOMAwGA1UECgwFRElHSVQxCzAJBgNVBAsMAkI0MREwDwYDVQQDDAhzZW5kZXJDTjEdMBsG\n" +
-            "            \"CSqGSIb3DQEJARYOc2VuZGVyQHRlc3QuYmUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBANxL\n" +
-            "            \"UPjIn7R0CsHf86kIwNzCu+6AdmWM8fBLUHL+VXT6ayr1kwgGbFMb/vUUX6a46jRCiZBM+9IK1Hpj\n" +
-            "            \"g9QX/QIQiWtvD+yDr6jUxahZ/w13kqFG/K81IVu9DwLBoiNwDvQ6l6UbvMvV+1nWy3gjRcKlFs/C\n" +
-            "            \"+E2uybgJxSM/sMkbAgMBAAGjOzA5MB8GA1UdIwQYMBaAFHCVSh4WnWR8MGBGedr+bJH96tc4MAkG\n" +
-            "            \"A1UdEwQCMAAwCwYDVR0PBAQDAgTwMA0GCSqGSIb3DQEBBQUAA4GBAK6idNRxyeBmqPoSKxq7Ck3e\n" +
-            "            \"j6R2QPyWbwZ+6/S7iCRt8PfgOu++Yu5YEjlUX1hlkbQKF/JuKTLqxNnKIE6Ef65+JP2ZaI9O2wdz\n" +
-            "            \"pRclAhAd00XbNKpyipr4jMdWmu2U8vyBBwn/utG1ZrLhAUiqnPvmaQrResiGHM2xzCmVwtse</Certificate>\n" +
-            "                            <ServiceDescription>This is the epSOS Patient Service List for the German NCP</ServiceDescription>\n" +
-            "                            <TechnicalContactUrl>http://germany/contact</TechnicalContactUrl>\n" +
-            "                            <TechnicalInformationUrl>http://germany/contact</TechnicalInformationUrl>\n" +
-            "                        </Endpoint>\n" +
-            "                    </ServiceEndpointList>\n" +
-            "                </Process>\n" +
-            "            </ProcessList>\n" +
-            "        </ServiceInformation>\n" +
-            "    </ServiceMetadata>" +
-            "   <Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
-            "  <SignedInfo>\n" +
-            "   <CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments\"/>\n" +
-            "   <SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
-            "   <Reference URI=\"\">\n" +
-            "    <Transforms>\n" +
-            "     <Transform\n" +
-            "      Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
-            "    </Transforms>\n" +
-            "   <DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/>\n" +
-            "    <DigestValue>7/XTsHaBSOnJ/jXD5v0zL6VKYsk=</DigestValue>\n" +
-            "   </Reference>\n" +
-            "  </SignedInfo>\n" +
-            "  <SignatureValue>bx4gFDnkqOjexZAx35rgNhKyRqMpaPyQ9z/h5uXPM1ZQ4LZvu6/3khjenwITP981MlaXF2tp11KS\n" +
-            "kxOroJArTA==</SignatureValue>\n" +
-            "  <KeyInfo>\n" +
-            "   <X509Data>" +
-            "       <X509SubjectName>1.2.840.113549.1.9.1=#160e73656e64657240746573742e6265,CN=senderCN,OU=B4,O=DIGIT,L=Brussels,ST=BE,C=BE</X509SubjectName>\n" +
-            "       <X509Certificate>MIICpTCCAg6gAwIBAgIBATANBgkqhkiG9w0BAQUFADB4MQswCQYDVQQGEwJCRTELMAkGA1UECAwC\n" +
-            "QkUxETAPBgNVBAcMCEJydXNzZWxzMQ4wDAYDVQQKDAVESUdJVDELMAkGA1UECwwCQjQxDzANBgNV\n" +
-            "BAMMBnJvb3RDTjEbMBkGCSqGSIb3DQEJARYMcm9vdEB0ZXN0LmJlMB4XDTE1MDMxNzE2MTkwN1oX\n" +
-            "DTI1MDMxNDE2MTkwN1owfDELMAkGA1UEBhMCQkUxCzAJBgNVBAgMAkJFMREwDwYDVQQHDAhCcnVz\n" +
-            "c2VsczEOMAwGA1UECgwFRElHSVQxCzAJBgNVBAsMAkI0MREwDwYDVQQDDAhzZW5kZXJDTjEdMBsG\n" +
-            "CSqGSIb3DQEJARYOc2VuZGVyQHRlc3QuYmUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBANxL\n" +
-            "UPjIn7R0CsHf86kIwNzCu+6AdmWM8fBLUHL+VXT6ayr1kwgGbFMb/vUUX6a46jRCiZBM+9IK1Hpj\n" +
-            "g9QX/QIQiWtvD+yDr6jUxahZ/w13kqFG/K81IVu9DwLBoiNwDvQ6l6UbvMvV+1nWy3gjRcKlFs/C\n" +
-            "+E2uybgJxSM/sMkbAgMBAAGjOzA5MB8GA1UdIwQYMBaAFHCVSh4WnWR8MGBGedr+bJH96tc4MAkG\n" +
-            "A1UdEwQCMAAwCwYDVR0PBAQDAgTwMA0GCSqGSIb3DQEBBQUAA4GBAK6idNRxyeBmqPoSKxq7Ck3e\n" +
-            "j6R2QPyWbwZ+6/S7iCRt8PfgOu++Yu5YEjlUX1hlkbQKF/JuKTLqxNnKIE6Ef65+JP2ZaI9O2wdz\n" +
-            "pRclAhAd00XbNKpyipr4jMdWmu2U8vyBBwn/utG1ZrLhAUiqnPvmaQrResiGHM2xzCmVwtse</X509Certificate>\n" +
-            "   </X509Data>\n" +
-            "  </KeyInfo>\n" +
-            " </Signature>\n" +
+    public static final String SERVICE_METADATA_URL_URN_POLAND_NCPB = "/cipa-smp-full-webapp/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107";
+    public static final String SERVICE_METADATA_BODY_URN_POLAND_NCPB = "<ServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\">"+
+            "<ServiceInformation>" +
+            "<ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:poland:ncpb</ParticipantIdentifier>" +
+            "<DocumentIdentifier scheme=\"ehealth-resid-qns\">urn::epsos##services:extended:epsos::107</DocumentIdentifier>" +
+            "<ProcessList>" +
+            "<Process>" +
+            "<ProcessIdentifier scheme=\"ehealth-procid-qns\">urn:epsosPatientService::List</ProcessIdentifier>" +
+            "<ServiceEndpointList>" +
+            "<Endpoint transportProfile=\"urn:ihe:iti:2013:xcpd\">" +
+            "<EndpointURI>http://poland/ncp/patient/list</EndpointURI>" +
+            "<RequireBusinessLevelSignature>false</RequireBusinessLevelSignature>" +
+            "<MinimumAuthenticationLevel>urn:epSOS:loa:1</MinimumAuthenticationLevel>" +
+            "<ServiceActivationDate>2016-06-06T11:06:02.000+02:00</ServiceActivationDate>" +
+            "<ServiceExpirationDate>2026-06-06T11:06:02+02:00</ServiceExpirationDate>" +
+            "<Certificate>" +
+            "MIID7jCCA1egAwIBAgICA+YwDQYJKoZIhvcNAQENBQAwOjELMAkGA1UEBhMCRlIxEzARBgNVBAoMCklIRSBFdXJvcGUxFjAUBgNVBAMMDUlIRSBFdXJvcGUgQ0EwHhcNMTYwNjAxMTQzNTUzWhcNMjYwNjAxMTQzNTUzWjCBgzELMAkGA1UEBhMCUFQxDDAKBgNVBAoMA01vSDENMAsGA1UECwwEU1BNUzENMAsGA1UEKgwESm9hbzEOMAwGA1UEBRMFQ3VuaGExHTAbBgNVBAMMFHFhZXBzb3MubWluLXNhdWRlLnB0MRkwFwYDVQQMDBBTZXJ2aWNlIFByb3ZpZGVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1eN4qPSSRZqjVFG9TlcPlxf2WiSimQK9L1nf9Z/s0ezeGQjCukDeDq/Wzqd9fpHhaMMq+XSSOtyEtIr5K/As4kFrViONUUkG12J6UllSWogp0NYFwA4wIqKSFiTnQS5/nRTs05oONCCGILCyJNNeO53JzPlaq3/QbPLssuSAr6XucPE8wBBGM8b/TsB2G/zjG8yuSTgGbhaZekq/Vnf9ftj1fr/vJDDAQgH6Yvzd88Z0DACJPHfW1p4F/OWLI386Bq7g/bo1DUPAyEwlf+CkLgJWRKki3yJlOCIZ9enMA5O7rfeG3rXdgYGmWS7tNEgKXxgC+heiYvi7ZWd7M+/SUwIDAQABo4IBMzCCAS8wPgYDVR0fBDcwNTAzoDGgL4YtaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQvcGtpL2NybC82NDMvY2FjcmwuY3JsMDwGCWCGSAGG+EIBBAQvFi1odHRwczovL2dhemVsbGUuaWhlLm5ldC9wa2kvY3JsLzY0My9jYWNybC5jcmwwPAYJYIZIAYb4QgEDBC8WLWh0dHBzOi8vZ2F6ZWxsZS5paGUubmV0L3BraS9jcmwvNjQzL2NhY3JsLmNybDAfBgNVHSMEGDAWgBTsMw4TyCJeouFrr0N7el3Sd3MdfjAdBgNVHQ4EFgQU1GQ/K1ykIwWFgiONzWJLQzufF/8wDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCBSAwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDQYJKoZIhvcNAQENBQADgYEAZ7t1Qkr9wz3q6+WcF6p/YX7Jr0CzVe7w58FvJFk2AsHeYkSlOyO5hxNpQbs1L1v6JrcqziNFrh2QKGT2v6iPdWtdCT8HBLjmuvVWxxnfzYjdQ0J+kdKMAEV6EtWU78OqL60CCtUZKXE/NKJUq7TTUCFP2fwiARy/t1dTD2NZo8c=" +
+            "</Certificate>" +
+            "<ServiceDescription>" +
+            "This is the epSOS Patient Service List for the Polish NCP" +
+            "</ServiceDescription>" +
+            "<TechnicalContactUrl>http://poland/contact</TechnicalContactUrl>" +
+            "<TechnicalInformationUrl>http://poland/contact</TechnicalInformationUrl>" +
+            "<Extension>" +
+            "</Extension>" +
+            "</Endpoint>" +
+            "</ServiceEndpointList>" +
+            "</Process>" +
+            "</ProcessList>" +
+            "</ServiceInformation>" +
+            "</ServiceMetadata>";
+
+    public static final String SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB = "/cipa-smp-full-webapp/ehealth-actorid-qns::urn:poland:ncpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107";
+    public static final String SIGNED_SERVICE_METADATA_BODY_URN_POLAND_NCPB = "<SignedServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\">\n" +
+            "<ServiceMetadata>\n" +
+            "<ServiceInformation>\n" +
+            "<ParticipantIdentifier scheme=\"ehealth-actorid-qns\">urn:poland:ncpb</ParticipantIdentifier>\n" +
+            "<DocumentIdentifier scheme=\"ehealth-resid-qns\">urn::epsos##services:extended:epsos::107</DocumentIdentifier>\n" +
+            "<ProcessList>\n" +
+            "<Process>\n" +
+            "<ProcessIdentifier scheme=\"ehealth-procid-qns\">urn:epsosPatientService::List</ProcessIdentifier>\n" +
+            "<ServiceEndpointList>\n" +
+            "<Endpoint transportProfile=\"urn:ihe:iti:2013:xcpd\">\n" +
+            "<EndpointURI>http://poland/ncp/patient/list</EndpointURI>\n" +
+            "<RequireBusinessLevelSignature>false</RequireBusinessLevelSignature>\n" +
+            "<MinimumAuthenticationLevel>urn:epSOS:loa:1</MinimumAuthenticationLevel>\n" +
+            "<ServiceActivationDate>2016-06-06T11:06:02.000+02:00</ServiceActivationDate>\n" +
+            "<ServiceExpirationDate>2026-06-06T11:06:02+02:00</ServiceExpirationDate>\n" +
+            "<Certificate>\n" +
+            "MIID7jCCA1egAwIBAgICA+YwDQYJKoZIhvcNAQENBQAwOjELMAkGA1UEBhMCRlIxEzARBgNVBAoMCklIRSBFdXJvcGUxFjAUBgNVBAMMDUlIRSBFdXJvcGUgQ0EwHhcNMTYwNjAxMTQzNTUzWhcNMjYwNjAxMTQzNTUzWjCBgzELMAkGA1UEBhMCUFQxDDAKBgNVBAoMA01vSDENMAsGA1UECwwEU1BNUzENMAsGA1UEKgwESm9hbzEOMAwGA1UEBRMFQ3VuaGExHTAbBgNVBAMMFHFhZXBzb3MubWluLXNhdWRlLnB0MRkwFwYDVQQMDBBTZXJ2aWNlIFByb3ZpZGVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1eN4qPSSRZqjVFG9TlcPlxf2WiSimQK9L1nf9Z/s0ezeGQjCukDeDq/Wzqd9fpHhaMMq+XSSOtyEtIr5K/As4kFrViONUUkG12J6UllSWogp0NYFwA4wIqKSFiTnQS5/nRTs05oONCCGILCyJNNeO53JzPlaq3/QbPLssuSAr6XucPE8wBBGM8b/TsB2G/zjG8yuSTgGbhaZekq/Vnf9ftj1fr/vJDDAQgH6Yvzd88Z0DACJPHfW1p4F/OWLI386Bq7g/bo1DUPAyEwlf+CkLgJWRKki3yJlOCIZ9enMA5O7rfeG3rXdgYGmWS7tNEgKXxgC+heiYvi7ZWd7M+/SUwIDAQABo4IBMzCCAS8wPgYDVR0fBDcwNTAzoDGgL4YtaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQvcGtpL2NybC82NDMvY2FjcmwuY3JsMDwGCWCGSAGG+EIBBAQvFi1odHRwczovL2dhemVsbGUuaWhlLm5ldC9wa2kvY3JsLzY0My9jYWNybC5jcmwwPAYJYIZIAYb4QgEDBC8WLWh0dHBzOi8vZ2F6ZWxsZS5paGUubmV0L3BraS9jcmwvNjQzL2NhY3JsLmNybDAfBgNVHSMEGDAWgBTsMw4TyCJeouFrr0N7el3Sd3MdfjAdBgNVHQ4EFgQU1GQ/K1ykIwWFgiONzWJLQzufF/8wDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCBSAwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDQYJKoZIhvcNAQENBQADgYEAZ7t1Qkr9wz3q6+WcF6p/YX7Jr0CzVe7w58FvJFk2AsHeYkSlOyO5hxNpQbs1L1v6JrcqziNFrh2QKGT2v6iPdWtdCT8HBLjmuvVWxxnfzYjdQ0J+kdKMAEV6EtWU78OqL60CCtUZKXE/NKJUq7TTUCFP2fwiARy/t1dTD2NZo8c=\n" +
+            "</Certificate>\n" +
+            "<ServiceDescription>\n" +
+            "This is the epSOS Patient Service List for the Polish NCP\n" +
+            "</ServiceDescription>\n" +
+            "<TechnicalContactUrl>http://poland/contact</TechnicalContactUrl>\n" +
+            "<TechnicalInformationUrl>http://poland/contact</TechnicalInformationUrl>\n" +
+            "<Extension>\n" +
+            "<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+            "<SignedInfo>\n" +
+            "<CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\"/>\n" +
+            "<SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
+            "<Reference URI=\"\">\n" +
+            "<Transforms>\n" +
+            "<Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+            "</Transforms>\n" +
+            "<DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>\n" +
+            "<DigestValue>ey+nljKuyPHWTXkFBLB7HNdS0hPM9d4t5HTFQT2TlBQ=</DigestValue>\n" +
+            "</Reference>\n" +
+            "</SignedInfo>\n" +
+            "<SignatureValue>\n" +
+            "KnFuvpIutfkod+dF7KtAv6U7136MWCfqb6Z+LXorgQeA4xSmHP8Ic/V2o+w9ZmF3Ak/ImXVb3v24 JYaYmrCy3q2uEVKZ0IdFnsri5/ykEMUDI9aR3tkefcWKRK/FCb2+0jfqHMq11lii+CBBlwuTvoXE KmTJj7fZb/0DCUAezmg=\n" +
+            "</SignatureValue>\n" +
+            "<KeyInfo>\n" +
+            "<X509Data>\n" +
+            "<X509SubjectName>CN=Sample National Infrastructure,OU=Sante,C=PT</X509SubjectName>\n" +
+            "<X509Certificate>\n" +
+            "MIICAzCCAWygAwIBAgIEWCRzHjANBgkqhkiG9w0BAQsFADBGMQswCQYDVQQGEwJQVDEOMAwGA1UE CwwFU2FudGUxJzAlBgNVBAMMHlNhbXBsZSBOYXRpb25hbCBJbmZyYXN0cnVjdHVyZTAeFw0xNjEx MTAxMzE2NTBaFw0yNjExMTAxMzE2NTBaMEYxCzAJBgNVBAYTAlBUMQ4wDAYDVQQLDAVTYW50ZTEn MCUGA1UEAwweU2FtcGxlIE5hdGlvbmFsIEluZnJhc3RydWN0dXJlMIGfMA0GCSqGSIb3DQEBAQUA A4GNADCBiQKBgQCywt50WXEWIiWytRGcMqzeMM/EyxruNthPdiUEUTbs9un7lzGGjpfFMTgd83wJ haB6FgpaVd8V2w/JBdkim5Ltuhu2vA0d6hHOsa58neIfe4z1ZhswwNmB0+mDTjwnd/gg8IJyQhhY c5G4x7m0ZGdDKZDizjtDTEPTsl8D4FzBFwIDAQABMA0GCSqGSIb3DQEBCwUAA4GBACKxUpAx0PYm ZZi4DfAzBkQ0+CvQw/l6Yo8wonVdpcQXO3khpWIcXhgYhTLHwm8IwJLEyFatmMyCKklSA3CLebJU L4XH1GcdCg6oPKPUc+ovbgN7/iR265Elp4qHfpVteBijBTyZReH4oAK9hRhK1gLwtjI7vpjVaPXv vkV1fbrz\n" +
+            "</X509Certificate>\n" +
+            "</X509Data>\n" +
+            "</KeyInfo>\n" +
+            "</Signature>\n" +
+            "</Extension>\n" +
+            "</Endpoint>\n" +
+            "</ServiceEndpointList>\n" +
+            "</Process>\n" +
+            "</ProcessList>\n" +
+            "</ServiceInformation>\n" +
+            "</ServiceMetadata>\n" +
+            "<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+            "<SignedInfo>\n" +
+            "<CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+            "<SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
+            "<Reference URI=\"\">\n" +
+            "<Transforms>\n" +
+            "<Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+            "</Transforms>\n" +
+            "<DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>\n" +
+            "<DigestValue>EchLfvR6YNZUIJJrblCj6dYdfKGe2xvL4Iz3FD6qfn0=</DigestValue>\n" +
+            "</Reference>\n" +
+            "</SignedInfo>\n" +
+            "<SignatureValue>\n" +
+            "Zhs0P/K7QGOQjV2KUSn4Vq+dwcgRUqFCGKtBQ/vbsV/hNuXBPjq+qOa2cCk2G3OeC/P5bmOV/HQL 1j+Hvuqx6B/0HdnDqBufVOcL9ina1+hdJ7wZzjH7oqaSlwBh7lE9WwSnv8uc4XAcHUUPvc2Dze7W btQzMht7ePi7YAM+7Y0=\n" +
+            "</SignatureValue>\n" +
+            "<KeyInfo>\n" +
+            "<X509Data>\n" +
+            "<X509SubjectName>\n" +
+            "CN=SMP Mock Services,OU=DIGIT,O=European Commision,C=BE\n" +
+            "</X509SubjectName>\n" +
+            "<X509Certificate>\n" +
+            "MIICIzCCAYygAwIBAgIEWCRzfjANBgkqhkiG9w0BAQsFADBWMQswCQYDVQQGEwJCRTEbMBkGA1UE CgwSRXVyb3BlYW4gQ29tbWlzaW9uMQ4wDAYDVQQLDAVESUdJVDEaMBgGA1UEAwwRU01QIE1vY2sg U2VydmljZXMwHhcNMTYxMTEwMTMxODE4WhcNMjYxMTEwMTMxODE4WjBWMQswCQYDVQQGEwJCRTEb MBkGA1UECgwSRXVyb3BlYW4gQ29tbWlzaW9uMQ4wDAYDVQQLDAVESUdJVDEaMBgGA1UEAwwRU01Q IE1vY2sgU2VydmljZXMwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALrpN2GGqctPTP27g+zA DCmQxdOZgDQg5AeF/N5w0knZYy1GnqvAoXgLGHeS1l+2DKx4/E6SlcU6SLIGhVtpF+Gitdp+3to2 6FfV5qcCy4XKz1xm19r84ykXPWD835DbGB7o1HSlKx4+GmAr5eL2VH/zgINcJojam3gimvedoNWj AgMBAAEwDQYJKoZIhvcNAQELBQADgYEAXoh7T9eYOdjasnzPfsTeQ1ptEorj4pIZMRFjn2BWl+mZ K4XRn2+doLjN2dHremGyeKBgLb0Ulp9E9I5P8kxuIs7TjroxZofK9ixhfBv5rJhLcHy8XdrUYqAS awc3c5bM9fNxRWCMkNYNoSYVxPBdlS4zEeLNNzRY+wjrMNYIJR4=\n" +
+            "</X509Certificate>\n" +
+            "</X509Data>\n" +
+            "</KeyInfo>\n" +
+            "</Signature>\n" +
             "</SignedServiceMetadata>";
 
-    public static final String SERVICE_METADATA_URL_URN_GERMANY_NCPB = "/cipa-smp-full-webapp/ehealth-participantid-qns%3A%3Aurn%3Agermany%3Ancpb/services/epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21";
-    public static final String SERVICE_METADATA_BODY_URN_GERMANY_NCPB = "<ServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\" \n" +
-            "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "    xmlns:ns=\"urn:esens:smp\">\n" +
-            "        <ServiceInformation>\n" +
-            "            <ParticipantIdentifier scheme=\"ehealth-participantid-qns\">urn:germany:ncpb</ParticipantIdentifier>\n" +
-            "            <DocumentIdentifier scheme=\"epsos-docid-qns\">urn::epsos:services##epsos-21</DocumentIdentifier>\n" +
-            "            <ProcessList>\n" +
-            "                <Process>\n" +
-            "                    <ProcessIdentifier scheme=\"ehealth-procid-qns\">urn:germany:ncpb:epsosPatientService::List</ProcessIdentifier>\n" +
-            "                    <ServiceEndpointList>\n" +
-            "                        <Endpoint transportProfile=\"urn:ihe:iti:2013:xcpd\">\n" +
-            "                            <EndpointURI>http://germany/ncp/patient/list</EndpointURI>\n" +
-            "                            <RequireBusinessLevelSignature>false</RequireBusinessLevelSignature>\n" +
-            "                            <MinimumAuthenticationLevel>urn:epSOS:loa:1</MinimumAuthenticationLevel>\n" +
-            "                            <ServiceActivationDate>2015-04-29T12:55:39Z</ServiceActivationDate>\n" +
-            "                            <ServiceExpirationDate>2015-04-29T12:55:39Z</ServiceExpirationDate>\n" +
-            "<Certificate>\n" +
-            "MIID5zCCA1CgAwIBAgICA+QwDQYJKoZIhvcNAQENBQAwOjELMAkGA1UEBhMCRlIx\n" +
-            " EzARBgNVBAoMCklIRSBFdXJvcGUxFjAUBgNVBAMMDUlIRSBFdXJvcGUgQ0EwHhcN\n" +
-            " MTYwNjAxMTQzNTMxWhcNMjYwNjAxMTQzNTMxWjB9MQswCQYDVQQGEwJQVDEMMAoG\n" +
-            " A1UECgwDTW9IMQ0wCwYDVQQLDARTUE1TMQ0wCwYDVQQqDARKb2FvMQ4wDAYDVQQF\n" +
-            " EwVDdW5oYTEdMBsGA1UEAwwUcWFlcHNvcy5taW4tc2F1ZGUucHQxEzARBgNVBAwM\n" +
-            " ClZQTiBTZXJ2ZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDcopPo\n" +
-            " wWuBSEokl4UE9BTpA6gzdzQvZrHawcsesieUNuJUBY04dD9dsnWjppz8JOE64Jmj\n" +
-            " rxZp+QJxESL2LDrE99r74S+rHtUQG4AMrD6qcfVRmf/9kw9tiVTHc1SdP8ycXTDs\n" +
-            " QjeTyymdBvL5c6TiDJafC6C/jaaqlmxekzIIYhVyhlr1JQH3L9TOcEpaKgNPm+HI\n" +
-            " dzdrpJiayVJz6Th256ZV1rPvBHRhFxfaG5xh640YstTMvqnfVX8u+8KMcoQ/9TOm\n" +
-            " CkMAeUiR9PduCZYaK6cE5519l5g/yWZD84YIz1P8fio1DnS8W1keV5DwXvHXiDNu\n" +
-            " Jz84gzyDDox767rBAgMBAAGjggEzMIIBLzA+BgNVHR8ENzA1MDOgMaAvhi1odHRw\n" +
-            " czovL2dhemVsbGUuaWhlLm5ldC9wa2kvY3JsLzY0My9jYWNybC5jcmwwPAYJYIZI\n" +
-            " AYb4QgEEBC8WLWh0dHBzOi8vZ2F6ZWxsZS5paGUubmV0L3BraS9jcmwvNjQzL2Nh\n" +
-            " Y3JsLmNybDA8BglghkgBhvhCAQMELxYtaHR0cHM6Ly9nYXplbGxlLmloZS5uZXQv\n" +
-            " cGtpL2NybC82NDMvY2FjcmwuY3JsMB8GA1UdIwQYMBaAFOwzDhPIIl6i4WuvQ3t6\n" +
-            " XdJ3cx1+MB0GA1UdDgQWBBQFn8LrGlDMCZ87E25x3y2+UzZWczAMBgNVHRMBAf8E\n" +
-            " AjAAMA4GA1UdDwEB/wQEAwIFIDATBgNVHSUEDDAKBggrBgEFBQcDATANBgkqhkiG\n" +
-            " 9w0BAQ0FAAOBgQBU7TdPBJmlgh+dS1YNJpUFezcaIDaf2c7POe2x2QsWfIayARhh\n" +
-            " gxEhSwemUFjhNYDx5sF6Us6lwcHsC1wiuWSyXxG5OonqBauDe/+sAkS2yetWUlM4\n" +
-            " a8YvefZ2X38Y1pIOa5Cfq1r8/G7n5liFweMFXhvc22YI6vk/VLEcZJAp2A==\n" +
+    public static final String SERVICE_METADATA_URL_9915_123456789 = "/cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A123456789/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1";
+    public static final String SERVICE_METADATA_BODY_9915_123456789 = "<ServiceMetadata>\n" +
+            "\t\t<ServiceInformation>\n" +
+            "\t\t\t<ParticipantIdentifier scheme=\"iso6523-actorid-upis\">9915:123456789</ParticipantIdentifier>\n" +
+            "\t\t\t<DocumentIdentifier scheme=\"bdxr-docid-qns\">urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1</DocumentIdentifier>\n" +
+            "\t\t\t<ProcessList>\n" +
+            "\t\t\t\t<Process>\n" +
+            "\t\t\t\t\t<ProcessIdentifier scheme=\"cenbii-procid-ubl\">urn:www.cenbii.eu:profile:bii05:ver2.0</ProcessIdentifier>\n" +
+            "\t\t\t\t\t<ServiceEndpointList>\n" +
+            "\t\t\t\t\t\t<Endpoint transportProfile=\"bdxr-transport-ebms3-as4-v1p0\">\n" +
+            "\t\t\t\t\t\t\t<EndpointURI>https://test.erechnung.gv.at/as4/msh/</EndpointURI>\n" +
+            "\t\t\t\t\t\t\t<RequireBusinessLevelSignature>false</RequireBusinessLevelSignature>\t\t\t\t\t\t\t\n" +
+            "\t\t\t\t\t\t\t<Certificate>\n" +
+            "MIIEUjCCAzqgAwIBAgIQP9HNsiz9c3LG08fQy1VibDANBgkqhkiG9w0BAQsFADBX\n" +
+            " MQswCQYDVQQGEwJESzEnMCUGA1UEChMeTkFUSU9OQUwgSVQgQU5EIFRFTEVDT00g\n" +
+            " QUdFTkNZMR8wHQYDVQQDExZQRVBQT0wgQUNDRVNTIFBPSU5UIENBMB4XDTE1MDMw\n" +
+            " NjAwMDAwMFoXDTE3MDMwNTIzNTk1OVowVzELMAkGA1UEBhMCQVQxFzAVBgNVBAMM\n" +
+            " DkFQUF8xMDAwMDAwMTAxMS8wLQYDVQQKDCZCUlogKEZlZGVyYWwgQ29tcHV0aW5n\n" +
+            " IENlbnRlciBBdXN0cmlhKTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" +
+            " ALyMijnrnbXnZIJVR3VRQUBrLhdsvrCotuPw4V5WD5q/OSCZvI0nT3jESnzM+/q7\n" +
+            " s8ElKXQv+dG4C2Qcr+7YYHXJD4dch67x7Advn65XM0Xk0ijUqKEFBJ7Jqei2Dw+y\n" +
+            " cLwG3mYkxJFb721Nx04YYjMqGCzCC5/pLcPUyUJ/tjAx5ApEUimskI0PDpYY9fl/\n" +
+            " vbn2JKa2VWt4L1MfnX86Gj5kNnkQ54qbRnxFlIm1EtlZCs41r3MocePk8mPkjzo/\n" +
+            " M2QokJ6ACD8sZi4I4DH5Vux2cPE4zDjevmP4irvkfWuWdl1WCzD5/03UFHOsTXy2\n" +
+            " MxYSr7+CETEPWlorL8cfeyUCAwEAAaOCARgwggEUMAkGA1UdEwQCMAAwCwYDVR0P\n" +
+            " BAQDAgO4MGwGA1UdHwRlMGMwYaBfoF2GW2h0dHA6Ly9vbnNpdGVjcmwudmVyaXNp\n" +
+            " Z24uY29tL0RpZ2l0YWxpc2VyaW5nc3N0eXJlbHNlbk9wZW5QRVBQT0xBQ0NFU1NQ\n" +
+            " T0lOVENBL0xhdGVzdENSTC5jcmwwHwYDVR0jBBgwFoAUTfY+AFAohm01oPzvZqr6\n" +
+            " IqEk240wHQYDVR0OBBYEFG3rnp87CACLoiMibj9s+7O4TrkKMDcGCCsGAQUFBwEB\n" +
+            " BCswKTAnBggrBgEFBQcwAYYbaHR0cDovL3BraS1vY3NwLnN5bWF1dGguY29tMBMG\n" +
+            " A1UdJQQMMAoGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4IBAQAYZgH8O69+BAie\n" +
+            " KXNvL83Vg/v2BiBkoWruVT3sGPpzUS1hQ/vTEt9FxphPhi2Ofz/TGXeSMUffnGXT\n" +
+            " 6Tntxcn5zsPuo7Km8o3EinXDHqXRHpoDo2nu2giOzHY5wFn2sI8lBnx4S8qAkljd\n" +
+            " AIE2XLQIloBhCVCR3V3pWEKPvN1LUHYcCDvNQn0UvG6jtuIflvLevaJdg2DV5to9\n" +
+            " RqS6UP6WGHvK9K+AmAp4snzQrgPBEutXYrKwojEDH/0k+30MTh8n8+V7YTKKqTeE\n" +
+            " P7EtqZBwWyGZ48sLgWIvF7cmByacIzV5fF/OQZ4bRjc8ySvu+b0vPeUV0Ris++E9\n" +
+            " Ab0lez1N\n" +
             "</Certificate>\n" +
-            "                            <ServiceDescription></ServiceDescription>\n" +
-            "                            <TechnicalContactUrl>http://germany/contact</TechnicalContactUrl>\n" +
-            "                            <TechnicalInformationUrl>http://germany/contact</TechnicalInformationUrl>\n" +
-            "                        </Endpoint>\n" +
-            "                    </ServiceEndpointList>\n" +
-            "                </Process>\n" +
-            "            </ProcessList>\n" +
-            "        </ServiceInformation>\n" +
-            "    </ServiceMetadata>";
+            "\t\t\t\t\t\t\t<ServiceDescription>BRZ Test AP</ServiceDescription>\n" +
+            "\t\t\t\t\t\t\t<TechnicalContactUrl>peppol-support@peppol.at</TechnicalContactUrl>\n" +
+            "\t\t\t\t\t\t\t<TechnicalInformationUrl>http://www.peppol.at</TechnicalInformationUrl>\t\t\t\t\t\t\t\n" +
+            "\t\t\t\t\t\t</Endpoint>\n" +
+            "\t\t\t\t\t</ServiceEndpointList>\n" +
+            "\t\t\t\t</Process>\n" +
+            "\t\t\t</ProcessList>\n" +
+            "\t\t</ServiceInformation>\n" +
+            "\t</ServiceMetadata>";
+
+    public static final String SIGNED_SERVICE_METADATA_URL_9915_123456789 = "/cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A123456789/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1";
+    public static final String SIGNED_SERVICE_METADATA_BODY_9915_123456789 = "<SignedServiceMetadata xmlns=\"http://docs.oasis-open.org/bdxr/ns/SMP/2016/05\">\n" +
+            "\t<ServiceMetadata>\n" +
+            "\t\t<ServiceInformation>\n" +
+            "\t\t\t<ParticipantIdentifier scheme=\"iso6523-actorid-upis\">9915:123456789</ParticipantIdentifier>\n" +
+            "\t\t\t<DocumentIdentifier scheme=\"busdox-docid-qns\">urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1</DocumentIdentifier>\n" +
+            "\t\t\t<ProcessList>\n" +
+            "\t\t\t\t<Process>\n" +
+            "\t\t\t\t\t<ProcessIdentifier scheme=\"cenbii-procid-ubl\">urn:www.cenbii.eu:profile:bii05:ver2.0</ProcessIdentifier>\n" +
+            "\t\t\t\t\t<ServiceEndpointList>\n" +
+            "\t\t\t\t\t\t<Endpoint transportProfile=\"bdxr-transport-ebms3-as4-v1p0\">\n" +
+            "\t\t\t\t\t\t\t<EndpointURI>https://test.erechnung.gv.at/as4/msh/</EndpointURI>\n" +
+            "\t\t\t\t\t\t\t<RequireBusinessLevelSignature>false</RequireBusinessLevelSignature>\t\t\t\t\t\t\t\n" +
+            "\t\t\t\t\t\t\t<Certificate>\n" +
+            "MIIEUjCCAzqgAwIBAgIQP9HNsiz9c3LG08fQy1VibDANBgkqhkiG9w0BAQsFADBX\n" +
+            " MQswCQYDVQQGEwJESzEnMCUGA1UEChMeTkFUSU9OQUwgSVQgQU5EIFRFTEVDT00g\n" +
+            " QUdFTkNZMR8wHQYDVQQDExZQRVBQT0wgQUNDRVNTIFBPSU5UIENBMB4XDTE1MDMw\n" +
+            " NjAwMDAwMFoXDTE3MDMwNTIzNTk1OVowVzELMAkGA1UEBhMCQVQxFzAVBgNVBAMM\n" +
+            " DkFQUF8xMDAwMDAwMTAxMS8wLQYDVQQKDCZCUlogKEZlZGVyYWwgQ29tcHV0aW5n\n" +
+            " IENlbnRlciBBdXN0cmlhKTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" +
+            " ALyMijnrnbXnZIJVR3VRQUBrLhdsvrCotuPw4V5WD5q/OSCZvI0nT3jESnzM+/q7\n" +
+            " s8ElKXQv+dG4C2Qcr+7YYHXJD4dch67x7Advn65XM0Xk0ijUqKEFBJ7Jqei2Dw+y\n" +
+            " cLwG3mYkxJFb721Nx04YYjMqGCzCC5/pLcPUyUJ/tjAx5ApEUimskI0PDpYY9fl/\n" +
+            " vbn2JKa2VWt4L1MfnX86Gj5kNnkQ54qbRnxFlIm1EtlZCs41r3MocePk8mPkjzo/\n" +
+            " M2QokJ6ACD8sZi4I4DH5Vux2cPE4zDjevmP4irvkfWuWdl1WCzD5/03UFHOsTXy2\n" +
+            " MxYSr7+CETEPWlorL8cfeyUCAwEAAaOCARgwggEUMAkGA1UdEwQCMAAwCwYDVR0P\n" +
+            " BAQDAgO4MGwGA1UdHwRlMGMwYaBfoF2GW2h0dHA6Ly9vbnNpdGVjcmwudmVyaXNp\n" +
+            " Z24uY29tL0RpZ2l0YWxpc2VyaW5nc3N0eXJlbHNlbk9wZW5QRVBQT0xBQ0NFU1NQ\n" +
+            " T0lOVENBL0xhdGVzdENSTC5jcmwwHwYDVR0jBBgwFoAUTfY+AFAohm01oPzvZqr6\n" +
+            " IqEk240wHQYDVR0OBBYEFG3rnp87CACLoiMibj9s+7O4TrkKMDcGCCsGAQUFBwEB\n" +
+            " BCswKTAnBggrBgEFBQcwAYYbaHR0cDovL3BraS1vY3NwLnN5bWF1dGguY29tMBMG\n" +
+            " A1UdJQQMMAoGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4IBAQAYZgH8O69+BAie\n" +
+            " KXNvL83Vg/v2BiBkoWruVT3sGPpzUS1hQ/vTEt9FxphPhi2Ofz/TGXeSMUffnGXT\n" +
+            " 6Tntxcn5zsPuo7Km8o3EinXDHqXRHpoDo2nu2giOzHY5wFn2sI8lBnx4S8qAkljd\n" +
+            " AIE2XLQIloBhCVCR3V3pWEKPvN1LUHYcCDvNQn0UvG6jtuIflvLevaJdg2DV5to9\n" +
+            " RqS6UP6WGHvK9K+AmAp4snzQrgPBEutXYrKwojEDH/0k+30MTh8n8+V7YTKKqTeE\n" +
+            " P7EtqZBwWyGZ48sLgWIvF7cmByacIzV5fF/OQZ4bRjc8ySvu+b0vPeUV0Ris++E9\n" +
+            " Ab0lez1N\n" +
+            "</Certificate>\n" +
+            "\t\t\t\t\t\t\t<ServiceDescription>BRZ Test AP</ServiceDescription>\n" +
+            "\t\t\t\t\t\t\t<TechnicalContactUrl>peppol-support@peppol.at</TechnicalContactUrl>\n" +
+            "\t\t\t\t\t\t\t<TechnicalInformationUrl>http://www.peppol.at</TechnicalInformationUrl>\t\t\t\t\t\t\t\n" +
+            "\t\t\t\t\t\t</Endpoint>\n" +
+            "\t\t\t\t\t</ServiceEndpointList>\n" +
+            "\t\t\t\t</Process>\n" +
+            "\t\t\t</ProcessList>\n" +
+            "\t\t</ServiceInformation>\n" +
+            "\t</ServiceMetadata>\n" +
+            "\t<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+            "\t\t<SignedInfo>\n" +
+            "\t\t\t<CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>\n" +
+            "\t\t\t<SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/>\n" +
+            "\t\t\t<Reference URI=\"\">\n" +
+            "\t\t\t\t<Transforms>\n" +
+            "\t\t\t\t\t<Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/>\n" +
+            "\t\t\t\t</Transforms>\n" +
+            "\t\t\t\t<DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>\n" +
+            "\t\t\t\t<DigestValue>EchLfvR6YNZUIJJrblCj6dYdfKGe2xvL4Iz3FD6qfn0=</DigestValue>\n" +
+            "\t\t\t</Reference>\n" +
+            "\t\t</SignedInfo>\n" +
+            "\t\t<SignatureValue>\n" +
+            "Zhs0P/K7QGOQjV2KUSn4Vq+dwcgRUqFCGKtBQ/vbsV/hNuXBPjq+qOa2cCk2G3OeC/P5bmOV/HQL 1j+Hvuqx6B/0HdnDqBufVOcL9ina1+hdJ7wZzjH7oqaSlwBh7lE9WwSnv8uc4XAcHUUPvc2Dze7W btQzMht7ePi7YAM+7Y0=\n" +
+            "\t\t</SignatureValue>\n" +
+            "\t\t<KeyInfo>\n" +
+            "\t\t\t<X509Data>\n" +
+            "\t\t\t\t<X509SubjectName>\n" +
+            "CN=SMP Mock Services,OU=DIGIT,O=European Commision,C=BE\n" +
+            "</X509SubjectName>\n" +
+            "<X509Certificate>\n" +
+            "MIICIzCCAYygAwIBAgIEWCRzfjANBgkqhkiG9w0BAQsFADBWMQswCQYDVQQGEwJCRTEbMBkGA1UE CgwSRXVyb3BlYW4gQ29tbWlzaW9uMQ4wDAYDVQQLDAVESUdJVDEaMBgGA1UEAwwRU01QIE1vY2sg U2VydmljZXMwHhcNMTYxMTEwMTMxODE4WhcNMjYxMTEwMTMxODE4WjBWMQswCQYDVQQGEwJCRTEb MBkGA1UECgwSRXVyb3BlYW4gQ29tbWlzaW9uMQ4wDAYDVQQLDAVESUdJVDEaMBgGA1UEAwwRU01Q IE1vY2sgU2VydmljZXMwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALrpN2GGqctPTP27g+zA DCmQxdOZgDQg5AeF/N5w0knZYy1GnqvAoXgLGHeS1l+2DKx4/E6SlcU6SLIGhVtpF+Gitdp+3to2 6FfV5qcCy4XKz1xm19r84ykXPWD835DbGB7o1HSlKx4+GmAr5eL2VH/zgINcJojam3gimvedoNWj AgMBAAEwDQYJKoZIhvcNAQELBQADgYEAXoh7T9eYOdjasnzPfsTeQ1ptEorj4pIZMRFjn2BWl+mZ K4XRn2+doLjN2dHremGyeKBgLb0Ulp9E9I5P8kxuIs7TjroxZofK9ixhfBv5rJhLcHy8XdrUYqAS awc3c5bM9fNxRWCMkNYNoSYVxPBdlS4zEeLNNzRY+wjrMNYIJR4=\n" +
+            "</X509Certificate>\n" +
+            "\t\t\t</X509Data>\n" +
+            "\t\t</KeyInfo>\n" +
+            "\t</Signature>\n" +
+            "</SignedServiceMetadata>";
 }
