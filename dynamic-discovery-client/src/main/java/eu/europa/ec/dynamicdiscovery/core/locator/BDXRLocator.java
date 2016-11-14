@@ -36,14 +36,6 @@ import java.security.NoSuchAlgorithmException;
  */
 public class BDXRLocator extends AbstractLocator {
 
-    public BDXRLocator(IDNSLookup dnsLookup) {
-        super(dnsLookup);
-    }
-
-    public BDXRLocator() {
-        this(new DefaultDNSLookup());
-    }
-
     public BDXRLocator(String hostname) {
         this(hostname, new DefaultDNSLookup());
     }
@@ -82,7 +74,7 @@ public class BDXRLocator extends AbstractLocator {
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new RuntimeException(exc.getMessage(), exc);
         } catch (TechnicalException | NullPointerException exc) {
-            //It was not possible to lookup using NAPTR, CNAME lookup will be used
+            //It was not possible to lookup using NAPTR, CNAME lookup will be used instead
         }
         return uri;
     }

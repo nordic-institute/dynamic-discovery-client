@@ -17,8 +17,6 @@
  * permissions and limitations under the Licence.
  */package eu.europa.ec.dynamicdiscovery.model;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 

@@ -30,14 +30,8 @@ import java.net.URI;
  */
 public abstract class AbstractLocator implements IMetadataLocator {
 
-    public static final String PRODUCTION = "edelivery.tech.ec.europa.eu";
-    public static final String ACCEPTANCE = "acc.edelivery.tech.ec.europa.eu";
     protected String hostname;
     protected IDNSLookup dnsLookup;
-
-    public AbstractLocator(IDNSLookup dnsLookup) {
-        this(PRODUCTION, dnsLookup);
-    }
 
     public AbstractLocator(String hostname, IDNSLookup dnsLookup) {
         this.hostname = hostname;

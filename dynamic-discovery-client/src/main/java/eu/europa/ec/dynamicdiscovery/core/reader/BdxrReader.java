@@ -23,6 +23,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.XmldsigVerifier;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.*;
+import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.*;
@@ -78,35 +79,37 @@ public class BdxrReader extends AbstractReader {
 
             org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata unmarshalledServiceMetadata = null;
             Object result = unmarshaller.unmarshal(CommonUtil.convertToSource(document));
+
             ServiceMetadata serviceMetadata = new ServiceMetadata();
             if (result instanceof SignedServiceMetadata) {
                 serviceMetadata.setSigner(XmldsigVerifier.verify(document));
-                unmarshalledServiceMetadata = ((SignedServiceMetadata) result).getServiceMetadata();
+                result = ((SignedServiceMetadata) result).getServiceMetadata();
             }
 
             if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata)) {
                 throw new Exception("ServiceMetadata element not found.");
-            } else {
-                unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result;
-                ServiceInformationType serviceInformation = unmarshalledServiceMetadata.getServiceInformation();
-                serviceMetadata.setParticipantIdentifier(new ParticipantIdentifier(serviceInformation.getParticipantIdentifier().getValue(), serviceInformation.getParticipantIdentifier().getScheme()));
-                serviceMetadata.setDocumentIdentifier(new DocumentIdentifier(serviceInformation.getDocumentIdentifier().getValue(), serviceInformation.getDocumentIdentifier().getScheme()));
-                CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-                Iterator iterator = serviceInformation.getProcessList().getProcesses().iterator();
-
-                while (iterator.hasNext()) {
-                    ProcessType processType = (ProcessType) iterator.next();
-                    eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier processIdentifier = new eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme());
-                    Iterator var12 = processType.getServiceEndpointList().getEndpoints().iterator();
-
-                    while (var12.hasNext()) {
-                        EndpointType endpointType = (EndpointType) var12.next();
-                        serviceMetadata.addEndpoint(new Endpoint(processIdentifier, new TransportProfile(endpointType.getTransportProfile()), endpointType.getEndpointURI(), (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(endpointType.getCertificate()))));
-                    }
-                }
-
-                return serviceMetadata;
             }
+
+            unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result;
+            ServiceInformationType serviceInformation = unmarshalledServiceMetadata.getServiceInformation();
+            serviceMetadata.setParticipantIdentifier(new ParticipantIdentifier(serviceInformation.getParticipantIdentifier().getValue(), serviceInformation.getParticipantIdentifier().getScheme()));
+            serviceMetadata.setDocumentIdentifier(new DocumentIdentifier(serviceInformation.getDocumentIdentifier().getValue(), serviceInformation.getDocumentIdentifier().getScheme()));
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            Iterator iterator = serviceInformation.getProcessList().getProcesses().iterator();
+
+            while (iterator.hasNext()) {
+                ProcessType processType = (ProcessType) iterator.next();
+                ProcessIdentifier processIdentifier = new ProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme());
+                Iterator var12 = processType.getServiceEndpointList().getEndpoints().iterator();
+
+                while (var12.hasNext()) {
+                    EndpointType endpointType = (EndpointType) var12.next();
+                    serviceMetadata.addEndpoint(new Endpoint(processIdentifier, new TransportProfile(endpointType.getTransportProfile()), endpointType.getEndpointURI(), (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(endpointType.getCertificate()))));
+                }
+            }
+
+            return serviceMetadata;
+
         } catch (Exception exc) {
             throw new BindException(exc.getMessage(), exc);
         }
