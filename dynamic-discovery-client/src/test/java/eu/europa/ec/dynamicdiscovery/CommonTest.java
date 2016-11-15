@@ -20,6 +20,7 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
+import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,5 +37,20 @@ public class CommonTest extends AbstractTest {
     public void testCNAMEHash() throws Exception {
         String participantId = HashUtil.getMD5Hash("urn:poland:ncpb");
         Assert.assertEquals("b-adb4c6d3821d142c684b13ed269fad65", "b-" + participantId);
+    }
+
+    @Test
+    public void testDefaultParameters() throws Exception {
+        DynamicDiscoveryBuilder builder = DynamicDiscoveryBuilder.newInstance();
+        DynamicDiscovery smpClient = builder
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .build();
+        Assert.assertNotNull(builder.getMetadataFetcher());
+        Assert.assertNotNull(builder.getMetadataLocator());
+        Assert.assertNotNull(builder.getMetadataLocator().getDnsLookup());
+        Assert.assertNotNull(builder.getMetadataProvider());
+        Assert.assertNotNull(builder.getMetadataReader());
+        Assert.assertNotNull(builder.getService());
+        Assert.assertNotNull(smpClient);
     }
 }

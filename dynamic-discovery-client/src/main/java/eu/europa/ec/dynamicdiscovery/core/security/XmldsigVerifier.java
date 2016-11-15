@@ -26,10 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.crypto.*;
-import javax.xml.crypto.dsig.Reference;
-import javax.xml.crypto.dsig.SignatureMethod;
-import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.*;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
@@ -46,7 +43,7 @@ public class XmldsigVerifier {
             XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
             NodeList nl = document.getDocumentElement().getChildNodes();
             if (nl.getLength() == 0) {
-                throw new Exception("Unable to find child nodes on the element");
+                throw new SignatureException("Unable to find child nodes on the element");
             }
 
             int size = nl.getLength();
@@ -62,7 +59,7 @@ public class XmldsigVerifier {
             }
 
             if (signatureel == null) {
-                throw new Exception("Unable to get the signature");
+                throw new SignatureException("Unable to get the signature");
             }
 
             DOMValidateContext valContext = new DOMValidateContext(keySelector, signatureel);
@@ -79,11 +76,11 @@ public class XmldsigVerifier {
                         boolean refValid = ((Reference) i1.next()).validate(valContext);
                     }
                 }
-                throw new Exception("Core Validity of the Signature is not valid.");
+                throw new SignatureException("Core Validity of the Signature is not valid.");
             }
             return keySelector.getCertificate();
-        } catch (Exception e) {
-            throw new SignatureException("Signature is not valid", e);
+        } catch (XMLSignatureException | MarshalException e) {
+            throw new SignatureException(e.getMessage(), e);
         }
     }
 

@@ -99,4 +99,23 @@ public class DynamicDiscoveryBuilder {
         }
     }
 
+    public IMetadataFetcher getMetadataFetcher() {
+        return metadataFetcher;
+    }
+
+    public IMetadataLocator getMetadataLocator() {
+        return metadataLocator;
+    }
+
+    public IMetadataProvider getMetadataProvider() {
+        return metadataProvider;
+    }
+
+    public IMetadataReader getMetadataReader() {
+        return metadataReader;
+    }
+
+    public IDynamicDiscoveryService getService() {
+        return service;
+    }
 }

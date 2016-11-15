@@ -43,6 +43,7 @@ public abstract class AbstractLocator implements IMetadataLocator {
         return this.lookup(new ParticipantIdentifier(identifier, scheme));
     }
 
+    @Override
     public IDNSLookup getDnsLookup() {
         return dnsLookup;
     }

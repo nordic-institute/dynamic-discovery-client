@@ -36,7 +36,8 @@ public class DefaultDNSLookup implements IDNSLookup {
     private ILookupClient lookupClient;
 
     @Override
-    public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
+    public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
+
         List<Record> records = getAllRecords(uri, participantIdentifier);
 
         String smpAddress = null;
@@ -59,14 +60,13 @@ public class DefaultDNSLookup implements IDNSLookup {
         return smpAddress;
     }
 
-    public String lookupFetcher(LookupClient lookupClient, ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
+    public String lookupFetcher(LookupClient lookupClient, ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
         this.lookupClient = lookupClient;
         return lookupFetcher(participantIdentifier, uri);
     }
 
     @Override
-    public List<Record> getAllRecords(Object... parameters) throws DNSLookupException, TextParseException {
-
+    public List<Record> getAllRecords(Object... parameters) throws TechnicalException {
         if (parameters == null || parameters.length != 2) {
             throw new DNSLookupException(String.format("Parameters for NAPTR Loopup are NULL or Incorrect [%s].", new Object[]{parameters}));
         }
@@ -76,14 +76,17 @@ public class DefaultDNSLookup implements IDNSLookup {
         if (lookupClient.getResultCode() != Lookup.SUCCESSFUL) {
             throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", new Object[]{participantId, lookupClient.getResultCode()}));
         }
-
         return Arrays.asList(records);
     }
 
-    public Record[] runLookup(String uri, Integer recordType) throws TextParseException {
-        if (lookupClient == null) {
-            lookupClient = new LookupClient(uri, recordType);
+    public Record[] runLookup(String uri, Integer recordType) throws TechnicalException {
+        try {
+            if (lookupClient == null) {
+                lookupClient = new LookupClient(uri, recordType);
+            }
+            return lookupClient.run();
+        } catch (TextParseException exc) {
+            throw new DNSLookupException(exc.getMessage(), exc);
         }
-        return lookupClient.run();
     }
 }
