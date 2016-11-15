@@ -1,67 +1,47 @@
 /*
- * Copyright 2016 Dynamic Discovery Client Project
+ * (C) Copyright 2016 Dynamic Discovery Client
  *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/servlets/Docbb6d.pdf?id=31979
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
+ * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ *
+ * Licensed under the LGPL, Version 2.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
+ *
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-/**
- * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
- */
 public class TransportProfile {
 
-    public static final TransportProfile START = new TransportProfile("busdox-transport-start");
-    public static final TransportProfile AS2_1_0 = new TransportProfile("busdox-transport-as2-ver1p0");
-    public static final TransportProfile AS4 = new TransportProfile("busdox-transport-ebms3-as4");
     private String identifier;
 
     public TransportProfile(String identifier) {
         this.identifier = identifier;
     }
 
+    @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if (o != null && this.getClass() == o.getClass()) {
-            boolean var10000;
-            label35:
-            {
-                TransportProfile that = (TransportProfile) o;
-                if (this.identifier != null) {
-                    if (this.identifier.equals(that.identifier)) {
-                        break label35;
-                    }
-                } else if (that.identifier == null) {
-                    break label35;
-                }
+        if (this == o) return true;
+        if (!(o instanceof TransportProfile)) return false;
 
-                var10000 = false;
-                return var10000;
-            }
+        TransportProfile that = (TransportProfile) o;
 
-            var10000 = true;
-            return var10000;
-        } else {
-            return false;
-        }
+        return identifier != null ? identifier.equals(that.identifier) : that.identifier == null;
     }
 
+    @Override
     public int hashCode() {
-        return this.identifier != null ? this.identifier.hashCode() : 0;
+        return identifier != null ? identifier.hashCode() : 0;
     }
 
     @Override

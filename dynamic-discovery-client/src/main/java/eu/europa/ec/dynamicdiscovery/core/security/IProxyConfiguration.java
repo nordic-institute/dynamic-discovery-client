@@ -18,19 +18,18 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.exception;
+package eu.europa.ec.dynamicdiscovery.core.security;
 
-public class BindException extends TechnicalException {
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 
-    public BindException() {
-        this("A bind exception has occurred.");
-    }
+import java.net.URI;
 
-    public BindException(String message) {
-        this(message, null);
-    }
+public interface IProxyConfiguration {
 
-    public BindException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    void build(URI uri);
+
+    HttpClient getHttpclient();
+
+    HttpGet getHttpget();
 }

@@ -1,37 +1,35 @@
 /*
- * Copyright 2016 Dynamic Discovery Client Project
+ * (C) Copyright 2016 Dynamic Discovery Client
  *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/servlets/Docbb6d.pdf?id=31979
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
+ * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ *
+ * Licensed under the LGPL, Version 2.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
+ *
  */
 package eu.europa.ec.dynamicdiscovery.core.reader;
 
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 
 import java.util.List;
 
-/**
- * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
- */
-
 public interface IMetadataReader {
-    List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse var1) throws BindException;
+    List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse var1) throws TechnicalException;
 
-    ServiceMetadata parseServiceMetadata(FetcherResponse var1) throws BindException, SecurityException;
+    ServiceMetadata parseServiceMetadata(FetcherResponse var1) throws SecurityException, TechnicalException;
 }

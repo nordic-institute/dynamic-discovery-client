@@ -20,17 +20,17 @@
  */
 package eu.europa.ec.dynamicdiscovery.exception;
 
-public class BindException extends TechnicalException {
+public class SignatureException extends TechnicalException {
 
-    public BindException() {
-        this("A bind exception has occurred.");
+    public SignatureException() {
+        this("A signature exception has occurred.");
     }
 
-    public BindException(String message) {
+    public SignatureException(String message) {
         this(message, null);
     }
 
-    public BindException(String message, Throwable cause) {
+    public SignatureException(String message, Throwable cause) {
         super(message, cause);
     }
 }

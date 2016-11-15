@@ -1,26 +1,30 @@
 /*
- * Copyright 2016 Dynamic Discovery Client Project
+ * (C) Copyright 2016 Dynamic Discovery Client
  *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/servlets/Docbb6d.pdf?id=31979
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
+ * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ *
+ * Licensed under the LGPL, Version 2.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
+ *
  */
 package eu.europa.ec.dynamicdiscovery.core.reader;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.XmldsigVerifier;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
@@ -28,21 +32,22 @@ import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.*;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URLDecoder;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
- */
 public class BdxrReader extends AbstractReader {
 
     public BdxrReader() {
@@ -72,7 +77,7 @@ public class BdxrReader extends AbstractReader {
         }
     }
 
-    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws BindException {
+    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = CommonUtil.parse(fetcherResponse.getInputStream());
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -87,7 +92,7 @@ public class BdxrReader extends AbstractReader {
             }
 
             if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata)) {
-                throw new Exception("ServiceMetadata element not found.");
+                throw new BindException("ServiceMetadata element not found.");
             }
 
             unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result;
@@ -110,7 +115,7 @@ public class BdxrReader extends AbstractReader {
 
             return serviceMetadata;
 
-        } catch (Exception exc) {
+        } catch (ParserConfigurationException | IOException | SAXException | CertificateException | JAXBException exc) {
             throw new BindException(exc.getMessage(), exc);
         }
     }

@@ -1,26 +1,29 @@
 /*
- * Copyright 2016 Dynamic Discovery Client Project
+ * (C) Copyright 2016 Dynamic Discovery Client
  *
- * Licensed under the EUPL, Version 1.1 or – as soon they
- * will be approved by the European Commission - subsequent
- * versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the
- * Licence.
- * You may obtain a copy of the Licence at:
- * http://ec.europa.eu/idabc/servlets/Docbb6d.pdf?id=31979
- * Unless required by applicable law or agreed to in
- * writing, software distributed under the Licence is
- * distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied.
- * See the Licence for the specific language governing
- * permissions and limitations under the Licence.
+ * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ *
+ * Licensed under the LGPL, Version 2.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ *
  */
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
@@ -32,13 +35,10 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Flavio Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- */
 public class ServiceMetadataTest extends AbstractTest {
 
     @Test
-    public void getServiceMetadataNaptrOk() throws Exception {
+    public void getServiceMetadataNaptrOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
@@ -63,56 +63,213 @@ public class ServiceMetadataTest extends AbstractTest {
     }
 
     @Test
-    public void getServiceMetadataCnameOk() throws Exception {
+    public void getSignedServiceMetadataNaptrOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-ce918d50184b5b0327efe7660bd44fde.ehealth-participantid-qns.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SIGNED_SERVICE_METADATA_BODY_URN_POLAND_NCPB);
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:germany:ncpb", "ehealth-participantid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos:services##epsos-21", "epsos-docid-qns");
 
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-        Assert.assertEquals("urn::epsos:services##epsos-21", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
-        Assert.assertEquals("epsos-docid-qns::urn::epsos:services##epsos-21", serviceMetadata.getDocumentIdentifier().getIdentifier());
-        Assert.assertEquals("epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceMetadata.getDocumentIdentifier().urlencoded());
-        Assert.assertEquals("epsos-docid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
-        Assert.assertEquals("urn:germany:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
-        Assert.assertEquals("ehealth-participantid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
         Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 
     @Test
-    public void getSignedServiceMetadataNaptrOk() throws Exception {
-       /* URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_urn_germany_ncpb, Constants.SIGNED_SERVICE_METADATA_BODY_urn_germany_ncpb);
-        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:germany:ncpb", "ehealth-participantid-qns");
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "RWR4TB6ADUSN25GA64C5E53ZF5E3J2AYSFXZNTOKMJAXXCVLCMGQ.ehealth-participantid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+    public void getServiceMetadataCnameOk1() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .locator(new BDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
+                .fetcher(urlFetcherURL)
+                .build();
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+    @Test
+    public void getSignedServiceMetadataCnameOk1() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SIGNED_SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
+                .fetcher(urlFetcherURL)
+                .build();
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+
+    @Test
+    public void getServiceMetadataNaptrOk2() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_9915_123456789, Constants.SERVICE_METADATA_BODY_9915_123456789);
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
+
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
 
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:epsos::services##epsos-21", "ehealth-resid-qns");
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
 
-        Assert.assertEquals("epsos-docid-qns::urn:epsos:services##epsos-21", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
-        Assert.assertEquals("urn:germany:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
-        Assert.assertEquals("ehealth-participantid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
-        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());*/
+        Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("bdxr-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("bdxr-docid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("9915:123456789", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("iso6523-actorid-upis", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
+
+    @Test
+    public void getSignedServiceMetadataNaptrOk2() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, Constants.SIGNED_SERVICE_METADATA_BODY_9915_123456789);
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
+
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .build();
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+
+        Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("bdxr-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("bdxr-docid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("9915:123456789", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("iso6523-actorid-upis", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+    @Test
+    public void getServiceMetadataCnameOk2() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_9915_123456789, Constants.SERVICE_METADATA_BODY_9915_123456789, "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .fetcher(urlFetcherURL)
+                .build();
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("bdxr-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("bdxr-docid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("9915:123456789", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("iso6523-actorid-upis", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+    @Test
+    public void getSignedServiceMetadataCnameOk2() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, Constants.SIGNED_SERVICE_METADATA_BODY_9915_123456789, "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .fetcher(urlFetcherURL)
+                .build();
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
+        Assert.assertEquals("bdxr-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", serviceMetadata.getDocumentIdentifier().urlencoded());
+        Assert.assertEquals("bdxr-docid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("9915:123456789", serviceMetadata.getParticipantIdentifier().getIdentifier());
+        Assert.assertEquals("iso6523-actorid-upis", serviceMetadata.getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+    }
+
+    @Test(expected = SignatureException.class)
+    public void getSignedServiceMetadataNaptrInvalidSignature1() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SIGNED_SERVICE_METADATA_BODY_URN_POLAND_NCPB_INVALID_SIGNATURE);
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .build();
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+    }
+
+    @Test(expected = SignatureException.class)
+    public void getSignedServiceMetadataNaptrInvalidSignature2() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, Constants.SIGNED_SERVICE_METADATA_BODY_9915_123456789_INVALID_SIGNATURE);
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
+
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .build();
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+    }
+
 
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataCnameNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-123456.ehealth-actorid-qns.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-123456.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
                 .fetcher(urlFetcherURL)
                 .build();
 
@@ -121,64 +278,21 @@ public class ServiceMetadataTest extends AbstractTest {
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
     }
 
-    @Test(expected = DNSLookupException.class)
-    public void getServiceMetadataNaptrNotOk() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
-        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "adfsdf54.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .fetcher(urlFetcherURL)
-                .build();
-
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
-        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-    }
 
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataNaptrParticipantIdentifierNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
 
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
-
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
-        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
-        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
-        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
-    }
-
-    @Test(expected = DNSLookupException.class)
-    public void getServiceMetadataCnameParticipantIdentifierNotOk() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
-        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "b-0e2981c9c2044fd64711099b6f9dbe19.ehealth-actorid-qns.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .fetcher(urlFetcherURL)
-                .build();
-
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
-
-        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-        Assert.assertEquals("urn::epsos##services:extended:epsos::105", serviceMetadata.getDocumentIdentifier().getDocumentIdentifier());
-        Assert.assertEquals("urn:ehealth:pt:ncpb-idp", serviceMetadata.getParticipantIdentifier().getIdentifier());
-        Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
-        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 }
