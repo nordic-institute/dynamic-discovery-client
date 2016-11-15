@@ -45,12 +45,13 @@ public class CommonTest extends AbstractTest {
         DynamicDiscovery smpClient = builder
                 .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
                 .build();
+        Assert.assertNotNull(smpClient);
         Assert.assertNotNull(builder.getMetadataFetcher());
         Assert.assertNotNull(builder.getMetadataLocator());
         Assert.assertNotNull(builder.getMetadataLocator().getDnsLookup());
         Assert.assertNotNull(builder.getMetadataProvider());
         Assert.assertNotNull(builder.getMetadataReader());
         Assert.assertNotNull(builder.getService());
-        Assert.assertNotNull(smpClient);
+
     }
 }
