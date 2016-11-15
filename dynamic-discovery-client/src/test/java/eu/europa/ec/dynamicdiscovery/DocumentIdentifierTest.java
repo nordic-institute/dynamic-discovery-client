@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 public class DocumentIdentifierTest extends AbstractTest {
 
     @Test
-    public void getDocumentIdentifierByNaptrOK() throws Exception {
+    public void getDocumentIdentifierByNaptrOK1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, Constants.SERVICE_GROUP_BODY_9925_0367302178);
 
@@ -74,7 +74,6 @@ public class DocumentIdentifierTest extends AbstractTest {
         Assert.assertEquals(2, documentIdentifiers.size());
         Assert.assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getDocumentIdentifier());
         Assert.assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
-
     }
 
     @Test
@@ -82,11 +81,16 @@ public class DocumentIdentifierTest extends AbstractTest {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_GROUP_URL_9925_0367302178, Constants.SERVICE_GROUP_BODY_9925_0367302178, "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu",defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+
         List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
         Assert.assertEquals(2, documentIdentifiers.size());
         Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", documentIdentifiers.get(1).getDocumentIdentifier());
