@@ -16,6 +16,7 @@
  * limitations under the License.
  *
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Adrien Ferial - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
 package eu.europa.ec.dynamicdiscovery.util;
