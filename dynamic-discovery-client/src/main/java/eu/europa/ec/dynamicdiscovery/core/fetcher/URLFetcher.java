@@ -23,6 +23,7 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -32,7 +33,7 @@ import java.io.BufferedInputStream;
 import java.net.URI;
 
 public class URLFetcher implements IMetadataFetcher {
-    private HttpClient httpClient;
+
     private IProxyConfiguration proxyConfiguration;
 
     public URLFetcher(IProxyConfiguration proxyConfiguration) {
@@ -43,7 +44,8 @@ public class URLFetcher implements IMetadataFetcher {
         this(null);
     }
 
-    public FetcherResponse fetch(URI uri) throws DNSLookupException {
+    @Override
+    public FetcherResponse fetch(URI uri) throws TechnicalException {
         if (this.proxyConfiguration != null) {
             proxyConfiguration.build(uri);
             return connect(this.proxyConfiguration.getHttpclient(), this.proxyConfiguration.getHttpget());
@@ -52,7 +54,7 @@ public class URLFetcher implements IMetadataFetcher {
         }
     }
 
-    public FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws DNSLookupException {
+    public FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws TechnicalException {
         try {
             HttpResponse response = httpClient.execute(httpGet);
             switch (response.getStatusLine().getStatusCode()) {

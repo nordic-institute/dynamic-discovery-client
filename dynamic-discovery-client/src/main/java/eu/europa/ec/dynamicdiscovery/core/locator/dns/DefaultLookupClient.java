@@ -20,22 +20,21 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.dns;
 
+import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.TextParseException;
 
-/**
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- */
-public class LookupClient implements ILookupClient {
+public class DefaultLookupClient implements ILookupClient {
 
     private Lookup lookup;
 
-    public LookupClient(String uri, int recordType) throws TextParseException {
+    public DefaultLookupClient(String uri, int recordType) throws TechnicalException {
         build(uri, recordType);
     }
 
-    public LookupClient(Lookup lookup) throws TextParseException {
+    public DefaultLookupClient(Lookup lookup) throws TechnicalException {
         this.lookup = lookup;
     }
 
@@ -43,8 +42,12 @@ public class LookupClient implements ILookupClient {
         return lookup.run();
     }
 
-    public void build(String uri, int recordType) throws TextParseException {
-        lookup = new Lookup(uri, recordType);
+    public void build(String uri, int recordType) throws TechnicalException {
+        try {
+            lookup = new Lookup(uri, recordType);
+        } catch (Exception exc) {
+            throw new DNSLookupException(exc.getMessage(), exc);
+        }
     }
 
     public int getResultCode() {

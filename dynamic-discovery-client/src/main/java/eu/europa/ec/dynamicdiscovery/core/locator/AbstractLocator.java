@@ -37,8 +37,10 @@ public abstract class AbstractLocator implements IMetadataLocator {
         this.dnsLookup = dnsLookup;
     }
 
+    @Override
     public abstract URI lookup(ParticipantIdentifier identifier) throws TechnicalException;
 
+    @Override
     public URI lookup(String identifier, String scheme) throws TechnicalException {
         return this.lookup(new ParticipantIdentifier(identifier, scheme));
     }

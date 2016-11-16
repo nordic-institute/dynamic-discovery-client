@@ -20,15 +20,16 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.dns;
 
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.TextParseException;
 
 public interface ILookupClient {
 
-    public Record[] run();
+    Record[] run();
 
-    public void build(String uri, int recordType) throws TextParseException;
+    void build(String uri, int recordType) throws TechnicalException;
 
-    public int getResultCode();
+    int getResultCode();
 }
 

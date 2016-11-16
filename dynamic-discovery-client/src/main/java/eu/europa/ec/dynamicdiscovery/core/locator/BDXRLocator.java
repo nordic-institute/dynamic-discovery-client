@@ -46,6 +46,7 @@ public class BDXRLocator extends AbstractLocator {
         super(hostname, dnsLookup);
     }
 
+    @Override
     public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI uri = naptrLookup(participantIdentifier);
         if (uri == null) {

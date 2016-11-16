@@ -54,7 +54,8 @@ public class BdxrReader extends AbstractReader {
         super();
     }
 
-    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws BindException {
+    @Override
+    public List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
             Object object = jaxbContext.createUnmarshaller().unmarshal(CommonUtil.convertToSource(fetcherResponse.getInputStream()), ServiceGroup.class);
@@ -77,6 +78,7 @@ public class BdxrReader extends AbstractReader {
         }
     }
 
+    @Override
     public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = CommonUtil.parse(fetcherResponse.getInputStream());

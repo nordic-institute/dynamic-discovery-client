@@ -24,7 +24,10 @@ import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.apache.commons.lang3.StringUtils;
-import org.xbill.DNS.*;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.NAPTRRecord;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.Type;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +63,7 @@ public class DefaultDNSLookup implements IDNSLookup {
         return smpAddress;
     }
 
-    public String lookupFetcher(LookupClient lookupClient, ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
+    public String lookupFetcher(DefaultLookupClient lookupClient, ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
         this.lookupClient = lookupClient;
         return lookupFetcher(participantIdentifier, uri);
     }
@@ -80,13 +83,9 @@ public class DefaultDNSLookup implements IDNSLookup {
     }
 
     public Record[] runLookup(String uri, Integer recordType) throws TechnicalException {
-        try {
-            if (lookupClient == null) {
-                lookupClient = new LookupClient(uri, recordType);
-            }
-            return lookupClient.run();
-        } catch (TextParseException exc) {
-            throw new DNSLookupException(exc.getMessage(), exc);
+        if (lookupClient == null) {
+            lookupClient = new DefaultLookupClient(uri, recordType);
         }
+        return lookupClient.run();
     }
 }

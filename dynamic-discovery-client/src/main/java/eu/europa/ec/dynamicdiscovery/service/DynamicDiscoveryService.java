@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
@@ -38,14 +39,14 @@ public class DynamicDiscoveryService extends AbstractDynamicDiscoveryService {
     }
 
     @Override
-    public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws Exception {
+    public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI location = metadataLocator.lookup(participantIdentifier);
         URI provider = metadataProvider.resolveDocumentIdentifiers(location, participantIdentifier);
         return metadataReader.parseDocumentIdentifiers(metadataFetcher.fetch(provider));
     }
 
     @Override
-    public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws Exception {
+    public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         URI location = metadataLocator.lookup(participantIdentifier);
         URI provider = metadataProvider.resolveServiceMetadata(location, participantIdentifier, documentIdentifier);
         ServiceMetadata serviceMetadata = metadataReader.parseServiceMetadata(metadataFetcher.fetch(provider));

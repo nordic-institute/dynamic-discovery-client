@@ -73,7 +73,7 @@ public class DynamicDiscoveryBuilder {
         return this;
     }
 
-    public DynamicDiscovery build() throws ConnectionException {
+    public DynamicDiscovery build() {
         if (this.metadataLocator == null) {
             throw new IllegalStateException("Locator not defined.");
         } else {

@@ -22,10 +22,11 @@
 package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 
 import java.net.URI;
 
 public interface IMetadataFetcher {
 
-    FetcherResponse fetch(URI uri) throws DNSLookupException;
+    FetcherResponse fetch(URI uri) throws TechnicalException;
 }
