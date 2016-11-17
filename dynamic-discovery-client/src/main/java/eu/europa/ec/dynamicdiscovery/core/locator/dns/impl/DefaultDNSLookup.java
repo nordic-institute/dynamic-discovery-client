@@ -18,8 +18,10 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.locator.dns;
+package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.ILookupClient;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
@@ -63,18 +65,13 @@ public class DefaultDNSLookup implements IDNSLookup {
         return smpAddress;
     }
 
-    public String lookupFetcher(DefaultLookupClient lookupClient, ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
+    public String lookupFetcher(ILookupClient lookupClient, ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
         this.lookupClient = lookupClient;
         return lookupFetcher(participantIdentifier, uri);
     }
 
     @Override
-    public List<Record> getAllRecords(Object... parameters) throws TechnicalException {
-        if (parameters == null || parameters.length != 2) {
-            throw new DNSLookupException(String.format("Parameters for NAPTR Loopup are NULL or Incorrect [%s].", new Object[]{parameters}));
-        }
-        String uri = (String) parameters[0];
-        String participantId = ((ParticipantIdentifier) parameters[1]).getIdentifier();
+    public List<Record> getAllRecords(String uri, ParticipantIdentifier participantId) throws TechnicalException {
         Record[] records = runLookup(uri, Type.NAPTR);
         if (lookupClient.getResultCode() != Lookup.SUCCESSFUL) {
             throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", new Object[]{participantId, lookupClient.getResultCode()}));
@@ -82,7 +79,7 @@ public class DefaultDNSLookup implements IDNSLookup {
         return Arrays.asList(records);
     }
 
-    public Record[] runLookup(String uri, Integer recordType) throws TechnicalException {
+    private Record[] runLookup(String uri, Integer recordType) throws TechnicalException {
         if (lookupClient == null) {
             lookupClient = new DefaultLookupClient(uri, recordType);
         }

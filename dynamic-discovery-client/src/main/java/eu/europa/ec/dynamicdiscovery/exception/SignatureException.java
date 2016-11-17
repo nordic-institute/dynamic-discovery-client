@@ -22,10 +22,6 @@ package eu.europa.ec.dynamicdiscovery.exception;
 
 public class SignatureException extends TechnicalException {
 
-    public SignatureException() {
-        this("A signature exception has occurred.");
-    }
-
     public SignatureException(String message) {
         this(message, null);
     }

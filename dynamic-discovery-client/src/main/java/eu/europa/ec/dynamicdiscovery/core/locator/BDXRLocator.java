@@ -20,9 +20,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
@@ -36,14 +36,18 @@ import java.security.NoSuchAlgorithmException;
 /**
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  */
-public class BDXRLocator extends AbstractLocator {
+public class BDXRLocator implements IMetadataLocator {
+
+    private String hostname;
+    private IDNSLookup dnsLookup;
 
     public BDXRLocator(String hostname) {
         this(hostname, new DefaultDNSLookup());
     }
 
     public BDXRLocator(String hostname, IDNSLookup dnsLookup) {
-        super(hostname, dnsLookup);
+        this.hostname = hostname;
+        this.dnsLookup = dnsLookup;
     }
 
     @Override
@@ -52,37 +56,44 @@ public class BDXRLocator extends AbstractLocator {
         if (uri == null) {
             uri = cnameLookup(participantIdentifier);
         }
-        if (uri == null) {
-            throw new DNSLookupException(String.format("DNS Lookup was not able to retrieve information using NAPTR and/or CNAME for the participant [ %s ]", new Object[]{participantIdentifier.getIdentifier()}));
-        }
 
         return uri;
     }
 
+    @Override
+    public URI lookup(String identifier, String scheme) throws TechnicalException {
+        return this.lookup(new ParticipantIdentifier(identifier, scheme));
+    }
+
+
     private URI cnameLookup(ParticipantIdentifier participantIdentifier) {
         try {
             String e = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
-            return new URI(String.format("http://b-%s.%s.%s", new Object[]{e, participantIdentifier.getScheme(), super.hostname}));
+            return new URI(String.format("http://b-%s.%s.%s", new Object[]{e, participantIdentifier.getScheme(), hostname}));
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException exc) {
             throw new RuntimeException(exc.getMessage(), exc);
         }
     }
 
     private URI naptrLookup(ParticipantIdentifier participantIdentifier) {
-        URI uri = null;
         try {
             String participantIdHashed = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
-            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s", new Object[]{participantIdHashed, participantIdentifier.getScheme(), super.hostname}));
-            uri = new URI(smpURI);
+            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s", new Object[]{participantIdHashed, participantIdentifier.getScheme(), hostname}));
+            return new URI(smpURI);
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new RuntimeException(exc.getMessage(), exc);
         } catch (TechnicalException | NullPointerException exc) {
             //It was not possible to lookup using NAPTR, CNAME lookup will be used instead
+            return null;
         }
-        return uri;
     }
 
     private String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
         return getDnsLookup().lookupFetcher(participantIdentifier, uri);
+    }
+
+    @Override
+    public IDNSLookup getDnsLookup() {
+        return dnsLookup;
     }
 }

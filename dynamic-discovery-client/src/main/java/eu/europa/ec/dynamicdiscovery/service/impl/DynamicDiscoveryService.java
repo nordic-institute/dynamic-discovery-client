@@ -18,16 +18,17 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.service;
+package eu.europa.ec.dynamicdiscovery.service.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.service.AbstractDynamicDiscoveryService;
 
 import java.net.URI;
 import java.util.List;

@@ -18,8 +18,9 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.locator.dns;
+package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.ILookupClient;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.xbill.DNS.Lookup;
@@ -31,7 +32,11 @@ public class DefaultLookupClient implements ILookupClient {
     private Lookup lookup;
 
     public DefaultLookupClient(String uri, int recordType) throws TechnicalException {
-        build(uri, recordType);
+        try {
+            lookup = new Lookup(uri, recordType);
+        } catch (Exception exc) {
+            throw new DNSLookupException(exc.getMessage(), exc);
+        }
     }
 
     public DefaultLookupClient(Lookup lookup) throws TechnicalException {
@@ -40,14 +45,6 @@ public class DefaultLookupClient implements ILookupClient {
 
     public Record[] run() {
         return lookup.run();
-    }
-
-    public void build(String uri, int recordType) throws TechnicalException {
-        try {
-            lookup = new Lookup(uri, recordType);
-        } catch (Exception exc) {
-            throw new DNSLookupException(exc.getMessage(), exc);
-        }
     }
 
     public int getResultCode() {

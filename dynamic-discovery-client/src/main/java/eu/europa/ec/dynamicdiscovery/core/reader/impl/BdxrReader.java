@@ -19,9 +19,10 @@
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.reader;
+package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.reader.AbstractReader;
 import eu.europa.ec.dynamicdiscovery.core.security.XmldsigVerifier;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;

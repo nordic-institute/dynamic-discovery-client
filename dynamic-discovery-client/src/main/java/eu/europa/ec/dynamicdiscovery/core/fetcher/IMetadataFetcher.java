@@ -21,6 +21,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 

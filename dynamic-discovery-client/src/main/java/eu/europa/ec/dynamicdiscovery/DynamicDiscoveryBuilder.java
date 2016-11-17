@@ -22,15 +22,13 @@
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.DefaultProvider;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.URLFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.IMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.core.reader.BdxrReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.BdxrReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
-import eu.europa.ec.dynamicdiscovery.service.DynamicDiscoveryService;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
 public class DynamicDiscoveryBuilder {

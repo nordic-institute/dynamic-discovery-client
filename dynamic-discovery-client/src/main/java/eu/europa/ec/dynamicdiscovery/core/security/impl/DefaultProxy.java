@@ -18,8 +18,9 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.security;
+package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -34,7 +35,7 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.net.URI;
 
-public class DefaultProxy implements IProxyConfiguration{
+public class DefaultProxy implements IProxyConfiguration {
 
     private String user;
     private String password;

@@ -19,8 +19,9 @@
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.provider;
+package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 

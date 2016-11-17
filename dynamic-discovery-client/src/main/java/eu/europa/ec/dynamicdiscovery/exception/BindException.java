@@ -22,10 +22,6 @@ package eu.europa.ec.dynamicdiscovery.exception;
 
 public class BindException extends TechnicalException {
 
-    public BindException() {
-        this("A bind exception has occurred.");
-    }
-
     public BindException(String message) {
         this(message, null);
     }

@@ -22,10 +22,6 @@ package eu.europa.ec.dynamicdiscovery.exception;
 
 public class DNSLookupException extends TechnicalException {
 
-    public DNSLookupException() {
-        this("A DNSLookup exception has occurred.");
-    }
-
     public DNSLookupException(String message) {
         this(message, null);
     }

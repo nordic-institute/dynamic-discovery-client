@@ -31,7 +31,7 @@ import java.util.List;
 
 public interface IDNSLookup {
 
-    List<Record> getAllRecords(Object... parameters) throws TechnicalException;
+    List<Record> getAllRecords(String uri, ParticipantIdentifier participantId) throws TechnicalException;
 
     String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
 }

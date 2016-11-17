@@ -22,10 +22,6 @@ package eu.europa.ec.dynamicdiscovery.exception;
 
 public class ConnectionException extends TechnicalException {
 
-    public ConnectionException() {
-        this("A connection exception has occurred.");
-    }
-
     public ConnectionException(String message) {
         this(message, null);
     }

@@ -28,8 +28,6 @@ public interface ILookupClient {
 
     Record[] run();
 
-    void build(String uri, int recordType) throws TechnicalException;
-
     int getResultCode();
 }
 

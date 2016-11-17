@@ -19,8 +19,10 @@
  *@author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.fetcher;
+package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
