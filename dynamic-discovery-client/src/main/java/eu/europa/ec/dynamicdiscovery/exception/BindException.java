@@ -23,7 +23,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
 public class BindException extends TechnicalException {
 
     public BindException(String message) {
-        this(message, null);
+        super(message);
     }
 
     public BindException(String message, Throwable cause) {

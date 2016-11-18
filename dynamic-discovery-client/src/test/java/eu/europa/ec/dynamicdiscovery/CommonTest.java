@@ -20,7 +20,9 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
+import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,15 +45,48 @@ public class CommonTest extends AbstractTest {
     public void testDefaultParameters() throws Exception {
         DynamicDiscoveryBuilder builder = DynamicDiscoveryBuilder.newInstance();
         DynamicDiscovery smpClient = builder
-                .locator(new BDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
                 .build();
         Assert.assertNotNull(smpClient);
-        Assert.assertNotNull(builder.getMetadataFetcher());
-        Assert.assertNotNull(builder.getMetadataLocator());
-        Assert.assertNotNull(builder.getMetadataLocator().getDnsLookup());
-        Assert.assertNotNull(builder.getMetadataProvider());
-        Assert.assertNotNull(builder.getMetadataReader());
         Assert.assertNotNull(builder.getService());
+        Assert.assertNotNull(builder.getService().getMetadataFetcher());
+        Assert.assertNotNull(builder.getService().getMetadataLocator());
+        Assert.assertNotNull(builder.getService().getMetadataLocator().getDnsLookup());
+        Assert.assertEquals(DefaultDNSLookup.class, builder.getService().getMetadataLocator().getDnsLookup().getClass());
+        Assert.assertNotNull(builder.getService().getMetadataProvider());
+        Assert.assertNotNull(builder.getService().getMetadataReader());
+    }
 
+    @Test
+    public void equalsTest() throws Exception {
+        ProcessIdentifier processIdentifier1 = new ProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
+        ProcessIdentifier processIdentifier2 = new ProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
+        TransportProfile transportProfile1 = new TransportProfile("urn:ihe:iti:2013:xcpd");
+        TransportProfile transportProfile2 = new TransportProfile("urn:ihe:iti:2013:xcpd");
+        Endpoint endpoint1 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu", null);
+        Endpoint endpoint2 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu", null);
+
+        Assert.assertEquals(new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"), new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"));
+        Assert.assertEquals(new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"), new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"));
+        Assert.assertEquals(processIdentifier1, processIdentifier2);
+        Assert.assertEquals(transportProfile1, transportProfile2);
+        Assert.assertEquals(endpoint1, endpoint2);
+    }
+
+    @Test
+    public void notEqualsTest() throws Exception {
+        ProcessIdentifier processIdentifier1 = new ProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
+        ProcessIdentifier processIdentifier2 = new ProcessIdentifier("urn:epsosPatientService::List1", "scheme='ehealth-procid-qns");
+        TransportProfile transportProfile1 = new TransportProfile("urn:ihe:iti:2013d:xcpd");
+        TransportProfile transportProfile2 = new TransportProfile("urn:ihe:iti:2013:xcpd1");
+        Endpoint endpoint1 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu", null);
+        Endpoint endpoint2 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu1", null);
+
+        Assert.assertNotEquals(new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"), new ParticipantIdentifier("urn:poland:ncpb1", "ehealth-actorid-qns"));
+        Assert.assertNotEquals(new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"), new DocumentIdentifier("urn::epsos##services:extended:epsos::1071", "ehealth-resid-qns"));
+        Assert.assertNotEquals(processIdentifier1, processIdentifier2);
+        Assert.assertNotEquals(transportProfile1, transportProfile2);
+        Assert.assertNotEquals(endpoint1, endpoint2);
     }
 }
+

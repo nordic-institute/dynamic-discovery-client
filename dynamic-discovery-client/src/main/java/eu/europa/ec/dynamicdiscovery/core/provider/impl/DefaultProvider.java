@@ -29,9 +29,6 @@ import java.net.URI;
 
 public class DefaultProvider implements IMetadataProvider {
 
-    public DefaultProvider() {
-    }
-
     @Override
     public URI resolveDocumentIdentifiers(URI location, ParticipantIdentifier participantIdentifier) {
         return location.resolve(String.format("/%s", new Object[]{participantIdentifier.urlencoded()}));

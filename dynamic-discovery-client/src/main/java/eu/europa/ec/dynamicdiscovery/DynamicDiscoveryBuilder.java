@@ -22,24 +22,18 @@
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.URLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.core.reader.impl.BdxrReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 
 public class DynamicDiscoveryBuilder {
 
-    private IMetadataFetcher metadataFetcher;
-    private IMetadataLocator metadataLocator;
-    private IMetadataProvider metadataProvider;
-    private IMetadataReader metadataReader;
     private IDynamicDiscoveryService service;
 
     public DynamicDiscoveryBuilder() {
+        this.service = new DynamicDiscoveryService();
     }
 
     public static DynamicDiscoveryBuilder newInstance() {
@@ -47,70 +41,30 @@ public class DynamicDiscoveryBuilder {
     }
 
     public DynamicDiscoveryBuilder fetcher(IMetadataFetcher metadataFetcher) {
-        this.metadataFetcher = metadataFetcher;
+        this.service.setMetadataFetcher(metadataFetcher);
         return this;
     }
 
     public DynamicDiscoveryBuilder locator(IMetadataLocator metadataLocator) {
-        this.metadataLocator = metadataLocator;
-        return this;
-    }
-
-    public DynamicDiscoveryBuilder service(IDynamicDiscoveryService service) {
-        this.service = service;
+        this.service.setMetadataLocator(metadataLocator);
         return this;
     }
 
     public DynamicDiscoveryBuilder provider(IMetadataProvider metadataProvider) {
-        this.metadataProvider = metadataProvider;
+        this.service.setMetadataProvider(metadataProvider);
         return this;
     }
 
     public DynamicDiscoveryBuilder reader(IMetadataReader metadataReader) {
-        this.metadataReader = metadataReader;
+        this.service.setMetadataReader(metadataReader);
         return this;
     }
 
     public DynamicDiscovery build() {
-        if (this.metadataLocator == null) {
-            throw new IllegalStateException("Locator not defined.");
-        } else {
-            if (this.metadataFetcher == null) {
-                this.fetcher(new URLFetcher());
-            }
-
-            if (this.metadataProvider == null) {
-                this.provider(new DefaultProvider());
-            }
-
-            if (this.metadataReader == null) {
-                this.reader(new BdxrReader());
-            }
-
-            if (this.service == null) {
-                this.service(new DynamicDiscoveryService(this.metadataLocator, this.metadataProvider, this.metadataFetcher, this.metadataReader));
-            } else {
-                this.service.build(this.metadataLocator, this.metadataProvider, this.metadataFetcher, this.metadataReader);
-            }
-
-            return new DynamicDiscovery(this.service);
+        if (this.service.getMetadataLocator() == null) {
+            throw new IllegalStateException("MetadataLocator not defined.");
         }
-    }
-
-    public IMetadataFetcher getMetadataFetcher() {
-        return metadataFetcher;
-    }
-
-    public IMetadataLocator getMetadataLocator() {
-        return metadataLocator;
-    }
-
-    public IMetadataProvider getMetadataProvider() {
-        return metadataProvider;
-    }
-
-    public IMetadataReader getMetadataReader() {
-        return metadataReader;
+        return new DynamicDiscovery(this.service);
     }
 
     public IDynamicDiscoveryService getService() {

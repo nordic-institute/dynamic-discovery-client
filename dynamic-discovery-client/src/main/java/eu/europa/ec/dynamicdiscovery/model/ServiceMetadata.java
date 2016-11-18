@@ -21,40 +21,48 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
+import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceInformationType;
+
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class ServiceMetadata {
-
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
-    private List<ProcessIdentifier> processIdentifiers;
-    private List<TransportProfile> transportProfiles;
     private X509Certificate signer;
     private List<Endpoint> endpoints;
+    private List<ProcessIdentifier> processIdentifiers;
+    private List<TransportProfile> transportProfiles;
 
-    public ServiceMetadata() {
-        processIdentifiers = new ArrayList<>();
-        transportProfiles = new ArrayList<>();
-        endpoints = new ArrayList<>();
+    public ServiceMetadata(X509Certificate certificate, ServiceInformationType serviceInformationType) throws TechnicalException {
+        if (serviceInformationType == null) {
+            throw new IllegalStateException("ServiceInformationType must be not null");
+        }
+        this.processIdentifiers = new ArrayList<>();
+        this.transportProfiles = new ArrayList<>();
+        this.endpoints = new ArrayList<>();
+        this.signer = certificate;
+        addParticipantIdentifier(serviceInformationType);
+        addDocumentIdentifier(serviceInformationType);
+        addEndpoint(serviceInformationType);
     }
 
     public ParticipantIdentifier getParticipantIdentifier() {
         return this.participantIdentifier;
     }
 
-    public void setParticipantIdentifier(ParticipantIdentifier participantIdentifier) {
-        this.participantIdentifier = participantIdentifier;
-    }
-
     public DocumentIdentifier getDocumentIdentifier() {
         return this.documentIdentifier;
-    }
-
-    public void setDocumentIdentifier(DocumentIdentifier documentIdentifier) {
-        this.documentIdentifier = documentIdentifier;
     }
 
     public List<ProcessIdentifier> getProcessIdentifiers() {
@@ -65,30 +73,56 @@ public class ServiceMetadata {
         return this.transportProfiles;
     }
 
-    public void addEndpoint(Endpoint endpoint) {
-        if (!this.processIdentifiers.contains(endpoint.getProcessIdentifier())) {
-            this.processIdentifiers.add(endpoint.getProcessIdentifier());
-        }
-
-        this.endpoints.add(endpoint);
-    }
-
     public List<Endpoint> getEndpoints() {
         return this.endpoints;
     }
 
+    public X509Certificate getSigner() {
+        return this.signer;
+    }
+
+    private void addParticipantIdentifier(ServiceInformationType serviceInformationType) {
+        this.participantIdentifier = new ParticipantIdentifier(serviceInformationType.getParticipantIdentifier().getValue(), serviceInformationType.getParticipantIdentifier().getScheme());
+    }
+
+    private void addDocumentIdentifier(ServiceInformationType serviceInformationType) {
+        this.documentIdentifier = new DocumentIdentifier(serviceInformationType.getDocumentIdentifier().getValue(), serviceInformationType.getDocumentIdentifier().getScheme());
+    }
+
+    private void addEndpoint(ServiceInformationType serviceInformationType) throws TechnicalException {
+        try {
+            Iterator processTypeIterator = serviceInformationType.getProcessList().getProcesses().iterator();
+            while (processTypeIterator.hasNext()) {
+                ProcessType processType = (ProcessType) processTypeIterator.next();
+                ProcessIdentifier processIdentifier = new ProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme());
+                Iterator endpointTypeIterator = processType.getServiceEndpointList().getEndpoints().iterator();
+
+                while (endpointTypeIterator.hasNext()) {
+                    EndpointType endpointType = (EndpointType) endpointTypeIterator.next();
+                    Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(endpointType.getTransportProfile()), endpointType.getEndpointURI(), (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(endpointType.getCertificate())));
+                    if (!this.processIdentifiers.contains(endpoint.getProcessIdentifier())) {
+                        this.processIdentifiers.add(endpoint.getProcessIdentifier());
+                    }
+                    this.endpoints.add(endpoint);
+                }
+            }
+        } catch (Exception exc) {
+            throw new BindException(exc.getMessage(), exc);
+        }
+    }
+
     public Endpoint getEndpoint(ProcessIdentifier processIdentifier, TransportProfile... transportProfiles) {
-        TransportProfile[] var3 = transportProfiles;
-        int var4 = transportProfiles.length;
-
-        for (int var5 = 0; var5 < var4; ++var5) {
-            TransportProfile transportProfile = var3[var5];
-            Iterator var7 = this.endpoints.iterator();
-
-            while (var7.hasNext()) {
-                Endpoint endpoint = (Endpoint) var7.next();
-                if (endpoint.getTransportProfile().equals(transportProfile) && endpoint.getProcessIdentifier().equals(processIdentifier)) {
-                    return endpoint;
+        if (transportProfiles != null) {
+            for (int i = 0; i < transportProfiles.length; ++i) {
+                TransportProfile transportProfile = transportProfiles[i];
+                if (this.endpoints != null) {
+                    Iterator iterator = this.endpoints.iterator();
+                    while (iterator.hasNext()) {
+                        Endpoint endpoint = (Endpoint) iterator.next();
+                        if (endpoint.getTransportProfile().equals(transportProfile) && endpoint.getProcessIdentifier().equals(processIdentifier)) {
+                            return endpoint;
+                        }
+                    }
                 }
             }
         }
@@ -96,11 +130,18 @@ public class ServiceMetadata {
         return null;
     }
 
-    public X509Certificate getSigner() {
-        return this.signer;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ServiceMetadata) {
+            return new EqualsBuilder().appendSuper(super.equals(obj))
+                    .isEquals();
+        }
+        return false;
     }
 
-    public void setSigner(X509Certificate signer) {
-        this.signer = signer;
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(this)
+                .toHashCode();
     }
 }

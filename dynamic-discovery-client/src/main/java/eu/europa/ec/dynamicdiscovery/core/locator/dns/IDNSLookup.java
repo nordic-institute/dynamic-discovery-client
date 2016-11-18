@@ -20,18 +20,16 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.dns;
 
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.xbill.DNS.Record;
-import org.xbill.DNS.TextParseException;
 
 import java.util.List;
 
 
 public interface IDNSLookup {
 
-    List<Record> getAllRecords(String uri, ParticipantIdentifier participantId) throws TechnicalException;
+    List<Record> getAllRecords(ParticipantIdentifier participantIdentifier,String uri) throws TechnicalException;
 
     String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
 }

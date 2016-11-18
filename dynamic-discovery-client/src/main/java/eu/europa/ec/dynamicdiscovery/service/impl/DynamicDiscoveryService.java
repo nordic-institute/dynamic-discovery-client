@@ -21,36 +21,83 @@
 package eu.europa.ec.dynamicdiscovery.service.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import eu.europa.ec.dynamicdiscovery.service.AbstractDynamicDiscoveryService;
+import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
 import java.net.URI;
 import java.util.List;
 
-public class DynamicDiscoveryService extends AbstractDynamicDiscoveryService {
+public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
-    public DynamicDiscoveryService(IMetadataLocator metadataLocator, IMetadataProvider metadataProvider, IMetadataFetcher metadataFetcher, IMetadataReader metadataReader) {
-        build(metadataLocator, metadataProvider, metadataFetcher, metadataReader);
+    private IMetadataLocator metadataLocator;
+    private IMetadataProvider metadataProvider;
+    private IMetadataFetcher metadataFetcher;
+    private IMetadataReader metadataReader;
+
+    public DynamicDiscoveryService() {
+        this.metadataProvider = new DefaultProvider();
+        this.metadataFetcher = new DefaultURLFetcher();
+        this.metadataReader = new DefaultBDXRReader();
     }
 
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI location = metadataLocator.lookup(participantIdentifier);
         URI provider = metadataProvider.resolveDocumentIdentifiers(location, participantIdentifier);
-        return metadataReader.parseDocumentIdentifiers(metadataFetcher.fetch(provider));
+        return metadataReader.getDocumentIdentifiers(metadataFetcher.fetch(provider));
     }
 
     @Override
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         URI location = metadataLocator.lookup(participantIdentifier);
         URI provider = metadataProvider.resolveServiceMetadata(location, participantIdentifier, documentIdentifier);
-        ServiceMetadata serviceMetadata = metadataReader.parseServiceMetadata(metadataFetcher.fetch(provider));
+        ServiceMetadata serviceMetadata = metadataReader.getServiceMetadata(metadataFetcher.fetch(provider));
         return serviceMetadata;
+    }
+
+    @Override
+    public void setMetadataLocator(IMetadataLocator metadataLocator) {
+        this.metadataLocator = metadataLocator;
+    }
+
+    @Override
+    public void setMetadataProvider(IMetadataProvider metadataProvider) {
+        this.metadataProvider = metadataProvider;
+    }
+
+    @Override
+    public void setMetadataFetcher(IMetadataFetcher metadataFetcher) {
+        this.metadataFetcher = metadataFetcher;
+    }
+
+    @Override
+    public void setMetadataReader(IMetadataReader metadataReader) {
+        this.metadataReader = metadataReader;
+    }
+
+    @Override
+    public IMetadataLocator getMetadataLocator() {
+        return metadataLocator;
+    }
+
+    public IMetadataProvider getMetadataProvider() {
+        return metadataProvider;
+    }
+
+    public IMetadataFetcher getMetadataFetcher() {
+        return metadataFetcher;
+    }
+
+    public IMetadataReader getMetadataReader() {
+        return metadataReader;
     }
 }

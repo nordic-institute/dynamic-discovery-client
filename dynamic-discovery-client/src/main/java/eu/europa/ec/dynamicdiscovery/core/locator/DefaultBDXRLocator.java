@@ -33,19 +33,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- */
-public class BDXRLocator implements IMetadataLocator {
+public class DefaultBDXRLocator implements IMetadataLocator {
 
     private String hostname;
     private IDNSLookup dnsLookup;
 
-    public BDXRLocator(String hostname) {
+    public DefaultBDXRLocator(String hostname) {
         this(hostname, new DefaultDNSLookup());
     }
 
-    public BDXRLocator(String hostname, IDNSLookup dnsLookup) {
+    public DefaultBDXRLocator(String hostname, IDNSLookup dnsLookup) {
         this.hostname = hostname;
         this.dnsLookup = dnsLookup;
     }
@@ -88,7 +85,7 @@ public class BDXRLocator implements IMetadataLocator {
         }
     }
 
-    private String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
+    public String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
         return getDnsLookup().lookupFetcher(participantIdentifier, uri);
     }
 

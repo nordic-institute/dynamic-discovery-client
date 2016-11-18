@@ -21,6 +21,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class TransportProfile {
 
     private String identifier;
@@ -29,19 +32,8 @@ public class TransportProfile {
         this.identifier = identifier;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TransportProfile)) return false;
-
-        TransportProfile that = (TransportProfile) o;
-
-        return identifier != null ? identifier.equals(that.identifier) : that.identifier == null;
-    }
-
-    @Override
-    public int hashCode() {
-        return identifier != null ? identifier.hashCode() : 0;
+    public String getIdentifier() {
+        return identifier;
     }
 
     @Override
@@ -49,5 +41,22 @@ public class TransportProfile {
         return "TransportProfile{" +
                 "identifier='" + identifier + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TransportProfile) {
+            TransportProfile transportProfile = (TransportProfile) obj;
+            return new EqualsBuilder()
+                    .append(identifier, transportProfile.getIdentifier())
+                    .isEquals();
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(identifier)
+                .toHashCode();
     }
 }

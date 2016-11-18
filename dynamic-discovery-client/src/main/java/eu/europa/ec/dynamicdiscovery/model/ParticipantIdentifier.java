@@ -21,7 +21,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.net.URLEncoder;
 
 public class ParticipantIdentifier {
@@ -45,49 +47,36 @@ public class ParticipantIdentifier {
     public String urlencoded() {
         try {
             return URLEncoder.encode(String.format("%s::%s", new Object[]{this.scheme, this.identifier}), "UTF-8");
-        } catch (UnsupportedEncodingException var2) {
-            throw new IllegalStateException("UTF-8 not supported.");
+        } catch (Exception exc) {
+            throw new IllegalStateException(exc.getMessage(), exc);
         }
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if (o != null && this.getClass() == o.getClass()) {
-            ParticipantIdentifier that = (ParticipantIdentifier) o;
-            if (this.identifier != null) {
-                if (!this.identifier.equals(that.identifier)) {
-                    return false;
-                }
-            } else if (that.identifier != null) {
-                return false;
-            }
-
-            boolean var10000;
-            label51:
-            {
-                if (this.scheme != null) {
-                    if (!this.scheme.equals(that.scheme)) {
-                        break label51;
-                    }
-                } else if (that.scheme != null) {
-                    break label51;
-                }
-
-                var10000 = true;
-                return var10000;
-            }
-
-            var10000 = false;
-            return var10000;
-        } else {
-            return false;
-        }
+    @Override
+    public String toString() {
+        return "ParticipantIdentifier{" +
+                "identifier='" + identifier + '\'' +
+                ", scheme='" + scheme + '\'' +
+                '}';
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ParticipantIdentifier) {
+            ParticipantIdentifier participantIdentifier = (ParticipantIdentifier) obj;
+            return new EqualsBuilder()
+                    .append(identifier, participantIdentifier.getIdentifier())
+                    .append(scheme, participantIdentifier.getScheme())
+                    .isEquals();
+        }
+        return false;
+    }
+
+    @Override
     public int hashCode() {
-        int result = this.identifier != null ? this.identifier.hashCode() : 0;
-        result = 31 * result + (this.scheme != null ? this.scheme.hashCode() : 0);
-        return result;
+        return new HashCodeBuilder()
+                .append(identifier)
+                .append(scheme)
+                .toHashCode();
     }
 }

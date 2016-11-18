@@ -21,6 +21,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.security.cert.X509Certificate;
 
 public class Endpoint {
@@ -61,5 +64,30 @@ public class Endpoint {
                 ", address='" + address + '\'' +
                 ", certificate=" + certificate +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Endpoint) {
+            Endpoint endpoint = (Endpoint) obj;
+            return new EqualsBuilder()
+                    .append(processIdentifier, endpoint.getProcessIdentifier())
+                    .append(transportProfile, endpoint.getTransportProfile())
+                    .append(address, endpoint.getAddress())
+                    .append(certificate, endpoint.getCertificate())
+                    .isEquals();
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(processIdentifier)
+                .append(transportProfile)
+                .append(address)
+                .append(certificate)
+                .toHashCode();
     }
 }

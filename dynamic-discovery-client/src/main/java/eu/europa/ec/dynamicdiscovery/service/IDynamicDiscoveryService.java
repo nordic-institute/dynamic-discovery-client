@@ -37,5 +37,19 @@ public interface IDynamicDiscoveryService {
 
     ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException;
 
-    void build(IMetadataLocator metadataLocator, IMetadataProvider metadataProvider, IMetadataFetcher metadataFetcher, IMetadataReader metadataReader);
+    void setMetadataLocator(IMetadataLocator metadataLocator);
+
+    void setMetadataProvider(IMetadataProvider metadataProvider);
+
+    void setMetadataFetcher(IMetadataFetcher metadataFetcher);
+
+    void setMetadataReader(IMetadataReader metadataReader);
+
+    IMetadataLocator getMetadataLocator();
+
+    IMetadataProvider getMetadataProvider();
+
+    IMetadataFetcher getMetadataFetcher();
+
+    IMetadataReader getMetadataReader();
 }

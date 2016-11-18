@@ -21,15 +21,11 @@
 package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
-import eu.europa.ec.dynamicdiscovery.core.locator.dns.ILookupClient;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.apache.commons.lang3.StringUtils;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.NAPTRRecord;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.Type;
+import org.xbill.DNS.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,13 +34,7 @@ import java.util.regex.Pattern;
 
 public class DefaultDNSLookup implements IDNSLookup {
 
-    private ILookupClient lookupClient;
-
-    @Override
-    public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
-
-        List<Record> records = getAllRecords(uri, participantIdentifier);
-
+    public String getRegexFromRecord(List<Record> records) throws TechnicalException {
         String smpAddress = null;
         String naptrRegex = null;
         for (Record record : records) {
@@ -65,24 +55,23 @@ public class DefaultDNSLookup implements IDNSLookup {
         return smpAddress;
     }
 
-    public String lookupFetcher(ILookupClient lookupClient, ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
-        this.lookupClient = lookupClient;
-        return lookupFetcher(participantIdentifier, uri);
+    @Override
+    public String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
+        List<Record> records = getAllRecords(participantIdentifier, uri);
+        return getRegexFromRecord(records);
     }
 
     @Override
-    public List<Record> getAllRecords(String uri, ParticipantIdentifier participantId) throws TechnicalException {
-        Record[] records = runLookup(uri, Type.NAPTR);
-        if (lookupClient.getResultCode() != Lookup.SUCCESSFUL) {
-            throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", new Object[]{participantId, lookupClient.getResultCode()}));
+    public List<Record> getAllRecords(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
+        try {
+            Lookup lookupClient = new Lookup(uri, Type.NAPTR);
+            Record[] records = lookupClient.run();
+            if (lookupClient.getResult() != Lookup.SUCCESSFUL) {
+                throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", new Object[]{participantIdentifier, lookupClient.getResult()}));
+            }
+            return Arrays.asList(records);
+        } catch (TextParseException exc) {
+            throw new DNSLookupException(exc.getMessage(), exc);
         }
-        return Arrays.asList(records);
-    }
-
-    private Record[] runLookup(String uri, Integer recordType) throws TechnicalException {
-        if (lookupClient == null) {
-            lookupClient = new DefaultLookupClient(uri, recordType);
-        }
-        return lookupClient.run();
     }
 }

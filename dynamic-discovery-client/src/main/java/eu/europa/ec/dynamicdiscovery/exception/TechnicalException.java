@@ -23,7 +23,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
 public abstract class TechnicalException extends Exception {
 
     public TechnicalException(String message) {
-        this(message, null);
+        super(message);
     }
 
     public TechnicalException(String message, Throwable cause) {

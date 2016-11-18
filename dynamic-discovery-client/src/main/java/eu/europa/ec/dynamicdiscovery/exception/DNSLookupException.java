@@ -23,7 +23,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
 public class DNSLookupException extends TechnicalException {
 
     public DNSLookupException(String message) {
-        this(message, null);
+        super(message);
     }
 
     public DNSLookupException(String message, Throwable cause) {

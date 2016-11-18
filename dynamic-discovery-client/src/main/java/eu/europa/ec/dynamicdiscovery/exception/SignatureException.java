@@ -23,7 +23,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
 public class SignatureException extends TechnicalException {
 
     public SignatureException(String message) {
-        this(message, null);
+        super(message);
     }
 
     public SignatureException(String message, Throwable cause) {

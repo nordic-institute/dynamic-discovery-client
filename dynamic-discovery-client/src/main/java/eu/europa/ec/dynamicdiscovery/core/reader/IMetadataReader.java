@@ -29,7 +29,8 @@ import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import java.util.List;
 
 public interface IMetadataReader {
-    List<DocumentIdentifier> parseDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException;
 
-    ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
+    List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException;
+
+    ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
 }

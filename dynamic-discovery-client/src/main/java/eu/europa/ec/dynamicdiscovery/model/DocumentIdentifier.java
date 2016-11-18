@@ -20,15 +20,17 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.net.URLEncoder;
 
 public class DocumentIdentifier {
-    private String documentIdentifier;
+    private String identifier;
     private String scheme;
 
     public DocumentIdentifier(String documentIdentifier, String scheme) {
-        this.documentIdentifier = documentIdentifier;
+        this.identifier = documentIdentifier;
         this.scheme = scheme;
     }
 
@@ -36,19 +38,45 @@ public class DocumentIdentifier {
         return this.scheme;
     }
 
-    public String getDocumentIdentifier() {
-        return documentIdentifier;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public String getIdentifier() {
-        return String.format("%s::%s", new Object[]{this.scheme, this.documentIdentifier});
+    public String getFullIdentifier() {
+        return String.format("%s::%s", new Object[]{this.scheme, this.identifier});
     }
 
     public String urlencoded() {
         try {
-            return URLEncoder.encode(String.format("%s::%s", new Object[]{this.scheme, this.documentIdentifier}), "UTF-8");
-        } catch (UnsupportedEncodingException var2) {
-            throw new IllegalStateException("UTF-8 not supported.");
+            return URLEncoder.encode(String.format("%s::%s", new Object[]{this.scheme, this.identifier}), "UTF-8");
+        } catch (Exception exc) {
+            throw new IllegalStateException(exc.getMessage(), exc);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "DocumentIdentifier{" +
+                "identifier='" + identifier + '\'' +
+                ", scheme='" + scheme + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DocumentIdentifier) {
+            DocumentIdentifier otherDocIdentifier = (DocumentIdentifier) obj;
+            return new EqualsBuilder()
+                    .append(identifier, otherDocIdentifier.getIdentifier())
+                    .append(scheme, otherDocIdentifier.getScheme())
+                    .isEquals();
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(identifier)
+                .append(scheme).toHashCode();
     }
 }

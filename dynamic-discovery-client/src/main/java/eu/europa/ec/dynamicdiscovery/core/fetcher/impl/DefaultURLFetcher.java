@@ -34,15 +34,15 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.BufferedInputStream;
 import java.net.URI;
 
-public class URLFetcher implements IMetadataFetcher {
+public class DefaultURLFetcher implements IMetadataFetcher {
 
     private IProxyConfiguration proxyConfiguration;
 
-    public URLFetcher(IProxyConfiguration proxyConfiguration) {
+    public DefaultURLFetcher(IProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
     }
 
-    public URLFetcher() {
+    public DefaultURLFetcher() {
         this(null);
     }
 

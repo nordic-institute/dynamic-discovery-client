@@ -18,24 +18,24 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.service;
+package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.impl.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 
-public abstract class AbstractDynamicDiscoveryService implements IDynamicDiscoveryService {
+import java.util.List;
 
-    protected IMetadataLocator metadataLocator;
-    protected IMetadataProvider metadataProvider;
-    protected IMetadataFetcher metadataFetcher;
-    protected IMetadataReader metadataReader;
+public class DefaultBDXRReader implements IMetadataReader {
 
-    public void build(IMetadataLocator metadataLocator, IMetadataProvider metadataProvider, IMetadataFetcher metadataFetcher, IMetadataReader metadataReader) {
-        this.metadataLocator = metadataLocator;
-        this.metadataProvider = metadataProvider;
-        this.metadataFetcher = metadataFetcher;
-        this.metadataReader = metadataReader;
+    public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
+        return new ResponseParser().parseDocumentIdentifier(fetcherResponse);
+    }
+
+    public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
+        return new ResponseParser().parseServiceMetadata(fetcherResponse);
     }
 }
