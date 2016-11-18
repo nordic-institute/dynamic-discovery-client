@@ -35,7 +35,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.mock;
 
-public class DocumentIdentifierIT extends AbstractTest {
+public class DocumentIdentifierTest extends AbstractTest {
 
     @Test
     public void getDocumentIdentifierByNaptrOK1() throws Exception {
