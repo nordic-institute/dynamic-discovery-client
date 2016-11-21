@@ -30,7 +30,7 @@ import java.util.List;
 
 public interface IDNSLookup {
 
-    List<Record> getAllRecords(ParticipantIdentifier participantIdentifier,String uri) throws Exception;
+    List<Record> getAllRecords(ParticipantIdentifier participantIdentifier,String uri) throws TechnicalException;
 
     String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
 }
