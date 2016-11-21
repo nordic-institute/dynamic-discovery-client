@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <groupId>eu.europa.ec.dynamic-discovery</groupId>
+    <artifactId>dynamic-discovery-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>dynamic-discovery-parent</name>
+    <description>Library for discovering data dynamically based on e-SENS BDXL specification</description>
+
+    <licenses>
+        <license>
+            <name>LGPL-2.1</name>
+            <url>https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <properties>
+        <httpclient.version>4.5.2</httpclient.version>
+        <dnsjava.version>2.1.7</dnsjava.version>
+        <bouncycastle.version>1.55</bouncycastle.version>
+        <compiler.version>3.5.1</compiler.version>
+        <guava.version>18.0</guava.version>
+        <commons-lang3.version>3.4</commons-lang3.version>
+        <mockito.version>1.10.19</mockito.version>
+        <jaxb2.version>2.3</jaxb2.version>
+        <junit.version>4.12</junit.version>
+        <helper.version>1.12</helper.version>
+        <surefire.version>2.19.1</surefire.version>
+        <wiremock.version>2.2.1</wiremock.version>
+        <jacoco.version>0.7.7.201606060606</jacoco.version>
+        <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
+        <sonar.jacoco.reportPath>${project.basedir}/target/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
+        <sonar.scm.disabled>true</sonar.scm.disabled>
+        <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
+        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar</sonar.host.url>
+        <sonar.sources>src/main/java</sonar.sources>
+        <surefire.argLine>-Xmx1G</surefire.argLine>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>cefdigital-releases</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery/</url>
+        </repository>
+        <snapshotRepository>
+            <id>cefdigital-snapshots</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>
