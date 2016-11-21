@@ -24,6 +24,8 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import eu.europa.ec.dynamicdiscovery.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
@@ -45,16 +47,16 @@ public class URLFetcherMock implements IMetadataFetcher {
 
     private LookupType lookupType;
     private String serviceUrl;
-    private String serviceBodyResponse;
+    private String bodyResponse;
     private String smpAlias;
 
     public URLFetcherMock() {
     }
 
-    public void setParameters(LookupType lookupType, String serviceUrl, String serviceBodyResponse, String smpAlias) throws DNSLookupException {
+    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName, String smpAlias) throws TechnicalException {
         this.lookupType = lookupType;
         this.serviceUrl = serviceUrl;
-        this.serviceBodyResponse = serviceBodyResponse;
+        this.bodyResponse = CommonUtil.getStringFromXmlFile(responseFileName);
 
         if (lookupType == LookupType.CNAME && StringUtils.isEmpty(smpAlias)) {
             throw new DNSLookupException("SMP alias represented by MD5 must be not null");
@@ -64,22 +66,22 @@ public class URLFetcherMock implements IMetadataFetcher {
         }
     }
 
-    public void setParameters(LookupType lookupType, String serviceUrl, String serviceBodyResponse) throws DNSLookupException {
-        setParameters(lookupType, serviceUrl, serviceBodyResponse, null);
+    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName) throws TechnicalException {
+        setParameters(lookupType, serviceUrl, responseFileName, null);
     }
 
     @Override
-    public FetcherResponse fetch(URI uri) throws DNSLookupException {
+    public FetcherResponse fetch(URI uri) throws TechnicalException {
         return switchResponse(uri);
     }
 
-    private FetcherResponse switchResponse(URI uri) throws DNSLookupException {
+    private FetcherResponse switchResponse(URI uri) throws TechnicalException {
         try {
             WireMock.stubFor(post(WireMock.urlEqualTo(serviceUrl))
                     .willReturn(WireMock.aResponse()
                             .withStatus(200)
                             .withHeader("Content-Type", "application/soap+xml")
-                            .withBody(serviceBodyResponse)));
+                            .withBody(bodyResponse)));
 
             HttpClient client = HttpClientBuilder.create().build();
 
