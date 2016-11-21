@@ -28,7 +28,7 @@ import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import java.net.URI;
 
 public interface IMetadataLocator {
-    URI lookup(String participantId, String scheme) throws TechnicalException;
+    URI lookup(String participantId, String participantScheme) throws TechnicalException;
 
     URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException;
 

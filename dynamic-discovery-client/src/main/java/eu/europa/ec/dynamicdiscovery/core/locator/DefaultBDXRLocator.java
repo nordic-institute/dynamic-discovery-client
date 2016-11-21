@@ -20,8 +20,8 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
@@ -49,17 +49,17 @@ public class DefaultBDXRLocator implements IMetadataLocator {
 
     @Override
     public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI uri = naptrLookup(participantIdentifier);
-        if (uri == null) {
-            uri = cnameLookup(participantIdentifier);
+        URI participantIdentifierURI = naptrLookup(participantIdentifier);
+        if (participantIdentifierURI == null) {
+            participantIdentifierURI = cnameLookup(participantIdentifier);
         }
 
-        return uri;
+        return participantIdentifierURI;
     }
 
     @Override
-    public URI lookup(String identifier, String scheme) throws TechnicalException {
-        return this.lookup(new ParticipantIdentifier(identifier, scheme));
+    public URI lookup(String participantIdentifier, String participantScheme) throws TechnicalException {
+        return this.lookup(new ParticipantIdentifier(participantIdentifier, participantScheme));
     }
 
 
@@ -85,8 +85,8 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         }
     }
 
-    public String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException, TextParseException {
-        return getDnsLookup().lookupFetcher(participantIdentifier, uri);
+    public String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException, TextParseException {
+        return getDnsLookup().lookupFetcher(participantIdentifier, participantURI);
     }
 
     @Override

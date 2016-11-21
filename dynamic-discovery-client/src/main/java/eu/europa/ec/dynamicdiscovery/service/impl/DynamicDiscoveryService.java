@@ -51,17 +51,16 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI location = metadataLocator.lookup(participantIdentifier);
-        URI provider = metadataProvider.resolveDocumentIdentifiers(location, participantIdentifier);
-        return metadataReader.getDocumentIdentifiers(metadataFetcher.fetch(provider));
+        URI smpURI = metadataLocator.lookup(participantIdentifier);
+        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
+        return metadataReader.getDocumentIdentifiers(metadataFetcher.fetch(participantUnderSmpURI));
     }
 
     @Override
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
-        URI location = metadataLocator.lookup(participantIdentifier);
-        URI provider = metadataProvider.resolveServiceMetadata(location, participantIdentifier, documentIdentifier);
-        ServiceMetadata serviceMetadata = metadataReader.getServiceMetadata(metadataFetcher.fetch(provider));
-        return serviceMetadata;
+        URI smpURI = metadataLocator.lookup(participantIdentifier);
+        URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
+        return metadataReader.getServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
     }
 
     @Override

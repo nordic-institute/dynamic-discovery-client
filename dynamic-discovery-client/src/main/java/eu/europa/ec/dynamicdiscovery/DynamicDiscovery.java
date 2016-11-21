@@ -43,4 +43,8 @@ public class DynamicDiscovery {
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         return service.getServiceMetadata(participantIdentifier, documentIdentifier);
     }
+
+    public IDynamicDiscoveryService getService() {
+        return service;
+    }
 }
