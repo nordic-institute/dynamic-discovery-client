@@ -56,7 +56,7 @@ public class ResponseParser {
             documentBuilderFactory.setNamespaceAware(true);
             unmarshaller = jaxbContext.createUnmarshaller();
         } catch (Exception exc) {
-            throw new RuntimeException(exc.getMessage(), exc);
+            throw new IllegalStateException(exc.getMessage(), exc);
         }
     }
 
