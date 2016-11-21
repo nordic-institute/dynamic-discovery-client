@@ -47,12 +47,12 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     }
 
     @Override
-    public FetcherResponse fetch(URI uri) throws TechnicalException {
+    public FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException {
         if (this.proxyConfiguration != null) {
-            proxyConfiguration.build(uri);
+            proxyConfiguration.build(participantUnderSmpURI);
             return connect(this.proxyConfiguration.getHttpclient(), this.proxyConfiguration.getHttpget());
         } else {
-            return connect(HttpClients.createDefault(), new HttpGet(uri));
+            return connect(HttpClients.createDefault(), new HttpGet(participantUnderSmpURI));
         }
     }
 

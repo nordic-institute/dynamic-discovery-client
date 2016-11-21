@@ -16,21 +16,26 @@
  * limitations under the License.
  *
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ * @author Adrien Ferial - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.locator.dns;
+package eu.europa.ec.dynamicdiscovery.util;
 
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.TextParseException;
+import eu.europa.ec.dynamicdiscovery.AbstractTest;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.List;
+public class HashUtilTest extends AbstractTest {
 
+    @Test
+    public void testNAPTRHash() throws Exception {
+        String participantId = HashUtil.getSHA256HashBase32("urn:poland:ncpb");
+        Assert.assertEquals("DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ", participantId);
+    }
 
-public interface IDNSLookup {
-
-    List<Record> getAllRecords(ParticipantIdentifier participantIdentifier,String uri) throws Exception;
-
-    String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
+    @Test
+    public void testCNAMEHash() throws Exception {
+        String participantId = HashUtil.getMD5Hash("urn:poland:ncpb");
+        Assert.assertEquals("b-adb4c6d3821d142c684b13ed269fad65", "b-" + participantId);
+    }
 }

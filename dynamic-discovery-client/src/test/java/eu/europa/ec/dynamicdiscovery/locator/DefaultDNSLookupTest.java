@@ -55,7 +55,7 @@ public class DefaultDNSLookupTest extends AbstractTest {
         Assert.assertEquals("http://smp-mock-1.ehealth.eu:8888", defaultDNSLookup.getRegexFromRecord(records));
     }
 
-    private Name createParticipantDNSNameObjectBDXL(String participantId, String scheme, String dnsZoneName) throws Exception {
+    public static Name createParticipantDNSNameObjectBDXL(String participantId, String scheme, String dnsZoneName) throws Exception {
         String smpDnsName = participantId + ", " + scheme + ", " + dnsZoneName;
         if ("*".equals(participantId)) {
             smpDnsName = "*." + scheme + "." + dnsZoneName;

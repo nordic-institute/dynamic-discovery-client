@@ -29,5 +29,5 @@ import java.net.URI;
 
 public interface IMetadataFetcher {
 
-    FetcherResponse fetch(URI uri) throws TechnicalException;
+    FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException;
 }

@@ -20,42 +20,11 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
-import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.*;
-import eu.europa.ec.dynamicdiscovery.util.HashUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class CommonTest extends AbstractTest {
-
-    @Test
-    public void testNAPTRHash() throws Exception {
-        String participantId = HashUtil.getSHA256HashBase32("urn:poland:ncpb");
-        Assert.assertEquals("DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ", participantId);
-    }
-
-    @Test
-    public void testCNAMEHash() throws Exception {
-        String participantId = HashUtil.getMD5Hash("urn:poland:ncpb");
-        Assert.assertEquals("b-adb4c6d3821d142c684b13ed269fad65", "b-" + participantId);
-    }
-
-    @Test
-    public void testDefaultParameters() throws Exception {
-        DynamicDiscoveryBuilder builder = DynamicDiscoveryBuilder.newInstance();
-        DynamicDiscovery smpClient = builder
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
-                .build();
-        Assert.assertNotNull(smpClient);
-        Assert.assertNotNull(builder.getService());
-        Assert.assertNotNull(builder.getService().getMetadataFetcher());
-        Assert.assertNotNull(builder.getService().getMetadataLocator());
-        Assert.assertNotNull(builder.getService().getMetadataLocator().getDnsLookup());
-        Assert.assertEquals(DefaultDNSLookup.class, builder.getService().getMetadataLocator().getDnsLookup().getClass());
-        Assert.assertNotNull(builder.getService().getMetadataProvider());
-        Assert.assertNotNull(builder.getService().getMetadataReader());
-    }
 
     @Test
     public void equalsTest() throws Exception {
