@@ -29,13 +29,14 @@ import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.Constants;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.Mockito;
 
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
 
-public class DocumentIdentifierTest extends AbstractTest {
+public class DocumentIdentifierIT extends AbstractTest {
 
     @Test
     public void getDocumentIdentifierByNaptrOK1() throws Exception {

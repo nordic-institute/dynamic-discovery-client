@@ -67,7 +67,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     private URI cnameLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
             String e = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
-            return new URI(String.format("http://b-%s.%s.%s", new Object[]{e, participantIdentifier.getScheme(), hostname}));
+            return new URI(String.format("http://b-%s.%s.%s", e, participantIdentifier.getScheme(), hostname));
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
@@ -76,7 +76,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     private URI naptrLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
             String participantIdHashed = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
-            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s", new Object[]{participantIdHashed, participantIdentifier.getScheme(), hostname}));
+            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s",participantIdHashed, participantIdentifier.getScheme(), hostname));
             return new URI(smpURI);
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);

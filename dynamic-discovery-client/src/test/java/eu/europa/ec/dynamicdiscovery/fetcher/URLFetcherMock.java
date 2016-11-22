@@ -101,7 +101,7 @@ public class URLFetcherMock implements IMetadataFetcher {
                 case 404:
                     throw new DNSLookupException("Not supported.");
                 default:
-                    throw new DNSLookupException(String.format("Received code %s for lookup.", new Object[]{Integer.valueOf(response.getStatusLine().getStatusCode())}));
+                    throw new DNSLookupException(String.format("Received code %s for lookup.", Integer.valueOf(response.getStatusLine().getStatusCode())));
             }
         } catch (IOException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);

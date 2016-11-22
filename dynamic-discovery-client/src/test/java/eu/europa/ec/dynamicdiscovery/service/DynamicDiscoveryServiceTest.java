@@ -37,11 +37,11 @@ public class DynamicDiscoveryServiceTest extends AbstractTest {
 
     @Test
     public void metadataLocatorCNAMETest() throws Exception {
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:98765digit", "iso6523-actorid-upis");
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
                 .build();
-        Assert.assertEquals("http://b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu", smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
+        Assert.assertEquals("http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu", smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
     }
 
     @Test

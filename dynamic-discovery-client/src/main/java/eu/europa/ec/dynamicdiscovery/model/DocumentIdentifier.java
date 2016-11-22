@@ -43,12 +43,12 @@ public class DocumentIdentifier {
     }
 
     public String getFullIdentifier() {
-        return String.format("%s::%s", new Object[]{this.scheme, this.identifier});
+        return String.format("%s::%s", this.scheme, this.identifier);
     }
 
     public String urlencoded() {
         try {
-            return URLEncoder.encode(String.format("%s::%s", new Object[]{this.scheme, this.identifier}), "UTF-8");
+            return URLEncoder.encode(String.format("%s::%s", this.scheme, this.identifier), "UTF-8");
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
         }

@@ -21,7 +21,9 @@
 package eu.europa.ec.dynamicdiscovery.util;
 
 public class Constants {
+
     public static final String SMP_DOMAIN = "http://localhost:8090/cipa-smp-full-webapp/";
+
     public static final String SMP_DOMAIN_ALIAS = "http://smp.ec.europa.eu/";
 
     public static final String SERVICE_GROUP_URL_9925_0367302178 = "/cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9925%3A0367302178";

@@ -49,7 +49,7 @@ public class DefaultDNSLookup implements IDNSLookup {
         }
 
         if (StringUtils.isEmpty(smpAddress)) {
-            throw new DNSLookupException(String.format("DNS Lookup for NATPR record failed, CODE: ", new Object[]{naptrRegex}));
+            throw new DNSLookupException(String.format("DNS Lookup for NATPR record failed, CODE: %s", naptrRegex));
         }
 
         return smpAddress;
@@ -67,7 +67,7 @@ public class DefaultDNSLookup implements IDNSLookup {
             Lookup lookupClient = new Lookup(uri, Type.NAPTR);
             Record[] records = lookupClient.run();
             if (lookupClient.getResult() != Lookup.SUCCESSFUL) {
-                throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", new Object[]{participantIdentifier, lookupClient.getResult()}));
+                throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", participantIdentifier, lookupClient.getResult()));
             }
             return Arrays.asList(records);
         } catch (TextParseException exc) {
