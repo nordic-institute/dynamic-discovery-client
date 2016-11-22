@@ -35,7 +35,7 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 
-public class ServiceMetadataIT extends AbstractTest {
+public class ServiceMetadataIT extends AbstractIT {
 
     @Test
     public void getServiceMetadataNaptrOk1() throws Exception {

@@ -20,7 +20,6 @@
  */
 package eu.europa.ec.dynamicdiscovery.reader;
 
-import eu.europa.ec.dynamicdiscovery.AbstractTest;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
@@ -31,7 +30,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class ResponseParserTest extends AbstractTest {
+public class ResponseParserTest {
 
     @Test
     public void parseServiceMetadataTest() throws Exception {

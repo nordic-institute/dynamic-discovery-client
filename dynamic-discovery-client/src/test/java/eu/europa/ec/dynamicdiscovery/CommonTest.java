@@ -24,7 +24,7 @@ import eu.europa.ec.dynamicdiscovery.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CommonTest extends AbstractTest {
+public class CommonTest {
 
     @Test
     public void equalsTest() throws Exception {

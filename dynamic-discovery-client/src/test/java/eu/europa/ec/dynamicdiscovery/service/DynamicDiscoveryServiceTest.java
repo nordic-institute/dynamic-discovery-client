@@ -20,11 +20,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.service;
 
-import eu.europa.ec.dynamicdiscovery.AbstractTest;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.locator.DefaultDNSLookupMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
@@ -33,7 +31,7 @@ import org.junit.Test;
 
 import java.net.URI;
 
-public class DynamicDiscoveryServiceTest extends AbstractTest {
+public class DynamicDiscoveryServiceTest {
 
     @Test
     public void metadataLocatorCNAMETest() throws Exception {

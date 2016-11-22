@@ -23,7 +23,7 @@ package eu.europa.ec.dynamicdiscovery;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Rule;
 
-public abstract class AbstractTest {
+public abstract class AbstractIT {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8090);

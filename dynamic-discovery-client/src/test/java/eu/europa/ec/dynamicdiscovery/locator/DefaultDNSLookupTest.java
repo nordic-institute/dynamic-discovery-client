@@ -20,7 +20,6 @@
  */
 package eu.europa.ec.dynamicdiscovery.locator;
 
-import eu.europa.ec.dynamicdiscovery.AbstractTest;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
@@ -35,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class DefaultDNSLookupTest extends AbstractTest {
+public class DefaultDNSLookupTest {
 
     @Test
     public void lookupFetcherTest1() throws Exception {
