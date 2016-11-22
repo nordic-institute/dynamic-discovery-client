@@ -20,12 +20,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-import eu.europa.ec.dynamicdiscovery.AbstractTest;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
-import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import eu.europa.ec.dynamicdiscovery.model.TransportProfile;
 import org.junit.Assert;
 import org.junit.Test;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceInformationType;
@@ -39,7 +34,7 @@ import java.io.InputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class ServiceMetadataTest extends AbstractTest {
+public class ServiceMetadataTest {
 
     @Test
     public void addParticipantIdentifierTest() throws Exception {

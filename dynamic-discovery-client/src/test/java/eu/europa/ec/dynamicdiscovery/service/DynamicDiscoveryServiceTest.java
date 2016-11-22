@@ -20,11 +20,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.service;
 
-import eu.europa.ec.dynamicdiscovery.AbstractTest;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.locator.DefaultDNSLookupMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
@@ -33,15 +31,15 @@ import org.junit.Test;
 
 import java.net.URI;
 
-public class DynamicDiscoveryServiceTest extends AbstractTest {
+public class DynamicDiscoveryServiceTest {
 
     @Test
     public void metadataLocatorCNAMETest() throws Exception {
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:1234156", "iso6523-actorid-upis");
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:98765digit", "iso6523-actorid-upis");
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
                 .build();
-        Assert.assertEquals("http://b-8f29cfc9d598c264605d43bdb5108d8c.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu", smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
+        Assert.assertEquals("http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu", smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
     }
 
     @Test

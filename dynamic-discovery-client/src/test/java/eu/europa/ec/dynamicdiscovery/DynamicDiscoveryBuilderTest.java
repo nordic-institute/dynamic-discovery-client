@@ -26,7 +26,7 @@ import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DynamicDiscoveryBuilderTest extends AbstractTest {
+public class DynamicDiscoveryBuilderTest {
 
     @Test
     public void testDefaultParameters() throws Exception {

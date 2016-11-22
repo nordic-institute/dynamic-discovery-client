@@ -42,6 +42,7 @@
         <sonar.sources>src/main/java</sonar.sources>
         <surefire.argLine>-Xmx1G</surefire.argLine>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
     </properties>
 
     <distributionManagement>

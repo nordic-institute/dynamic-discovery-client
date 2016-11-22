@@ -21,7 +21,6 @@
  */
 package eu.europa.ec.dynamicdiscovery.provider;
 
-import eu.europa.ec.dynamicdiscovery.AbstractTest;
 import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
@@ -31,7 +30,7 @@ import org.junit.Test;
 
 import java.net.URI;
 
-public class DefaultProviderTest extends AbstractTest {
+public class DefaultProviderTest {
 
     @Test
     public void resolveDocumentIdentifiersTest() throws Exception {

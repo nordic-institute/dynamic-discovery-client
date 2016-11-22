@@ -16,25 +16,15 @@
  * limitations under the License.
  *
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Adrien Ferial - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.util;
+package eu.europa.ec.dynamicdiscovery;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.junit.Rule;
 
-public class HashUtilTest {
+public abstract class AbstractIT {
 
-    @Test
-    public void testNAPTRHash() throws Exception {
-        String participantId = HashUtil.getSHA256HashBase32("urn:poland:ncpb");
-        Assert.assertEquals("DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ", participantId);
-    }
-
-    @Test
-    public void testCNAMEHash() throws Exception {
-        String participantId = HashUtil.getMD5Hash("urn:poland:ncpb");
-        Assert.assertEquals("b-adb4c6d3821d142c684b13ed269fad65", "b-" + participantId);
-    }
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(8090);
 }

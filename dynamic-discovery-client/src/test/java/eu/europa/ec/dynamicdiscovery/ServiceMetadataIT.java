@@ -35,12 +35,12 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 
-public class ServiceMetadataTest extends AbstractTest {
+public class ServiceMetadataIT extends AbstractIT {
 
     @Test
     public void getServiceMetadataNaptrOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
@@ -65,7 +65,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getSignedServiceMetadataNaptrOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SIGNED_SERVICE_METADATA_BODY_URN_POLAND_NCPB);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
@@ -90,7 +90,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getServiceMetadataCnameOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
@@ -99,7 +99,7 @@ public class ServiceMetadataTest extends AbstractTest {
         Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu",defaultDNSLookup))
+                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
 
@@ -116,7 +116,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getSignedServiceMetadataCnameOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SIGNED_SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
@@ -125,7 +125,7 @@ public class ServiceMetadataTest extends AbstractTest {
         Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu",defaultDNSLookup))
+                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .fetcher(urlFetcherURL)
                 .build();
 
@@ -143,7 +143,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getServiceMetadataNaptrOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_9915_123456789, Constants.SERVICE_METADATA_BODY_9915_123456789);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_9915_123456789, "service_metadata_9915_123456789");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
@@ -168,7 +168,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getSignedServiceMetadataNaptrOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, Constants.SIGNED_SERVICE_METADATA_BODY_9915_123456789);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, "signed_service_metadata_9915_123456789");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
@@ -194,7 +194,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getServiceMetadataCnameOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_9915_123456789, Constants.SERVICE_METADATA_BODY_9915_123456789, "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_9915_123456789, "service_metadata_9915_123456789", "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
@@ -216,7 +216,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test
     public void getSignedServiceMetadataCnameOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, Constants.SIGNED_SERVICE_METADATA_BODY_9915_123456789, "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, "signed_service_metadata_9915_123456789", "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
@@ -238,7 +238,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = SignatureException.class)
     public void getSignedServiceMetadataNaptrInvalidSignature1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SIGNED_SERVICE_METADATA_BODY_URN_POLAND_NCPB_INVALID_SIGNATURE);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb_invalid_signature");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
@@ -256,7 +256,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = SignatureException.class)
     public void getSignedServiceMetadataNaptrInvalidSignature2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, Constants.SIGNED_SERVICE_METADATA_BODY_9915_123456789_INVALID_SIGNATURE);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SIGNED_SERVICE_METADATA_URL_9915_123456789, "signed_service_metadata_9915_123456789_invalid_signature");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
@@ -274,7 +274,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataCnameNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB, "b-123456.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb", "b-123456.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
@@ -290,7 +290,7 @@ public class ServiceMetadataTest extends AbstractTest {
     @Test(expected = DNSLookupException.class)
     public void getServiceMetadataNaptrParticipantIdentifierNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, Constants.SERVICE_METADATA_BODY_URN_POLAND_NCPB);
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.lookupFetcher(new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
 

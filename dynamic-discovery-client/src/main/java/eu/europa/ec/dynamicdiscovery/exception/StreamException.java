@@ -18,13 +18,15 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery;
+package eu.europa.ec.dynamicdiscovery.exception;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.junit.Rule;
+public class StreamException extends TechnicalException {
 
-public abstract class AbstractTest {
+    public StreamException(String message) {
+        super(message);
+    }
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8090);
+    public StreamException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
