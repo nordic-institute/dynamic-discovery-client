@@ -88,14 +88,17 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
         return metadataLocator;
     }
 
+    @Override
     public IMetadataProvider getMetadataProvider() {
         return metadataProvider;
     }
 
+    @Override
     public IMetadataFetcher getMetadataFetcher() {
         return metadataFetcher;
     }
 
+    @Override
     public IMetadataReader getMetadataReader() {
         return metadataReader;
     }
