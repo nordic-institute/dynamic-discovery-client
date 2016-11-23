@@ -34,7 +34,6 @@ import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
@@ -53,24 +52,14 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
-        URI participantUnderSmpURI = null;
-        try {
-            participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(new URI("http://smp-digit-mock.publisher.ehealth.acc.edelivery.tech.ec.europa.eu:8888/"), participantIdentifier);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
         return metadataReader.getDocumentIdentifiers(metadataFetcher.fetch(participantUnderSmpURI));
     }
 
     @Override
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
-        URI participantUnderSmpURI = null;
-        try {
-            participantUnderSmpURI = metadataProvider.resolveServiceMetadata(new URI("http://smp-digit-mock.publisher.ehealth.acc.edelivery.tech.ec.europa.eu:8888/"), participantIdentifier, documentIdentifier);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
         return metadataReader.getServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
     }
 
