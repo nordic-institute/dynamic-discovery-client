@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 Dynamic Discovery Client
+ * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *

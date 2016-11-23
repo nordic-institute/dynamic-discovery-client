@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 Dynamic Discovery Client
+ * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -34,6 +34,7 @@ import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
@@ -52,14 +53,24 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
+        URI participantUnderSmpURI = null;
+        try {
+            participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(new URI("http://smp-digit-mock.publisher.ehealth.acc.edelivery.tech.ec.europa.eu:8888/"), participantIdentifier);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
         return metadataReader.getDocumentIdentifiers(metadataFetcher.fetch(participantUnderSmpURI));
     }
 
     @Override
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
+        URI participantUnderSmpURI = null;
+        try {
+            participantUnderSmpURI = metadataProvider.resolveServiceMetadata(new URI("http://smp-digit-mock.publisher.ehealth.acc.edelivery.tech.ec.europa.eu:8888/"), participantIdentifier, documentIdentifier);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
         return metadataReader.getServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
     }
 
