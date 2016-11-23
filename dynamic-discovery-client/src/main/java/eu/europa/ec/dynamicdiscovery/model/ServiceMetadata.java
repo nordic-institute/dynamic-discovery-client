@@ -23,8 +23,6 @@ package eu.europa.ec.dynamicdiscovery.model;
 
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceInformationType;
@@ -128,20 +126,5 @@ public class ServiceMetadata {
         }
 
         return null;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ServiceMetadata) {
-            return new EqualsBuilder().appendSuper(super.equals(obj))
-                    .isEquals();
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder().append(this)
-                .toHashCode();
     }
 }
