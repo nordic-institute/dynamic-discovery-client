@@ -33,7 +33,7 @@ public class X509KeySelector extends KeySelector {
                     continue;
                 }
                 this.certificate = (X509Certificate) o;
-                final PublicKey key = ((X509Certificate) o).getPublicKey();
+                final PublicKey key =  this.certificate.getPublicKey();
                 // Make sure the algorithm is compatible
                 // with the method.
                 if (algEquals(method.getAlgorithm(), key.getAlgorithm())) {
