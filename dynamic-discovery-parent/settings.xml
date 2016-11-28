@@ -53,21 +53,22 @@ under the License.
     <localRepository>/path/to/local/repo</localRepository>
     -->
     <pluginGroups></pluginGroups>
+
     <servers>
         <server>
             <id>webgate-digit</id>
             <username>rodrfla</username>
-            <password>{G3klZeYY7fMHWoIzJgD5bTgCI7cTCt9xJdO7f0qc7UU=}</password>
+            <password>{UaFLE7vL9V0Hnt3DceR8RHiFrJVuMNBPi386t78Nl14=}</password>
         </server>
         <server>
             <id>webgate-digit-third-party</id>
             <username>rodrfla</username>
-            <password>{G3klZeYY7fMHWoIzJgD5bTgCI7cTCt9xJdO7f0qc7UU=}</password>
+            <password>{UaFLE7vL9V0Hnt3DceR8RHiFrJVuMNBPi386t78Nl14=}</password>
         </server>
         <server>
             <id>joinup-releases</id>
             <username>rodrfla</username>
-            <password>{G3klZeYY7fMHWoIzJgD5bTgCI7cTCt9xJdO7f0qc7UU=}</password>
+            <password>{UaFLE7vL9V0Hnt3DceR8RHiFrJVuMNBPi386t78Nl14=}</password>
         </server>
         <server>
             <id>joinup-snapshots</id>
@@ -77,22 +78,22 @@ under the License.
         <server>
             <id>joinup-3rdparty</id>
             <username>rodrfla</username>
-            <password>{G3klZeYY7fMHWoIzJgD5bTgCI7cTCt9xJdO7f0qc7UU=}</password>
+            <password>{UaFLE7vL9V0Hnt3DceR8RHiFrJVuMNBPi386t78Nl14=}</password>
         </server>
         <server>
             <id>public-snapshots</id>
             <username>rodrfla</username>
-            <password>{G3klZeYY7fMHWoIzJgD5bTgCI7cTCt9xJdO7f0qc7UU=}</password>
+            <password>{UaFLE7vL9V0Hnt3DceR8RHiFrJVuMNBPi386t78Nl14=}</password>
         </server>
         <server>
             <id>cefdigital-snapshots</id>
             <username>rodrfla</username>
-            <password>{G3klZeYY7fMHWoIzJgD5bTgCI7cTCt9xJdO7f0qc7UU=}</password>
+            <password>{UaFLE7vL9V0Hnt3DceR8RHiFrJVuMNBPi386t78Nl14=}</password>
         </server>
         <server>
             <id>cefdigital-releases</id>
             <username>rodrfla</username>
-            <password>{G3klZeYY7fMHWoIzJgD5bTgCI7cTCt9xJdO7f0qc7UU=}</password>
+            <password>{UaFLE7vL9V0Hnt3DceR8RHiFrJVuMNBPi386t78Nl14=}</password>
         </server>
     </servers>
 
