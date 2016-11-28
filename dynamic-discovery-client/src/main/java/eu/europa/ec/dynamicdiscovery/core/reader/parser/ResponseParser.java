@@ -53,9 +53,9 @@ public class ResponseParser {
     public ResponseParser(ISignatureValidator signatureValidator) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata.class, SignedServiceMetadata.class, ServiceGroup.class);
-            documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
-            unmarshaller = jaxbContext.createUnmarshaller();
+            this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            this.documentBuilderFactory.setNamespaceAware(true);
+            this.unmarshaller = jaxbContext.createUnmarshaller();
             this.signatureValidator = signatureValidator;
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
@@ -64,11 +64,11 @@ public class ResponseParser {
 
     public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
-            Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-            Object result = unmarshaller.unmarshal(document);
+            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
+            Object result = this.unmarshaller.unmarshal(document);
             Certificate certificate = null;
             if (result instanceof SignedServiceMetadata) {
-                certificate = signatureValidator.verify(document);
+                certificate = this.signatureValidator.verify(document);
                 result = ((SignedServiceMetadata) result).getServiceMetadata();
             }
 
@@ -86,8 +86,8 @@ public class ResponseParser {
     public List<DocumentIdentifier> parseDocumentIdentifier(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
-            Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-            ServiceGroup serviceGroup = (ServiceGroup) unmarshaller.unmarshal(document);
+            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
+            ServiceGroup serviceGroup = (ServiceGroup) this.unmarshaller.unmarshal(document);
             if (serviceGroup != null && serviceGroup.getServiceMetadataReferenceCollection() != null) {
                 List<ServiceMetadataReferenceType> serviceMetadataReference = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences();
                 if (serviceMetadataReference != null && !serviceMetadataReference.isEmpty()) {

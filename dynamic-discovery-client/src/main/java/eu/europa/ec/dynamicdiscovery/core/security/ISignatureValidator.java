@@ -29,5 +29,4 @@ import java.security.cert.Certificate;
 public interface ISignatureValidator {
 
     Certificate verify(Document document) throws TechnicalException;
-
 }
