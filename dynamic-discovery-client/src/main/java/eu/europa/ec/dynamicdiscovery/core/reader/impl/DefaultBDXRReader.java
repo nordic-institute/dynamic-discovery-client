@@ -33,7 +33,7 @@ import java.util.List;
 
 public class DefaultBDXRReader implements IMetadataReader {
 
-    protected ResponseParser responseParser;
+    private ResponseParser responseParser;
 
     public DefaultBDXRReader() {
         this(new SignatureValidatorImpl());
