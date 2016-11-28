@@ -21,7 +21,7 @@
 package eu.europa.ec.dynamicdiscovery.core.reader.parser;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.security.XmldsigVerifier;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
@@ -39,7 +39,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.security.cert.X509Certificate;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,13 +48,15 @@ public class ResponseParser {
 
     private Unmarshaller unmarshaller;
     private DocumentBuilderFactory documentBuilderFactory;
+    private ISignatureValidator signatureValidator;
 
-    public ResponseParser() {
+    public ResponseParser(ISignatureValidator signatureValidator) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata.class, SignedServiceMetadata.class, ServiceGroup.class);
             documentBuilderFactory = DocumentBuilderFactory.newInstance();
             documentBuilderFactory.setNamespaceAware(true);
             unmarshaller = jaxbContext.createUnmarshaller();
+            this.signatureValidator = signatureValidator;
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
         }
@@ -64,9 +66,9 @@ public class ResponseParser {
         try {
             Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
             Object result = unmarshaller.unmarshal(document);
-            X509Certificate certificate = null;
+            Certificate certificate = null;
             if (result instanceof SignedServiceMetadata) {
-                certificate = XmldsigVerifier.verify(document);
+                certificate = signatureValidator.verify(document);
                 result = ((SignedServiceMetadata) result).getServiceMetadata();
             }
 

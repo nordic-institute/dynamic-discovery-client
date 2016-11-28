@@ -23,6 +23,8 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.SignatureValidatorImpl;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
@@ -31,11 +33,21 @@ import java.util.List;
 
 public class DefaultBDXRReader implements IMetadataReader {
 
+    protected ResponseParser responseParser;
+
+    public DefaultBDXRReader() {
+        this(new SignatureValidatorImpl());
+    }
+
+    public DefaultBDXRReader(ISignatureValidator signatureValidator) {
+        responseParser = new ResponseParser(signatureValidator);
+    }
+
     public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
-        return new ResponseParser().parseDocumentIdentifier(fetcherResponse);
+        return responseParser.parseDocumentIdentifier(fetcherResponse);
     }
 
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        return new ResponseParser().parseServiceMetadata(fetcherResponse);
+        return responseParser.parseServiceMetadata(fetcherResponse);
     }
 }

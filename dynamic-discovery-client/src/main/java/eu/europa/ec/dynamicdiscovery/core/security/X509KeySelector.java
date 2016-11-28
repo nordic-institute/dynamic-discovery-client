@@ -10,9 +10,10 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 
 public class X509KeySelector extends KeySelector {
+
     private X509Certificate certificate;
 
-    X509KeySelector() {
+    public X509KeySelector() {
     }
 
     public KeySelectorResult select(KeyInfo keyInfo,
@@ -33,7 +34,7 @@ public class X509KeySelector extends KeySelector {
                     continue;
                 }
                 this.certificate = (X509Certificate) o;
-                final PublicKey key =  this.certificate.getPublicKey();
+                final PublicKey key = this.certificate.getPublicKey();
                 // Make sure the algorithm is compatible
                 // with the method.
                 if (algEquals(method.getAlgorithm(), key.getAlgorithm())) {
