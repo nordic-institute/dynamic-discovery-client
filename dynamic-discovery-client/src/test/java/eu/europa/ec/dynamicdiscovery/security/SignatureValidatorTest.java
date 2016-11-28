@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 public class SignatureValidatorTest {
@@ -43,7 +44,7 @@ public class SignatureValidatorTest {
         Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
         X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
         Assert.assertNotNull(certificate);
-        Assert.assertEquals("CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE",certificate.getSubjectDN().toString());
+        Assert.assertEquals("CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE", certificate.getSubjectDN().toString());
     }
 
     @Test(expected = SignatureException.class)
@@ -53,6 +54,6 @@ public class SignatureValidatorTest {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-        X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
+        Certificate certificate = signatureValidator.verify(document);
     }
 }
