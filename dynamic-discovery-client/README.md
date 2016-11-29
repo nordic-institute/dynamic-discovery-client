@@ -9,6 +9,7 @@
     2. Project
     2.1. Artifacts
     2.2. Repository
+    2.3. Source Code
     3. Setting up parameters
     3.1. Interfaces and Implementations
     3.2. Proxy Configuration
