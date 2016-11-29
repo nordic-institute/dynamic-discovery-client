@@ -1,10 +1,8 @@
-**Getting started with the Dynamic Discovery Client for SMP**
-=========================================================
+#Getting started with the Dynamic Discovery Client for SMP
 
 ----------
 
-**INDEX**
-
+##INDEX
 
     1. Introduction
     1.1. Purpose of this document
@@ -20,18 +18,18 @@
     7. Contact Information
 
 
-**1. INTRODUCTION**
+## 1. INTRODUCTION
 
 This Dynamic Discovery Client is a webservice client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the e-SENS SMP profile based on the OASIS BDX SMP specification and by any business domain.
 
-**1.1. PURPOSE OF THIS DOCUMENT**
+##1.1. PURPOSE OF THIS DOCUMENT
 
 This page provides a brief description of how to use this web service client to connect to a Service Metadata Publisher using CNAME or NAPTR record to find out and retrieve Receiver Recipient Metadata.
 
 
-**2. PROJECT**
+##2. PROJECT
 
-**2.1. ARTIFACTS**
+##2.1. ARTIFACTS
 
 Please find the maven project organization here: https://ec.europa.eu/cefdigital/wiki/download/attachments/35215791/Dynamic%20Discovery%20Client.PNG?version=1&modificationDate=1476951474175&api=v2
 
@@ -59,10 +57,7 @@ artifactId: <artifactId>dynamic-discovery-client</artifactId>
 version: <version>{version}</version>
 
 
-
-
-
-**2.2. REPOSITORY**
+##2.2. REPOSITORY
 
 All versions of Dynamic Discovery Client can be found on:
 
@@ -75,39 +70,39 @@ Snapshots
 https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/eu/europa/ec/dynamic-discovery/
 
 
-**3. SETTING UP PARAMETERS**
+##3. SETTING UP PARAMETERS
 
 The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations however the user is free to use customized implementations to fit other needs.
 
 
-**3.1. INTERFACES AND IMPLEMENTATIONS**
+##3.1. INTERFACES AND IMPLEMENTATIONS
 
 *IMetadataLocator*
 
-This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation ***eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator*** for looking up NAPTR or CNAME records.
+This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation ##*eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator##* for looking up NAPTR or CNAME records.
 
 *IMetadataFetcher*
 
-This interface is responsible for fetching the response from the request. By default it provides the implementation ***eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher***.
+This interface is responsible for fetching the response from the request. By default it provides the implementation ##*eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher##*.
 
 *IDNSLookup*
 
-This interface is responsible for looking up the participant identifier. By default it provides the implementation ***eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup.***
+This interface is responsible for looking up the participant identifier. By default it provides the implementation ##*eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup.##*
 
 *IMetadataProvider*
 
-This interface is responsible for resolving URIs for participant identifier metadata. By default it provides the implementation ***eu.europa.ec.dynamicdiscovery.core.provider.DefaultProvider.***
+This interface is responsible for resolving URIs for participant identifier metadata. By default it provides the implementation ##*eu.europa.ec.dynamicdiscovery.core.provider.DefaultProvider.##*
 
 *IMetadataReader*
 
-This interface is responsible for parsing the response according to the XSD. By default it provides the implementation ***eu.europa.ec.dynamicdiscovery.core.reader.BdxrReader.***
+This interface is responsible for parsing the response according to the XSD. By default it provides the implementation ##*eu.europa.ec.dynamicdiscovery.core.reader.BdxrReader.##*
 
 *ISignatureValidator*
 
-This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation ***eu.europa.ec.dynamicdiscovery.core.security.DefaultSignatureValidator.***
+This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation ##*eu.europa.ec.dynamicdiscovery.core.security.DefaultSignatureValidator.##*
 
 
-**3.2. PROXY CONFIGURATION**
+##3.2. PROXY CONFIGURATION
 
 By default eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher does not use proxy configuration. In order to use proxy, an instance of the class eu.europa.ec.dynamicdiscovery.core.security.ProxyConfiguration must be configured and passed by parameter as follows:
 
@@ -116,7 +111,7 @@ Example:
     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance() .fetcher(new URLFetcher(new ProxyConfiguration("127.0.0.1", 8000, "user", "password")))
 
 
-**4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT**
+##4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT
 
 The DynamicDiscoveryBuilder is responsible for creating a new instance of the Dynamic Discovery Client. By default, there are implementations for all core services provided by the tool however new customized implementations can be used by the user.
 
@@ -146,7 +141,7 @@ Customized implementation example:
     ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier ,  new DocumentIdentifier("urn::epsos:services##epsos-21", "epsos-docid-qns"));
 
 
-**5. REFERENCES**
+##5. REFERENCES
 
 e-SENS/PR-BDXL - ipi.gr/display/ESENS/PR+-+BDXL
 
@@ -157,7 +152,7 @@ Service Metadata Publisher (SMP) - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/
 SMP XML schema - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/cs03/schemas/bdx-smp-201605.xsd
 
 
-**6. LICENSE**
+##6. LICENSE
 
 Dynamic Discovery Client is under license LGPL-2.1.
 
@@ -166,7 +161,7 @@ More Information:
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
 
 
-**7. CONTACT INFORMATION**
+##7. CONTACT INFORMATION
 
 CEF Support Team
 
