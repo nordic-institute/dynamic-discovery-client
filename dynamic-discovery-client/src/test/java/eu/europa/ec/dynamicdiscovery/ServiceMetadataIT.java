@@ -20,7 +20,7 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;

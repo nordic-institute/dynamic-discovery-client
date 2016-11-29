@@ -22,7 +22,7 @@ package eu.europa.ec.dynamicdiscovery.service;
 
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
-import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.locator.DefaultDNSLookupMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;

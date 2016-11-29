@@ -21,7 +21,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.provider;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
