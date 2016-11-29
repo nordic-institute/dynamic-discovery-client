@@ -47,6 +47,13 @@ Snapshots
 https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/eu/europa/ec/dynamic-discovery/
 
 
+## 2.3. SOURCE CODE
+
+Please find the GIT repository on https://rodrfla@ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git
+
+Source code: https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+
+
 ## 3. SETTING UP PARAMETERS
 
 The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations, however, the user is free to use customized implementations to fit other needs.
