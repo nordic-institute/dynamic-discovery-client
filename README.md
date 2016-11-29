@@ -77,29 +77,29 @@ The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default imple
 
 ## 3.1. INTERFACES AND IMPLEMENTATIONS
 
-*IMetadataLocator*
+**IMetadataLocator**
 
-This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation ## *eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator## * for looking up NAPTR or CNAME records.
+This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator** for looking up NAPTR or CNAME records.
 
-*IMetadataFetcher*
+**IMetadataFetcher**
 
-This interface is responsible for fetching the response from the request. By default it provides the implementation ## *eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher## *.
+This interface is responsible for fetching the response from the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher**.
 
-*IDNSLookup*
+**IDNSLookup**
 
-This interface is responsible for looking up the participant identifier. By default it provides the implementation ## *eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup.## *
+This interface is responsible for looking up the participant identifier. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup.**
 
-*IMetadataProvider*
+**IMetadataProvider**
 
-This interface is responsible for resolving URIs for participant identifier metadata. By default it provides the implementation ## *eu.europa.ec.dynamicdiscovery.core.provider.DefaultProvider.## *
+This interface is responsible for resolving URIs for participant identifier metadata. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.provider.DefaultProvider.**
 
-*IMetadataReader*
+**IMetadataReader**
 
-This interface is responsible for parsing the response according to the XSD. By default it provides the implementation ## *eu.europa.ec.dynamicdiscovery.core.reader.BdxrReader.## *
+This interface is responsible for parsing the response according to the XSD. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.reader.BdxrReader.**
 
-*ISignatureValidator*
+**ISignatureValidator**
 
-This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation ## *eu.europa.ec.dynamicdiscovery.core.security.DefaultSignatureValidator.## *
+This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.security.DefaultSignatureValidator.**
 
 
 ## 3.2. PROXY CONFIGURATION
@@ -171,6 +171,6 @@ By phone: +32 2 299 09 09
 
 Standard Service: 8am to 6pm (Normal EC working Days)
 
-Standby Service*: 6pm to 8am (Commission and Public Holidays, Weekends)
+Standby Service**: 6pm to 8am (Commission and Public Holidays, Weekends)
 
-* Only for critical and urgent incidents and only by phone
+** Only for critical and urgent incidents and only by phone
