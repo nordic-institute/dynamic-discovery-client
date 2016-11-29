@@ -1,9 +1,9 @@
 **
 Getting started with the Dynamic Discovery Client for SMP
-===============================================
 **
 
 **INDEX**
+
     1. Introduction
     1.1. Purpose of this document
     2. Project
@@ -18,6 +18,7 @@ Getting started with the Dynamic Discovery Client for SMP
     7. Contact Information
 
 **1. INTRODUCTION**
+
 This Dynamic Discovery Client is a webservice client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the e-SENS SMP profile based on the OASIS BDX SMP specification and by any business domain.
 
 **1.1. PURPOSE OF THIS DOCUMENT**
