@@ -16,22 +16,17 @@
  * limitations under the License.
  *
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.reader;
+package eu.europa.ec.dynamicdiscovery.core.security;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
+import org.w3c.dom.Document;
 
-import java.util.List;
+import java.security.cert.Certificate;
 
-public interface IMetadataReader {
+public interface ISignatureValidator {
 
-    List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException;
-
-    ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
+    Certificate verify(Document document) throws TechnicalException;
 }
-

@@ -28,6 +28,7 @@ import org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceInformationType;
 
 import java.io.ByteArrayInputStream;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -37,12 +38,12 @@ import java.util.List;
 public class ServiceMetadata {
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
-    private X509Certificate signer;
+    private Certificate signer;
     private List<Endpoint> endpoints;
     private List<ProcessIdentifier> processIdentifiers;
     private List<TransportProfile> transportProfiles;
 
-    public ServiceMetadata(X509Certificate certificate, ServiceInformationType serviceInformationType) throws TechnicalException {
+    public ServiceMetadata(Certificate certificate, ServiceInformationType serviceInformationType) throws TechnicalException {
         if (serviceInformationType == null) {
             throw new IllegalStateException("ServiceInformationType must be not null");
         }
@@ -75,7 +76,7 @@ public class ServiceMetadata {
         return this.endpoints;
     }
 
-    public X509Certificate getSigner() {
+    public Certificate getSigner() {
         return this.signer;
     }
 

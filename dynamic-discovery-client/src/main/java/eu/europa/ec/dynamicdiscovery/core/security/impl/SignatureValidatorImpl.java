@@ -1,5 +1,7 @@
-package eu.europa.ec.dynamicdiscovery.core.security;
+package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.w3c.dom.Document;
@@ -13,14 +15,15 @@ import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
-import java.security.cert.X509Certificate;
+import java.security.cert.Certificate;
 import java.util.Iterator;
 
-public class XmldsigVerifier {
+public class SignatureValidatorImpl implements ISignatureValidator {
 
-    public static X509Certificate verify(Document document) throws TechnicalException {
+    @Override
+    public Certificate verify(Document document) throws TechnicalException {
         try {
-            eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector keySelector = new eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector();
+            X509KeySelector keySelector = new eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector();
             XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
             NodeList nl = document.getDocumentElement().getChildNodes();
             if (nl.getLength() == 0) {
