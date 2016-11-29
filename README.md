@@ -28,7 +28,7 @@ This Dynamic Discovery Client is a webservice client designed to retrieve metada
 
 This page provides a brief description of how to use this web service client to connect to a Service Metadata Publisher using CNAME or NAPTR record to find out and retrieve Receiver Recipient Metadata.
 
-</br>
+
 **2. PROJECT**
 
 **2.1. ARTIFACTS**
@@ -37,16 +37,29 @@ Please find the maven project organization here: https://ec.europa.eu/cefdigital
 
 
 groupId: <groupId>eu.europa.ec.dynamic-discovery</groupId>
+
 artifactId: <artifactId>dynamic-discovery-builder</artifactId>
+
 version: <version>{version}</version>
 
+
+
 groupId: <groupId>eu.europa.ec.dynamic-discovery</groupId>
+
 artifactId: <artifactId>dynamic-discovery-parent</artifactId>
+
 version: <version>{version}</version>
 
+
+
 groupId: <groupId>eu.europa.ec.dynamic-discovery</groupId>
+
 artifactId: <artifactId>dynamic-discovery-client</artifactId>
+
 version: <version>{version}</version>
+
+
+
 
 
 **2.2. REPOSITORY**
