@@ -81,7 +81,7 @@ This interface is responsible for verifying the signature of the response accord
 
 ## 3.2. PROXY CONFIGURATION
 
-By default eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher does not use proxy configuration. In order to use proxy, an instance of the class eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy must be configured and passed by parameter as follows:
+By default **eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher** does not use proxy configuration. In order to use proxy, an instance of the class **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy** must be configured and passed by parameter as follows:
 
 Example:
 
