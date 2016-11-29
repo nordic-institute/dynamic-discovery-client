@@ -24,7 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.impl.SignatureValidatorImpl;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
@@ -36,7 +36,7 @@ public class DefaultBDXRReader implements IMetadataReader {
     private ResponseParser responseParser;
 
     public DefaultBDXRReader() {
-        this(new SignatureValidatorImpl());
+        this(new DefaultSignatureValidator());
     }
 
     public DefaultBDXRReader(ISignatureValidator signatureValidator) {

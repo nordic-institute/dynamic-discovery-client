@@ -19,7 +19,7 @@
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.locator.impl;
+package eu.europa.ec.dynamicdiscovery.core.locator;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;

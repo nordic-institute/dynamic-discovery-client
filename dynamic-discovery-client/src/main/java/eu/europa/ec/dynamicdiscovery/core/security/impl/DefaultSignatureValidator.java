@@ -18,7 +18,7 @@ import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import java.security.cert.Certificate;
 import java.util.Iterator;
 
-public class SignatureValidatorImpl implements ISignatureValidator {
+public class DefaultSignatureValidator implements ISignatureValidator {
 
     @Override
     public Certificate verify(Document document) throws TechnicalException {
