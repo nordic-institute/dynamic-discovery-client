@@ -20,7 +20,7 @@
 
 ##  1. INTRODUCTION
 
-This Dynamic Discovery Client is a webservice client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the e-SENS SMP profile based on the OASIS BDX SMP specification and by any business domain.
+This Dynamic Discovery Client is a web service client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the e-SENS SMP profile based on the OASIS BDX SMP specification and by any business domain.
 
 ## 1.1. PURPOSE OF THIS DOCUMENT
 
@@ -49,43 +49,43 @@ https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshot
 
 ## 3. SETTING UP PARAMETERS
 
-The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations however the user is free to use customized implementations to fit other needs.
+The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations, however, the user is free to use customized implementations to fit other needs.
 
 
 ## 3.1. INTERFACES AND IMPLEMENTATIONS
 
 **IMetadataLocator**
 
-This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.BDXRLocator** for looking up NAPTR or CNAME records.
+This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator** for looking up NAPTR or CNAME records.
 
 **IMetadataFetcher**
 
-This interface is responsible for fetching the response from the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher**.
+This interface is responsible for fetching the response from the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher.**
 
 **IDNSLookup**
 
-This interface is responsible for looking up the participant identifier. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.dns.DefaultDNSLookup.**
+This interface is responsible for looking up the participant identifier. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup.**
 
 **IMetadataProvider**
 
-This interface is responsible for resolving URIs for participant identifier metadata. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.provider.DefaultProvider.**
+This interface is responsible for resolving URIs for participant identifier metadata. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider.**
 
 **IMetadataReader**
 
-This interface is responsible for parsing the response according to the XSD. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.reader.BdxrReader.**
+This interface is responsible for parsing the response according to the XSD. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader.**
 
 **ISignatureValidator**
 
-This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.security.DefaultSignatureValidator.**
+This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator.**
 
 
 ## 3.2. PROXY CONFIGURATION
 
-By default eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher does not use proxy configuration. In order to use proxy, an instance of the class eu.europa.ec.dynamicdiscovery.core.security.ProxyConfiguration must be configured and passed by parameter as follows:
+By default eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher does not use proxy configuration. In order to use proxy, an instance of the class eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy must be configured and passed by parameter as follows:
 
 Example:
 
-    DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance() .fetcher(new URLFetcher(new ProxyConfiguration("127.0.0.1", 8000, "user", "password")))
+    DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance().fetcher(new DefaultURLFetcher(new DefaultProxy("127.0.0.1", 8000, "user", "password"))).build();
 
 
 ## 4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT
@@ -105,7 +105,8 @@ Default implementation example:
 
 
 Customized implementation example:
-Please replace class starting with "Customized" by implementations extended from the aforementioned interfaces.It is not mandatory to have implementations for all the components (Locator, Reader, DNSLookup, Provider, Fetcher)
+
+Please replace classes starting with **"Customized"** by implementations extended from the aforementioned interfaces.It is not mandatory to have implementations for all the components (Locator, Reader, DNSLookup, Provider, Fetcher)
 
     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
             .locator(new CustomizedBDXRLocator("acc.edelivery.tech.ec.europa.eu", new CustomizedDNSLookup()))
