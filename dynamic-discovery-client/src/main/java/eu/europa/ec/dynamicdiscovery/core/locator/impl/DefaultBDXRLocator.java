@@ -36,15 +36,15 @@ import java.security.NoSuchAlgorithmException;
 
 public class DefaultBDXRLocator implements IMetadataLocator {
 
-    private String hostname;
+    private String domain;
     private IDNSLookup dnsLookup;
 
-    public DefaultBDXRLocator(String hostname) {
-        this(hostname, new DefaultDNSLookup());
+    public DefaultBDXRLocator(String domain) {
+        this(domain, new DefaultDNSLookup());
     }
 
-    public DefaultBDXRLocator(String hostname, IDNSLookup dnsLookup) {
-        this.hostname = hostname;
+    public DefaultBDXRLocator(String domain, IDNSLookup dnsLookup) {
+        this.domain = domain;
         this.dnsLookup = dnsLookup;
     }
 
@@ -67,7 +67,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     private URI cnameLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
             String e = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
-            return new URI(String.format("http://b-%s.%s.%s", e, participantIdentifier.getScheme(), hostname));
+            return new URI(String.format("http://b-%s.%s.%s", e, participantIdentifier.getScheme(), domain));
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
@@ -76,7 +76,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     private URI naptrLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
             String participantIdHashed = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
-            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s",participantIdHashed, participantIdentifier.getScheme(), hostname));
+            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s",participantIdHashed, participantIdentifier.getScheme(), domain));
             return new URI(smpURI);
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);

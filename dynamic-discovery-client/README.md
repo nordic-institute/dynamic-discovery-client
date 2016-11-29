@@ -94,22 +94,22 @@ The DynamicDiscoveryBuilder is responsible for creating a new instance of the Dy
 
 Default implementation example:
 
-     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-            .locator(new BDXRLocator()))
-            .build();
+      DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                     .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
+                     .build();
 
-    ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+      ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
-    List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
-    ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+      List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+      ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
 
 
 Customized implementation example:
+Please replace class starting with "Customized" by implementations extended from the aforementioned interfaces.It is not mandatory to have implementations for all the components (Locator, Reader, DNSLookup, Provider, Fetcher)
 
     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-            .locator(new CustomizedBDXRLocator("edelivery.tech.ec.europa.eu", new CustomizedDNSLookup()))
+            .locator(new CustomizedBDXRLocator("acc.edelivery.tech.ec.europa.eu", new CustomizedDNSLookup()))
             .reader(new CustomizedBdxrReader(new CustomizedSignatureValidator()))
-            .service(new CustomDynamicDiscoveryService())
             .provider(new CustomizedProvider())
             .fetcher(new CustomizedURLFetcher(new CustomizedProxyConfiguration("127.0.0.1", 8000, "user", "password")))
             .build();
