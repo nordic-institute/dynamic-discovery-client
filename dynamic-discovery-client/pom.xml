@@ -27,6 +27,22 @@
     </licenses>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${basedir}</directory>
+                <includes>
+                    <include>README.md</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/resources/</directory>
+                <includes>
+                    <include>bdx-smp-201605.xsd</include>
+                    <include>commonServiceBinding.xjb</include>
+                    <include>xmldsig-core-schema.xsd</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
