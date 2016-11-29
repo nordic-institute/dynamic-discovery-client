@@ -1,4 +1,12 @@
-**Getting started with the Dynamic Discovery Client for SMP**
+**
+
+Getting started with the Dynamic Discovery Client for SMP
+=========================================================
+
+**
+
+
+----------
 
 
 
