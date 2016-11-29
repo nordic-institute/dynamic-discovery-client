@@ -39,13 +39,13 @@ groupId: <groupId>eu.europa.ec.dynamic-discovery</groupId>
 artifactId: <artifactId>dynamic-discovery-builder</artifactId>
 
 version: <version>{version}</version>
---
+__
 groupId: <groupId>eu.europa.ec.dynamic-discovery</groupId>
 
 artifactId: <artifactId>dynamic-discovery-parent</artifactId>
 
 version: <version>{version}</version>
---
+__
 groupId: <groupId>eu.europa.ec.dynamic-discovery</groupId>
 
 artifactId: <artifactId>dynamic-discovery-client</artifactId>
