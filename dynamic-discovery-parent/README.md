@@ -113,6 +113,7 @@ Customized implementation example:
 
 **5. REFERENCES**
 
+
 e-SENS/PR-BDXL - ipi.gr/display/ESENS/PR+-+BDXL
 PEPPOL BUSDOX - https://joinup.ec.europa.eu/community/epractice/document/eu-peppol-project-deliverable-busdox-specifications-v10
 Service Metadata Publisher (SMP) - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/bdx-smp-v1.0.html
