@@ -1,7 +1,9 @@
 **Getting started with the Dynamic Discovery Client for SMP**
 
 
+
 **INDEX**
+
 
     1. Introduction
     1.1. Purpose of this document
@@ -16,6 +18,7 @@
     6. License
     7. Contact Information
 
+
 **1. INTRODUCTION**
 
 This Dynamic Discovery Client is a webservice client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the e-SENS SMP profile based on the OASIS BDX SMP specification and by any business domain.
@@ -23,6 +26,7 @@ This Dynamic Discovery Client is a webservice client designed to retrieve metada
 **1.1. PURPOSE OF THIS DOCUMENT**
 
 This page provides a brief description of how to use this web service client to connect to a Service Metadata Publisher using CNAME or NAPTR record to find out and retrieve Receiver Recipient Metadata.
+
 
 **2. PROJECT**
 
@@ -58,9 +62,11 @@ Snapshots
 
 https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/eu/europa/ec/dynamic-discovery/
 
+
 **3. SETTING UP PARAMETERS**
 
 The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations however the user is free to use customized implementations to fit other needs.
+
 
 **3.1. INTERFACES AND IMPLEMENTATIONS**
 
@@ -88,6 +94,7 @@ This interface is responsible for parsing the response according to the XSD. By 
 
 This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation ***eu.europa.ec.dynamicdiscovery.core.security.DefaultSignatureValidator.***
 
+
 **3.2. PROXY CONFIGURATION**
 
 By default eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher does not use proxy configuration. In order to use proxy, an instance of the class eu.europa.ec.dynamicdiscovery.core.security.ProxyConfiguration must be configured and passed by parameter as follows:
@@ -95,6 +102,7 @@ By default eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcher does not use pr
 Example:
 
     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance() .fetcher(new URLFetcher(new ProxyConfiguration("127.0.0.1", 8000, "user", "password")))
+
 
 **4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT**
 
@@ -125,6 +133,7 @@ Customized implementation example:
     List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier );
     ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier ,  new DocumentIdentifier("urn::epsos:services##epsos-21", "epsos-docid-qns"));
 
+
 **5. REFERENCES**
 
 e-SENS/PR-BDXL - ipi.gr/display/ESENS/PR+-+BDXL
@@ -135,6 +144,7 @@ Service Metadata Publisher (SMP) - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/
 
 SMP XML schema - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/cs03/schemas/bdx-smp-201605.xsd
 
+
 **6. LICENSE**
 
 Dynamic Discovery Client is under license LGPL-2.1.
@@ -142,6 +152,7 @@ Dynamic Discovery Client is under license LGPL-2.1.
 More Information:
 
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+
 
 **7. CONTACT INFORMATION**
 
