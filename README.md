@@ -50,7 +50,7 @@ https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshot
 
 ## 2.3. SOURCE CODE
 
-Please find the GIT repository on https://rodrfla@ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git
+Please find the GIT repository on https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git
 
 Source code: https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
 
