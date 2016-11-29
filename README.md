@@ -35,7 +35,7 @@ This page provides a brief description of how to use this web service client to 
 
 Please find the maven project organization here: https://ec.europa.eu/cefdigital/wiki/download/attachments/35215791/Dynamic%20Discovery%20Client.PNG?version=1&modificationDate=1476951474175&api=v2
 
-
+<pre>
 <groupId>eu.europa.ec.dynamic-discovery</groupId>
 <artifactId>dynamic-discovery-builder</artifactId>
 <version>{version}</version>
@@ -49,7 +49,7 @@ Please find the maven project organization here: https://ec.europa.eu/cefdigital
 <groupId>eu.europa.ec.dynamic-discovery</groupId>
 <artifactId>dynamic-discovery-client</artifactId>
 <version>{version}</version>
-
+<code>
 
 **2.2. REPOSITORY**
 
