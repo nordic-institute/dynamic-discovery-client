@@ -18,7 +18,7 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.model;
+package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import org.junit.Assert;
@@ -31,7 +31,7 @@ import javax.xml.bind.UnmarshalException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 
-public class DocumentIdentifierTest {
+public class ServiceGroupTest {
 
     @Test
     public void serviceGroupTestOk() throws Exception {
