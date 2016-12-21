@@ -104,18 +104,18 @@ public class DefaultSignatureValidator implements ISignatureValidator {
 
                 KeyStore.TrustedCertificateEntry certificateEntry =
                         (KeyStore.TrustedCertificateEntry) trustStore.getEntry(alias, null);
-                Certificate certificateEmbedded = certificateEntry.getTrustedCertificate();
-                if (!(certificateEmbedded instanceof X509Certificate)) {
+                Certificate trustedCertificate = certificateEntry.getTrustedCertificate();
+                if (!(trustedCertificate instanceof X509Certificate)) {
                     continue;
                 }
 
-                if (!(signerCertificate).getIssuerDN().equals(((X509Certificate) certificateEmbedded).getSubjectDN())) {
+                if (!(signerCertificate).getIssuerDN().equals(((X509Certificate) trustedCertificate).getSubjectDN())) {
                     continue;
                 }
                 if (certificateFound != null) {
                     throw new IllegalStateException("TrustStore has more than one issuing CA.");
                 }
-                certificateFound = certificateEmbedded;
+                certificateFound = trustedCertificate;
             }
             if (certificateFound == null) {
                 throw new IllegalStateException("TrustStore does not contain Issuer CA.");
