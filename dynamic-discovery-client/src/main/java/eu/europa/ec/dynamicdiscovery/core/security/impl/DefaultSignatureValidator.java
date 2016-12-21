@@ -15,13 +15,38 @@ import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class DefaultSignatureValidator implements ISignatureValidator {
 
+    private KeyStore trustStore;
+
+    public DefaultSignatureValidator() {
+    }
+
+    public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
+        this.trustStore = trustStore;
+
+        if (trustStore == null) {
+            throw new SignatureException("TrustStore must be not null for signature validation.");
+        }
+    }
+
     @Override
     public Certificate verify(Document document) throws TechnicalException {
+        Certificate certificate = verifySignature(document);
+        if (trustStore != null) {
+            verifyCertificate(trustStore, (X509Certificate) certificate);
+        }
+
+        return certificate;
+    }
+
+    private Certificate verifySignature(Document document) throws TechnicalException {
         try {
             X509KeySelector keySelector = new eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector();
             XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
@@ -31,22 +56,22 @@ public class DefaultSignatureValidator implements ISignatureValidator {
             }
 
             int size = nl.getLength();
-            Element signatureel = null;
+            Element signatureElement = null;
             for (int i = 0; i < size; i++) {
                 Node n = nl.item(i);
                 if (n.getNodeType() == Node.ELEMENT_NODE) {
                     Element el = (Element) n;
                     if (el.getLocalName().equals("Signature") && el.getNamespaceURI().equals("http://www.w3.org/2000/09/xmldsig#")) {
-                        signatureel = el;
+                        signatureElement = el;
                     }
                 }
             }
 
-            if (signatureel == null) {
+            if (signatureElement == null) {
                 throw new SignatureException("Unable to get the signature");
             }
 
-            DOMValidateContext valContext = new DOMValidateContext(keySelector, signatureel);
+            DOMValidateContext valContext = new DOMValidateContext(keySelector, signatureElement);
             valContext.setProperty("javax.xml.crypto.dsig.cacheReference", Boolean.TRUE);
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
             boolean coreValidity = signature.validate(valContext);
@@ -65,6 +90,38 @@ public class DefaultSignatureValidator implements ISignatureValidator {
             return keySelector.getCertificate();
         } catch (XMLSignatureException | MarshalException e) {
             throw new SignatureException(e.getMessage(), e);
+        }
+    }
+
+    private void verifyCertificate(KeyStore trustStore, X509Certificate signerCertificate) throws TechnicalException {
+        try {
+            Certificate certificateFound = null;
+            for (String alias : Collections.list(trustStore.aliases())) {
+                KeyStore.Entry entry = trustStore.getEntry(alias, null);
+                if (!trustStore.entryInstanceOf(alias, KeyStore.TrustedCertificateEntry.class)) {
+                    continue;
+                }
+
+                KeyStore.TrustedCertificateEntry certificateEntry =
+                        (KeyStore.TrustedCertificateEntry) trustStore.getEntry(alias, null);
+                Certificate certificateEmbedded = certificateEntry.getTrustedCertificate();
+                if (!(certificateEmbedded instanceof X509Certificate)) {
+                    continue;
+                }
+
+                if (!(signerCertificate).getIssuerDN().equals(((X509Certificate) certificateEmbedded).getSubjectDN())) {
+                    continue;
+                }
+                if (certificateFound != null) {
+                    throw new IllegalStateException("TrustStore has more than one issuing CA.");
+                }
+                certificateFound = certificateEmbedded;
+            }
+            if (certificateFound == null) {
+                throw new IllegalStateException("TrustStore does not contain Issuer CA.");
+            }
+        } catch (Exception exc) {
+            throw new SignatureException(exc.getMessage(), exc);
         }
     }
 }
