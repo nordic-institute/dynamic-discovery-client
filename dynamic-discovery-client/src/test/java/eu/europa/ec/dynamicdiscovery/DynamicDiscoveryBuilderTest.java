@@ -23,6 +23,9 @@ package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
+import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,6 +36,7 @@ public class DynamicDiscoveryBuilderTest {
         DynamicDiscoveryBuilder builder = DynamicDiscoveryBuilder.newInstance();
         DynamicDiscovery smpClient = builder
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
         Assert.assertNotNull(smpClient);
         Assert.assertNotNull(builder.getService());
@@ -43,5 +47,4 @@ public class DynamicDiscoveryBuilderTest {
         Assert.assertNotNull(builder.getService().getMetadataProvider());
         Assert.assertNotNull(builder.getService().getMetadataReader());
     }
-
 }

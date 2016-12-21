@@ -39,7 +39,8 @@ public class SignatureValidatorTest {
 
     @Test
     public void verifyValidSignature() throws Exception {
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator();
+        KeyStore keyStore = loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
         X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
         Assert.assertNotNull(certificate);
@@ -48,7 +49,8 @@ public class SignatureValidatorTest {
 
     @Test(expected = SignatureException.class)
     public void verifyNotValidSignature() throws Exception {
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator();
+        KeyStore keyStore = loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_9915_123456789_invalid_signature");
         Certificate certificate = signatureValidator.verify(document);
     }

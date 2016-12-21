@@ -24,8 +24,10 @@ import com.google.common.io.CharStreams;
 import eu.europa.ec.dynamicdiscovery.exception.StreamException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.KeyStore;
 
 /**
  * Created by rodrfla on 21/11/2016.
@@ -47,5 +49,11 @@ public class CommonUtil {
         } catch (Exception exc) {
             throw new StreamException(exc.getMessage(), exc);
         }
+    }
+
+    public static KeyStore loadTrustStore(String fileName) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource(fileName).getFile()), null);
+        return keyStore;
     }
 }

@@ -35,10 +35,6 @@ public class DefaultBDXRReader implements IMetadataReader {
 
     private ResponseParser responseParser;
 
-    public DefaultBDXRReader() {
-        this(new DefaultSignatureValidator());
-    }
-
     public DefaultBDXRReader(ISignatureValidator signatureValidator) {
         responseParser = new ResponseParser(signatureValidator);
     }

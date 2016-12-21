@@ -1,6 +1,26 @@
+/*
+ * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ *
+ * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ *
+ * Licensed under the LGPL, Version 2.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ *
+ */
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -21,27 +41,16 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Iterator;
 
-public class DefaultSignatureValidator implements ISignatureValidator {
-
-    private KeyStore trustStore;
-
-    public DefaultSignatureValidator() {
-    }
+public class DefaultSignatureValidator extends AbstractSignatureValidator {
 
     public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
-        this.trustStore = trustStore;
-
-        if (trustStore == null) {
-            throw new SignatureException("TrustStore must be not null for signature validation.");
-        }
+        super(trustStore);
     }
 
     @Override
     public Certificate verify(Document document) throws TechnicalException {
         Certificate certificate = verifySignature(document);
-        if (trustStore != null) {
-            verifyCertificate(trustStore, (X509Certificate) certificate);
-        }
+        verifyCertificate((X509Certificate) certificate);
 
         return certificate;
     }
@@ -93,7 +102,7 @@ public class DefaultSignatureValidator implements ISignatureValidator {
         }
     }
 
-    private void verifyCertificate(KeyStore trustStore, X509Certificate signerCertificate) throws TechnicalException {
+    private void verifyCertificate(X509Certificate signerCertificate) throws TechnicalException {
         try {
             Certificate certificateFound = null;
             for (String alias : Collections.list(trustStore.aliases())) {

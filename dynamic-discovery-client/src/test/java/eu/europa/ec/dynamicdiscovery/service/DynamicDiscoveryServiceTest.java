@@ -23,13 +23,18 @@ package eu.europa.ec.dynamicdiscovery.service;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.locator.DefaultDNSLookupMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.FileInputStream;
 import java.net.URI;
+import java.security.KeyStore;
 
 public class DynamicDiscoveryServiceTest {
 
@@ -38,6 +43,7 @@ public class DynamicDiscoveryServiceTest {
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:98765digit", "iso6523-actorid-upis");
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
         Assert.assertEquals("http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu", smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
     }
@@ -48,6 +54,7 @@ public class DynamicDiscoveryServiceTest {
         DefaultDNSLookupMock defaultDNSLookup = new DefaultDNSLookupMock();
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
 
         Assert.assertEquals("http://smp-mock-1.ehealth.eu:8888", smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
@@ -60,6 +67,7 @@ public class DynamicDiscoveryServiceTest {
         DefaultDNSLookupMock defaultDNSLookup = new DefaultDNSLookupMock();
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
 
         Assert.assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178", smpClient.getService().getMetadataProvider().resolveDocumentIdentifiers(new URI("http://smp.ec.europa.eu/"), participantIdentifier).toString());
@@ -72,6 +80,7 @@ public class DynamicDiscoveryServiceTest {
         DefaultDNSLookupMock defaultDNSLookup = new DefaultDNSLookupMock();
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
 
         Assert.assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
@@ -84,6 +93,7 @@ public class DynamicDiscoveryServiceTest {
         DefaultDNSLookupMock defaultDNSLookup = new DefaultDNSLookupMock();
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
         URI provider = smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp123456.ec.europa.eu/"), participantIdentifier, documentIdentifier);
         Assert.assertEquals("http://smp123456.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", provider.toString());
