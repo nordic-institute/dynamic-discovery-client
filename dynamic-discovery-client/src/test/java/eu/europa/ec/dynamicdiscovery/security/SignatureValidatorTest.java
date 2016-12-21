@@ -55,7 +55,7 @@ public class SignatureValidatorTest {
 
     @Test
     public void verifyValidSignerCertificate() throws Exception {
-        KeyStore keyStore = createTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        KeyStore keyStore = loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
         X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
@@ -65,7 +65,7 @@ public class SignatureValidatorTest {
 
     @Test(expected = SignatureException.class)
     public void verifyNotTrustedSignerCertificate() throws Exception {
-        KeyStore keyStore = createTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
+        KeyStore keyStore = loadTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
         try {
@@ -78,7 +78,7 @@ public class SignatureValidatorTest {
 
     @Test(expected = SignatureException.class)
     public void verifyValidSignerCertificateForDoubleCA() throws Exception {
-        KeyStore keyStore = createTrustStore("truststore/truststoreForTrustedCertificateWithDoubleCA.ts");
+        KeyStore keyStore = loadTrustStore("truststore/truststoreForTrustedCertificateWithDoubleCA.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
         try {
@@ -96,7 +96,7 @@ public class SignatureValidatorTest {
         return documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
     }
 
-    private KeyStore createTrustStore(String fileName) throws Exception {
+    private KeyStore loadTrustStore(String fileName) throws Exception {
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource(fileName).getFile()), null);
         return keyStore;
