@@ -23,6 +23,7 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -35,7 +36,7 @@ public class DefaultBDXRReader implements IMetadataReader {
 
     private ResponseParser responseParser;
 
-    public DefaultBDXRReader(ISignatureValidator signatureValidator) {
+    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
         responseParser = new ResponseParser(signatureValidator);
     }
 

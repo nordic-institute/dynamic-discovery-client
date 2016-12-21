@@ -29,9 +29,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.KeyStore;
 
-/**
- * Created by rodrfla on 21/11/2016.
- */
 public class CommonUtil {
 
     public static String getStringFromXmlFile(String fileName) throws TechnicalException {
