@@ -63,12 +63,20 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 case 200:
                     return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()), response.containsHeader("X-SMP-Namespace") ? response.getFirstHeader("X-SMP-Namespace").getValue() : null);
                 case 404:
-                    throw new DNSLookupException("Not supported.");
+                    throw new DNSLookupException("SMP not found - response 404");
                 default:
-                    throw new DNSLookupException(String.format("Received code %s for lookup.", Integer.valueOf(response.getStatusLine().getStatusCode())));
+                    throw new DNSLookupException(String.format("Error %s trying to access SMP.", Integer.valueOf(response.getStatusLine().getStatusCode())));
             }
         } catch (Exception exc) {
-            throw new DNSLookupException(exc.getMessage(), exc);
+            if (exc instanceof TechnicalException) {
+                throw (TechnicalException) exc;
+            } else {
+                String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
+                if (httpGet.getURI().toString().toLowerCase().startsWith("http://b-")) {
+                    message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
+                }
+                throw new DNSLookupException(message, exc);
+            }
         }
     }
 }

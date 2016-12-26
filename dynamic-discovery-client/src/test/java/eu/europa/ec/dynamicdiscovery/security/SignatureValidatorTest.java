@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -86,7 +85,7 @@ public class SignatureValidatorTest {
         try {
             X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
         } catch (SignatureException exc) {
-            Assert.assertEquals("TrustStore has more than one issuing CA.", exc.getMessage());
+            Assert.assertEquals("TrustStore has more than one trusted certificate as the same.", exc.getMessage());
             throw new SignatureException(exc.getMessage(), exc);
         }
     }
