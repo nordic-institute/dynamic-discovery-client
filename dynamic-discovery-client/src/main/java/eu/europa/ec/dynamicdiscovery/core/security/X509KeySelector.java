@@ -49,15 +49,17 @@ public class X509KeySelector extends KeySelector {
         throw new KeySelectorException("No key found!");
     }
 
-    static boolean algEquals(String algURI, String algName) {
-        if ((algName.equalsIgnoreCase("DSA") &&
-                algURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1)) ||
-                (algName.equalsIgnoreCase("RSA") &&
-                        algURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1))) {
+    static boolean algEquals(String algorithmURI, String algorithmName) {
+        if ((algorithmName.equalsIgnoreCase("DSA") &&
+                algorithmURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1))
+                || (algorithmName.equalsIgnoreCase("RSA") &&
+                algorithmURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1))
+                || (algorithmName.equalsIgnoreCase("RSA")
+                && algorithmURI.equalsIgnoreCase("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"))) {
+
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public X509Certificate getCertificate() {
