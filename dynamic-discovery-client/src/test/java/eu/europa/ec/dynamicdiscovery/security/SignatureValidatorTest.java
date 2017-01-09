@@ -64,7 +64,7 @@ public class SignatureValidatorTest {
         Assert.assertEquals("CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE", certificate.getSubjectDN().toString());
     }
 
-    @Test(expected = SignatureException.class)
+    @Test
     public void verifyNotTrustedSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
@@ -73,21 +73,10 @@ public class SignatureValidatorTest {
             X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
         } catch (SignatureException exc) {
             Assert.assertEquals("TrustStore does not contain Issuer CA.", exc.getMessage());
-            throw new SignatureException(exc.getMessage(), exc);
+            Assert.assertTrue(exc instanceof SignatureException);
+            return;
         }
-    }
-
-    @Test(expected = SignatureException.class)
-    public void verifyValidSignerCertificateForDoubleCA() throws Exception {
-        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificateWithDoubleCA.ts");
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
-        Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
-        try {
-            X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
-        } catch (SignatureException exc) {
-            Assert.assertEquals("TrustStore has more than one trusted certificate as the same.", exc.getMessage());
-            throw new SignatureException(exc.getMessage(), exc);
-        }
+        Assert.fail("Exception should have been thrown");
     }
 
     private Document parseDocument(String fileName) throws Exception {
