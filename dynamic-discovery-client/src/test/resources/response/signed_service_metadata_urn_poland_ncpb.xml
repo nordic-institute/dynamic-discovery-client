@@ -21,9 +21,9 @@
                             </ServiceDescription>
                             <TechnicalContactUrl>http://poland/contact</TechnicalContactUrl>
                             <TechnicalInformationUrl>http://poland/contact</TechnicalInformationUrl>
-                            <Extension><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>JBVhP+ar5j+asrLMiSYk9VFUuJ0R5s7vVpo6s0LN23c=</DigestValue></Reference></SignedInfo><SignatureValue>RIhE0z8ql5jGgVbCiFYqCMuhQfANGtUinoa1qpQIU5caRHaWGqOS/sQXxjUbAYU3YaQcLikgMycZ
-dBWGzHV78LIyhPAMw9fhDEs+EoyWA0AQBjDSrax4H5EghNb+pILO+6paz1TTqvF3J1T+l1prRBFn
-cGY17AyIeKpe31jU2gw=</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=Sample National Infrastructure,OU=Sante,C=PT</X509SubjectName><X509Certificate>MIICAzCCAWygAwIBAgIEWCRzHjANBgkqhkiG9w0BAQsFADBGMQswCQYDVQQGEwJQVDEOMAwGA1UE
+                            <Extension><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>sHjDUJ2FRDf2eMAM7+xLlyHy1OMHnqj6plqvfSu8zP4=</DigestValue></Reference></SignedInfo><SignatureValue>HLGBqDpzihtAnDN8fwJGJyAYXSaafmmegxPsVR7EX8YAYUf/ceudw99Hq136NoLIA54PHCocZooY
+ltTmaFxyGqwZOTWvFz+shzhYkeMP7Rbcvf6lKmXamFCJIdd1pmZxtA3SCWE5cwtHDauO2UPth+i9
+DQCJm/gIJFtoHeKR1OQ=</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=Sample National Infrastructure,OU=Sante,C=PT</X509SubjectName><X509Certificate>MIICAzCCAWygAwIBAgIEWCRzHjANBgkqhkiG9w0BAQsFADBGMQswCQYDVQQGEwJQVDEOMAwGA1UE
 CwwFU2FudGUxJzAlBgNVBAMMHlNhbXBsZSBOYXRpb25hbCBJbmZyYXN0cnVjdHVyZTAeFw0xNjEx
 MTAxMzE2NTBaFw0yNjExMTAxMzE2NTBaMEYxCzAJBgNVBAYTAlBUMQ4wDAYDVQQLDAVTYW50ZTEn
 MCUGA1UEAwweU2FtcGxlIE5hdGlvbmFsIEluZnJhc3RydWN0dXJlMIGfMA0GCSqGSIb3DQEBAQUA
@@ -37,11 +37,12 @@ vkV1fbrz</X509Certificate></X509Data></KeyInfo></Signature></Extension>
                     </ServiceEndpointList>
                 </Process>
             </ProcessList>
+			<Extension/>
         </ServiceInformation>
     </ServiceMetadata>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>+otqg2cV7nOi5ec3G2vSVByPfi+2AKsYbOcsbbGREWc=</DigestValue></Reference></SignedInfo><SignatureValue>NTLHxxG4Tr9F06saTqYx8IFkVyMI7JEYUNPabECg0Yc5kfRnw2Yd2mO3KAM4A1qSNIvZl3vce1q+
-mwtpUu1co83eSza4gsxt5JhU3y3kxmQ3ThV9bGp2mSpdxvgRAoQA6VI0m++rcyVcUHpPkHfRqxgR
-ztxbuf33f5Py8TmkRBw=</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=SMP Mock Services,OU=DIGIT,O=European Commision,C=BE</X509SubjectName><X509Certificate>MIICIzCCAYygAwIBAgIEWCRzfjANBgkqhkiG9w0BAQsFADBWMQswCQYDVQQGEwJCRTEbMBkGA1UE
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>+H5cswRa/LmLc6+BNzjUrMiTJOTpr9Bf98Mhgw4U93o=</DigestValue></Reference></SignedInfo><SignatureValue>dz0jGAfB6XnXXIR/WwV+AN1enScquzkQi0eXqaAEanTkLwSD9IEuHbASwriI/r7m4lWVfBno0SiZ
+6gKVFmAp6pEO8MhENJFz+h3vbkgcOgUx8fowCWRed/uiQtpuAMtpqXbd8eASH6/9Xk2JhEG3eQYS
+r7el42FY5lsvHQIjvzM=</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=SMP Mock Services,OU=DIGIT,O=European Commision,C=BE</X509SubjectName><X509Certificate>MIICIzCCAYygAwIBAgIEWCRzfjANBgkqhkiG9w0BAQsFADBWMQswCQYDVQQGEwJCRTEbMBkGA1UE
 CgwSRXVyb3BlYW4gQ29tbWlzaW9uMQ4wDAYDVQQLDAVESUdJVDEaMBgGA1UEAwwRU01QIE1vY2sg
 U2VydmljZXMwHhcNMTYxMTEwMTMxODE4WhcNMjYxMTEwMTMxODE4WjBWMQswCQYDVQQGEwJCRTEb
 MBkGA1UECgwSRXVyb3BlYW4gQ29tbWlzaW9uMQ4wDAYDVQQLDAVESUdJVDEaMBgGA1UEAwwRU01Q
