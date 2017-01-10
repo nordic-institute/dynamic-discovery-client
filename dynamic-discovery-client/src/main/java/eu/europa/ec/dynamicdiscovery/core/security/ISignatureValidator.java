@@ -25,8 +25,9 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.w3c.dom.Document;
 
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 public interface ISignatureValidator {
 
-    Certificate verify(Document document) throws TechnicalException;
+    X509Certificate verify(Document document) throws TechnicalException;
 }

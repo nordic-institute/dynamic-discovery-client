@@ -48,14 +48,14 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
     }
 
     @Override
-    public Certificate verify(Document document) throws TechnicalException {
-        Certificate certificate = verifySignature(document);
-        verifyCertificate((X509Certificate) certificate);
+    public X509Certificate verify(Document document) throws TechnicalException {
+        X509Certificate certificate = verifySignature(document);
+        verifyCertificate(certificate);
 
         return certificate;
     }
 
-    private Certificate verifySignature(Document document) throws TechnicalException {
+    private X509Certificate verifySignature(Document document) throws TechnicalException {
         try {
             X509KeySelector keySelector = new eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector();
             XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
