@@ -67,8 +67,15 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 default:
                     throw new DNSLookupException(String.format("Error %s trying to access SMP.", Integer.valueOf(response.getStatusLine().getStatusCode())));
             }
+        } catch (TechnicalException exc) {
+            throw exc;
         } catch (Exception exc) {
-            throw new DNSLookupException(exc.getMessage(), exc);
+            String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
+            String uri = httpGet.getURI().toString().toLowerCase();
+            if (uri.startsWith("http://b-") || uri.startsWith("https://b-")) {
+                message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
+            }
+            throw new DNSLookupException(message, exc);
         }
     }
 }

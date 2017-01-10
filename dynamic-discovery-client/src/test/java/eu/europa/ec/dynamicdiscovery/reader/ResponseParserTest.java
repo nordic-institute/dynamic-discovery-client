@@ -29,6 +29,7 @@ import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.security.KeyStore;
 import java.util.List;
 
 public class ResponseParserTest {
@@ -36,7 +37,8 @@ public class ResponseParserTest {
     @Test
     public void parseServiceMetadataTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_metadata_urn_poland_ncpb"), "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
-        ResponseParser responseParser = new ResponseParser(new DefaultSignatureValidator());
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        ResponseParser responseParser = new ResponseParser(new DefaultSignatureValidator(keyStore));
         ServiceMetadata serviceMetadata = responseParser.parseServiceMetadata(fetcherResponse);
         Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
@@ -52,7 +54,8 @@ public class ResponseParserTest {
     @Test
     public void parseDocumentIdentifierTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_group_urn_poland_ncpb"), "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
-        ResponseParser responseParser = new ResponseParser(new DefaultSignatureValidator());
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        ResponseParser responseParser = new ResponseParser(new DefaultSignatureValidator(keyStore));
         List<DocumentIdentifier> documentIdentifiers = responseParser.parseDocumentIdentifier(fetcherResponse);
         Assert.assertEquals(2, documentIdentifiers.size());
         Assert.assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());

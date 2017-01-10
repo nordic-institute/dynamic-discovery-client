@@ -21,6 +21,7 @@
 package eu.europa.ec.dynamicdiscovery.core.reader.parser;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -48,9 +49,9 @@ public class ResponseParser {
 
     private Unmarshaller unmarshaller;
     private DocumentBuilderFactory documentBuilderFactory;
-    private ISignatureValidator signatureValidator;
+    private AbstractSignatureValidator signatureValidator;
 
-    public ResponseParser(ISignatureValidator signatureValidator) {
+    public ResponseParser(AbstractSignatureValidator signatureValidator) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata.class, SignedServiceMetadata.class, ServiceGroup.class);
             this.documentBuilderFactory = DocumentBuilderFactory.newInstance();

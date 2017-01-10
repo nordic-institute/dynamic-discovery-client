@@ -20,14 +20,20 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.security;
 
-
+import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import org.w3c.dom.Document;
 
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
+import java.security.KeyStore;
 
-public interface ISignatureValidator {
+public abstract class AbstractSignatureValidator implements ISignatureValidator {
 
-    X509Certificate verify(Document document) throws TechnicalException;
+    protected KeyStore trustStore;
+
+    public AbstractSignatureValidator(KeyStore trustStore) throws TechnicalException {
+        this.trustStore = trustStore;
+
+        if (this.trustStore == null) {
+            throw new SignatureException("TrustStore must be not null for signature validation.");
+        }
+    }
 }
