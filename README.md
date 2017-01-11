@@ -95,6 +95,16 @@ Example:
 
     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance().fetcher(new DefaultURLFetcher(new DefaultProxy("127.0.0.1", 8000, "user", "password"))).build();
 
+## 3.3. TRUSTSTORE CONFIGURATION
+
+In order to check if the certificate extracted from the signed response is trusted even if the signature is valid, a truststore must be passed by parameter to the Signature Validator implementation as below:
+
+Example:
+
+     KeyStore truststore = KeyStore.getInstance("JKS");
+     truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+     DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
 
 ## 4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT
 
@@ -102,9 +112,13 @@ The DynamicDiscoveryBuilder is responsible for creating a new instance of the Dy
 
 Default implementation example:
 
+      KeyStore truststore = KeyStore.getInstance("JKS");
+      truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
       DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                     .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
-                     .build();
+      .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
+      .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+      .build();
 
       ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
@@ -116,9 +130,12 @@ Customized implementation example:
 
 Please replace classes starting with **"Customized"** by implementations extended from the aforementioned interfaces.It is not mandatory to have implementations for all the components (Locator, Reader, DNSLookup, Provider, Fetcher)
 
+    KeyStore truststore = KeyStore.getInstance("JKS");
+    truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
             .locator(new CustomizedBDXRLocator("acc.edelivery.tech.ec.europa.eu", new CustomizedDNSLookup()))
-            .reader(new CustomizedBdxrReader(new CustomizedSignatureValidator()))
+            .reader(new CustomizedBdxrReader(new CustomizedSignatureValidator(truststore)))
             .provider(new CustomizedProvider())
             .fetcher(new CustomizedURLFetcher(new CustomizedProxyConfiguration("127.0.0.1", 8000, "user", "password")))
             .build();
