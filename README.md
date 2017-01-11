@@ -84,8 +84,8 @@ This interface is responsible for parsing the response according to the XSD. By 
 
 **ISignatureValidator**
 
-This interface is responsible for verifying the signature of the response according to the XSD. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator.**
-
+This interface is responsible for verifying the signature of the response according to the XSD and is used by the abstract class **eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator**, all the implementations must extend this abstract class.
+By default the implementation **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator** is provided.
 
 ## 3.2. PROXY CONFIGURATION
 
@@ -97,7 +97,7 @@ Example:
 
 ## 3.3. TRUSTSTORE CONFIGURATION
 
-In order to check if the certificate extracted from the signed response is trusted even if the signature is valid, a truststore must be passed by parameter to the Signature Validator implementation as below:
+In order to check if the certificate extracted from the signed response is trusted even if the signature is valid, a truststore must be passed by parameter to the Signature Validator implementation.A trusted certificate must be included in the truststore.
 
 Example:
 

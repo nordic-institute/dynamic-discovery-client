@@ -104,7 +104,6 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
 
     private void verifyCertificate(X509Certificate signerCertificate) throws TechnicalException {
         try {
-            Certificate certificateFound = null;
             for (String alias : Collections.list(trustStore.aliases())) {
 
                 //Checks if certificate is under the truststore and is trusted
