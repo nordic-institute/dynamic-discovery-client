@@ -65,12 +65,13 @@ public class DefaultDNSLookup implements IDNSLookup {
     public List<Record> getAllRecords(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
         try {
             Lookup lookupClient = new Lookup(uri, Type.NAPTR);
+            lookupClient.setCache(null);
             Record[] records = lookupClient.run();
             if (lookupClient.getResult() != Lookup.SUCCESSFUL) {
                 throw new DNSLookupException(String.format("NAPTR Lookup for participant [ %s ] has failed. Lookup result CODE [ %s ]", participantIdentifier, lookupClient.getResult()));
             }
             return Arrays.asList(records);
-        } catch (TextParseException exc) {
+        } catch (Exception exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
     }
