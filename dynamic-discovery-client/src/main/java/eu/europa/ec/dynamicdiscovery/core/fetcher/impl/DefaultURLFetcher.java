@@ -61,7 +61,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             HttpResponse response = httpClient.execute(httpGet);
             switch (response.getStatusLine().getStatusCode()) {
                 case 200:
-                    return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()), response.containsHeader("X-SMP-Namespace") ? response.getFirstHeader("X-SMP-Namespace").getValue() : null);
+                    return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
                 case 404:
                     throw new DNSLookupException("SMP not found - response 404");
                 default:
