@@ -24,6 +24,7 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher;
 import java.io.InputStream;
 
 public class FetcherResponse {
+    
     private InputStream inputStream;
 
     public FetcherResponse(InputStream inputStream) {
