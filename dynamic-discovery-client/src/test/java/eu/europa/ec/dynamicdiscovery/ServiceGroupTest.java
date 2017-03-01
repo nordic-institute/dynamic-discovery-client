@@ -36,7 +36,7 @@ public class ServiceGroupTest {
     @Test
     public void serviceGroupTestOk() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_group_urn_poland_ncpb.xml");
-        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
         ServiceGroup serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup) result);
         Assert.assertNotNull(serviceGroup);
@@ -51,7 +51,7 @@ public class ServiceGroupTest {
     @Test
     public void serviceGroupNoDocumentsTest() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_group_urn_poland_ncpb_no_document.xml");
-        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
         ServiceGroup serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup) result);
         Assert.assertNotNull(serviceGroup);
@@ -65,7 +65,7 @@ public class ServiceGroupTest {
     @Test(expected = UnmarshalException.class)
     public void serviceGroupNotValidTest() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_group_urn_poland_ncpb_not_valid.xml");
-        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
         ServiceGroup serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup) result);
     }

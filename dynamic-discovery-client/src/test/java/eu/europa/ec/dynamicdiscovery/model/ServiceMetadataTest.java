@@ -39,7 +39,7 @@ public class ServiceMetadataTest {
     @Test
     public void addParticipantIdentifierTest() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
-        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
         ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result).getServiceInformation();
         ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);
@@ -51,7 +51,7 @@ public class ServiceMetadataTest {
     @Test
     public void addDocumentIdentifierTest() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
-        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
         ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result).getServiceInformation();
         ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);
@@ -63,7 +63,7 @@ public class ServiceMetadataTest {
     @Test
     public void addEndpointTest() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
-        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
         ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result).getServiceInformation();
         ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);
@@ -86,7 +86,7 @@ public class ServiceMetadataTest {
     @Test
     public void getEndpointTest() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
-        FetcherResponse fetcherResponse = new FetcherResponse(inputStream, "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
         ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result).getServiceInformation();
         ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);

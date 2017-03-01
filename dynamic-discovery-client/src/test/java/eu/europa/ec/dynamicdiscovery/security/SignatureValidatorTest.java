@@ -80,7 +80,7 @@ public class SignatureValidatorTest {
     }
 
     private Document parseDocument(String fileName) throws Exception {
-        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile(fileName), "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05");
+        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile(fileName));
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         return documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
