@@ -146,7 +146,7 @@ Please replace classes starting with **"Customized"** by implementations extende
 
 ## 5. REFERENCES
 
-e-SENS/PR-BDXL - ipi.gr/display/ESENS/PR+-+BDXL
+e-SENS/PR-BDXL - http://wiki.ds.unipi.gr/display/ESENS/PR+-+BDXL
 
 PEPPOL BUSDOX - https://joinup.ec.europa.eu/community/epractice/document/eu-peppol-project-deliverable-busdox-specifications-v10
 
