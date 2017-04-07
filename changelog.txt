@@ -1,3 +1,6 @@
+Dynamic Discovery 1.2
+- Made @scheme optional for the creation of a DocumentIdentifier
+- Fix the collision between XML DSIG generated classes
 Dynamic Discovery 1.1
 - Check if certificate extracted from the signed response is trusted through a truststore
 - Clear exception message for OASIS and PEPPOL regarding CNAME and NAPTR records.

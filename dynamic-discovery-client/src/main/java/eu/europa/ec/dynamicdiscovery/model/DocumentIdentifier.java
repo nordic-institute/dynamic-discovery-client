@@ -34,6 +34,11 @@ public class DocumentIdentifier {
         this.scheme = scheme;
     }
 
+    public DocumentIdentifier(String documentIdentifier) {
+        this.identifier = documentIdentifier;
+        this.scheme = null;
+    }
+
     public String getScheme() {
         return this.scheme;
     }
@@ -43,15 +48,26 @@ public class DocumentIdentifier {
     }
 
     public String getFullIdentifier() {
-        return String.format("%s::%s", this.scheme, this.identifier);
+        String fullIdentifier = "";
+        if(this.scheme != null) {
+            fullIdentifier = String.format("%s::", this.scheme);
+        }
+        fullIdentifier += String.format("%s", this.identifier);
+        return fullIdentifier;
     }
 
     public String urlencoded() {
+        String urlEncoded = "";
         try {
-            return URLEncoder.encode(String.format("%s::%s", this.scheme, this.identifier), "UTF-8");
+            if(this.scheme != null) {
+                urlEncoded = URLEncoder.encode(String.format("%s::", this.scheme), "UTF-8");
+            }
+            urlEncoded += URLEncoder.encode(String.format("%s", this.identifier), "UTF-8");
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
         }
+
+        return urlEncoded;
     }
 
     @Override

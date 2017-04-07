@@ -23,10 +23,11 @@ package eu.europa.ec.dynamicdiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import org.junit.Assert;
 import org.junit.Test;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
@@ -38,14 +39,14 @@ public class ServiceGroupTest {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_group_urn_poland_ncpb.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
-        ServiceGroup serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup) result);
+        ServiceGroupType serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType) result);
         Assert.assertNotNull(serviceGroup);
         Assert.assertNotNull(serviceGroup.getServiceMetadataReferenceCollection());
-        Assert.assertNotNull(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences());
-        Assert.assertFalse(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences().isEmpty());
+        Assert.assertNotNull(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference());
+        Assert.assertFalse(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().isEmpty());
         Assert.assertEquals("ehealth-actorid-qns",serviceGroup.getParticipantIdentifier().getScheme());
         Assert.assertEquals("urn:poland:ncpb",serviceGroup.getParticipantIdentifier().getValue());
-        Assert.assertEquals("http://cipa-smp-full-webapp/ehealth-actorid-qns::urn:poland:ncpb/services/epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences().get(0).getHref());
+        Assert.assertEquals("http://cipa-smp-full-webapp/ehealth-actorid-qns::urn:poland:ncpb/services/epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().get(0).getHref());
     }
 
     @Test
@@ -53,13 +54,13 @@ public class ServiceGroupTest {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_group_urn_poland_ncpb_no_document.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
-        ServiceGroup serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup) result);
+        ServiceGroupType serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType) result);
         Assert.assertNotNull(serviceGroup);
         Assert.assertEquals("ehealth-actorid-qns",serviceGroup.getParticipantIdentifier().getScheme());
         Assert.assertEquals("urn:poland:ncpb",serviceGroup.getParticipantIdentifier().getValue());
         Assert.assertNotNull(serviceGroup.getServiceMetadataReferenceCollection());
-        Assert.assertNotNull(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences());
-        Assert.assertTrue(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences().isEmpty());
+        Assert.assertNotNull(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference());
+        Assert.assertTrue(serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().isEmpty());
     }
 
     @Test(expected = UnmarshalException.class)
@@ -67,14 +68,14 @@ public class ServiceGroupTest {
         InputStream inputStream = getClass().getResourceAsStream("/response/service_group_urn_poland_ncpb_not_valid.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
         Object result = unmarshal(fetcherResponse);
-        ServiceGroup serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup) result);
+        ServiceGroupType serviceGroup = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType) result);
     }
 
     public Object unmarshal(FetcherResponse fetcherResponse) throws Exception {
-        JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType.class);
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-        return jaxbContext.createUnmarshaller().unmarshal(document);
+        return ((JAXBElement)jaxbContext.createUnmarshaller().unmarshal(document)).getValue();
     }
 }

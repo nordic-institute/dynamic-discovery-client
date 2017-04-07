@@ -20,21 +20,18 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import org.junit.Assert;
 import org.junit.Test;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceInformationType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadata;
-import org.w3c.dom.Document;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 
 public class DocumentIdentifierTest {
+
+    @Test
+    public void checkFullIdentifierNoSchemeTest() throws Exception {
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107");
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
+        Assert.assertNull(documentIdentifier.getScheme());
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getFullIdentifier());
+    }
 
     @Test
     public void checkFullIdentifierTest() throws Exception {
