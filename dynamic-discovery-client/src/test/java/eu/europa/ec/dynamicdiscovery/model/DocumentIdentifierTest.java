@@ -26,14 +26,6 @@ import org.junit.Test;
 public class DocumentIdentifierTest {
 
     @Test
-    public void checkFullIdentifierNoSchemeTest() throws Exception {
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107");
-        Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
-        Assert.assertNull(documentIdentifier.getScheme());
-        Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getFullIdentifier());
-    }
-
-    @Test
     public void checkFullIdentifierTest() throws Exception {
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
         Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());

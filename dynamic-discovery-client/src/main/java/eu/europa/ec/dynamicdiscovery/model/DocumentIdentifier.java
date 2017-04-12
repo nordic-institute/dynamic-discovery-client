@@ -34,11 +34,6 @@ public class DocumentIdentifier {
         this.scheme = scheme;
     }
 
-    public DocumentIdentifier(String documentIdentifier) {
-        this.identifier = documentIdentifier;
-        this.scheme = null;
-    }
-
     public String getScheme() {
         return this.scheme;
     }
