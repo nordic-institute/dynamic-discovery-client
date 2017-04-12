@@ -43,26 +43,15 @@ public class DocumentIdentifier {
     }
 
     public String getFullIdentifier() {
-        String fullIdentifier = "";
-        if(this.scheme != null) {
-            fullIdentifier = String.format("%s::", this.scheme);
-        }
-        fullIdentifier += String.format("%s", this.identifier);
-        return fullIdentifier;
+        return String.format("%s::%s", this.scheme, this.identifier);
     }
 
     public String urlencoded() {
-        String urlEncoded = "";
         try {
-            if(this.scheme != null) {
-                urlEncoded = URLEncoder.encode(String.format("%s::", this.scheme), "UTF-8");
-            }
-            urlEncoded += URLEncoder.encode(String.format("%s", this.identifier), "UTF-8");
+            return URLEncoder.encode(String.format("%s::%s", this.scheme, this.identifier), "UTF-8");
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
         }
-
-        return urlEncoded;
     }
 
     @Override
