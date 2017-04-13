@@ -27,13 +27,14 @@ import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroup;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadata;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,7 +54,7 @@ public class ResponseParser {
 
     public ResponseParser(AbstractSignatureValidator signatureValidator) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata.class, SignedServiceMetadata.class, ServiceGroup.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType.class, SignedServiceMetadataType.class, ServiceGroupType.class);
             this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
             this.documentBuilderFactory.setNamespaceAware(true);
             this.unmarshaller = jaxbContext.createUnmarshaller();
@@ -66,18 +67,18 @@ public class ResponseParser {
     public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-            Object result = this.unmarshaller.unmarshal(document);
+            Object result = ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
             Certificate certificate = null;
-            if (result instanceof SignedServiceMetadata) {
+            if (result instanceof SignedServiceMetadataType) {
                 certificate = this.signatureValidator.verify(document);
-                result = ((SignedServiceMetadata) result).getServiceMetadata();
+                result = ((SignedServiceMetadataType)result).getServiceMetadata();
             }
 
-            if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata)) {
+            if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType)) {
                 throw new BindException("ServiceMetadata element not found.");
             }
 
-            org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadata) result;
+            org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType) result;
             return new ServiceMetadata(certificate, unmarshalledServiceMetadata.getServiceInformation());
         } catch (ParserConfigurationException | IOException | SAXException | JAXBException exc) {
             throw new BindException(exc.getMessage(), exc);
@@ -88,11 +89,11 @@ public class ResponseParser {
         try {
             List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-            ServiceGroup serviceGroup = (ServiceGroup) this.unmarshaller.unmarshal(document);
-            if (serviceGroup != null && serviceGroup.getServiceMetadataReferenceCollection() != null) {
-                List<ServiceMetadataReferenceType> serviceMetadataReference = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences();
+            ServiceGroupType ServiceGroupType = (ServiceGroupType) ((JAXBElement)this.unmarshaller.unmarshal(document)).getValue();
+            if (ServiceGroupType != null && ServiceGroupType.getServiceMetadataReferenceCollection() != null) {
+                List<ServiceMetadataReferenceType> serviceMetadataReference = ServiceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference();
                 if (serviceMetadataReference != null && !serviceMetadataReference.isEmpty()) {
-                    Iterator serviceMetadataReferenceTypeIterator = serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences().iterator();
+                    Iterator serviceMetadataReferenceTypeIterator = ServiceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference().iterator();
                     while (serviceMetadataReferenceTypeIterator.hasNext()) {
                         ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) serviceMetadataReferenceTypeIterator.next();
                         String[] parts = URLDecoder.decode(reference.getHref().split("/services/")[1], "UTF-8").split("::", 2);

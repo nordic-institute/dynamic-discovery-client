@@ -90,11 +90,11 @@ public class ServiceMetadata {
 
     private void addEndpoint(ServiceInformationType serviceInformationType) throws TechnicalException {
         try {
-            Iterator processTypeIterator = serviceInformationType.getProcessList().getProcesses().iterator();
+            Iterator processTypeIterator = serviceInformationType.getProcessList().getProcess().iterator();
             while (processTypeIterator.hasNext()) {
                 ProcessType processType = (ProcessType) processTypeIterator.next();
                 ProcessIdentifier processIdentifier = new ProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme());
-                Iterator endpointTypeIterator = processType.getServiceEndpointList().getEndpoints().iterator();
+                Iterator endpointTypeIterator = processType.getServiceEndpointList().getEndpoint().iterator();
 
                 while (endpointTypeIterator.hasNext()) {
                     EndpointType endpointType = (EndpointType) endpointTypeIterator.next();

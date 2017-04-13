@@ -5,7 +5,6 @@
                jaxb:extensionBindingPrefixes="xjc"
                xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <jaxb:globalBindings xmlns:xs="http://www.w3.org/2001/XMLSchema">
-        <xjc:simple />
         <jaxb:javaType name="java.util.Calendar" xmlType="xs:dateTime"
                        parseMethod="javax.xml.bind.DatatypeConverter.parseDateTime"
                        printMethod="javax.xml.bind.DatatypeConverter.printDateTime"/>
