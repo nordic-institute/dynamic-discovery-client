@@ -6,7 +6,7 @@
 
     <groupId>eu.europa.ec.dynamic-discovery</groupId>
     <artifactId>dynamic-discovery-builder</artifactId>
-    <version>1.2</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>dynamic-discovery-builder</name>
