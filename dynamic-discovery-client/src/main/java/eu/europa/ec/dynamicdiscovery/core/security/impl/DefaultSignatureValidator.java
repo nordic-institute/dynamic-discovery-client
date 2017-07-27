@@ -48,11 +48,11 @@ import java.util.Iterator;
 
 public class DefaultSignatureValidator extends AbstractSignatureValidator {
 
-    private String regexCertificateSubjectValidator;
+    private String regexCertificateSubjectValidation;
 
-    public DefaultSignatureValidator(KeyStore trustStore, String regexCertificateSubjectValidator) throws TechnicalException {
+    public DefaultSignatureValidator(KeyStore trustStore, String regexCertificateSubjectValidation) throws TechnicalException {
         super(trustStore);
-        this.regexCertificateSubjectValidator = regexCertificateSubjectValidator;
+        this.regexCertificateSubjectValidation = regexCertificateSubjectValidation;
     }
 
     public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
@@ -116,8 +116,8 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
     }
 
     private void verifyCertificateSubject(X509Certificate signerCertificate) throws TechnicalException {
-        if (!StringUtils.isEmpty(regexCertificateSubjectValidator)) {
-            if (!signerCertificate.getSubjectX500Principal().toString().matches(regexCertificateSubjectValidator)) {
+        if (!StringUtils.isEmpty(regexCertificateSubjectValidation)) {
+            if (!signerCertificate.getSubjectX500Principal().toString().matches(regexCertificateSubjectValidation)) {
                 throw new SignatureException("Certificate subject is not accepted according to the pattern.");
             }
         }
