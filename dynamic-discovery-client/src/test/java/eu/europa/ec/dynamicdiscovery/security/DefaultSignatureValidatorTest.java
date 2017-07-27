@@ -66,7 +66,7 @@ public class DefaultSignatureValidatorTest {
     }
 
     @Test
-    public void testVverifyNotTrustedSignerCertificate() throws Exception {
+    public void testVerifyNotTrustedSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
