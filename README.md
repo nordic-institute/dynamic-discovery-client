@@ -165,8 +165,48 @@ Please replace classes starting with **"Customized"** by implementations extende
     List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier );
     ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier ,  new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
 
+## 5. TRUSTABILITY MODEL
 
-## 5. REFERENCES
+The certificates are validated against the truststore as follows.
+
+Example 1
+    Truststore
+        - INTERMEDIATE CA
+    Your certificate:
+        - ROOT CA
+            -  INTERMEDIATE CA
+                - SUBJECT
+    Expected result: The certificate is trusted if INTERMEDIATE CA matches
+
+Example 2
+    Truststore
+        - ROOT CA
+        - INTERMEDIATE CA
+    Your certificate:
+        - ROOT CA
+            -  INTERMEDIATE CA
+                - SUBJECT
+    Expected result: The certificate is trusted if INTERMEDIATE CA matches
+    
+Example 3
+      Truststore
+          - ROOT CA         
+      Your certificate:
+          - ROOT CA
+              -  INTERMEDIATE CA
+                  - SUBJECT
+      Expected result: The certificate is not trusted  
+      
+Example 4 (NOT RECOMMENDED)
+      Truststore
+          - SUBJECT      
+      Your certificate:
+          - ROOT CA
+              -  INTERMEDIATE CA
+                  - SUBJECT
+      Expected result: The certificate is trusted if SUBJECT matches  
+    
+## 6. REFERENCES
 
 e-SENS/PR-BDXL - http://wiki.ds.unipi.gr/display/ESENS/PR+-+BDXL
 
@@ -177,7 +217,7 @@ Service Metadata Publisher (SMP) - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/
 SMP XML schema - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/cs03/schemas/bdx-smp-201605.xsd
 
 
-## 6. LICENSE
+## 7. LICENSE
 
 Dynamic Discovery Client is under license LGPL-2.1.
 
@@ -186,7 +226,7 @@ More Information:
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
 
 
-## 7. CONTACT INFORMATION
+## 8. CONTACT INFORMATION
 
 CEF Support Team
 
