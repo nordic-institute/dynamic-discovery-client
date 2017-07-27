@@ -48,15 +48,12 @@ import java.util.Iterator;
 
 public class DefaultSignatureValidator extends AbstractSignatureValidator {
 
-    private String regexCertificateSubjectValidation;
-
     public DefaultSignatureValidator(KeyStore trustStore, String regexCertificateSubjectValidation) throws TechnicalException {
-        super(trustStore);
-        this.regexCertificateSubjectValidation = regexCertificateSubjectValidation;
+        super(trustStore, regexCertificateSubjectValidation);
     }
 
     public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
-        this(trustStore, null);
+        super(trustStore);
     }
 
     @Override
