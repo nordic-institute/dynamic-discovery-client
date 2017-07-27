@@ -118,7 +118,7 @@ public class DefaultSignatureValidatorTest {
     }
 
     @Test(expected = Exception.class)
-    public void testIsSignedByDifferentCA() throws Exception {
+    public void testIsSignedByDifferentAndNotOkCA() throws Exception {
         KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
 
