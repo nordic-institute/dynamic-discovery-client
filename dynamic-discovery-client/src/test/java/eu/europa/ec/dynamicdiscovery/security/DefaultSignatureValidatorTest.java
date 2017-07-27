@@ -82,50 +82,66 @@ public class DefaultSignatureValidatorTest {
 
     @Test
     public void testIsSignedByIntermediateCA() throws Exception {
-        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts");
-        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
-
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
     }
 
     @Test(expected = Exception.class)
     public void testIsSignedByRootCA() throws Exception {
-        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-OnlyRootCA.ts");
-        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
-
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyRootCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
         Assert.fail("Exception should have been thrown");
     }
 
     @Test
     public void testIsSignedByRootAndIntermediateCA() throws Exception {
-        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts");
-        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
-
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+        testSignedBy("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
     }
 
     @Test
     public void testIsSignedByCertificateItself() throws Exception {
-        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-CertificateItself.ts");
-        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
 
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
     }
 
     @Test(expected = Exception.class)
     public void testIsSignedByDifferentAndNotOkCA() throws Exception {
-        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
-
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+        testSignedBy("truststore/truststoreForTrustedCertificate.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
         Assert.fail("Exception should have been thrown");
     }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsAll() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^.*$", "verifyCertificateSubject");
+    }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_TEST_1.*$", "verifyCertificateSubject");
+    }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly1() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^(CN=eDelivery_SMP_TEST_8|CN=eDelivery_SMP_TEST_1).*$", "verifyCertificateSubject");
+    }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly2() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_\\\\*.*$", "verifyCertificateSubject");
+    }
+
+    @Test(expected = Exception.class)
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnlyFail() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_TEST_8.*$", "verifyCertificateSubject");
+        Assert.fail("Exception should have been thrown");
+    }
+
+    private void testSignedBy(String trustStorePath, String certificatePath, String regex, String methodName) throws Exception {
+        KeyStore trustStore = CommonUtil.loadTrustStore(trustStorePath);
+        Certificate certificate = CommonUtil.loadCertificate(certificatePath);
+
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore, regex);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator, methodName, certificate);
+    }
+
 
     private Document parseDocument(String fileName) throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile(fileName));

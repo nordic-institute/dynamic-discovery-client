@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,14 +48,22 @@ import java.util.Iterator;
 
 public class DefaultSignatureValidator extends AbstractSignatureValidator {
 
-    public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
+    private String regexCertificateSubjectValidator;
+
+    public DefaultSignatureValidator(KeyStore trustStore, String regexCertificateSubjectValidator) throws TechnicalException {
         super(trustStore);
+        this.regexCertificateSubjectValidator = regexCertificateSubjectValidator;
+    }
+
+    public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
+        this(trustStore, null);
     }
 
     @Override
     public X509Certificate verify(Document document) throws TechnicalException {
         X509Certificate certificate = verifySignature(document);
         verifyCertificate(certificate);
+        verifyCertificateSubject(certificate);
 
         return certificate;
     }
@@ -106,6 +115,14 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
         }
     }
 
+    private void verifyCertificateSubject(X509Certificate signerCertificate) throws TechnicalException {
+        if (!StringUtils.isEmpty(regexCertificateSubjectValidator)) {
+            if (!signerCertificate.getSubjectX500Principal().toString().matches(regexCertificateSubjectValidator)) {
+                throw new SignatureException("Certificate subject is not accepted according to the pattern.");
+            }
+        }
+    }
+
     private void verifyCertificate(X509Certificate signerCertificate) throws TechnicalException {
         try {
             for (String alias : Collections.list(trustStore.aliases())) {
@@ -125,7 +142,7 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
                 }
 
                 // Verify trust
-                if(signerCertificate.equals(trustedCertificate) || isSignedBy(signerCertificate, trustedCertificate)){
+                if (signerCertificate.equals(trustedCertificate) || isSignedBy(signerCertificate, trustedCertificate)) {
                     return;
                 }
             }
@@ -138,11 +155,11 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
 
     }
 
-    private boolean isSignedBy(Certificate signed, Certificate signer){
-        try{
+    private boolean isSignedBy(Certificate signed, Certificate signer) {
+        try {
             signed.verify(signer.getPublicKey());
             return true;
-        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | java.security.SignatureException e){
+        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | java.security.SignatureException e) {
             return false;
         }
     }
