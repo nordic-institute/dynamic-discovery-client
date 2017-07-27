@@ -121,12 +121,12 @@ In order to add this optional validation, please follow the steps below:
      DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore,regexSubjectValidation);
 
 
-    Default Signature Validator
+     Default Signature Validator
    
-    KeyStore truststore = KeyStore.getInstance("JKS");
-    truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+     KeyStore truststore = KeyStore.getInstance("JKS");
+     truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
     
-    DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
+     DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
 
 ## 4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT
 
@@ -169,43 +169,8 @@ Please replace classes starting with **"Customized"** by implementations extende
 
 The certificates are validated against the truststore as follows.
 
-Example 1
-    Truststore
-        - INTERMEDIATE CA
-    Your certificate:
-        - ROOT CA
-            -  INTERMEDIATE CA
-                - SUBJECT
-    Expected result: The certificate is trusted if INTERMEDIATE CA matches
+![enter image description here](https://ec.europa.eu/cefdigital/wiki/download/attachments/37749134/trustabilitymodel.PNG?version=1&modificationDate=1501168419400&api=v2)
 
-Example 2
-    Truststore
-        - ROOT CA
-        - INTERMEDIATE CA
-    Your certificate:
-        - ROOT CA
-            -  INTERMEDIATE CA
-                - SUBJECT
-    Expected result: The certificate is trusted if INTERMEDIATE CA matches
-    
-Example 3
-      Truststore
-          - ROOT CA         
-      Your certificate:
-          - ROOT CA
-              -  INTERMEDIATE CA
-                  - SUBJECT
-      Expected result: The certificate is not trusted  
-      
-Example 4 (NOT RECOMMENDED)
-      Truststore
-          - SUBJECT      
-      Your certificate:
-          - ROOT CA
-              -  INTERMEDIATE CA
-                  - SUBJECT
-      Expected result: The certificate is trusted if SUBJECT matches  
-    
 ## 6. REFERENCES
 
 e-SENS/PR-BDXL - http://wiki.ds.unipi.gr/display/ESENS/PR+-+BDXL
