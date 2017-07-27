@@ -138,7 +138,7 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
 
     }
 
-    private static boolean isSignedBy(Certificate signed, Certificate signer){
+    private boolean isSignedBy(Certificate signed, Certificate signer){
         try{
             signed.verify(signer.getPublicKey());
             return true;

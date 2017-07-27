@@ -27,6 +27,7 @@ import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,10 +35,10 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-public class SignatureValidatorTest {
+public class DefaultSignatureValidatorTest {
 
     @Test
-    public void verifyValidSignature() throws Exception {
+    public void testVerifyValidSignature() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
@@ -47,7 +48,7 @@ public class SignatureValidatorTest {
     }
 
     @Test(expected = SignatureException.class)
-    public void verifyNotValidSignature() throws Exception {
+    public void testVerifyNotValidSignature() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_9915_123456789_invalid_signature");
@@ -55,7 +56,7 @@ public class SignatureValidatorTest {
     }
 
     @Test
-    public void verifyValidSignerCertificate() throws Exception {
+    public void testVerifyValidSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
@@ -65,7 +66,7 @@ public class SignatureValidatorTest {
     }
 
     @Test
-    public void verifyNotTrustedSignerCertificate() throws Exception {
+    public void testVverifyNotTrustedSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
@@ -76,6 +77,53 @@ public class SignatureValidatorTest {
             Assert.assertTrue(exc instanceof SignatureException);
             return;
         }
+        Assert.fail("Exception should have been thrown");
+    }
+
+    @Test
+    public void testIsSignedByIntermediateCA() throws Exception {
+        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts");
+        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
+
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+    }
+
+    @Test(expected = Exception.class)
+    public void testIsSignedByRootCA() throws Exception {
+        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-OnlyRootCA.ts");
+        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
+
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+        Assert.fail("Exception should have been thrown");
+    }
+
+    @Test
+    public void testIsSignedByRootAndIntermediateCA() throws Exception {
+        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts");
+        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
+
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+    }
+
+    @Test
+    public void testIsSignedByCertificateItself() throws Exception {
+        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate-CertificateItself.ts");
+        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
+
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
+    }
+
+    @Test(expected = Exception.class)
+    public void testIsSignedByDifferentCA() throws Exception {
+        KeyStore trustStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        Certificate certificate = CommonUtil.loadCertificate("certificate/eDelivery_SMP_TEST_1.cer");
+
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator, "verifyCertificate", certificate);
         Assert.fail("Exception should have been thrown");
     }
 
