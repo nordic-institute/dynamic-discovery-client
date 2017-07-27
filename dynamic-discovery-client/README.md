@@ -106,6 +106,28 @@ Example:
 
      DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
 
+## 3.4. CONFIGURE REGULAR EXPRESSION TO VALIDATE CERTIFICATE SUBJECT
+
+Apart from validating response of signer certificates against the truststore, the Dynamic Discovery gives the possibility to add (optional) a regular expression to validate any certificate metadata related to the subject of the signer certificate.
+
+In order to add this optional validation, please follow the steps below:
+
+     Default Signature Validator with regex to check certificate subject
+
+     KeyStore truststore = KeyStore.getInstance("JKS");
+     truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+     String regexSubjectValidation = "^CN=eDelivery_SMP_TEST_1.*$"
+     DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore,regexSubjectValidation);
+
+
+    Default Signature Validator
+   
+    KeyStore truststore = KeyStore.getInstance("JKS");
+    truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+    
+    DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
+
 ## 4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT
 
 The DynamicDiscoveryBuilder is responsible for creating a new instance of the Dynamic Discovery Client. By default, there are implementations for all core services provided by the tool however new customized implementations can be used by the user.
