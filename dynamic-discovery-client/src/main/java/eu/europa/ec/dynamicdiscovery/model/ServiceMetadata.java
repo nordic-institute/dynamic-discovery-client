@@ -21,6 +21,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
@@ -36,6 +37,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * @deprecated Replaced by {@link org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType}
+ */
 @Deprecated
 public class ServiceMetadata {
     private ParticipantIdentifier participantIdentifier;

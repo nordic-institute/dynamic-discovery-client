@@ -18,9 +18,11 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.reader.parser;
+package eu.europa.ec.dynamicdiscovery.core.reader.parser.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.AbstractResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.ISignedServiceMetadataResponseParser;
 import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -46,13 +48,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class SignedServiceMetadataResponseParser extends AbstractResponseParser {
+public class SignedServiceMetadataResponseParserImpl extends AbstractResponseParser implements ISignedServiceMetadataResponseParser {
 
-    public SignedServiceMetadataResponseParser(AbstractSignatureValidator signatureValidator) throws JAXBException {
+    public SignedServiceMetadataResponseParserImpl(AbstractSignatureValidator signatureValidator) throws JAXBException {
         super(JAXBContext.newInstance(SignedServiceMetadataType.class), signatureValidator);
     }
 
+    /**
+     * @deprecated Replaced by {@link #getSignedServiceMetadata(FetcherResponse)}
+     */
     @Deprecated
+    @Override
     public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
@@ -74,6 +80,7 @@ public class SignedServiceMetadataResponseParser extends AbstractResponseParser 
         }
     }
 
+    @Override
     public SignedServiceMetadataType getSignedServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());

@@ -32,6 +32,10 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.security.cert.X509Certificate;
+
+/**
+ * @deprecated Replaced by {@link org.oasis_open.docs.bdxr.ns.smp._2016._05.ExtensionType}
+ */
 @Deprecated
 public class Extension {
 

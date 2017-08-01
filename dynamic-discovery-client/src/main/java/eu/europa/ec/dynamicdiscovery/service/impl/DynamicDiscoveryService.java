@@ -20,6 +20,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.service.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
@@ -34,6 +35,7 @@ import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 import eu.europa.ec.dynamicdiscovery.wrapper.DocumentIdVO;
 import eu.europa.ec.dynamicdiscovery.wrapper.ParticipantIdVO;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.net.URI;
@@ -44,33 +46,47 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     private IMetadataLocator metadataLocator;
     private IMetadataProvider metadataProvider;
     private IMetadataFetcher metadataFetcher;
+    private IMetadataReader metadataReader;
 
     public DynamicDiscoveryService() {
         this.metadataProvider = new DefaultProvider();
         this.metadataFetcher = new DefaultURLFetcher();
     }
 
-    private IMetadataReader metadataReader;
-
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI smpURI = metadataLocator.lookup(participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
-        return metadataReader.getDocumentIdentifiers(metadataFetcher.fetch(participantUnderSmpURI));
+        return metadataReader.getDocumentIdentifiers(getFetcherResponseForDocs(participantIdentifier));
     }
 
     @Override
+    public ServiceGroupType getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        return metadataReader.getServiceGroup(getFetcherResponseForDocs(participantIdentifier));
+    }
+
+    /**
+     * @deprecated Replaced by {@link #getSignedServiceMetadata(ParticipantIdentifier, DocumentIdentifier)}
+     */
+    @Deprecated
+    @Override
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
-        URI smpURI = metadataLocator.lookup(participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
-        return metadataReader.getServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
+        return metadataReader.getServiceMetadata(getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier));
     }
 
     @Override
     public SignedServiceMetadataType getSignedServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
+        return metadataReader.getSignedServiceMetadata(getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier));
+    }
+
+    private FetcherResponse getFetcherResponseForServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
-        return metadataReader.getSignedServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
+        return metadataFetcher.fetch(participantUnderSmpURI);
+    }
+
+    private FetcherResponse getFetcherResponseForDocs(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        URI smpURI = metadataLocator.lookup(participantIdentifier);
+        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
+        return metadataFetcher.fetch(participantUnderSmpURI);
     }
 
     @Override

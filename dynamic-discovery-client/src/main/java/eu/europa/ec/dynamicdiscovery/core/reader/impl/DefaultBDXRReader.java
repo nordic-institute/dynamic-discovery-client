@@ -22,13 +22,13 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.ServiceGroupResponseParser;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.SignedServiceMetadataResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.ServiceGroupResponseParserImpl;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetadataResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import eu.europa.ec.dynamicdiscovery.wrapper.DocumentIdVO;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
@@ -37,28 +37,34 @@ import java.util.List;
 
 public class DefaultBDXRReader implements IMetadataReader {
 
-    private ServiceGroupResponseParser serviceGroupResponseParser;
-    private SignedServiceMetadataResponseParser signedServiceMetadataResponseParser;
+    private ServiceGroupResponseParserImpl serviceGroupResponseParser;
+    private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
 
     public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) throws JAXBException {
-        serviceGroupResponseParser = new ServiceGroupResponseParser(signatureValidator);
-        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParser(signatureValidator);
+        serviceGroupResponseParser = new ServiceGroupResponseParserImpl(signatureValidator);
+        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(signatureValidator);
     }
 
+    @Override
     public ServiceGroupType getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
         return serviceGroupResponseParser.getServiceGroup(fetcherResponse);
     }
 
-    @Deprecated
+    @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
-        return serviceGroupResponseParser.parseDocumentIdentifier(fetcherResponse);
+        return serviceGroupResponseParser.getDocumentIdentifiers(fetcherResponse);
     }
 
+    @Override
     public SignedServiceMetadataType getSignedServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         return signedServiceMetadataResponseParser.getSignedServiceMetadata(fetcherResponse);
     }
 
+    /**
+     * @deprecated Replaced by {@link #getSignedServiceMetadata(FetcherResponse)}
+     */
     @Deprecated
+    @Override
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         return signedServiceMetadataResponseParser.parseServiceMetadata(fetcherResponse);
     }
