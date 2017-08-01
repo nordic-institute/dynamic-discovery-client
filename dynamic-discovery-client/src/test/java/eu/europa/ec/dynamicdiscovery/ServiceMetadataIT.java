@@ -37,9 +37,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ExtensionType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import javax.xml.bind.JAXBElement;
 import java.io.FileInputStream;
+import java.net.UnknownHostException;
 import java.security.KeyStore;
 
 import static org.mockito.Mockito.mock;
@@ -207,38 +209,6 @@ public class ServiceMetadataIT extends AbstractIT {
     }
 
     @Test
-    public void testExtension() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "extension", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
-
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-
-        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .fetcher(urlFetcherURL)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
-                .build();
-
-        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-
-        Assert.assertEquals(1, serviceMetadata.getExtensions().size());
-        Assert.assertEquals(" DIGIT-B003", serviceMetadata.getExtensions().get(0).getExtensionAgencyID());
-        Assert.assertEquals("DIGIT Agency", serviceMetadata.getExtensions().get(0).getExtensionAgencyName());
-        Assert.assertEquals("digit.com", serviceMetadata.getExtensions().get(0).getExtensionAgencyURI());
-        Assert.assertEquals("digitID", serviceMetadata.getExtensions().get(0).getExtensionID());
-        Assert.assertEquals("DigitExtension", serviceMetadata.getExtensions().get(0).getExtensionName());
-        Assert.assertEquals("DigitReason", serviceMetadata.getExtensions().get(0).getExtensionReason());
-        Assert.assertEquals("DigitReasonCode", serviceMetadata.getExtensions().get(0).getExtensionReasonCode());
-        Assert.assertEquals("extension.com", serviceMetadata.getExtensions().get(0).getExtensionURI());
-        Assert.assertTrue(serviceMetadata.getExtensions().get(0).getExtensionVersionID().isEmpty());
-        Assert.assertEquals(JAXBElement.class.getSimpleName(), serviceMetadata.getExtensions().get(0).getAny().getClass().getSimpleName());
-    }
-
-    @Test
     public void getServiceMetadataCnameOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_METADATA_URL_9915_123456789, "service_metadata_9915_123456789", "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
@@ -355,5 +325,86 @@ public class ServiceMetadataIT extends AbstractIT {
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+    }
+
+    @Test
+    public void testExtension() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "extension", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .build();
+
+        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+
+        Assert.assertEquals(1, serviceMetadata.getExtensions().size());
+        Assert.assertEquals(" DIGIT-B003", serviceMetadata.getExtensions().get(0).getExtensionAgencyID());
+        Assert.assertEquals("DIGIT Agency", serviceMetadata.getExtensions().get(0).getExtensionAgencyName());
+        Assert.assertEquals("digit.com", serviceMetadata.getExtensions().get(0).getExtensionAgencyURI());
+        Assert.assertEquals("digitID", serviceMetadata.getExtensions().get(0).getExtensionID());
+        Assert.assertEquals("DigitExtension", serviceMetadata.getExtensions().get(0).getExtensionName());
+        Assert.assertEquals("DigitReason", serviceMetadata.getExtensions().get(0).getExtensionReason());
+        Assert.assertEquals("DigitReasonCode", serviceMetadata.getExtensions().get(0).getExtensionReasonCode());
+        Assert.assertEquals("extension.com", serviceMetadata.getExtensions().get(0).getExtensionURI());
+        Assert.assertTrue(serviceMetadata.getExtensions().get(0).getExtensionVersionID().isEmpty());
+        Assert.assertEquals(JAXBElement.class.getSimpleName(), serviceMetadata.getExtensions().get(0).getAny().getClass().getSimpleName());
+    }
+
+    @Test
+    public void testSignedServiceMetadataType() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "extension", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .build();
+
+        SignedServiceMetadataType signedServiceMetadataType = smpClient.getSignedServiceMetadata(participantIdentifier, documentIdentifier);
+
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getValue());
+        Assert.assertEquals("ehealth-resid-qns", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getScheme());
+        Assert.assertEquals(" DIGIT-B003", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getExtension().get(0).getExtensionAgencyID());
+        Assert.assertEquals("urn:poland:ncpb", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getParticipantIdentifier().getValue());
+        Assert.assertEquals("ehealth-actorid-qns", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getParticipantIdentifier().getScheme());
+        Assert.assertEquals(1, signedServiceMetadataType.getServiceMetadata().getServiceInformation().getProcessList().getProcess().size());
+        Assert.assertEquals("urn:epsosPatientService::List", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getProcessList().getProcess().get(0).getProcessIdentifier().getValue());
+        Assert.assertEquals("ehealth-procid-qns", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getProcessList().getProcess().get(0).getProcessIdentifier().getScheme());
+    }
+
+    @Test(expected = DNSLookupException.class)
+    public void testSignedServiceMetadataTypeParticipantNotOk() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "extension", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb1", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .fetcher(urlFetcherURL)
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .build();
+
+        SignedServiceMetadataType signedServiceMetadataType = smpClient.getSignedServiceMetadata(participantIdentifier, documentIdentifier);
     }
 }
