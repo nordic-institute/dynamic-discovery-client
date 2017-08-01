@@ -144,9 +144,17 @@ Default implementation example:
 
       ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
-      List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+      ## LIST OF DOCUMENTS
+      List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier);
+         
+      ServiceGroupType serviceGroupType = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
+      
+      ## DOCUMENT DETAIL
+        
+      @Deprecated
       ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
-
+                    
+      SignedServiceMetadata sm = smpClient.getSignedServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
 
 Customized implementation example:
 
@@ -162,8 +170,18 @@ Please replace classes starting with **"Customized"** by implementations extende
             .fetcher(new CustomizedURLFetcher(new CustomizedProxyConfiguration("127.0.0.1", 8000, "user", "password")))
             .build();
     ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
-    List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier );
-    ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier ,  new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+    
+    ## LIST OF DOCUMENTS
+    List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier);
+    
+    ServiceGroupType serviceGroupType = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
+    
+    ## DOCUMENT DETAIL
+    
+    @Deprecated
+    ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+                
+    SignedServiceMetadata sm = smpClient.getSignedServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
 
 ## 5. TRUSTABILITY MODEL
 
