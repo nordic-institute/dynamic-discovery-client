@@ -106,6 +106,28 @@ Example:
 
      DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
 
+## 3.4. CONFIGURE REGULAR EXPRESSION TO VALIDATE CERTIFICATE SUBJECT
+
+Apart from validating response of signer certificates against the truststore, the Dynamic Discovery gives the possibility to add (optional) a regular expression to validate any certificate metadata related to the subject of the signer certificate.
+
+In order to add this optional validation, please follow the steps below:
+
+     Default Signature Validator with regex to check certificate subject
+
+     KeyStore truststore = KeyStore.getInstance("JKS");
+     truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+     String regexSubjectValidation = "^CN=eDelivery_SMP_TEST_1.*$"
+     DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore,regexSubjectValidation);
+
+
+     Default Signature Validator
+   
+     KeyStore truststore = KeyStore.getInstance("JKS");
+     truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+    
+     DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
+
 ## 4. HOW TO USE THE DYNAMIC DISCOVERY CLIENT
 
 The DynamicDiscoveryBuilder is responsible for creating a new instance of the Dynamic Discovery Client. By default, there are implementations for all core services provided by the tool however new customized implementations can be used by the user.
@@ -143,8 +165,13 @@ Please replace classes starting with **"Customized"** by implementations extende
     List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier );
     ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier ,  new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
 
+## 5. TRUSTABILITY MODEL
 
-## 5. REFERENCES
+The certificates are validated against the truststore as follows.
+
+![enter image description here](https://ec.europa.eu/cefdigital/wiki/download/attachments/37749134/trustabilitymodel.PNG?version=1&modificationDate=1501168419400&api=v2)
+
+## 6. REFERENCES
 
 e-SENS/PR-BDXL - http://wiki.ds.unipi.gr/display/ESENS/PR+-+BDXL
 
@@ -155,7 +182,7 @@ Service Metadata Publisher (SMP) - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/
 SMP XML schema - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/cs03/schemas/bdx-smp-201605.xsd
 
 
-## 6. LICENSE
+## 7. LICENSE
 
 Dynamic Discovery Client is under license LGPL-2.1.
 
@@ -164,7 +191,7 @@ More Information:
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
 
 
-## 7. CONTACT INFORMATION
+## 8. CONTACT INFORMATION
 
 CEF Support Team
 

@@ -27,6 +27,7 @@ import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,10 +35,10 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-public class SignatureValidatorTest {
+public class DefaultSignatureValidatorTest {
 
     @Test
-    public void verifyValidSignature() throws Exception {
+    public void testVerifyValidSignature() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
@@ -47,7 +48,7 @@ public class SignatureValidatorTest {
     }
 
     @Test(expected = SignatureException.class)
-    public void verifyNotValidSignature() throws Exception {
+    public void testVerifyNotValidSignature() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_9915_123456789_invalid_signature");
@@ -55,7 +56,7 @@ public class SignatureValidatorTest {
     }
 
     @Test
-    public void verifyValidSignerCertificate() throws Exception {
+    public void testVerifyValidSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
@@ -65,7 +66,7 @@ public class SignatureValidatorTest {
     }
 
     @Test
-    public void verifyNotTrustedSignerCertificate() throws Exception {
+    public void testVerifyNotTrustedSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
@@ -78,6 +79,69 @@ public class SignatureValidatorTest {
         }
         Assert.fail("Exception should have been thrown");
     }
+
+    @Test
+    public void testIsSignedByIntermediateCA() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+    }
+
+    @Test(expected = Exception.class)
+    public void testIsSignedByRootCA() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyRootCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        Assert.fail("Exception should have been thrown");
+    }
+
+    @Test
+    public void testIsSignedByRootAndIntermediateCA() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+    }
+
+    @Test
+    public void testIsSignedByCertificateItself() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+
+    }
+
+    @Test(expected = Exception.class)
+    public void testIsSignedByDifferentAndNotOkCA() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        Assert.fail("Exception should have been thrown");
+    }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsAll() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^.*$", "verifyCertificateSubject");
+    }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_TEST_1.*$", "verifyCertificateSubject");
+    }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly1() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^(CN=eDelivery_SMP_TEST_8|CN=eDelivery_SMP_TEST_1).*$", "verifyCertificateSubject");
+    }
+
+    @Test
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly2() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_\\\\*.*$", "verifyCertificateSubject");
+    }
+
+    @Test(expected = Exception.class)
+    public void testVerifyCertificateSubjectAcceptsDefinedCNOnlyFail() throws Exception {
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_TEST_8.*$", "verifyCertificateSubject");
+        Assert.fail("Exception should have been thrown");
+    }
+
+    private void testSignedBy(String trustStorePath, String certificatePath, String regex, String methodName) throws Exception {
+        KeyStore trustStore = CommonUtil.loadTrustStore(trustStorePath);
+        Certificate certificate = CommonUtil.loadCertificate(certificatePath);
+
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore, regex);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator, methodName, certificate);
+    }
+
 
     private Document parseDocument(String fileName) throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile(fileName));
