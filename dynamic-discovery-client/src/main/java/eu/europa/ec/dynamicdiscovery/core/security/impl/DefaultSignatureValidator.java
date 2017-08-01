@@ -115,7 +115,7 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
     private void verifyCertificateSubject(X509Certificate signerCertificate) throws TechnicalException {
         if (!StringUtils.isEmpty(regexCertificateSubjectValidation)) {
             if (!signerCertificate.getSubjectX500Principal().toString().matches(regexCertificateSubjectValidation)) {
-                throw new SignatureException("Certificate subject is not accepted according to the pattern.");
+                throw new SignatureException(String.format("Given certificate: %s does not match configured regex: %s.", signerCertificate.getSubjectX500Principal(), regexCertificateSubjectValidation));
             }
         }
     }
