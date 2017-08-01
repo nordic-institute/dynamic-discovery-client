@@ -60,8 +60,9 @@ public class ServiceGroupResponseParserImpl extends AbstractResponseParser imple
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
         ServiceGroupType serviceGroupType = getServiceGroup(fetcherResponse);
-        List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
+
         try {
+            List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
             if (serviceGroupType != null && serviceGroupType.getServiceMetadataReferenceCollection() != null) {
                 List<ServiceMetadataReferenceType> serviceMetadataReferences = serviceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference();
                 if (serviceMetadataReferences != null) {
