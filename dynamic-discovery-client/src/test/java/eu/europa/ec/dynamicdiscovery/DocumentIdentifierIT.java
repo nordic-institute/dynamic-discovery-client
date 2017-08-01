@@ -136,20 +136,7 @@ public class DocumentIdentifierIT extends AbstractIT {
 
     @Test
     public void testGetServiceGroupTypeOk() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, "service_group_9925_0367302178");
-
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
-
-        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
-                .fetcher(urlFetcherURL)
-                .build();
-        ServiceGroupType serviceGroup = smpClient.getServiceGroup(participantIdentifier);
+        ServiceGroupType serviceGroup = testGetServiceGroupType("9925:0367302178");
         Assert.assertEquals("9925:0367302178", serviceGroup.getParticipantIdentifier().getValue());
         Assert.assertEquals("iso6523-actorid-upis", serviceGroup.getParticipantIdentifier().getScheme());
         Assert.assertEquals("http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().get(0).getHref());
@@ -157,10 +144,15 @@ public class DocumentIdentifierIT extends AbstractIT {
 
     @Test(expected = DNSLookupException.class)
     public void testGetServiceGroupTypeParticipantNotOk() throws Exception {
+        ServiceGroupType serviceGroup = testGetServiceGroupType("9925:036730217815");
+    }
+
+    private ServiceGroupType testGetServiceGroupType(String participantId) throws Exception {
+
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, "service_group_9925_0367302178");
 
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:036730217815", "iso6523-actorid-upis");
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(participantId, "iso6523-actorid-upis");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
@@ -170,9 +162,6 @@ public class DocumentIdentifierIT extends AbstractIT {
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
-        ServiceGroupType serviceGroup = smpClient.getServiceGroup(participantIdentifier);
-        Assert.assertEquals("9925:0367302178", serviceGroup.getParticipantIdentifier().getValue());
-        Assert.assertEquals("iso6523-actorid-upis", serviceGroup.getParticipantIdentifier().getScheme());
-        Assert.assertEquals("http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().get(0).getHref());
+        return smpClient.getServiceGroup(participantIdentifier);
     }
 }
