@@ -26,6 +26,7 @@ import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.Extension;
@@ -329,22 +330,7 @@ public class ServiceMetadataIT extends AbstractIT {
 
     @Test
     public void testExtension() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "extension", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
-
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-
-        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .fetcher(urlFetcherURL)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
-                .build();
-
-        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        ServiceMetadata serviceMetadata = (ServiceMetadata) getSignedServiceMetada("extension", "urn:poland:ncpb", true);
 
         Assert.assertEquals(1, serviceMetadata.getExtensions().size());
         Assert.assertEquals(" DIGIT-B003", serviceMetadata.getExtensions().get(0).getExtensionAgencyID());
@@ -361,22 +347,7 @@ public class ServiceMetadataIT extends AbstractIT {
 
     @Test
     public void testSignedServiceMetadataType() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "extension", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
-
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-
-        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .fetcher(urlFetcherURL)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
-                .build();
-
-        SignedServiceMetadataType signedServiceMetadataType = smpClient.getSignedServiceMetadata(participantIdentifier, documentIdentifier);
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) getSignedServiceMetada("extension", "urn:poland:ncpb", false);
 
         Assert.assertEquals("urn::epsos##services:extended:epsos::107", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getValue());
         Assert.assertEquals("ehealth-resid-qns", signedServiceMetadataType.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getScheme());
@@ -390,10 +361,14 @@ public class ServiceMetadataIT extends AbstractIT {
 
     @Test(expected = DNSLookupException.class)
     public void testSignedServiceMetadataTypeParticipantNotOk() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "extension", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) getSignedServiceMetada("extension", "urn:poland:ncpb1", false);
+    }
 
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb1", "ehealth-actorid-qns");
+    private Object getSignedServiceMetada(String filename, String participantId, boolean deprecateServiceMetadata) throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, filename, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(participantId, "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
@@ -405,6 +380,10 @@ public class ServiceMetadataIT extends AbstractIT {
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
 
-        SignedServiceMetadataType signedServiceMetadataType = smpClient.getSignedServiceMetadata(participantIdentifier, documentIdentifier);
+        if (deprecateServiceMetadata) {
+            return smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
+        }
+
+        return smpClient.getSignedServiceMetadata(participantIdentifier, documentIdentifier);
     }
 }
