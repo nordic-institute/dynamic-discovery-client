@@ -28,10 +28,15 @@ import java.security.KeyStore;
 public abstract class AbstractSignatureValidator implements ISignatureValidator {
 
     protected KeyStore trustStore;
+    protected String regexCertificateSubjectValidation;
 
     public AbstractSignatureValidator(KeyStore trustStore) throws TechnicalException {
-        this.trustStore = trustStore;
+        this(trustStore, null);
+    }
 
+    public AbstractSignatureValidator(KeyStore trustStore, String regexCertificateSubjectValidation) throws TechnicalException {
+        this.trustStore = trustStore;
+        this.regexCertificateSubjectValidation = regexCertificateSubjectValidation;
         if (this.trustStore == null) {
             throw new SignatureException("TrustStore must be not null for signature validation.");
         }

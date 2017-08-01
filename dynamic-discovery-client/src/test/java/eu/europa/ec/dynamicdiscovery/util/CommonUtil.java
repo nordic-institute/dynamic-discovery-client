@@ -24,10 +24,11 @@ import com.google.common.io.CharStreams;
 import eu.europa.ec.dynamicdiscovery.exception.StreamException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 
 public class CommonUtil {
 
@@ -52,5 +53,13 @@ public class CommonUtil {
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource(fileName).getFile()), null);
         return keyStore;
+    }
+
+    public static  Certificate loadCertificate(String certFilename) throws IOException, CertificateException {
+        InputStream fis = Thread.currentThread().getContextClassLoader().getResource(certFilename).openStream();
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+        return cf.generateCertificate(bis);
     }
 }
