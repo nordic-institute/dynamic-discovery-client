@@ -25,7 +25,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.security.cert.X509Certificate;
-
+@Deprecated
 public class Endpoint {
 
     private ProcessIdentifier processIdentifier;

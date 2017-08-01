@@ -22,13 +22,13 @@ package eu.europa.ec.dynamicdiscovery.core.reader.parser;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -46,24 +46,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ResponseParser {
+public class SignedServiceMetadataResponseParser extends AbstractResponseParser {
 
-    private Unmarshaller unmarshaller;
-    private DocumentBuilderFactory documentBuilderFactory;
-    private AbstractSignatureValidator signatureValidator;
-
-    public ResponseParser(AbstractSignatureValidator signatureValidator) {
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType.class, SignedServiceMetadataType.class, ServiceGroupType.class);
-            this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            this.documentBuilderFactory.setNamespaceAware(true);
-            this.unmarshaller = jaxbContext.createUnmarshaller();
-            this.signatureValidator = signatureValidator;
-        } catch (Exception exc) {
-            throw new IllegalStateException(exc.getMessage(), exc);
-        }
+    public SignedServiceMetadataResponseParser(AbstractSignatureValidator signatureValidator) throws JAXBException {
+        super(JAXBContext.newInstance(SignedServiceMetadataType.class), signatureValidator);
     }
 
+    @Deprecated
     public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
@@ -71,38 +60,29 @@ public class ResponseParser {
             Certificate certificate = null;
             if (result instanceof SignedServiceMetadataType) {
                 certificate = this.signatureValidator.verify(document);
-                result = ((SignedServiceMetadataType)result).getServiceMetadata();
+                result = ((SignedServiceMetadataType) result).getServiceMetadata();
             }
 
-            if (!(result instanceof org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType)) {
+            if (!(result instanceof ServiceMetadataType)) {
                 throw new BindException("ServiceMetadata element not found.");
             }
 
-            org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType unmarshalledServiceMetadata = (org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType) result;
+            ServiceMetadataType unmarshalledServiceMetadata = (ServiceMetadataType) result;
             return new ServiceMetadata(certificate, unmarshalledServiceMetadata.getServiceInformation());
         } catch (ParserConfigurationException | IOException | SAXException | JAXBException exc) {
             throw new BindException(exc.getMessage(), exc);
         }
     }
 
-    public List<DocumentIdentifier> parseDocumentIdentifier(FetcherResponse fetcherResponse) throws TechnicalException {
+    public SignedServiceMetadataType getSignedServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
-            List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-            ServiceGroupType ServiceGroupType = (ServiceGroupType) ((JAXBElement)this.unmarshaller.unmarshal(document)).getValue();
-            if (ServiceGroupType != null && ServiceGroupType.getServiceMetadataReferenceCollection() != null) {
-                List<ServiceMetadataReferenceType> serviceMetadataReference = ServiceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference();
-                if (serviceMetadataReference != null && !serviceMetadataReference.isEmpty()) {
-                    Iterator serviceMetadataReferenceTypeIterator = ServiceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference().iterator();
-                    while (serviceMetadataReferenceTypeIterator.hasNext()) {
-                        ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) serviceMetadataReferenceTypeIterator.next();
-                        String[] parts = URLDecoder.decode(reference.getHref().split("/services/")[1], "UTF-8").split("::", 2);
-                        documentIdentifiers.add(new DocumentIdentifier(parts[1], parts[0]));
-                    }
-                }
-            }
-            return documentIdentifiers;
-        } catch (Exception exc) {
+            SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
+
+            this.signatureValidator.verify(document);
+
+            return signedServiceMetadataType;
+        } catch (ParserConfigurationException | IOException | SAXException | JAXBException exc) {
             throw new BindException(exc.getMessage(), exc);
         }
     }

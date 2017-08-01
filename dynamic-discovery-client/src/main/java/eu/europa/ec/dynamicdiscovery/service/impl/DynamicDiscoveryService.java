@@ -32,6 +32,9 @@ import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
+import eu.europa.ec.dynamicdiscovery.wrapper.DocumentIdVO;
+import eu.europa.ec.dynamicdiscovery.wrapper.ParticipantIdVO;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.net.URI;
 import java.util.List;
@@ -41,12 +44,13 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     private IMetadataLocator metadataLocator;
     private IMetadataProvider metadataProvider;
     private IMetadataFetcher metadataFetcher;
-    private IMetadataReader metadataReader;
 
     public DynamicDiscoveryService() {
         this.metadataProvider = new DefaultProvider();
         this.metadataFetcher = new DefaultURLFetcher();
     }
+
+    private IMetadataReader metadataReader;
 
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
@@ -60,6 +64,13 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
         return metadataReader.getServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
+    }
+
+    @Override
+    public SignedServiceMetadataType getSignedServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
+        URI smpURI = metadataLocator.lookup(participantIdentifier);
+        URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
+        return metadataReader.getSignedServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
     }
 
     @Override

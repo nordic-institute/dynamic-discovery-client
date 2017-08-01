@@ -22,29 +22,44 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.ServiceGroupResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.SignedServiceMetadataResponseParser;
 import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.wrapper.DocumentIdVO;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
+import javax.xml.bind.JAXBException;
 import java.util.List;
 
 public class DefaultBDXRReader implements IMetadataReader {
 
-    private ResponseParser responseParser;
+    private ServiceGroupResponseParser serviceGroupResponseParser;
+    private SignedServiceMetadataResponseParser signedServiceMetadataResponseParser;
 
-    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
-        responseParser = new ResponseParser(signatureValidator);
+    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) throws JAXBException {
+        serviceGroupResponseParser = new ServiceGroupResponseParser(signatureValidator);
+        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParser(signatureValidator);
     }
 
+    public ServiceGroupType getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
+        return serviceGroupResponseParser.getServiceGroup(fetcherResponse);
+    }
+
+    @Deprecated
     public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
-        return responseParser.parseDocumentIdentifier(fetcherResponse);
+        return serviceGroupResponseParser.parseDocumentIdentifier(fetcherResponse);
     }
 
+    public SignedServiceMetadataType getSignedServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
+        return signedServiceMetadataResponseParser.getSignedServiceMetadata(fetcherResponse);
+    }
+
+    @Deprecated
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        return responseParser.parseServiceMetadata(fetcherResponse);
+        return signedServiceMetadataResponseParser.parseServiceMetadata(fetcherResponse);
     }
 }

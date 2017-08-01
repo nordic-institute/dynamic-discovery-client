@@ -24,6 +24,7 @@ package eu.europa.ec.dynamicdiscovery.model;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ExtensionType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceInformationType;
 
@@ -35,11 +36,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@Deprecated
 public class ServiceMetadata {
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
     private Certificate signer;
     private List<Endpoint> endpoints;
+    private List<Extension> extensions;
     private List<ProcessIdentifier> processIdentifiers;
     private List<TransportProfile> transportProfiles;
 
@@ -49,11 +52,13 @@ public class ServiceMetadata {
         }
         this.processIdentifiers = new ArrayList<>();
         this.transportProfiles = new ArrayList<>();
+        this.extensions = new ArrayList<>();
         this.endpoints = new ArrayList<>();
         this.signer = certificate;
         addParticipantIdentifier(serviceInformationType);
         addDocumentIdentifier(serviceInformationType);
         addEndpoint(serviceInformationType);
+        addExtension(serviceInformationType);
     }
 
     public ParticipantIdentifier getParticipantIdentifier() {
@@ -76,6 +81,10 @@ public class ServiceMetadata {
         return this.endpoints;
     }
 
+    public List<Extension> getExtensions() {
+        return extensions;
+    }
+
     public Certificate getSigner() {
         return this.signer;
     }
@@ -86,6 +95,14 @@ public class ServiceMetadata {
 
     private void addDocumentIdentifier(ServiceInformationType serviceInformationType) {
         this.documentIdentifier = new DocumentIdentifier(serviceInformationType.getDocumentIdentifier().getValue(), serviceInformationType.getDocumentIdentifier().getScheme());
+    }
+
+    private void addExtension(ServiceInformationType serviceInformationType) throws TechnicalException {
+        Iterator extensionIterator = serviceInformationType.getExtension().iterator();
+        while (extensionIterator.hasNext()) {
+            ExtensionType extensionType = (ExtensionType) extensionIterator.next();
+            this.extensions.add(new Extension(extensionType));
+        }
     }
 
     private void addEndpoint(ServiceInformationType serviceInformationType) throws TechnicalException {

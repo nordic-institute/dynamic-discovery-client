@@ -25,6 +25,8 @@ import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
+import eu.europa.ec.dynamicdiscovery.wrapper.ParticipantIdVO;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.util.List;
 
@@ -42,6 +44,10 @@ public class DynamicDiscovery {
 
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         return service.getServiceMetadata(participantIdentifier, documentIdentifier);
+    }
+
+    public SignedServiceMetadataType getSignedServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
+        return service.getSignedServiceMetadata(participantIdentifier, documentIdentifier);
     }
 
     public IDynamicDiscoveryService getService() {

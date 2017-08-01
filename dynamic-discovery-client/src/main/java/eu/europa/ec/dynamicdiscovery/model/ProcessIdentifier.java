@@ -24,6 +24,7 @@ package eu.europa.ec.dynamicdiscovery.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+@Deprecated
 public class ProcessIdentifier {
 
     private String identifier;
