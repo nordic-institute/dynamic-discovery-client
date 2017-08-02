@@ -30,11 +30,7 @@ import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 
-import java.util.List;
-
 public interface IDynamicDiscoveryService {
-
-    List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException;
 
     ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException;
 

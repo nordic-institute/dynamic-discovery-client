@@ -35,7 +35,6 @@ import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
 import java.net.URI;
-import java.util.List;
 
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
@@ -47,16 +46,6 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     public DynamicDiscoveryService() {
         this.metadataProvider = new DefaultProvider();
         this.metadataFetcher = new DefaultURLFetcher();
-    }
-
-    @Deprecated
-    @Override
-    /**
-     *@deprecated Replaced by {@link #getServiceGroup(ParticipantIdentifier)}.getDocumentIdentifiers()
-     *
-     *  * */
-    public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        return getServiceGroup(participantIdentifier).getDocumentIdentifiers();
     }
 
     @Override

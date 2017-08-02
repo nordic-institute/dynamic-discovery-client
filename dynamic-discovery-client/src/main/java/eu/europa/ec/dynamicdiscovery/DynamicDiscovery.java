@@ -40,9 +40,14 @@ public class DynamicDiscovery {
     public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         return service.getServiceGroup(participantIdentifier);
     }
-
+    
+    @Deprecated
+    /**
+     *@deprecated Replaced by {@link #getServiceGroup(ParticipantIdentifier)}.getDocumentIdentifiers()
+     *
+     *  * */
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        return service.getDocumentIdentifiers(participantIdentifier);
+        return getServiceGroup(participantIdentifier).getDocumentIdentifiers();
     }
 
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
