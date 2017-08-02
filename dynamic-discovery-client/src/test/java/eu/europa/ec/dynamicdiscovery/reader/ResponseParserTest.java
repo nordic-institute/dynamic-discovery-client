@@ -25,6 +25,7 @@ import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.ServiceGroupRespons
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetadataResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
@@ -57,7 +58,8 @@ public class ResponseParserTest {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_group_urn_poland_ncpb"));
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ServiceGroupResponseParserImpl responseParser = new ServiceGroupResponseParserImpl(new DefaultSignatureValidator(keyStore));
-        List<DocumentIdentifier> documentIdentifiers = responseParser.getDocumentIdentifiers(fetcherResponse);
+        ServiceGroup serviceGroup = responseParser.getServiceGroup(fetcherResponse);
+        List<DocumentIdentifier> documentIdentifiers = serviceGroup.getDocumentIdentifiers();
         Assert.assertEquals(2, documentIdentifiers.size());
         Assert.assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
         Assert.assertEquals("epsos-docid-qns", documentIdentifiers.get(0).getScheme());

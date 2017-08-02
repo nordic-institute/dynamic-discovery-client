@@ -49,11 +49,6 @@ public class DefaultBDXRReader implements IMetadataReader {
     }
 
     @Override
-    public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
-        return serviceGroupResponseParser.getDocumentIdentifiers(fetcherResponse);
-    }
-
-    @Override
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         return signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
     }

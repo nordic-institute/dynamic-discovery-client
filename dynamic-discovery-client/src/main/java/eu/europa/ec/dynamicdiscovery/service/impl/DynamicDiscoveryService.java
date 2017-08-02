@@ -51,7 +51,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        return metadataReader.getDocumentIdentifiers(getFetcherResponseForDocs(participantIdentifier));
+        return getServiceGroup(participantIdentifier).getDocumentIdentifiers();
     }
 
     @Override

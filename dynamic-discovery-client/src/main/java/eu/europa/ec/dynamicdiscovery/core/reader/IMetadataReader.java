@@ -31,8 +31,6 @@ import java.util.List;
 
 public interface IMetadataReader {
 
-    List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException;
-
     ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException;
 
     ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;

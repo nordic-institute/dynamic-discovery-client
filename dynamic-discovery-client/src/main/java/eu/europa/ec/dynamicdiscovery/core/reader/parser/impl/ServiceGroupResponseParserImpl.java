@@ -56,16 +56,6 @@ public class ServiceGroupResponseParserImpl extends AbstractResponseParser imple
         }
     }
 
-    @Override
-    public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
-        try {
-            ServiceGroupType serviceGroupType = unmarshalServiceGroupType(fetcherResponse);
-            return getDocumentIdentifiers(serviceGroupType);
-        } catch (Exception exc) {
-            throw new BindException(exc.getMessage(), exc);
-        }
-    }
-
     private ServiceGroupType unmarshalServiceGroupType(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());

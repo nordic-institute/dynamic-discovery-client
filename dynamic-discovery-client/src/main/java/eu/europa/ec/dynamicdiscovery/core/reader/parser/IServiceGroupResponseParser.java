@@ -32,7 +32,5 @@ import java.util.List;
  */
 public interface IServiceGroupResponseParser {
 
-    List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException;
-
     ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException;
 }
