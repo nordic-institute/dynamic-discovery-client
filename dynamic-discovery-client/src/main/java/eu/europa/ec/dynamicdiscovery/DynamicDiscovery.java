@@ -33,14 +33,14 @@ public class DynamicDiscovery {
 
     private IDynamicDiscoveryService service;
 
-    DynamicDiscovery(IDynamicDiscoveryService service) {
+    private DynamicDiscovery(IDynamicDiscoveryService service) {
         this.service = service;
     }
 
     public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         return service.getServiceGroup(participantIdentifier);
     }
-    
+
     @Deprecated
     /**
      *@deprecated Replaced by {@link #getServiceGroup(ParticipantIdentifier)}.getDocumentIdentifiers()
