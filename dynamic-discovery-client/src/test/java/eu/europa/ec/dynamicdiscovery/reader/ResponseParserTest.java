@@ -37,10 +37,10 @@ public class ResponseParserTest {
 
     @Test
     public void parseServiceMetadataTest() throws Exception {
-        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_metadata_urn_poland_ncpb"));
+        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("signed_service_metadata_urn_poland_ncpb"));
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         SignedServiceMetadataResponseParserImpl responseParser = new SignedServiceMetadataResponseParserImpl(new DefaultSignatureValidator(keyStore));
-        ServiceMetadata serviceMetadata = responseParser.parseServiceMetadata(fetcherResponse);
+        ServiceMetadata serviceMetadata = responseParser.getServiceMetadata(fetcherResponse);
         Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
         Assert.assertEquals(1, serviceMetadata.getEndpoints().size());

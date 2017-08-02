@@ -19,24 +19,31 @@
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.reader;
+package eu.europa.ec.dynamicdiscovery.model;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.util.List;
 
-public interface IMetadataReader {
+public class ServiceGroup {
 
-    List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException;
+    private ServiceGroupType serviceGroupType;
+    private List<DocumentIdentifier> documentIdentifiers;
 
-    ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException;
+    public ServiceGroup(ServiceGroupType serviceGroupType, List<DocumentIdentifier> documentIdentifiers) throws TechnicalException {
+        if (serviceGroupType == null) {
+            throw new IllegalStateException("ServiceInformationType must be not null");
+        }
+        this.documentIdentifiers = documentIdentifiers;
+        this.serviceGroupType = serviceGroupType;
+    }
 
-    ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
+    public ServiceGroupType getOriginalServiceGroup() throws TechnicalException {
+        return serviceGroupType;
+    }
+
+    public List<DocumentIdentifier> getDocumentIdentifiers() {
+        return documentIdentifiers;
+    }
 }
-

@@ -162,6 +162,6 @@ public class DocumentIdentifierIT extends AbstractIT {
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
-        return smpClient.getServiceGroup(participantIdentifier);
+        return smpClient.getServiceGroup(participantIdentifier).getOriginalServiceGroup();
     }
 }

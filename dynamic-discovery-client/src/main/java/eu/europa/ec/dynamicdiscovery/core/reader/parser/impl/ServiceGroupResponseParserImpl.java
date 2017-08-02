@@ -27,6 +27,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
 import org.w3c.dom.Document;
@@ -46,12 +47,10 @@ public class ServiceGroupResponseParserImpl extends AbstractResponseParser imple
     }
 
     @Override
-    public ServiceGroupType getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
+    public ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
-            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-            ServiceGroupType serviceGroupType = (ServiceGroupType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
-
-            return serviceGroupType;
+            ServiceGroupType serviceGroupType = unmarshalServiceGroupType(fetcherResponse);
+            return new ServiceGroup(serviceGroupType, getDocumentIdentifiers(serviceGroupType));
         } catch (Exception exc) {
             throw new BindException(exc.getMessage(), exc);
         }
@@ -59,8 +58,25 @@ public class ServiceGroupResponseParserImpl extends AbstractResponseParser imple
 
     @Override
     public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
-        ServiceGroupType serviceGroupType = getServiceGroup(fetcherResponse);
+        try {
+            ServiceGroupType serviceGroupType = unmarshalServiceGroupType(fetcherResponse);
+            return getDocumentIdentifiers(serviceGroupType);
+        } catch (Exception exc) {
+            throw new BindException(exc.getMessage(), exc);
+        }
+    }
 
+    private ServiceGroupType unmarshalServiceGroupType(FetcherResponse fetcherResponse) throws TechnicalException {
+        try {
+            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
+            ServiceGroupType serviceGroupType = (ServiceGroupType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
+            return serviceGroupType;
+        } catch (Exception exc) {
+            throw new BindException(exc.getMessage(), exc);
+        }
+    }
+
+    private List<DocumentIdentifier> getDocumentIdentifiers(ServiceGroupType serviceGroupType) throws TechnicalException {
         try {
             List<DocumentIdentifier> documentIdentifiers = new ArrayList<>();
             if (serviceGroupType != null && serviceGroupType.getServiceMetadataReferenceCollection() != null) {

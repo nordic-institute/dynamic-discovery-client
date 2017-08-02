@@ -54,41 +54,16 @@ public class SignedServiceMetadataResponseParserImpl extends AbstractResponsePar
         super(JAXBContext.newInstance(SignedServiceMetadataType.class), signatureValidator);
     }
 
-    /**
-     * @deprecated Replaced by {@link #getSignedServiceMetadata(FetcherResponse)}
-     */
-    @Deprecated
-    @Override
-    public ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        try {
-            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-            Object result = ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
-            Certificate certificate = null;
-            if (result instanceof SignedServiceMetadataType) {
-                certificate = this.signatureValidator.verify(document);
-                result = ((SignedServiceMetadataType) result).getServiceMetadata();
-            }
-
-            if (!(result instanceof ServiceMetadataType)) {
-                throw new BindException("ServiceMetadata element not found.");
-            }
-
-            ServiceMetadataType unmarshalledServiceMetadata = (ServiceMetadataType) result;
-            return new ServiceMetadata(certificate, unmarshalledServiceMetadata.getServiceInformation());
-        } catch (ParserConfigurationException | IOException | SAXException | JAXBException exc) {
-            throw new BindException(exc.getMessage(), exc);
-        }
-    }
-
-    @Override
-    public SignedServiceMetadataType getSignedServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
+    public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try {
             Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
             SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
+            Certificate certificate = this.signatureValidator.verify(document);
 
-            this.signatureValidator.verify(document);
-
-            return signedServiceMetadataType;
+            if (!(signedServiceMetadataType.getServiceMetadata() instanceof ServiceMetadataType)) {
+                throw new BindException("ServiceMetadata element not found.");
+            }
+            return new ServiceMetadata(signedServiceMetadataType, certificate);
         } catch (ParserConfigurationException | IOException | SAXException | JAXBException exc) {
             throw new BindException(exc.getMessage(), exc);
         }

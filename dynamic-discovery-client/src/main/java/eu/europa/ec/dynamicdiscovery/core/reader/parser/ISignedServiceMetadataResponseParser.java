@@ -40,11 +40,5 @@ import java.security.cert.Certificate;
 
 public interface ISignedServiceMetadataResponseParser {
 
-    /**
-     * @deprecated Replaced by {@link #getSignedServiceMetadata(FetcherResponse)}
-     */
-    @Deprecated
-    ServiceMetadata parseServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
-
-    SignedServiceMetadataType getSignedServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
+    ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
 }

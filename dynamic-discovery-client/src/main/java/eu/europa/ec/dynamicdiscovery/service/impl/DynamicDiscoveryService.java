@@ -30,10 +30,9 @@ import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.net.URI;
 import java.util.List;
@@ -56,22 +55,12 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     @Override
-    public ServiceGroupType getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         return metadataReader.getServiceGroup(getFetcherResponseForDocs(participantIdentifier));
     }
 
-    /**
-     * @deprecated Replaced by {@link #getSignedServiceMetadata(ParticipantIdentifier, DocumentIdentifier)}
-     */
-    @Deprecated
-    @Override
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         return metadataReader.getServiceMetadata(getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier));
-    }
-
-    @Override
-    public SignedServiceMetadataType getSignedServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
-        return metadataReader.getSignedServiceMetadata(getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier));
     }
 
     private FetcherResponse getFetcherResponseForServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {

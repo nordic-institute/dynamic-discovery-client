@@ -27,9 +27,8 @@ import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetada
 import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import javax.xml.bind.JAXBException;
@@ -46,7 +45,7 @@ public class DefaultBDXRReader implements IMetadataReader {
     }
 
     @Override
-    public ServiceGroupType getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
+    public ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
         return serviceGroupResponseParser.getServiceGroup(fetcherResponse);
     }
 
@@ -56,16 +55,7 @@ public class DefaultBDXRReader implements IMetadataReader {
     }
 
     @Override
-    public SignedServiceMetadataType getSignedServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        return signedServiceMetadataResponseParser.getSignedServiceMetadata(fetcherResponse);
-    }
-
-    /**
-     * @deprecated Replaced by {@link #getSignedServiceMetadata(FetcherResponse)}
-     */
-    @Deprecated
-    @Override
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        return signedServiceMetadataResponseParser.parseServiceMetadata(fetcherResponse);
+        return signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
     }
 }

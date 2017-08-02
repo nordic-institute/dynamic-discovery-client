@@ -23,10 +23,9 @@ package eu.europa.ec.dynamicdiscovery;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.util.List;
 
@@ -38,8 +37,7 @@ public class DynamicDiscovery {
         this.service = service;
     }
 
-
-    public ServiceGroupType getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         return service.getServiceGroup(participantIdentifier);
     }
 
@@ -47,16 +45,8 @@ public class DynamicDiscovery {
         return service.getDocumentIdentifiers(participantIdentifier);
     }
 
-    /**
-     * @deprecated Replaced by {@link #getSignedServiceMetadata(ParticipantIdentifier, DocumentIdentifier)}
-     */
-    @Deprecated
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         return service.getServiceMetadata(participantIdentifier, documentIdentifier);
-    }
-
-    public SignedServiceMetadataType getSignedServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
-        return service.getSignedServiceMetadata(participantIdentifier, documentIdentifier);
     }
 
     public IDynamicDiscoveryService getService() {
