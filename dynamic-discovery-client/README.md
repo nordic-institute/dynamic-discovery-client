@@ -145,16 +145,19 @@ Default implementation example:
       ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
       ## LIST OF DOCUMENTS
+      
+      @Deprecated
       List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier);
          
-      ServiceGroupType serviceGroupType = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
+      ServiceGroup serviceGroup = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
+      ServiceGroupType xmlServiceGroupType = serviceGroup.getOriginalServiceGroup();
+      List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers();
       
       ## DOCUMENT DETAIL
-        
-      @Deprecated
-      ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
-                    
-      SignedServiceMetadata sm = smpClient.getSignedServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+            
+      ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+      SignedServiceMetadata xmlSignedServiceMetadata = serviceMetadata.getOriginalServiceMetadata();
+      List<ExtensionType> extensions = serviceMetadata.getExtensions();
 
 Customized implementation example:
 
@@ -172,16 +175,19 @@ Please replace classes starting with **"Customized"** by implementations extende
     ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
     
     ## LIST OF DOCUMENTS
-    List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier);
-    
-    ServiceGroupType serviceGroupType = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
-    
-    ## DOCUMENT DETAIL
-    
-    @Deprecated
-    ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+          
+          @Deprecated
+          List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier);
+             
+          ServiceGroup serviceGroup = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
+          ServiceGroupType xmlServiceGroupType = serviceGroup.getOriginalServiceGroup();
+          List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers();
+          
+          ## DOCUMENT DETAIL
                 
-    SignedServiceMetadata sm = smpClient.getSignedServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+          ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
+          SignedServiceMetadata xmlSignedServiceMetadata = serviceMetadata.getOriginalServiceMetadata();
+          List<ExtensionType> extensions = serviceMetadata.getExtensions();
 
 ## 5. TRUSTABILITY MODEL
 

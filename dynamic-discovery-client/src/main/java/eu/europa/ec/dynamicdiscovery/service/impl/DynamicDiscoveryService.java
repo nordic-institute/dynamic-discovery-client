@@ -49,7 +49,6 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
         this.metadataFetcher = new DefaultURLFetcher();
     }
 
-
     @Deprecated
     @Override
     /**
