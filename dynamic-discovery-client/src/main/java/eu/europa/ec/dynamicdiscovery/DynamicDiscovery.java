@@ -33,7 +33,7 @@ public class DynamicDiscovery {
 
     private IDynamicDiscoveryService service;
 
-    private DynamicDiscovery(IDynamicDiscoveryService service) {
+    public DynamicDiscovery(IDynamicDiscoveryService service) {
         this.service = service;
     }
 

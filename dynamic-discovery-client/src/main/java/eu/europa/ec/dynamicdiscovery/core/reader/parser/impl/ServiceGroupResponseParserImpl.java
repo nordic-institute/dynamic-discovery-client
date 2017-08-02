@@ -76,7 +76,7 @@ public class ServiceGroupResponseParserImpl extends AbstractResponseParser imple
                     while (serviceMetadataReferenceTypeIterator.hasNext()) {
                         ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) serviceMetadataReferenceTypeIterator.next();
                         String[] parts = URLDecoder.decode(reference.getHref().split("/services/")[1], "UTF-8").split("::", 2);
-                        documentIdentifiers.add(new DocumentIdentifier(parts[1], parts[0], reference.getHref()));
+                        documentIdentifiers.add(new DocumentIdentifier(parts[1], parts[0]));
                     }
                 }
             }
