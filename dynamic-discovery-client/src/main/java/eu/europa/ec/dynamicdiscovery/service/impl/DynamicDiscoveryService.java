@@ -49,7 +49,13 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
         this.metadataFetcher = new DefaultURLFetcher();
     }
 
+
+    @Deprecated
     @Override
+    /**
+     *@deprecated Replaced by {@link #getServiceGroup(ParticipantIdentifier)}.getDocumentIdentifiers()
+     *
+     *  * */
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         return getServiceGroup(participantIdentifier).getDocumentIdentifiers();
     }
