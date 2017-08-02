@@ -21,10 +21,12 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.*;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ExtensionType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.Certificate;

@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
 package eu.europa.ec.dynamicdiscovery.model;
