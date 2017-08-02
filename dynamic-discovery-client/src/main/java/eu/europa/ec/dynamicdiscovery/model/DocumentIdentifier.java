@@ -28,16 +28,10 @@ import java.net.URLEncoder;
 public class DocumentIdentifier {
     private String identifier;
     private String scheme;
-    private String uri;
 
     public DocumentIdentifier(String documentIdentifier, String scheme) {
-        this(documentIdentifier, scheme, null);
-    }
-
-    public DocumentIdentifier(String documentIdentifier, String scheme, String uri) {
         this.identifier = documentIdentifier;
         this.scheme = scheme;
-        this.uri = uri;
     }
 
 
@@ -47,10 +41,6 @@ public class DocumentIdentifier {
 
     public String getIdentifier() {
         return identifier;
-    }
-
-    public String getUri() {
-        return uri;
     }
 
     public String getFullIdentifier() {
@@ -70,7 +60,6 @@ public class DocumentIdentifier {
         return "DocumentIdentifier{" +
                 "identifier='" + identifier + '\'' +
                 ", scheme='" + scheme + '\'' +
-                ", uri='" + uri + '\'' +
                 '}';
     }
 
@@ -81,7 +70,6 @@ public class DocumentIdentifier {
             return new EqualsBuilder()
                     .append(identifier, otherDocIdentifier.getIdentifier())
                     .append(scheme, otherDocIdentifier.getScheme())
-                    .append(uri, otherDocIdentifier.getUri())
                     .isEquals();
         }
         return false;
@@ -90,6 +78,6 @@ public class DocumentIdentifier {
     @Override
     public int hashCode() {
         return new HashCodeBuilder().append(identifier)
-                .append(scheme).append(uri).toHashCode();
+                .append(scheme).toHashCode();
     }
 }
