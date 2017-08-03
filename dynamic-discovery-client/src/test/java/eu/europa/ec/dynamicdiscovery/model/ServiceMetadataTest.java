@@ -55,6 +55,7 @@ public class ServiceMetadataTest {
         Assert.assertEquals("ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", serviceMetadata.getParticipantIdentifier().urlencoded());
         Assert.assertEquals("urn:poland:ncpb", serviceInformationType.getParticipantIdentifier().getValue());
         Assert.assertEquals("ehealth-actorid-qns", serviceInformationType.getParticipantIdentifier().getScheme());
+        baos.close();
     }
 
     @Test
@@ -71,6 +72,7 @@ public class ServiceMetadataTest {
         Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
         Assert.assertNotNull(StringUtils.isEmpty(serviceMetadata.getResponseBody()));
+        baos.close();
     }
 
     @Test
@@ -98,6 +100,7 @@ public class ServiceMetadataTest {
         Assert.assertEquals("urn:ihe:iti:2013:xcpd", serviceMetadata.getEndpoints().get(0).getTransportProfile().getIdentifier());
         Assert.assertEquals("http://poland/ncp/patient/list", serviceMetadata.getEndpoints().get(0).getAddress());
         Assert.assertEquals("CN=IHE Europe CA, O=IHE Europe, C=FR", serviceMetadata.getEndpoints().get(0).getCertificate().getIssuerDN().toString());
+        baos.close();
     }
 
     @Test
@@ -116,6 +119,7 @@ public class ServiceMetadataTest {
         Assert.assertEquals(serviceMetadata.getEndpoints().size(), serviceInformationType.getProcessList().getProcess().get(0).getServiceEndpointList().getEndpoint().size());
         Assert.assertEquals(transportProfiles[0].getIdentifier(), serviceMetadata.getEndpoint(processIdentifier, transportProfiles).getTransportProfile().getIdentifier());
         Assert.assertEquals(processIdentifier.getIdentifier(), serviceMetadata.getEndpoint(processIdentifier, transportProfiles).getProcessIdentifier().getIdentifier());
+        baos.close();
     }
 
     public Object unmarshal(FetcherResponse fetcherResponse) throws Exception {
