@@ -48,10 +48,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class SignedServiceMetadataResponseParserImpl extends AbstractResponseParser implements ISignedServiceMetadataResponseParser {
+public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMetadataResponseParser {
 
-    public SignedServiceMetadataResponseParserImpl(AbstractSignatureValidator signatureValidator) throws JAXBException {
-        super(JAXBContext.newInstance(SignedServiceMetadataType.class), signatureValidator);
+    private Unmarshaller unmarshaller;
+    private DocumentBuilderFactory documentBuilderFactory;
+    private AbstractSignatureValidator signatureValidator;
+
+    public SignedServiceMetadataResponseParserImpl(AbstractSignatureValidator signatureValidator) {
+        try {
+            this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            this.documentBuilderFactory.setNamespaceAware(true);
+            this.unmarshaller = JAXBContext.newInstance(SignedServiceMetadataType.class).createUnmarshaller();
+            this.signatureValidator = signatureValidator;
+        } catch (Exception exc) {
+            throw new IllegalStateException(exc.getMessage(), exc);
+        }
     }
 
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {

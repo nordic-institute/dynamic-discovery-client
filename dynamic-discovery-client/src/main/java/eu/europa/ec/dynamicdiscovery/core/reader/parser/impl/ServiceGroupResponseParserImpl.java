@@ -35,15 +35,26 @@ import org.w3c.dom.Document;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ServiceGroupResponseParserImpl extends AbstractResponseParser implements IServiceGroupResponseParser {
+public class ServiceGroupResponseParserImpl implements IServiceGroupResponseParser {
 
-    public ServiceGroupResponseParserImpl(AbstractSignatureValidator signatureValidator) throws JAXBException {
-        super(JAXBContext.newInstance(ServiceGroupType.class), signatureValidator);
+    private Unmarshaller unmarshaller;
+    private DocumentBuilderFactory documentBuilderFactory;
+
+    public ServiceGroupResponseParserImpl() {
+        try {
+            this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            this.documentBuilderFactory.setNamespaceAware(true);
+            this.unmarshaller = JAXBContext.newInstance(ServiceGroupType.class).createUnmarshaller();
+        } catch (Exception exc) {
+            throw new IllegalStateException(exc.getMessage(), exc);
+        }
     }
 
     @Override

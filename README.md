@@ -144,10 +144,7 @@ Default implementation example:
 
       ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
-      ## LIST OF DOCUMENTS
-      
-      @Deprecated
-      List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier);
+      ## LIST OF DOCUMENTS     
          
       ServiceGroup serviceGroup = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
       ServiceGroupType xmlServiceGroupType = serviceGroup.getOriginalServiceGroup();
@@ -174,10 +171,7 @@ Please replace classes starting with **"Customized"** by implementations extende
             .build();
     ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
     
-    ## LIST OF DOCUMENTS
-          
-          @Deprecated
-          List<DocumentIdentifier> documents = smpClient.getDocumentIdentifiers(participantIdentifier);
+    ## LIST OF DOCUMENTS                   
              
           ServiceGroup serviceGroup = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
           ServiceGroupType xmlServiceGroupType = serviceGroup.getOriginalServiceGroup();
