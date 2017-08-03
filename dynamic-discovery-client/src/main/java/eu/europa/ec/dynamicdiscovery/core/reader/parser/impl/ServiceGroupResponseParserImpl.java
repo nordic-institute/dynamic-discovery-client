@@ -26,6 +26,7 @@ import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
+import org.apache.commons.io.IOUtils;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
 import org.w3c.dom.Document;
@@ -34,7 +35,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -56,17 +61,19 @@ public class ServiceGroupResponseParserImpl implements IServiceGroupResponsePars
 
     @Override
     public ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
-        try {
-            ServiceGroupType serviceGroupType = unmarshalServiceGroupType(fetcherResponse);
-            return new ServiceGroup(serviceGroupType, getDocumentIdentifiers(serviceGroupType));
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            IOUtils.copy(fetcherResponse.getInputStream(), baos);
+            String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
+            ServiceGroupType serviceGroupType = unmarshalServiceGroupType(new ByteArrayInputStream(baos.toByteArray()));
+            return new ServiceGroup(serviceGroupType, responseBodyStr, getDocumentIdentifiers(serviceGroupType));
         } catch (Exception exc) {
             throw new BindException(exc.getMessage(), exc);
         }
     }
 
-    private ServiceGroupType unmarshalServiceGroupType(FetcherResponse fetcherResponse) throws TechnicalException {
+    private ServiceGroupType unmarshalServiceGroupType(InputStream inputStream) throws TechnicalException {
         try {
-            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
+            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(inputStream);
             ServiceGroupType serviceGroupType = (ServiceGroupType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
             return serviceGroupType;
         } catch (Exception exc) {

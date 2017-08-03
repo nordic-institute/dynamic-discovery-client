@@ -40,22 +40,22 @@ public class ServiceMetadata {
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
     private Certificate signer;
-    private List<ExtensionType> extensions;
+    private String responseBody;
+    private SignedServiceMetadataType signedServiceMetadataType;
     private List<Endpoint> endpoints;
     private List<ProcessIdentifier> processIdentifiers;
     private List<TransportProfile> transportProfiles;
-    private SignedServiceMetadataType signedServiceMetadataType;
 
-    public ServiceMetadata(SignedServiceMetadataType signedServiceMetadataType, Certificate certificate) throws TechnicalException {
+    public ServiceMetadata(SignedServiceMetadataType signedServiceMetadataType, Certificate certificate, String responseBody) throws TechnicalException {
         if (signedServiceMetadataType == null) {
             throw new IllegalStateException("SignedServiceMetadataType must be not null");
         }
         this.processIdentifiers = new ArrayList<>();
         this.transportProfiles = new ArrayList<>();
-        this.extensions = new ArrayList<>();
         this.endpoints = new ArrayList<>();
         this.signer = certificate;
         this.signedServiceMetadataType = signedServiceMetadataType;
+        this.responseBody = responseBody;
         addParticipantIdentifier();
         addDocumentIdentifier();
         addEndpoint();
@@ -134,6 +134,10 @@ public class ServiceMetadata {
         return null;
     }
 
+    public String getResponseBody() {
+        return responseBody;
+    }
+
     public ParticipantIdentifier getParticipantIdentifier() {
         return this.participantIdentifier;
     }
@@ -145,9 +149,4 @@ public class ServiceMetadata {
     public SignedServiceMetadataType getOriginalServiceMetadata() {
         return signedServiceMetadataType;
     }
-
-    public List<ExtensionType> getExtensions() throws TechnicalException {
-        return signedServiceMetadataType.getServiceMetadata().getServiceInformation().getExtension();
-    }
-
 }

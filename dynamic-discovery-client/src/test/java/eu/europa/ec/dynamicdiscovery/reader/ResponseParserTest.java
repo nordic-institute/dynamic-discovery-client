@@ -50,6 +50,7 @@ public class ResponseParserTest {
         Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
         Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getFullIdentifier());
+        Assert.assertEquals(CommonUtil.getStringFromXmlFile("signed_service_metadata_urn_poland_ncpb"), serviceMetadata.getResponseBody());
         Assert.assertNotNull(serviceMetadata.getDocumentIdentifier());
     }
 
@@ -65,6 +66,7 @@ public class ResponseParserTest {
         Assert.assertEquals("epsos-docid-qns", documentIdentifiers.get(0).getScheme());
         Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifiers.get(1).getIdentifier());
         Assert.assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
+        Assert.assertEquals(CommonUtil.getStringFromXmlFile("service_group_urn_poland_ncpb"), serviceGroup.getResponseBody());
     }
 }
 

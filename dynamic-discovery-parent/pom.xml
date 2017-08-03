@@ -21,6 +21,7 @@
     </licenses>
 
     <properties>
+        <commons-io.version>2.5</commons-io.version>
         <httpclient.version>4.5.2</httpclient.version>
         <dnsjava.version>2.1.7</dnsjava.version>
         <bouncycastle.version>1.55</bouncycastle.version>

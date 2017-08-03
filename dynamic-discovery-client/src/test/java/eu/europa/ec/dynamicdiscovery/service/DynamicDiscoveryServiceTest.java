@@ -32,9 +32,7 @@ import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.FileInputStream;
 import java.net.URI;
-import java.security.KeyStore;
 
 public class DynamicDiscoveryServiceTest {
 
