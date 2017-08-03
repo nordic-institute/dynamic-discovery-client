@@ -38,7 +38,7 @@ public class DefaultBDXRReader implements IMetadataReader {
     private ServiceGroupResponseParserImpl serviceGroupResponseParser;
     private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
 
-    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) throws JAXBException {
+    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
         serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
         signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(signatureValidator);
     }
