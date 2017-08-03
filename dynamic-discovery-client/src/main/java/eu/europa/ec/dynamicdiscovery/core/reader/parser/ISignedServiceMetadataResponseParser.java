@@ -21,22 +21,8 @@
 package eu.europa.ec.dynamicdiscovery.core.reader.parser;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.AbstractResponseParser;
-import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.security.cert.Certificate;
 
 public interface ISignedServiceMetadataResponseParser {
 

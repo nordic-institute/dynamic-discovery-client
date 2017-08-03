@@ -21,15 +21,11 @@
 package eu.europa.ec.dynamicdiscovery.core.reader.parser.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.AbstractResponseParser;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.ISignedServiceMetadataResponseParser;
 import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
@@ -42,11 +38,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMetadataResponseParser {
 
