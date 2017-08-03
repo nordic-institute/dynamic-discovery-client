@@ -20,8 +20,8 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
@@ -36,8 +36,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
-
-import javax.xml.bind.JAXBElement;
 
 import static org.mockito.Mockito.mock;
 
@@ -320,23 +318,6 @@ public class ServiceMetadataIT extends AbstractIT {
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
         ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-    }
-
-    @Test
-    public void testExtension() throws Exception {
-        ServiceMetadata serviceMetadata = (ServiceMetadata) getSignedServiceMetada("extension", "urn:poland:ncpb", true);
-
-        Assert.assertEquals(1, serviceMetadata.getExtensions().size());
-        Assert.assertEquals(" DIGIT-B003", serviceMetadata.getExtensions().get(0).getExtensionAgencyID());
-        Assert.assertEquals("DIGIT Agency", serviceMetadata.getExtensions().get(0).getExtensionAgencyName());
-        Assert.assertEquals("digit.com", serviceMetadata.getExtensions().get(0).getExtensionAgencyURI());
-        Assert.assertEquals("digitID", serviceMetadata.getExtensions().get(0).getExtensionID());
-        Assert.assertEquals("DigitExtension", serviceMetadata.getExtensions().get(0).getExtensionName());
-        Assert.assertEquals("DigitReason", serviceMetadata.getExtensions().get(0).getExtensionReason());
-        Assert.assertEquals("DigitReasonCode", serviceMetadata.getExtensions().get(0).getExtensionReasonCode());
-        Assert.assertEquals("extension.com", serviceMetadata.getExtensions().get(0).getExtensionURI());
-        Assert.assertTrue(serviceMetadata.getExtensions().get(0).getExtensionVersionID().isEmpty());
-        Assert.assertEquals(JAXBElement.class.getSimpleName(), serviceMetadata.getExtensions().get(0).getAny().getClass().getSimpleName());
     }
 
     @Test

@@ -28,14 +28,16 @@ import java.util.List;
 public class ServiceGroup {
 
     private ServiceGroupType serviceGroupType;
+    private String responseBody;
     private List<DocumentIdentifier> documentIdentifiers;
 
-    public ServiceGroup(ServiceGroupType serviceGroupType, List<DocumentIdentifier> documentIdentifiers) throws TechnicalException {
+    public ServiceGroup(ServiceGroupType serviceGroupType, String responseBody, List<DocumentIdentifier> documentIdentifiers) throws TechnicalException {
         if (serviceGroupType == null) {
             throw new IllegalStateException("ServiceInformationType must be not null");
         }
         this.documentIdentifiers = documentIdentifiers;
         this.serviceGroupType = serviceGroupType;
+        this.responseBody = responseBody;
     }
 
     public ServiceGroupType getOriginalServiceGroup() throws TechnicalException {
@@ -44,5 +46,9 @@ public class ServiceGroup {
 
     public List<DocumentIdentifier> getDocumentIdentifiers() {
         return documentIdentifiers;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
     }
 }

@@ -26,6 +26,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
+import org.apache.commons.io.IOUtils;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
@@ -37,7 +38,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 
 public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMetadataResponseParser {
@@ -58,15 +62,19 @@ public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMe
     }
 
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        try {
-            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            IOUtils.copy(fetcherResponse.getInputStream(), baos);
+            String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
+
+            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(baos.toByteArray()));
             SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
             Certificate certificate = this.signatureValidator.verify(document);
 
             if (!(signedServiceMetadataType.getServiceMetadata() instanceof ServiceMetadataType)) {
                 throw new BindException("ServiceMetadata element not found.");
             }
-            return new ServiceMetadata(signedServiceMetadataType, certificate);
+
+            return new ServiceMetadata(signedServiceMetadataType, certificate, responseBodyStr);
         } catch (ParserConfigurationException | IOException | SAXException | JAXBException exc) {
             throw new BindException(exc.getMessage(), exc);
         }
