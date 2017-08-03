@@ -57,7 +57,7 @@ public class ResponseParserTest {
     public void parseDocumentIdentifierTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_group_urn_poland_ncpb"));
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        ServiceGroupResponseParserImpl responseParser = new ServiceGroupResponseParserImpl(new DefaultSignatureValidator(keyStore));
+        ServiceGroupResponseParserImpl responseParser = new ServiceGroupResponseParserImpl();
         ServiceGroup serviceGroup = responseParser.getServiceGroup(fetcherResponse);
         List<DocumentIdentifier> documentIdentifiers = serviceGroup.getDocumentIdentifiers();
         Assert.assertEquals(2, documentIdentifiers.size());
