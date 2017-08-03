@@ -22,29 +22,34 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.ServiceGroupResponseParserImpl;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetadataResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 
+import javax.xml.bind.JAXBException;
 import java.util.List;
 
 public class DefaultBDXRReader implements IMetadataReader {
 
-    private ResponseParser responseParser;
+    private ServiceGroupResponseParserImpl serviceGroupResponseParser;
+    private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
 
-    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
-        responseParser = new ResponseParser(signatureValidator);
+    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) throws JAXBException {
+        serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
+        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(signatureValidator);
     }
 
-    public List<DocumentIdentifier> getDocumentIdentifiers(FetcherResponse fetcherResponse) throws TechnicalException {
-        return responseParser.parseDocumentIdentifier(fetcherResponse);
+    @Override
+    public ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
+        return serviceGroupResponseParser.getServiceGroup(fetcherResponse);
     }
 
+    @Override
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        return responseParser.parseServiceMetadata(fetcherResponse);
+        return signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
     }
 }

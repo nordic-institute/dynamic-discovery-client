@@ -24,6 +24,10 @@ package eu.europa.ec.dynamicdiscovery.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+/**
+ * @deprecated Replaced by {@link org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessIdentifierType}
+ */
+@Deprecated
 public class ProcessIdentifier {
 
     private String identifier;

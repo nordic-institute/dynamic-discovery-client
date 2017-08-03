@@ -39,11 +39,11 @@ public class ServiceMetadataTest {
 
     @Test
     public void addParticipantIdentifierTest() throws Exception {
-        InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
+        InputStream inputStream = getClass().getResourceAsStream("/response/signed_service_metadata_urn_poland_ncpb.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
-        Object result = unmarshal(fetcherResponse);
-        ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType) result).getServiceInformation();
-        ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) unmarshal(fetcherResponse);
+        ServiceInformationType serviceInformationType = signedServiceMetadataType.getServiceMetadata().getServiceInformation();
+        ServiceMetadata serviceMetadata = new ServiceMetadata(signedServiceMetadataType, null);
         Assert.assertEquals("ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", serviceMetadata.getParticipantIdentifier().urlencoded());
         Assert.assertEquals("urn:poland:ncpb", serviceInformationType.getParticipantIdentifier().getValue());
         Assert.assertEquals("ehealth-actorid-qns", serviceInformationType.getParticipantIdentifier().getScheme());
@@ -51,23 +51,23 @@ public class ServiceMetadataTest {
 
     @Test
     public void addDocumentIdentifierTest() throws Exception {
-        InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
+        InputStream inputStream = getClass().getResourceAsStream("/response/signed_service_metadata_urn_poland_ncpb.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
-        Object result = unmarshal(fetcherResponse);
-        ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType) result).getServiceInformation();
-        ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) unmarshal(fetcherResponse);
+
+        ServiceMetadata serviceMetadata = new ServiceMetadata(signedServiceMetadataType, null);
         Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getFullIdentifier());
-        Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceInformationType.getDocumentIdentifier().getValue());
-        Assert.assertEquals("ehealth-resid-qns", serviceInformationType.getDocumentIdentifier().getScheme());
+        Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
     }
 
     @Test
     public void addEndpointTest() throws Exception {
-        InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
+        InputStream inputStream = getClass().getResourceAsStream("/response/signed_service_metadata_urn_poland_ncpb.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
-        Object result = unmarshal(fetcherResponse);
-        ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType) result).getServiceInformation();
-        ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) unmarshal(fetcherResponse);
+        ServiceInformationType serviceInformationType = signedServiceMetadataType.getServiceMetadata().getServiceInformation();
+        ServiceMetadata serviceMetadata = new ServiceMetadata(signedServiceMetadataType, null);
         Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
         Assert.assertEquals("urn:epsosPatientService::List", serviceMetadata.getEndpoints().get(0).getProcessIdentifier().getIdentifier());
         Assert.assertEquals(serviceMetadata.getEndpoints().get(0).getProcessIdentifier().getIdentifier(), serviceInformationType.getProcessList().getProcess().get(0).getProcessIdentifier().getValue());
@@ -86,11 +86,11 @@ public class ServiceMetadataTest {
 
     @Test
     public void getEndpointTest() throws Exception {
-        InputStream inputStream = getClass().getResourceAsStream("/response/service_metadata_urn_poland_ncpb.xml");
+        InputStream inputStream = getClass().getResourceAsStream("/response/signed_service_metadata_urn_poland_ncpb.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
-        Object result = unmarshal(fetcherResponse);
-        ServiceInformationType serviceInformationType = ((org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType) result).getServiceInformation();
-        ServiceMetadata serviceMetadata = new ServiceMetadata(null, serviceInformationType);
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) unmarshal(fetcherResponse);
+        ServiceInformationType serviceInformationType = signedServiceMetadataType.getServiceMetadata().getServiceInformation();
+        ServiceMetadata serviceMetadata = new ServiceMetadata(signedServiceMetadataType, null);
         ProcessIdentifier processIdentifier = new ProcessIdentifier(serviceInformationType.getProcessList().getProcess().get(0).getProcessIdentifier().getValue(), serviceInformationType.getProcessList().getProcess().get(0).getProcessIdentifier().getScheme());
         TransportProfile[] transportProfiles = new TransportProfile[]{new TransportProfile(serviceInformationType.getProcessList().getProcess().get(0).getServiceEndpointList().getEndpoint().get(0).getTransportProfile())};
         Assert.assertEquals(serviceMetadata.getEndpoints().size(), serviceInformationType.getProcessList().getProcess().get(0).getServiceEndpointList().getEndpoint().size());
@@ -103,6 +103,6 @@ public class ServiceMetadataTest {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         Document document = documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
-        return ((JAXBElement)jaxbContext.createUnmarshaller().unmarshal(document)).getValue();
+        return ((JAXBElement) jaxbContext.createUnmarshaller().unmarshal(document)).getValue();
     }
 }

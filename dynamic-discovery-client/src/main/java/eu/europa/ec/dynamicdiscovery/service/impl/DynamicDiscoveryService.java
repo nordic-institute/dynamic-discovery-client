@@ -20,21 +20,21 @@
  */
 package eu.europa.ec.dynamicdiscovery.service.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
 import java.net.URI;
-import java.util.List;
 
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
@@ -49,17 +49,25 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     @Override
-    public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI smpURI = metadataLocator.lookup(participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
-        return metadataReader.getDocumentIdentifiers(metadataFetcher.fetch(participantUnderSmpURI));
+    public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        return metadataReader.getServiceGroup(getFetcherResponseForDocs(participantIdentifier));
     }
 
     @Override
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
+        return metadataReader.getServiceMetadata(getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier));
+    }
+
+    private FetcherResponse getFetcherResponseForServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
-        return metadataReader.getServiceMetadata(metadataFetcher.fetch(participantUnderSmpURI));
+        return metadataFetcher.fetch(participantUnderSmpURI);
+    }
+
+    private FetcherResponse getFetcherResponseForDocs(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        URI smpURI = metadataLocator.lookup(participantIdentifier);
+        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
+        return metadataFetcher.fetch(participantUnderSmpURI);
     }
 
     @Override

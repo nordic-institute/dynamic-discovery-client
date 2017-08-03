@@ -26,6 +26,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.security.cert.X509Certificate;
 
+/**
+ * @deprecated Replaced by {@link org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType}
+ */
+@Deprecated
 public class Endpoint {
 
     private ProcessIdentifier processIdentifier;

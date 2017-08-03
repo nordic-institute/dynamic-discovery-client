@@ -24,8 +24,9 @@ package eu.europa.ec.dynamicdiscovery.model;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ExtensionType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceInformationType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.Certificate;
@@ -39,58 +40,61 @@ public class ServiceMetadata {
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
     private Certificate signer;
+    private List<ExtensionType> extensions;
     private List<Endpoint> endpoints;
     private List<ProcessIdentifier> processIdentifiers;
     private List<TransportProfile> transportProfiles;
+    private SignedServiceMetadataType signedServiceMetadataType;
 
-    public ServiceMetadata(Certificate certificate, ServiceInformationType serviceInformationType) throws TechnicalException {
-        if (serviceInformationType == null) {
-            throw new IllegalStateException("ServiceInformationType must be not null");
+    public ServiceMetadata(SignedServiceMetadataType signedServiceMetadataType, Certificate certificate) throws TechnicalException {
+        if (signedServiceMetadataType == null) {
+            throw new IllegalStateException("SignedServiceMetadataType must be not null");
         }
         this.processIdentifiers = new ArrayList<>();
         this.transportProfiles = new ArrayList<>();
+        this.extensions = new ArrayList<>();
         this.endpoints = new ArrayList<>();
         this.signer = certificate;
-        addParticipantIdentifier(serviceInformationType);
-        addDocumentIdentifier(serviceInformationType);
-        addEndpoint(serviceInformationType);
+        this.signedServiceMetadataType = signedServiceMetadataType;
+        addParticipantIdentifier();
+        addDocumentIdentifier();
+        addEndpoint();
     }
 
-    public ParticipantIdentifier getParticipantIdentifier() {
-        return this.participantIdentifier;
-    }
-
-    public DocumentIdentifier getDocumentIdentifier() {
-        return this.documentIdentifier;
-    }
-
+    @Deprecated
     public List<ProcessIdentifier> getProcessIdentifiers() {
         return this.processIdentifiers;
     }
 
+    @Deprecated
     public List<TransportProfile> getTransportProfiles() {
         return this.transportProfiles;
     }
 
+    @Deprecated
     public List<Endpoint> getEndpoints() {
         return this.endpoints;
     }
 
+    @Deprecated
     public Certificate getSigner() {
         return this.signer;
     }
 
-    private void addParticipantIdentifier(ServiceInformationType serviceInformationType) {
-        this.participantIdentifier = new ParticipantIdentifier(serviceInformationType.getParticipantIdentifier().getValue(), serviceInformationType.getParticipantIdentifier().getScheme());
+    @Deprecated
+    private void addParticipantIdentifier() {
+        this.participantIdentifier = new ParticipantIdentifier(signedServiceMetadataType.getServiceMetadata().getServiceInformation().getParticipantIdentifier().getValue(), signedServiceMetadataType.getServiceMetadata().getServiceInformation().getParticipantIdentifier().getScheme());
     }
 
-    private void addDocumentIdentifier(ServiceInformationType serviceInformationType) {
-        this.documentIdentifier = new DocumentIdentifier(serviceInformationType.getDocumentIdentifier().getValue(), serviceInformationType.getDocumentIdentifier().getScheme());
+    @Deprecated
+    private void addDocumentIdentifier() {
+        this.documentIdentifier = new DocumentIdentifier(signedServiceMetadataType.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getValue(), signedServiceMetadataType.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getScheme());
     }
 
-    private void addEndpoint(ServiceInformationType serviceInformationType) throws TechnicalException {
+    @Deprecated
+    private void addEndpoint() throws TechnicalException {
         try {
-            Iterator processTypeIterator = serviceInformationType.getProcessList().getProcess().iterator();
+            Iterator processTypeIterator = signedServiceMetadataType.getServiceMetadata().getServiceInformation().getProcessList().getProcess().iterator();
             while (processTypeIterator.hasNext()) {
                 ProcessType processType = (ProcessType) processTypeIterator.next();
                 ProcessIdentifier processIdentifier = new ProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme());
@@ -110,6 +114,7 @@ public class ServiceMetadata {
         }
     }
 
+    @Deprecated
     public Endpoint getEndpoint(ProcessIdentifier processIdentifier, TransportProfile... transportProfiles) {
         if (transportProfiles != null) {
             for (int i = 0; i < transportProfiles.length; ++i) {
@@ -128,4 +133,21 @@ public class ServiceMetadata {
 
         return null;
     }
+
+    public ParticipantIdentifier getParticipantIdentifier() {
+        return this.participantIdentifier;
+    }
+
+    public DocumentIdentifier getDocumentIdentifier() {
+        return this.documentIdentifier;
+    }
+
+    public SignedServiceMetadataType getOriginalServiceMetadata() {
+        return signedServiceMetadataType;
+    }
+
+    public List<ExtensionType> getExtensions() throws TechnicalException {
+        return signedServiceMetadataType.getServiceMetadata().getServiceInformation().getExtension();
+    }
+
 }

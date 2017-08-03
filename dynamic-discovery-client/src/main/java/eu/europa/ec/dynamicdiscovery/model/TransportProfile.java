@@ -24,6 +24,11 @@ package eu.europa.ec.dynamicdiscovery.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+@Deprecated
+/**
+ *  @deprecated This class will be removed in the next version. Please
+ *  use @link {@link org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType} instead.
+ **/
 public class TransportProfile {
 
     private String identifier;

@@ -23,6 +23,7 @@ package eu.europa.ec.dynamicdiscovery;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
@@ -32,12 +33,21 @@ public class DynamicDiscovery {
 
     private IDynamicDiscoveryService service;
 
-    DynamicDiscovery(IDynamicDiscoveryService service) {
+    public DynamicDiscovery(IDynamicDiscoveryService service) {
         this.service = service;
     }
 
+    public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        return service.getServiceGroup(participantIdentifier);
+    }
+
+    @Deprecated
+    /**
+     *@deprecated Replaced by {@link #getServiceGroup(ParticipantIdentifier)}.getDocumentIdentifiers()
+     *
+     *  * */
     public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        return service.getDocumentIdentifiers(participantIdentifier);
+        return getServiceGroup(participantIdentifier).getDocumentIdentifiers();
     }
 
     public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {

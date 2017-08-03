@@ -21,9 +21,11 @@
 package eu.europa.ec.dynamicdiscovery.reader;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.ResponseParser;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.ServiceGroupResponseParserImpl;
+import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetadataResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
@@ -36,10 +38,10 @@ public class ResponseParserTest {
 
     @Test
     public void parseServiceMetadataTest() throws Exception {
-        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_metadata_urn_poland_ncpb"));
+        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("signed_service_metadata_urn_poland_ncpb"));
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        ResponseParser responseParser = new ResponseParser(new DefaultSignatureValidator(keyStore));
-        ServiceMetadata serviceMetadata = responseParser.parseServiceMetadata(fetcherResponse);
+        SignedServiceMetadataResponseParserImpl responseParser = new SignedServiceMetadataResponseParserImpl(new DefaultSignatureValidator(keyStore));
+        ServiceMetadata serviceMetadata = responseParser.getServiceMetadata(fetcherResponse);
         Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
         Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
@@ -55,8 +57,9 @@ public class ResponseParserTest {
     public void parseDocumentIdentifierTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_group_urn_poland_ncpb"));
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        ResponseParser responseParser = new ResponseParser(new DefaultSignatureValidator(keyStore));
-        List<DocumentIdentifier> documentIdentifiers = responseParser.parseDocumentIdentifier(fetcherResponse);
+        ServiceGroupResponseParserImpl responseParser = new ServiceGroupResponseParserImpl();
+        ServiceGroup serviceGroup = responseParser.getServiceGroup(fetcherResponse);
+        List<DocumentIdentifier> documentIdentifiers = serviceGroup.getDocumentIdentifiers();
         Assert.assertEquals(2, documentIdentifiers.size());
         Assert.assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
         Assert.assertEquals("epsos-docid-qns", documentIdentifiers.get(0).getScheme());
