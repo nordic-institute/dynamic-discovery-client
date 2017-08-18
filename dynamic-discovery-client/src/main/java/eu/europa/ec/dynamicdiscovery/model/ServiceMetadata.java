@@ -102,7 +102,8 @@ public class ServiceMetadata {
 
                 while (endpointTypeIterator.hasNext()) {
                     EndpointType endpointType = (EndpointType) endpointTypeIterator.next();
-                    Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(endpointType.getTransportProfile()), endpointType.getEndpointURI(), (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(endpointType.getCertificate())));
+                    X509Certificate certificate = getX509Certificate(endpointType);
+                    Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(endpointType.getTransportProfile()), endpointType.getEndpointURI(), certificate);
                     if (!this.processIdentifiers.contains(endpoint.getProcessIdentifier())) {
                         this.processIdentifiers.add(endpoint.getProcessIdentifier());
                     }
@@ -111,6 +112,14 @@ public class ServiceMetadata {
             }
         } catch (Exception exc) {
             throw new BindException(exc.getMessage(), exc);
+        }
+    }
+
+    private X509Certificate getX509Certificate(EndpointType endpointType) {
+        try{
+            return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(endpointType.getCertificate()));
+        } catch (Exception e){
+            return null;
         }
     }
 
