@@ -1,0 +1,19 @@
+<!DOCTYPE xxeAttack [
+        <!ENTITY a "1234567890" >
+        <!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;" >
+        <!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;" >
+        <!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;" >
+        <!ENTITY e "&d;&d;&d;&d;&d;&d;&d;&d;&d;&d;" >
+        <!ENTITY f "&e;&e;&e;&e;&e;&e;&e;&e;&e;&e;" >
+        <!ENTITY g "&f;&f;&f;&f;&f;&f;&f;&f;&f;&f;" >
+        <!ENTITY h "&g;&g;&g;&g;&g;&g;&g;&g;&g;&g;" >
+        <!ENTITY i "&h;&h;&h;&h;&h;&h;&h;&h;&h;&h;" >
+        <!ENTITY j "&i;&i;&i;&i;&i;&i;&i;&i;&i;&i;" >
+        ]>
+<ServiceGroup xmlns="http://docs.oasis-open.org/bdxr/ns/SMP/2016/05">
+    <ParticipantIdentifier scheme="ehealth-actorid-qns">&j;</ParticipantIdentifier>
+    <ServiceMetadataReferenceCollection>
+        <ServiceMetadataReference href="http://cipa-smp-full-webapp/ehealth-actorid-qns::urn:poland:ncpb/services/epsos-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21"/>
+        <ServiceMetadataReference href="http://cipa-smp-full-webapp/ehealth-actorid-qns::urn:poland:ncpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107"/>
+    </ServiceMetadataReferenceCollection>
+</ServiceGroup>

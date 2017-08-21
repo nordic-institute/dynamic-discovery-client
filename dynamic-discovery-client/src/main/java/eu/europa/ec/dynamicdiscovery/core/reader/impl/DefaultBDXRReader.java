@@ -29,14 +29,18 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 public class DefaultBDXRReader implements IMetadataReader {
 
     private ServiceGroupResponseParserImpl serviceGroupResponseParser;
     private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
 
     public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
-        serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
-        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(signatureValidator);
+        DocumentBuilderFactory documentBuilderFactory = createDocumentBuilderFactory();
+        serviceGroupResponseParser = new ServiceGroupResponseParserImpl(documentBuilderFactory);
+        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(documentBuilderFactory, signatureValidator);
     }
 
     @Override
@@ -47,5 +51,16 @@ public class DefaultBDXRReader implements IMetadataReader {
     @Override
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         return signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
+    }
+
+    private DocumentBuilderFactory createDocumentBuilderFactory() {
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            return documentBuilderFactory;
+        } catch (ParserConfigurationException exc) {
+            throw new IllegalStateException(exc.getMessage(), exc);
+        }
     }
 }

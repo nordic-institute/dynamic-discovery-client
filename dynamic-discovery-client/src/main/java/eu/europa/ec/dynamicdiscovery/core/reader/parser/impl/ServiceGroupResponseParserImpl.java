@@ -31,10 +31,12 @@ import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
 import org.w3c.dom.Document;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -49,10 +51,9 @@ public class ServiceGroupResponseParserImpl implements IServiceGroupResponsePars
     private Unmarshaller unmarshaller;
     private DocumentBuilderFactory documentBuilderFactory;
 
-    public ServiceGroupResponseParserImpl() {
+    public ServiceGroupResponseParserImpl(DocumentBuilderFactory documentBuilderFactory) {
         try {
-            this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            this.documentBuilderFactory.setNamespaceAware(true);
+            this.documentBuilderFactory = documentBuilderFactory;
             this.unmarshaller = JAXBContext.newInstance(ServiceGroupType.class).createUnmarshaller();
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);

@@ -32,6 +32,7 @@ import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -50,10 +51,9 @@ public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMe
     private DocumentBuilderFactory documentBuilderFactory;
     private AbstractSignatureValidator signatureValidator;
 
-    public SignedServiceMetadataResponseParserImpl(AbstractSignatureValidator signatureValidator) {
+    public SignedServiceMetadataResponseParserImpl(DocumentBuilderFactory documentBuilderFactory, AbstractSignatureValidator signatureValidator) {
         try {
-            this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            this.documentBuilderFactory.setNamespaceAware(true);
+            this.documentBuilderFactory = documentBuilderFactory;
             this.unmarshaller = JAXBContext.newInstance(SignedServiceMetadataType.class).createUnmarshaller();
             this.signatureValidator = signatureValidator;
         } catch (Exception exc) {
