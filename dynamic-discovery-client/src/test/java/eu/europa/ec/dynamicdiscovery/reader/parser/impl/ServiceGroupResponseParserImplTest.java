@@ -44,12 +44,12 @@ public class ServiceGroupResponseParserImplTest {
 
     @Test
     public void testDocumentBuilderWithDocTypeEnabled() throws Exception {
-        testForDocType("service_group_with_doctype", false, "\\etc\\ddcxxeAttackTest (The system cannot find the path specified)", "DOCTYPE declaration is not blocked and should be able to access filesystem and not found the path.");
+        testForDocType("service_group_with_doctype_filesystem", false, "\\etc\\ddcxxeAttackTest (The system cannot find the path specified)", "DOCTYPE declaration is not blocked and should be able to access filesystem and not found the path.");
     }
 
     @Test
     public void testDocumentBuilderWithDocTypeDisabled1() throws Exception {
-        testForDocType("service_group_with_doctype", true, "DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true.", "DOCTYPE declaration must be blocked to prevent from XXE attacks");
+        testForDocType("service_group_with_doctype_filesystem", true, "DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true.", "DOCTYPE declaration must be blocked to prevent from XXE attacks");
     }
 
     @Test
