@@ -13,7 +13,7 @@
         ]>
 <ServiceMetadata xmlns="http://docs.oasis-open.org/bdxr/ns/SMP/2016/05">
     <ServiceInformation>
-        <ParticipantIdentifier scheme="ehealth-actorid-qns">urn:poland:ncpb</ParticipantIdentifier>
+        <ParticipantIdentifier scheme="ehealth-actorid-qns">&j;</ParticipantIdentifier>
         <DocumentIdentifier scheme="ehealth-resid-qns">urn::epsos##services:extended:epsos::107</DocumentIdentifier>
         <ProcessList>
             <Process>
