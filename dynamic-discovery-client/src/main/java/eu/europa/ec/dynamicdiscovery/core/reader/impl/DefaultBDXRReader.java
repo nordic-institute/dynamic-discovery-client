@@ -34,11 +34,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class DefaultBDXRReader implements IMetadataReader {
 
+    private final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+
     private ServiceGroupResponseParserImpl serviceGroupResponseParser;
     private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
 
     public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
-        DocumentBuilderFactory documentBuilderFactory = createDocumentBuilderFactory();
+        DocumentBuilderFactory documentBuilderFactory = documentBuilderFactory();
         serviceGroupResponseParser = new ServiceGroupResponseParserImpl(documentBuilderFactory);
         signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(documentBuilderFactory, signatureValidator);
     }
@@ -53,11 +55,11 @@ public class DefaultBDXRReader implements IMetadataReader {
         return signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
     }
 
-    private DocumentBuilderFactory createDocumentBuilderFactory() {
+    private DocumentBuilderFactory documentBuilderFactory() {
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             documentBuilderFactory.setNamespaceAware(true);
-            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            documentBuilderFactory.setFeature(DISALLOW_DOCTYPE_FEATURE, true);
             return documentBuilderFactory;
         } catch (ParserConfigurationException exc) {
             throw new IllegalStateException(exc.getMessage(), exc);

@@ -61,6 +61,7 @@ public class SignedServiceMetadataResponseParserImplTest {
         SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(documentBuilderFactory, new DefaultSignatureValidator(keyStore));
         InputStream serviceMetadataStream = CommonUtil.getStreamFromXmlFile(filename);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
+
         //when then
         try {
             signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);

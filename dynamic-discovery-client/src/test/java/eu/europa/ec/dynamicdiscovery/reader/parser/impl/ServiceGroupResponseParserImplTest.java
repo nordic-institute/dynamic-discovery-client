@@ -63,6 +63,7 @@ public class ServiceGroupResponseParserImplTest {
         ServiceGroupResponseParserImpl serviceGroupResponseParser = new ServiceGroupResponseParserImpl(documentBuilderFactory);
         InputStream serviceGroupStream = CommonUtil.getStreamFromXmlFile(filename);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceGroupStream);
+
         //when then
         try {
             serviceGroupResponseParser.getServiceGroup(fetcherResponse);
