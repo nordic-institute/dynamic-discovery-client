@@ -23,10 +23,8 @@ package eu.europa.ec.dynamicdiscovery.reader.parser.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.ServiceGroupResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 
 import static junit.framework.TestCase.fail;
@@ -36,15 +34,15 @@ public class ServiceGroupResponseParserImplTest {
 
     @Test
     public void testDocumentBuilderWithDocTypeDisabled1() throws Exception {
-        testForDocType("service_group_with_doctype_filesystem", true, "DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true.", "DOCTYPE declaration must be blocked to prevent from XXE attacks");
+        testForDocType("service_group_with_doctype_filesystem");
     }
 
     @Test
     public void testDocumentBuilderWithDocTypeDisabled2() throws Exception {
-        testForDocType("service_group_with_doctype_multiplying_entities_out_of_memory", true, "DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true.", "DOCTYPE declaration must be blocked to prevent from XXE attacks");
+        testForDocType("service_group_with_doctype_multiplying_entities_out_of_memory");
     }
 
-    private void testForDocType(String filename, boolean disableDocType, String... errorMessage) throws Exception {
+    private void testForDocType(String filename, String... errorMessage) throws Exception {
         //given
         ServiceGroupResponseParserImpl serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
         InputStream serviceGroupStream = CommonUtil.getStreamFromXmlFile(filename);
@@ -54,9 +52,9 @@ public class ServiceGroupResponseParserImplTest {
         try {
             serviceGroupResponseParser.getServiceGroup(fetcherResponse);
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains(errorMessage[0]));
+            assertTrue(e.getMessage().contains("DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true."));
             return;
         }
-        fail(errorMessage[1]);
+        fail("DOCTYPE declaration must be blocked to prevent from XXE attacks");
     }
 }

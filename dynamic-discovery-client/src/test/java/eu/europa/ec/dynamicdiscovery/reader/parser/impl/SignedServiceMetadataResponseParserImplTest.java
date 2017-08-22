@@ -24,10 +24,8 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetadataResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 
@@ -38,23 +36,18 @@ public class SignedServiceMetadataResponseParserImplTest {
 
     @Test
     public void testDocumentBuilderWithDocTypeDisabled() throws Exception {
-        testForDocType("service_metadata_with_doctype_multiplying_entities_out_of_memory", true, "DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true.", "DOCTYPE declaration must be blocked to prevent from XXE attacks");
-    }
-
-    private void testForDocType(String filename, boolean disableDocType, String... errorMessage) throws Exception {
         //given
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(new DefaultSignatureValidator(keyStore));
-        InputStream serviceMetadataStream = CommonUtil.getStreamFromXmlFile(filename);
+        InputStream serviceMetadataStream = CommonUtil.getStreamFromXmlFile("service_metadata_with_doctype_multiplying_entities_out_of_memory");
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
-
         //when then
         try {
             signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains(errorMessage[0]));
+            assertTrue(e.getMessage().contains("DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true."));
             return;
         }
-        fail(errorMessage[1]);
+        fail("DOCTYPE declaration must be blocked to prevent from XXE attacks");
     }
 }
