@@ -68,5 +68,38 @@ public class ResponseParserTest {
         Assert.assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
         Assert.assertEquals(CommonUtil.getStringFromXmlFile("service_group_urn_poland_ncpb"), serviceGroup.getResponseBody());
     }
+
+    //BUG EDELIVERY-2484
+    @Test
+    public void parseServiceMetadataWithEmptyCertificateTest() throws Exception {
+        //given
+        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("signed_service_metadata_empty_certificate"));
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        SignedServiceMetadataResponseParserImpl responseParser = new SignedServiceMetadataResponseParserImpl(new DefaultSignatureValidator(keyStore));
+
+        //when
+        ServiceMetadata serviceMetadata = responseParser.getServiceMetadata(fetcherResponse);
+
+        //then
+        byte [] certificate = serviceMetadata.getOriginalServiceMetadata().getServiceMetadata().getServiceInformation().getProcessList().getProcess().get(0).getServiceEndpointList().getEndpoint().get(0).getCertificate();
+        Assert.assertEquals(0, certificate.length);
+    }
+
+    //BUG EDELIVERY-2484
+    @Test
+    public void parseServiceMetadataWithInvalidCertificateTest() throws Exception {
+        //given
+        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("signed_service_metadata_invalid_certificate"));
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        SignedServiceMetadataResponseParserImpl responseParser = new SignedServiceMetadataResponseParserImpl(new DefaultSignatureValidator(keyStore));
+
+        //when
+        ServiceMetadata serviceMetadata = responseParser.getServiceMetadata(fetcherResponse);
+
+        //then
+        byte [] certificate = serviceMetadata.getOriginalServiceMetadata().getServiceMetadata().getServiceInformation().getProcessList().getProcess().get(0).getServiceEndpointList().getEndpoint().get(0).getCertificate();
+        Assert.assertEquals("base64 encoded invalid certificate content", new String(certificate));
+        Assert.assertNull(serviceMetadata.getEndpoints().get(0).getCertificate());
+    }
 }
 
