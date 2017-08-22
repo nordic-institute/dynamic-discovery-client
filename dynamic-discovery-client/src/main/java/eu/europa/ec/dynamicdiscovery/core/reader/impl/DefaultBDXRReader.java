@@ -29,20 +29,14 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 public class DefaultBDXRReader implements IMetadataReader {
-
-    private final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
 
     private ServiceGroupResponseParserImpl serviceGroupResponseParser;
     private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
 
     public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
-        DocumentBuilderFactory documentBuilderFactory = documentBuilderFactory();
-        serviceGroupResponseParser = new ServiceGroupResponseParserImpl(documentBuilderFactory);
-        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(documentBuilderFactory, signatureValidator);
+        serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
+        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(signatureValidator);
     }
 
     @Override
@@ -53,16 +47,5 @@ public class DefaultBDXRReader implements IMetadataReader {
     @Override
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         return signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
-    }
-
-    private DocumentBuilderFactory documentBuilderFactory() {
-        try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
-            documentBuilderFactory.setFeature(DISALLOW_DOCTYPE_FEATURE, true);
-            return documentBuilderFactory;
-        } catch (ParserConfigurationException exc) {
-            throw new IllegalStateException(exc.getMessage(), exc);
-        }
     }
 }

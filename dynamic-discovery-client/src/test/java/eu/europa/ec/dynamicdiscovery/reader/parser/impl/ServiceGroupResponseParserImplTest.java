@@ -34,19 +34,6 @@ import static org.junit.Assert.assertTrue;
 
 public class ServiceGroupResponseParserImplTest {
 
-    private static DocumentBuilderFactory documentBuilderFactory;
-
-    @BeforeClass
-    public static void before() throws Exception {
-        documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-    }
-
-    @Test
-    public void testDocumentBuilderWithDocTypeEnabled() throws Exception {
-        testForDocType("service_group_with_doctype_filesystem", false, "\\etc\\ddcxxeAttackTest (The system cannot find the path specified)", "DOCTYPE declaration is not blocked and should be able to access filesystem and not found the path.");
-    }
-
     @Test
     public void testDocumentBuilderWithDocTypeDisabled1() throws Exception {
         testForDocType("service_group_with_doctype_filesystem", true, "DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true.", "DOCTYPE declaration must be blocked to prevent from XXE attacks");
@@ -59,8 +46,7 @@ public class ServiceGroupResponseParserImplTest {
 
     private void testForDocType(String filename, boolean disableDocType, String... errorMessage) throws Exception {
         //given
-        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", disableDocType);
-        ServiceGroupResponseParserImpl serviceGroupResponseParser = new ServiceGroupResponseParserImpl(documentBuilderFactory);
+        ServiceGroupResponseParserImpl serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
         InputStream serviceGroupStream = CommonUtil.getStreamFromXmlFile(filename);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceGroupStream);
 

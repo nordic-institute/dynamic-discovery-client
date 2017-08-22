@@ -29,28 +29,18 @@ import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.security.KeyStore;
 import java.util.List;
 
 public class ResponseParserTest {
-    private static DocumentBuilderFactory documentBuilderFactory;
-
-    @BeforeClass
-    public static void before() throws Exception {
-        documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-    }
 
     @Test
     public void parseServiceMetadataTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("signed_service_metadata_urn_poland_ncpb"));
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        SignedServiceMetadataResponseParserImpl responseParser = new SignedServiceMetadataResponseParserImpl(documentBuilderFactory, new DefaultSignatureValidator(keyStore));
+        SignedServiceMetadataResponseParserImpl responseParser = new SignedServiceMetadataResponseParserImpl( new DefaultSignatureValidator(keyStore));
         ServiceMetadata serviceMetadata = responseParser.getServiceMetadata(fetcherResponse);
         Assert.assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
@@ -68,7 +58,7 @@ public class ResponseParserTest {
     public void parseDocumentIdentifierTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile("service_group_urn_poland_ncpb"));
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        ServiceGroupResponseParserImpl responseParser = new ServiceGroupResponseParserImpl(documentBuilderFactory);
+        ServiceGroupResponseParserImpl responseParser = new ServiceGroupResponseParserImpl();
         ServiceGroup serviceGroup = responseParser.getServiceGroup(fetcherResponse);
         List<DocumentIdentifier> documentIdentifiers = serviceGroup.getDocumentIdentifiers();
         Assert.assertEquals(2, documentIdentifiers.size());

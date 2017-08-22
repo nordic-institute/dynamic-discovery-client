@@ -45,13 +45,17 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 
 public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMetadataResponseParser {
+    private final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
 
     private Unmarshaller unmarshaller;
     private DocumentBuilderFactory documentBuilderFactory;
     private AbstractSignatureValidator signatureValidator;
 
-    public SignedServiceMetadataResponseParserImpl(DocumentBuilderFactory documentBuilderFactory, AbstractSignatureValidator signatureValidator) {
+    public SignedServiceMetadataResponseParserImpl(AbstractSignatureValidator signatureValidator) {
         try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            documentBuilderFactory.setFeature(DISALLOW_DOCTYPE_FEATURE, true);
             this.documentBuilderFactory = documentBuilderFactory;
             this.unmarshaller = JAXBContext.newInstance(SignedServiceMetadataType.class).createUnmarshaller();
             this.signatureValidator = signatureValidator;

@@ -36,19 +36,6 @@ import static org.junit.Assert.assertTrue;
 
 public class SignedServiceMetadataResponseParserImplTest {
 
-    private static DocumentBuilderFactory documentBuilderFactory;
-
-    @BeforeClass
-    public static void before() throws Exception {
-        documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-    }
-
-    @Test
-    public void testDocumentBuilderWithDocTypeEnabled() throws Exception {
-        testForDocType("service_metadata_with_doctype_filesystem", false, "\\etc\\ddcxxeAttackTest (The system cannot find the path specified)", "DOCTYPE declaration is not blocked and should be able to access filesystem and not found the path.");
-    }
-
     @Test
     public void testDocumentBuilderWithDocTypeDisabled() throws Exception {
         testForDocType("service_metadata_with_doctype_multiplying_entities_out_of_memory", true, "DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true.", "DOCTYPE declaration must be blocked to prevent from XXE attacks");
@@ -56,9 +43,8 @@ public class SignedServiceMetadataResponseParserImplTest {
 
     private void testForDocType(String filename, boolean disableDocType, String... errorMessage) throws Exception {
         //given
-        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", disableDocType);
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(documentBuilderFactory, new DefaultSignatureValidator(keyStore));
+        SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(new DefaultSignatureValidator(keyStore));
         InputStream serviceMetadataStream = CommonUtil.getStreamFromXmlFile(filename);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
 

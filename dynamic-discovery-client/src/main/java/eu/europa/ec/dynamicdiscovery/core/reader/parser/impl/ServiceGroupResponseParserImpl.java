@@ -46,11 +46,16 @@ import java.util.List;
 
 public class ServiceGroupResponseParserImpl implements IServiceGroupResponseParser {
 
+    private final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+
     private Unmarshaller unmarshaller;
     private DocumentBuilderFactory documentBuilderFactory;
 
-    public ServiceGroupResponseParserImpl(DocumentBuilderFactory documentBuilderFactory) {
+    public ServiceGroupResponseParserImpl() {
         try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            documentBuilderFactory.setFeature(DISALLOW_DOCTYPE_FEATURE, true);
             this.documentBuilderFactory = documentBuilderFactory;
             this.unmarshaller = JAXBContext.newInstance(ServiceGroupType.class).createUnmarshaller();
         } catch (Exception exc) {
