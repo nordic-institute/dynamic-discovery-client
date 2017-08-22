@@ -53,10 +53,9 @@ public class ServiceGroupResponseParserImpl implements IServiceGroupResponsePars
 
     public ServiceGroupResponseParserImpl() {
         try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
-            documentBuilderFactory.setFeature(DISALLOW_DOCTYPE_FEATURE, true);
-            this.documentBuilderFactory = documentBuilderFactory;
+            this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            this.documentBuilderFactory.setNamespaceAware(true);
+            this.documentBuilderFactory.setFeature(DISALLOW_DOCTYPE_FEATURE, true);
             this.unmarshaller = JAXBContext.newInstance(ServiceGroupType.class).createUnmarshaller();
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
