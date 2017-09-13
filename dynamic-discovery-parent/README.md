@@ -146,17 +146,20 @@ Default implementation example:
 
       ## LIST OF DOCUMENTS     
          
-      ServiceGroup serviceGroup = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
-      ServiceGroupType xmlServiceGroupType = serviceGroup.getOriginalServiceGroup();
-      String responseBody = serviceGroup.getResponseBody();
-      List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers();
+      ServiceGroup serviceGroup = smpClient.getServiceGroup(participantIdentifier);
+      List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers(); // DEPRECATED
+      Sring sgResponseBody = serviceGroup.getResponseBody(); // XML RESPONSE
+      ServiceGroupType serviceGroupType = serviceGroup.getOriginalServiceGroup(); // ROOT ELEMENT
+      List<ServiceMetadataReferenceType> documents = serviceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference();
 
       ## DOCUMENT DETAIL
             
       ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
-      SignedServiceMetadata xmlSignedServiceMetadata = serviceMetadata.getOriginalServiceMetadata();
-      String responseBody = serviceMetadata.getResponseBody();
-      List<ExtensionType> extensions = serviceMetadata.getExtensions();
+      Endpoint endpoint = serviceMetadata.getEndpoints().get(0); // DEPRECATED
+      SignedServiceMetadataType xmlSignedServiceMetadata = serviceMetadata.getOriginalServiceMetadata(); // ROOT ELEMENT
+      String smResponseBody = serviceMetadata.getResponseBody(); // XML RESPONSE
+      EndpointType endpoint = xmlSignedServiceMetadata.getServiceMetadata().getServiceInformation()
+                   .getProcessList().getProcess().get(0).getServiceEndpointList().getEndpoint().get(0);
 
 Customized implementation example:
 
@@ -173,19 +176,6 @@ Please replace classes starting with **"Customized"** by implementations extende
             .build();
     ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
     
-     ## LIST OF DOCUMENTS     
-             
-     ServiceGroup serviceGroup = smpClient.getServiceGroup(ParticipantIdentifier participantIdentifier);
-     ServiceGroupType xmlServiceGroupType = serviceGroup.getOriginalServiceGroup();
-     String responseBody = serviceGroup.getResponseBody();
-     List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers();
-    
-     ## DOCUMENT DETAIL
-               
-     ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
-     SignedServiceMetadata xmlSignedServiceMetadata = serviceMetadata.getOriginalServiceMetadata();
-     String responseBody = serviceMetadata.getResponseBody();
-     List<ExtensionType> extensions = serviceMetadata.getExtensions();
 
 ## 5. TRUSTABILITY MODEL
 
