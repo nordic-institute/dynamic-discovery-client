@@ -20,7 +20,6 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.provider;
 
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 
@@ -28,7 +27,7 @@ import java.net.URI;
 
 public interface IMetadataProvider {
 
-    URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier) throws TechnicalException;
+    URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier);
 
-    URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException;
+    URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier);
 }
