@@ -25,18 +25,9 @@ import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
-import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
 import org.junit.Test;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
-
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.util.List;
 
 public class DynamicDiscoveryBuilderTest {
 
@@ -55,31 +46,5 @@ public class DynamicDiscoveryBuilderTest {
         Assert.assertEquals(DefaultDNSLookup.class, builder.getService().getMetadataLocator().getDnsLookup().getClass());
         Assert.assertNotNull(builder.getService().getMetadataProvider());
         Assert.assertNotNull(builder.getService().getMetadataReader());
-    }
-
-    public void testDefaultParameters() throws Exception {
-        KeyStore truststore = KeyStore.getInstance("JKS");
-        truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
-                .build();
-
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
-
-
-        ServiceGroup serviceGroup = smpClient.getServiceGroup(participantIdentifier);
-        List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers(); // DEPRECATED
-        String sgResponseBody = serviceGroup.getResponseBody(); // XML RESPONSE
-        ServiceGroupType serviceGroupType = serviceGroup.getOriginalServiceGroup(); // ROOT ELEMENT
-        List<ServiceMetadataReferenceType> documentTypes = serviceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference();
-
-        ServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, new DocumentIdentifier("urn::epsos:services## epsos-21", "epsos-docid-qns"));
-        Endpoint endpoint = serviceMetadata.getEndpoints().get(0); // DEPRECATED
-        SignedServiceMetadataType xmlSignedServiceMetadata = serviceMetadata.getOriginalServiceMetadata(); // ROOT ELEMENT
-        String smResponseBody = serviceMetadata.getResponseBody(); // XML RESPONSE
-        EndpointType endpointType = xmlSignedServiceMetadata.getServiceMetadata().getServiceInformation()
-                .getProcessList().getProcess().get(0).getServiceEndpointList().getEndpoint().get(0);
     }
 }
