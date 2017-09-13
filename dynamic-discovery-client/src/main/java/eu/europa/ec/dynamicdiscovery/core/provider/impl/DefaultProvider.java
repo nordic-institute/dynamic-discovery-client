@@ -31,11 +31,12 @@ public class DefaultProvider implements IMetadataProvider {
 
     @Override
     public URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier) {
-        return smpURI.resolve(String.format("/%s", participantIdentifier.urlencoded()));
+        return URI.create(smpURI.toString() + String.format("/%s", participantIdentifier.urlencoded())).normalize();
     }
 
     @Override
-    public URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) {
-        return smpURI.resolve(String.format("/%s/services/%s", participantIdentifier.urlencoded(), documentIdentifier.urlencoded()));
+    public URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier
+            documentIdentifier) {
+        return URI.create(smpURI.toString() + String.format("/%s/services/%s", participantIdentifier.urlencoded(), documentIdentifier.urlencoded())).normalize();
     }
 }
