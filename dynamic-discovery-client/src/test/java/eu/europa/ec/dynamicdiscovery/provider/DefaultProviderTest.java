@@ -65,6 +65,33 @@ public class DefaultProviderTest {
     }
 
     @Test
+    public void resolveDocumentIdentifiersForSmpUnderRootContextWithExtraSlashTest() throws Exception {
+        //given
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        DefaultProvider defaultProvider = new DefaultProvider();
+
+        //when
+        String url = defaultProvider.resolveDocumentIdentifiers(new URI("http://host:666/"), participantIdentifier).toString();
+
+        //then
+        Assert.assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
+    }
+
+    @Test
+    public void resolveServiceMetadataForSmpUnderRootContextWithoutLastSlashTest() throws Exception {
+        //given
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("doc_id", "ehealth-resid-qns");
+        DefaultProvider defaultProvider = new DefaultProvider();
+
+        //when
+        String url = defaultProvider.resolveServiceMetadata(new URI("http://host:666"), participantIdentifier, documentIdentifier).toString();
+
+        //then
+        Assert.assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
+    }
+
+    @Test
     public void resolveServiceMetadataForSmpUnderNonRootContextTest() throws Exception {
         //given
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");

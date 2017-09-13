@@ -18,17 +18,15 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.provider;
+package eu.europa.ec.dynamicdiscovery.exception;
 
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+public class GeneralException extends TechnicalException {
 
-import java.net.URI;
+    public GeneralException(String message) {
+        super(message);
+    }
 
-public interface IMetadataProvider {
-
-    URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier) throws TechnicalException;
-
-    URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException;
+    public GeneralException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

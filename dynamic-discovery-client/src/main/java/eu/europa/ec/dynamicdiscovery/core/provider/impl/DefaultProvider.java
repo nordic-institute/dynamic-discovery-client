@@ -22,20 +22,40 @@
 package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
+import eu.europa.ec.dynamicdiscovery.exception.GeneralException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class DefaultProvider implements IMetadataProvider {
 
     @Override
-    public URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier) {
-        return smpURI.resolve(String.format("/%s", participantIdentifier.urlencoded()));
+    public URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        return setURI(smpURI, String.format("/%s", participantIdentifier.urlencoded()));
     }
 
     @Override
-    public URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) {
-        return smpURI.resolve(String.format("/%s/services/%s", participantIdentifier.urlencoded(), documentIdentifier.urlencoded()));
+    public URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier
+            documentIdentifier) throws TechnicalException {
+        return setURI(smpURI, String.format("/%s/services/%s", participantIdentifier.urlencoded(), documentIdentifier.urlencoded()));
+    }
+
+    private URI setURI(URI smpURI, String query) throws TechnicalException {
+        try {
+            URI uri = new URI(removeLastSlash(smpURI.toString()) + query);
+            return uri;
+        } catch (URISyntaxException e) {
+            throw new GeneralException(e.getMessage(), e);
+        }
+    }
+
+    private String removeLastSlash(String uri) throws TechnicalException {
+        if (uri.endsWith("/")) {
+            return uri.substring(0, uri.length() - 1);
+        }
+        return uri;
     }
 }
