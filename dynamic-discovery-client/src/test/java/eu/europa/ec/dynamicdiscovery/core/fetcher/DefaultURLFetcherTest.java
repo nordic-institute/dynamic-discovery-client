@@ -87,8 +87,8 @@ public class DefaultURLFetcherTest {
     public void testConnectForCNAMEException() throws Exception {
         //GIVEN
         setup(200);
-        String naptStr = "http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu";
-        URI naptrURI = new URI(naptStr);
+        String cnameStr = "http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu";
+        URI naptrURI = new URI(cnameStr);
         PowerMockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
         PowerMockito.doReturn(naptrURI).when(httpGet).getURI();
 

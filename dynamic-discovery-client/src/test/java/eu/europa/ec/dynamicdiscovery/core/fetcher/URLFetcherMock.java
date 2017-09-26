@@ -51,7 +51,7 @@ public class URLFetcherMock implements IMetadataFetcher {
     public URLFetcherMock() {
     }
 
-    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName, String smpAlias) throws TechnicalException {
+    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName, String smpAlias) throws Exception {
         this.lookupType = lookupType;
         this.serviceUrl = serviceUrl;
         this.bodyResponse = CommonUtil.getStringFromXmlFile(responseFileName);
@@ -64,7 +64,7 @@ public class URLFetcherMock implements IMetadataFetcher {
         }
     }
 
-    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName) throws TechnicalException {
+    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName) throws Exception {
         setParameters(lookupType, serviceUrl, responseFileName, null);
     }
 
