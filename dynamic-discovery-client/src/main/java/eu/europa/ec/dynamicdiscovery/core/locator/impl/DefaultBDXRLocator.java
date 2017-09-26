@@ -63,7 +63,6 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         return this.lookup(new ParticipantIdentifier(participantIdentifier, participantScheme));
     }
 
-
     private URI cnameLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
             String e = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
