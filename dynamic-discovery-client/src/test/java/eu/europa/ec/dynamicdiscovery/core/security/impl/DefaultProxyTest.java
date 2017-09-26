@@ -1,0 +1,87 @@
+/*
+ * (C) Copyright 2017 - European Commission | Dynamic Discovery Client
+ *
+ * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ *
+ * Licensed under the LGPL, Version 2.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
+ *
+ */
+package eu.europa.ec.dynamicdiscovery.core.security.impl;
+
+import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.net.URI;
+
+public class DefaultProxyTest {
+
+    private String user;
+    private String password;
+    private String serverAddress;
+    private int serverPort;
+    private HttpClient httpclient;
+    private HttpGet httpget;
+
+    @Test
+    public void testSetupConstructor() throws Exception {
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8000, "user", "password");
+    }
+
+    @Test
+    public void testSetupConstructorServerNotOk() throws Exception {
+        try {
+            DefaultProxy defaultProxy = new DefaultProxy("", 8000, "user", "password");
+        } catch (Exception exc) {
+            Assert.assertEquals("Server configuration for Proxy Authentication is missing.", exc.getMessage());
+            Assert.assertEquals(ConnectionException.class, exc.getClass());
+        }
+
+        try {
+            DefaultProxy defaultProxy = new DefaultProxy("", 0000, "user", "password");
+        } catch (Exception exc) {
+            Assert.assertEquals("Server configuration for Proxy Authentication is missing.", exc.getMessage());
+            Assert.assertEquals(ConnectionException.class, exc.getClass());
+        }
+    }
+
+    @Test
+    public void testSetupConstructorCredentialsNotOk() throws Exception {
+        try {
+            DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8111, "", "password");
+        } catch (Exception exc) {
+            Assert.assertEquals("UserCredential for Proxy Authentication is missing.", exc.getMessage());
+            Assert.assertEquals(ConnectionException.class, exc.getClass());
+        }
+
+        try {
+            DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8111, "user", "");
+        } catch (Exception exc) {
+            Assert.assertEquals("UserCredential for Proxy Authentication is missing.", exc.getMessage());
+            Assert.assertEquals(ConnectionException.class, exc.getClass());
+        }
+    }
+
+    @Test
+    public void testBuild() throws Exception {
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8000, "user", "password");
+        defaultProxy.build(new URI("dummy.test.ec.eu"));
+
+        Assert.assertNotNull(defaultProxy.getHttpclient());
+        Assert.assertNotNull(defaultProxy.getHttpget());
+    }
+}

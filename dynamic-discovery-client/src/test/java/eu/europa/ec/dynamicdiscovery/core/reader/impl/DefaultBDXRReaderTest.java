@@ -18,7 +18,7 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.reader.parser.impl;
+package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
