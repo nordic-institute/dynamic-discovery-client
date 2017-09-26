@@ -30,17 +30,13 @@ import org.apache.commons.io.IOUtils;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 
@@ -78,6 +74,8 @@ public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMe
             }
 
             return new ServiceMetadata(signedServiceMetadataType, certificate, responseBodyStr);
+        } catch (TechnicalException exc) {
+            throw exc;
         } catch (Exception exc) {
             throw new BindException(exc.getMessage(), exc);
         }

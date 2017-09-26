@@ -69,6 +69,8 @@ public class ServiceGroupResponseParserImpl implements IServiceGroupResponsePars
             String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
             ServiceGroupType serviceGroupType = unmarshalServiceGroupType(new ByteArrayInputStream(baos.toByteArray()));
             return new ServiceGroup(serviceGroupType, responseBodyStr, getDocumentIdentifiers(serviceGroupType));
+        } catch (TechnicalException exc) {
+            throw exc;
         } catch (Exception exc) {
             throw new BindException(exc.getMessage(), exc);
         }
