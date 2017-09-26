@@ -78,7 +78,7 @@ public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMe
             }
 
             return new ServiceMetadata(signedServiceMetadataType, certificate, responseBodyStr);
-        } catch (ParserConfigurationException | IOException | SAXException | JAXBException exc) {
+        } catch (Exception exc) {
             throw new BindException(exc.getMessage(), exc);
         }
     }

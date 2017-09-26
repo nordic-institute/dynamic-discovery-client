@@ -19,7 +19,7 @@
  * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
  *
  */
-package eu.europa.ec.dynamicdiscovery.core.provider;
+package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
