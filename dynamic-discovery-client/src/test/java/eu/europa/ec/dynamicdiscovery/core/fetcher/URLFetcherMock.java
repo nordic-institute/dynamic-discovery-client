@@ -18,11 +18,9 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.fetcher;
+package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
