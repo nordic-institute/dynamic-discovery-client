@@ -57,14 +57,12 @@ public class DefaultProxyTest {
     }
 
     private void testSetupForExceptions(String serverAddress, int serverPort, String user, String password, String errorMessage) throws Exception {
-        for (int i = 0; i < 2; i++) {
-            try {
-                DefaultProxy defaultProxy = new DefaultProxy(serverAddress, serverPort, user, password);
-                fail();
-            } catch (Exception exc) {
-                Assert.assertEquals(errorMessage, exc.getMessage());
-                Assert.assertEquals(ConnectionException.class, exc.getClass());
-            }
+        try {
+            DefaultProxy defaultProxy = new DefaultProxy(serverAddress, serverPort, user, password);
+            fail();
+        } catch (Exception exc) {
+            Assert.assertEquals(errorMessage, exc.getMessage());
+            Assert.assertEquals(ConnectionException.class, exc.getClass());
         }
     }
 }
