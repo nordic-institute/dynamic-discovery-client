@@ -36,41 +36,15 @@ public class DefaultProxyTest {
     }
 
     @Test
-    public void testSetupConstructorServerNotOk() throws Exception {
-        try {
-            DefaultProxy defaultProxy = new DefaultProxy("", 8000, "user", "password");
-            fail();
-        } catch (Exception exc) {
-            Assert.assertEquals("Server configuration for Proxy Authentication is missing.", exc.getMessage());
-            Assert.assertEquals(ConnectionException.class, exc.getClass());
-        }
-
-        try {
-            DefaultProxy defaultProxy = new DefaultProxy("", 0000, "user", "password");
-            fail();
-        } catch (Exception exc) {
-            Assert.assertEquals("Server configuration for Proxy Authentication is missing.", exc.getMessage());
-            Assert.assertEquals(ConnectionException.class, exc.getClass());
-        }
+    public void testSetupConstructorCredentialsNotOk() throws Exception {
+        testSetupForExceptions("127.0.0.1", 8111, "", "password", "UserCredential for Proxy Authentication is missing.");
+        testSetupForExceptions("127.0.0.1", 8111, "user", "", "UserCredential for Proxy Authentication is missing.");
     }
 
     @Test
-    public void testSetupConstructorCredentialsNotOk() throws Exception {
-        try {
-            DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8111, "", "password");
-            fail();
-        } catch (Exception exc) {
-            Assert.assertEquals("UserCredential for Proxy Authentication is missing.", exc.getMessage());
-            Assert.assertEquals(ConnectionException.class, exc.getClass());
-        }
-
-        try {
-            DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8111, "user", "");
-            fail();
-        } catch (Exception exc) {
-            Assert.assertEquals("UserCredential for Proxy Authentication is missing.", exc.getMessage());
-            Assert.assertEquals(ConnectionException.class, exc.getClass());
-        }
+    public void testSetupConstructorServerNotOk() throws Exception {
+        testSetupForExceptions("", 8000, "user", "password", "Server configuration for Proxy Authentication is missing.");
+        testSetupForExceptions("127.0.0.1", 0000, "user", "password", "Server configuration for Proxy Authentication is missing.");
     }
 
     @Test
@@ -80,5 +54,17 @@ public class DefaultProxyTest {
 
         Assert.assertNotNull(defaultProxy.getHttpclient());
         Assert.assertNotNull(defaultProxy.getHttpget());
+    }
+
+    private void testSetupForExceptions(String serverAddress, int serverPort, String user, String password, String errorMessage) throws Exception {
+        for (int i = 0; i < 2; i++) {
+            try {
+                DefaultProxy defaultProxy = new DefaultProxy(serverAddress, serverPort, user, password);
+                fail();
+            } catch (Exception exc) {
+                Assert.assertEquals(errorMessage, exc.getMessage());
+                Assert.assertEquals(ConnectionException.class, exc.getClass());
+            }
+        }
     }
 }
