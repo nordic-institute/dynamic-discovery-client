@@ -21,21 +21,14 @@
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URI;
 
-public class DefaultProxyTest {
+import static org.junit.Assert.fail;
 
-    private String user;
-    private String password;
-    private String serverAddress;
-    private int serverPort;
-    private HttpClient httpclient;
-    private HttpGet httpget;
+public class DefaultProxyTest {
 
     @Test
     public void testSetupConstructor() throws Exception {
@@ -46,6 +39,7 @@ public class DefaultProxyTest {
     public void testSetupConstructorServerNotOk() throws Exception {
         try {
             DefaultProxy defaultProxy = new DefaultProxy("", 8000, "user", "password");
+            fail();
         } catch (Exception exc) {
             Assert.assertEquals("Server configuration for Proxy Authentication is missing.", exc.getMessage());
             Assert.assertEquals(ConnectionException.class, exc.getClass());
@@ -53,6 +47,7 @@ public class DefaultProxyTest {
 
         try {
             DefaultProxy defaultProxy = new DefaultProxy("", 0000, "user", "password");
+            fail();
         } catch (Exception exc) {
             Assert.assertEquals("Server configuration for Proxy Authentication is missing.", exc.getMessage());
             Assert.assertEquals(ConnectionException.class, exc.getClass());
@@ -63,6 +58,7 @@ public class DefaultProxyTest {
     public void testSetupConstructorCredentialsNotOk() throws Exception {
         try {
             DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8111, "", "password");
+            fail();
         } catch (Exception exc) {
             Assert.assertEquals("UserCredential for Proxy Authentication is missing.", exc.getMessage());
             Assert.assertEquals(ConnectionException.class, exc.getClass());
@@ -70,6 +66,7 @@ public class DefaultProxyTest {
 
         try {
             DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8111, "user", "");
+            fail();
         } catch (Exception exc) {
             Assert.assertEquals("UserCredential for Proxy Authentication is missing.", exc.getMessage());
             Assert.assertEquals(ConnectionException.class, exc.getClass());
