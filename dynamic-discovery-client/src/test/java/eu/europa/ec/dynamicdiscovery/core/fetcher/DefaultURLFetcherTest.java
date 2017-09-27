@@ -31,8 +31,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -47,11 +47,6 @@ public class DefaultURLFetcherTest {
     private DefaultURLFetcher defaultURLFetcher;
     private HttpClient httpClient;
     private HttpGet httpGet;
-
-    @Before
-    public void init() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void testConnect() throws Exception {
@@ -71,8 +66,8 @@ public class DefaultURLFetcherTest {
         setup(200);
         String naptStr = "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu";
         URI naptrURI = new URI(naptStr);
-        PowerMockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
-        PowerMockito.doReturn(naptrURI).when(httpGet).getURI();
+        Mockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
+        Mockito.doReturn(naptrURI).when(httpGet).getURI();
 
         //WHEN THEN
         try {
@@ -89,8 +84,8 @@ public class DefaultURLFetcherTest {
         setup(200);
         String cnameStr = "http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu";
         URI naptrURI = new URI(cnameStr);
-        PowerMockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
-        PowerMockito.doReturn(naptrURI).when(httpGet).getURI();
+        Mockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
+        Mockito.doReturn(naptrURI).when(httpGet).getURI();
 
         //WHEN THEN
         try {
@@ -120,11 +115,11 @@ public class DefaultURLFetcherTest {
         StatusLine statusLine = mock(StatusLine.class);
         HttpEntity httpEntity = mock(HttpEntity.class);
 
-        PowerMockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
-        PowerMockito.doReturn(httpEntity).when(response).getEntity();
-        PowerMockito.doReturn(new ByteArrayInputStream("Dummy Content".getBytes())).when(httpEntity).getContent();
-        PowerMockito.doReturn(statusLine).when(response).getStatusLine();
-        PowerMockito.doReturn(errorCode).when(statusLine).getStatusCode();
+        Mockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
+        Mockito.doReturn(httpEntity).when(response).getEntity();
+        Mockito.doReturn(new ByteArrayInputStream("Dummy Content".getBytes())).when(httpEntity).getContent();
+        Mockito.doReturn(statusLine).when(response).getStatusLine();
+        Mockito.doReturn(errorCode).when(statusLine).getStatusCode();
     }
 
     private void testConnectForExceptions(String errorMessage, int errorCode) throws Exception {

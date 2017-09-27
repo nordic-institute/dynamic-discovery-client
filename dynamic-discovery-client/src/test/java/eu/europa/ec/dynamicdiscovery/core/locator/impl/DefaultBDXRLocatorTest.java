@@ -23,12 +23,13 @@ package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.junit.Assert;
 import org.junit.Test;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.Mockito;
 
 import java.net.URI;
 
 import static org.mockito.Matchers.any;
-import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.mockito.Mockito.spy;
+
 
 public class DefaultBDXRLocatorTest {
 
@@ -62,7 +63,7 @@ public class DefaultBDXRLocatorTest {
         //GIVEN
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
         defaultBDXRLocator = spy(defaultBDXRLocator);
-        PowerMockito.doReturn(null).when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
+        Mockito.doReturn(null).when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:brazil:saopaulo", "country-state-qns");
 
         //WHEN
@@ -75,7 +76,7 @@ public class DefaultBDXRLocatorTest {
     private DefaultBDXRLocator lookupNAPTR() throws Exception {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
         defaultBDXRLocator = spy(defaultBDXRLocator);
-        PowerMockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
+        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
 
         return defaultBDXRLocator;
     }
