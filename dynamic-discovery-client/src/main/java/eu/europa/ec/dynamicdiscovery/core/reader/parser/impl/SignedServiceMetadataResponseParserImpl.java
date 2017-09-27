@@ -69,10 +69,6 @@ public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMe
             SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
             Certificate certificate = this.signatureValidator.verify(document);
 
-            if (!(signedServiceMetadataType.getServiceMetadata() instanceof ServiceMetadataType)) {
-                throw new BindException("ServiceMetadata element not found.");
-            }
-
             return new ServiceMetadata(signedServiceMetadataType, certificate, responseBodyStr);
         } catch (TechnicalException exc) {
             throw exc;
