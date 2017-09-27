@@ -29,7 +29,6 @@
         <guava.version>18.0</guava.version>
         <commons-lang3.version>3.4</commons-lang3.version>
         <mockito.version>1.10.19</mockito.version>
-        <mockito.core>2.1.0</mockito.core>
         <jaxb2.version>2.3</jaxb2.version>
         <junit.version>4.12</junit.version>
         <helper.version>1.12</helper.version>

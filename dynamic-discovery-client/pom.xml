@@ -160,7 +160,8 @@
                         </goals>
                         <configuration>
                             <!-- Sets the VM argument line used when integration tests are run. -->
-                            <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m -Duser.language=en
+                            <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                                -Duser.language=en
                                 ${failsafeArgLine}
                             </argLine>
                         </configuration>
@@ -222,7 +223,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito.core}</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 

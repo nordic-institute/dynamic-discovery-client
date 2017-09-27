@@ -31,9 +31,6 @@ import java.security.Security;
 
 public class HashUtil {
 
-    public HashUtil() {
-    }
-
     /**
      * Returns the MD5 hash of the given String
      *
