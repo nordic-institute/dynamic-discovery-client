@@ -115,9 +115,7 @@
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <argLine>-XX:MaxPermSize=512m</argLine>
-                </configuration>
+
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -162,7 +160,7 @@
                         </goals>
                         <configuration>
                             <!-- Sets the VM argument line used when integration tests are run. -->
-                            <argLine>-server -ea -XX:-UseSplitVerifier -Xms512m -Xmx1024m -XX:MaxPermSize=512m
+                            <argLine>-server -ea -Xms512m -Xmx1024m
                                 -Duser.language=en
                                 ${failsafeArgLine}
                             </argLine>
