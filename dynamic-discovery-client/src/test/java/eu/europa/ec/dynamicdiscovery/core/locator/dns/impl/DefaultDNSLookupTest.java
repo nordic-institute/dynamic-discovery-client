@@ -18,7 +18,7 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.locator;
+package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;

@@ -23,6 +23,8 @@ package eu.europa.ec.dynamicdiscovery.model;
 
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
+import org.apache.log4j.Logger;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.EndpointType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ExtensionType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ProcessType;
@@ -37,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ServiceMetadata {
+    final static Logger LOG = Logger.getLogger(ServiceMetadata.class);
     private ParticipantIdentifier participantIdentifier;
     private DocumentIdentifier documentIdentifier;
     private Certificate signer;
@@ -97,12 +100,17 @@ public class ServiceMetadata {
             Iterator processTypeIterator = signedServiceMetadataType.getServiceMetadata().getServiceInformation().getProcessList().getProcess().iterator();
             while (processTypeIterator.hasNext()) {
                 ProcessType processType = (ProcessType) processTypeIterator.next();
+
                 ProcessIdentifier processIdentifier = new ProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme());
+                LOG.debug("Found process: " +processIdentifier.getIdentifier());
                 Iterator endpointTypeIterator = processType.getServiceEndpointList().getEndpoint().iterator();
 
                 while (endpointTypeIterator.hasNext()) {
                     EndpointType endpointType = (EndpointType) endpointTypeIterator.next();
                     X509Certificate certificate = getX509Certificate(endpointType);
+                    LOG.debug("Found transport for process: " +processIdentifier.getIdentifier()
+                            + ", transport " + endpointType.getTransportProfile()
+                            + ", url " + endpointType.getEndpointURI());
                     Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(endpointType.getTransportProfile()), endpointType.getEndpointURI(), certificate);
                     if (!this.processIdentifiers.contains(endpoint.getProcessIdentifier())) {
                         this.processIdentifiers.add(endpoint.getProcessIdentifier());

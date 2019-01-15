@@ -18,11 +18,9 @@
  * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
  *
  */
-package eu.europa.ec.dynamicdiscovery.fetcher;
+package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
@@ -53,7 +51,7 @@ public class URLFetcherMock implements IMetadataFetcher {
     public URLFetcherMock() {
     }
 
-    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName, String smpAlias) throws TechnicalException {
+    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName, String smpAlias) throws Exception {
         this.lookupType = lookupType;
         this.serviceUrl = serviceUrl;
         this.bodyResponse = CommonUtil.getStringFromXmlFile(responseFileName);
@@ -66,7 +64,7 @@ public class URLFetcherMock implements IMetadataFetcher {
         }
     }
 
-    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName) throws TechnicalException {
+    public void setParameters(LookupType lookupType, String serviceUrl, String responseFileName) throws Exception {
         setParameters(lookupType, serviceUrl, responseFileName, null);
     }
 

@@ -21,7 +21,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
-import com.google.common.io.BaseEncoding;
+//import com.google.common.io.BaseEncoding;
+
+import org.apache.commons.codec.binary.Base32;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -30,9 +32,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 
 public class HashUtil {
-
-    public HashUtil() {
-    }
 
     /**
      * Returns the MD5 hash of the given String
@@ -88,10 +87,15 @@ public class HashUtil {
         byte[] hashBytes = md.digest();
 
         if (isBase32) {
+            Base32 base32 = new Base32();
+
+
             //convert the byte to BASE32 - noPadding '='
-            BaseEncoding base32
-                    = BaseEncoding.base32().omitPadding();
-            return base32.encode(hashBytes);
+            //BaseEncoding base32
+            //        = BaseEncoding.base32().omitPadding();
+            String base64Value = base32.encodeToString(hashBytes);
+            // remove padding
+            return base64Value.replaceAll("=*$", "");
         } else {
             //convert the byte to hex format method 2
             StringBuilder hexString = new StringBuilder();

@@ -148,7 +148,7 @@ Default implementation example:
          
       ServiceGroup serviceGroup = smpClient.getServiceGroup(participantIdentifier);
       List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers(); // DEPRECATED
-      Sring sgResponseBody = serviceGroup.getResponseBody(); // XML RESPONSE
+      String sgResponseBody = serviceGroup.getResponseBody(); // XML RESPONSE
       ServiceGroupType serviceGroupType = serviceGroup.getOriginalServiceGroup(); // ROOT ELEMENT
       List<ServiceMetadataReferenceType> documents = serviceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference();
 

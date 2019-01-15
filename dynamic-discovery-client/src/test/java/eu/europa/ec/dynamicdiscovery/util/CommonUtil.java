@@ -20,11 +20,11 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
-import com.google.common.io.CharStreams;
-import eu.europa.ec.dynamicdiscovery.exception.StreamException;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+//import com.google.common.io.CharStreams;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -32,20 +32,19 @@ import java.security.cert.CertificateFactory;
 
 public class CommonUtil {
 
-    public static String getStringFromXmlFile(String fileName) throws TechnicalException {
+    public static String getStringFromXmlFile(String fileName) throws Exception {
         try {
-            InputStream inputStream = getStreamFromXmlFile(fileName);
-            return CharStreams.toString(new InputStreamReader(inputStream, "UTF-8"));
+            return new String(Files.readAllBytes(Paths.get("src","test","resources","response",fileName+".xml")), "UTF-8");
         } catch (Exception exc) {
-            throw new StreamException(exc.getMessage(), exc);
+            throw new Exception(exc.getMessage(), exc);
         }
     }
 
-    public static InputStream getStreamFromXmlFile(String fileName) throws TechnicalException {
+    public static InputStream getStreamFromXmlFile(String fileName) throws Exception {
         try {
             return CommonUtil.class.getResourceAsStream("/response/" + fileName + ".xml");
         } catch (Exception exc) {
-            throw new StreamException(exc.getMessage(), exc);
+            throw new Exception(exc.getMessage(), exc);
         }
     }
 

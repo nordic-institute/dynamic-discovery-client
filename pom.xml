@@ -6,7 +6,7 @@
 
     <groupId>eu.europa.ec.dynamic-discovery</groupId>
     <artifactId>dynamic-discovery-builder</artifactId>
-    <version>1.5</version>
+    <version>1.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>dynamic-discovery-builder</name>
@@ -24,5 +24,33 @@
         <module>dynamic-discovery-parent</module>
         <module>dynamic-discovery-client</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>dependency-check</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <version>3.2.1</version>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <skipProvidedScope>true</skipProvidedScope>
+                            <skipRuntimeScope>true</skipRuntimeScope>
+                            <!-- Disable .Net Assembly Analyzer -->
+                            <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>aggregate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

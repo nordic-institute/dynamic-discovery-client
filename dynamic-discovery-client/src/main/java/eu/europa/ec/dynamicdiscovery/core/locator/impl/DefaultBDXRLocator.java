@@ -20,6 +20,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
@@ -27,6 +28,7 @@ import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
+import org.apache.log4j.Logger;
 import org.xbill.DNS.TextParseException;
 
 import java.io.UnsupportedEncodingException;
@@ -35,6 +37,7 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 public class DefaultBDXRLocator implements IMetadataLocator {
+    final static Logger LOG = Logger.getLogger(DefaultBDXRLocator.class);
 
     private String domain;
     private IDNSLookup dnsLookup;
@@ -52,6 +55,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI participantIdentifierURI = naptrLookup(participantIdentifier);
         if (participantIdentifierURI == null) {
+            LOG.debug("Did not find NAPTR record try cname lookup for participant: " + participantIdentifier);
             participantIdentifierURI = cnameLookup(participantIdentifier);
         }
 
@@ -63,11 +67,12 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         return this.lookup(new ParticipantIdentifier(participantIdentifier, participantScheme));
     }
 
-
     private URI cnameLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
             String e = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
-            return new URI(String.format("http://b-%s.%s.%s", e, participantIdentifier.getScheme(), domain));
+            URI uri =  new URI(String.format("http://b-%s.%s.%s", e, participantIdentifier.getScheme(), domain));
+            LOG.debug("Created CNAME lookup with url: "+uri+" for participant" + participantIdentifier.toString());
+            return uri;
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
@@ -75,12 +80,16 @@ public class DefaultBDXRLocator implements IMetadataLocator {
 
     private URI naptrLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
+            LOG.debug("Start napr search for participant " + participantIdentifier );
             String participantIdHashed = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
-            String smpURI = naptrLookupFetcher(participantIdentifier, String.format("%s.%s.%s",participantIdHashed, participantIdentifier.getScheme(), domain));
+            String naptrURI =  String.format("%s.%s.%s",participantIdHashed, participantIdentifier.getScheme(), domain);
+            String smpURI = naptrLookupFetcher(participantIdentifier,naptrURI);
+            LOG.debug("Got URL: "+smpURI+" for participant " + participantIdentifier + " with naprt query url: " + naptrURI);
             return new URI(smpURI);
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         } catch (TechnicalException | NullPointerException exc) {
+            LOG.debug("Naptr lookup was not possible, CNAME lookup will be used instead for participant" + participantIdentifier.toString());
             //It was not possible to lookup using NAPTR, CNAME lookup will be used instead
             return null;
         }
