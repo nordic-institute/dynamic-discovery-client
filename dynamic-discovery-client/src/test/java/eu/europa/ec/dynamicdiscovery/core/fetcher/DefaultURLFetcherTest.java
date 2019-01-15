@@ -103,7 +103,7 @@ public class DefaultURLFetcherTest {
 
     @Test(expected = DNSLookupException.class)
     public void testConnectForException500() throws Exception {
-        testConnectForExceptions("Error 500 trying to access SMP URL:http://test.eu/schema::party", 500);
+        testConnectForExceptions("Got Http error code 500 trying to access SMP URL:http://test.eu/schema::party", 500);
     }
 
     private void setup(int errorCode) throws Exception {
