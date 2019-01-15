@@ -53,7 +53,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     @Override
     public FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException {
         if (this.proxyConfiguration != null) {
-            LOG.debug("Fetch data using proxy: " +this.proxyConfiguration.getHttpget().getConfig().getProxy()+", participantURI:" + participantUnderSmpURI);
+            LOG.debug("Fetch data using proxy: " + (this.proxyConfiguration.getHttpget()!=null
+                    && this.proxyConfiguration.getHttpget().getConfig()!=null ?
+            this.proxyConfiguration.getHttpget().getConfig().getProxy(): "noProxy")+", participantURI:" + participantUnderSmpURI);
             proxyConfiguration.build(participantUnderSmpURI);
             return connect(this.proxyConfiguration.getHttpclient(), this.proxyConfiguration.getHttpget());
         } else {
@@ -71,7 +73,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 case 404:
                     throw new DNSLookupException("SMP lookup address "+httpGet.getURI()+" not found - response 404");
                 default:
-                    throw new DNSLookupException(String.format("Error %s trying to access SMP URL:" + httpGet.getURI(), Integer.valueOf(response.getStatusLine().getStatusCode())));
+                    throw new DNSLookupException("Got Http error code "+response.getStatusLine().getStatusCode()+" trying to access SMP URL:" +httpGet.getURI());
             }
         } catch (TechnicalException exc) {
             LOG.error("Fetching data failed for participantURI:" + httpGet.getRequestLine() + ": "  + ExceptionUtils.getRootCauseMessage(exc), exc);
