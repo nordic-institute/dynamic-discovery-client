@@ -56,10 +56,6 @@
     </properties>
 
 
-    <scm>
-        <developerConnection>scm:git:https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git</developerConnection>
-    </scm>
-
     <distributionManagement>
         <repository>
             <id>cefdigital-releases</id>
@@ -140,19 +136,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
-                <configuration>
-                    <!-- Automatically assign submodules the parent version during the release. -->
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>
