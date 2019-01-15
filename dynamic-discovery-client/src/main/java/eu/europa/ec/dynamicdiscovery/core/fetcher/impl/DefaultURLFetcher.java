@@ -24,17 +24,21 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.net.URI;
 
 public class DefaultURLFetcher implements IMetadataFetcher {
+    final static Logger LOG = Logger.getLogger(DefaultURLFetcher.class);
 
     private IProxyConfiguration proxyConfiguration;
 
@@ -49,9 +53,11 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     @Override
     public FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException {
         if (this.proxyConfiguration != null) {
+            LOG.debug("Fetch data using proxy: " +this.proxyConfiguration.getHttpget().getConfig().getProxy()+", participantURI:" + participantUnderSmpURI);
             proxyConfiguration.build(participantUnderSmpURI);
             return connect(this.proxyConfiguration.getHttpclient(), this.proxyConfiguration.getHttpget());
         } else {
+            LOG.debug("Fetch data without proxy, participantURI:" + participantUnderSmpURI);
             return connect(HttpClients.createDefault(), new HttpGet(participantUnderSmpURI));
         }
     }
@@ -63,11 +69,12 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 case 200:
                     return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
                 case 404:
-                    throw new DNSLookupException("SMP not found - response 404");
+                    throw new DNSLookupException("SMP lookup address "+httpGet.getURI()+" not found - response 404");
                 default:
-                    throw new DNSLookupException(String.format("Error %s trying to access SMP.", Integer.valueOf(response.getStatusLine().getStatusCode())));
+                    throw new DNSLookupException(String.format("Error %s trying to access SMP URL:" + httpGet.getURI(), Integer.valueOf(response.getStatusLine().getStatusCode())));
             }
         } catch (TechnicalException exc) {
+            LOG.error("Fetching data failed for participantURI:" + httpGet.getRequestLine() + ": "  + ExceptionUtils.getRootCauseMessage(exc), exc);
             throw exc;
         } catch (Exception exc) {
             String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
@@ -75,6 +82,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             if (uri.startsWith("http://b-") || uri.startsWith("https://b-")) {
                 message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
             }
+            LOG.error("Fetching data failed for participantURI:" + httpGet.getRequestLine() + ": " +ExceptionUtils.getRootCauseMessage(exc)+"(" + message+")", exc);
             throw new DNSLookupException(message, exc);
         }
     }
