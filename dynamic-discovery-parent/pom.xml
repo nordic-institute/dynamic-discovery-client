@@ -22,6 +22,7 @@
 
     <properties>
         <!-- misc properties -->
+        <project.scm.id>edelivery-scm</project.scm.id>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -53,6 +54,11 @@
         <surefire.version>2.19.1</surefire.version>
         <wiremock.version>2.2.1</wiremock.version>
     </properties>
+
+
+    <scm>
+        <developerConnection>scm:git:https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git</developerConnection>
+    </scm>
 
     <distributionManagement>
         <repository>
@@ -134,4 +140,19 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <!-- Automatically assign submodules the parent version during the release. -->
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
