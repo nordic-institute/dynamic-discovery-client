@@ -98,12 +98,12 @@ public class DefaultURLFetcherTest {
 
     @Test(expected = DNSLookupException.class)
     public void testConnectForException404() throws Exception {
-        testConnectForExceptions("SMP not found - response 404", 404);
+        testConnectForExceptions("SMP lookup address http://test.eu/schema::party not found - response 404", 404);
     }
 
     @Test(expected = DNSLookupException.class)
     public void testConnectForException500() throws Exception {
-        testConnectForExceptions("Error 500 trying to access SMP.", 500);
+        testConnectForExceptions("Error 500 trying to access SMP URL:http://test.eu/schema::party", 500);
     }
 
     private void setup(int errorCode) throws Exception {
@@ -116,6 +116,8 @@ public class DefaultURLFetcherTest {
         HttpEntity httpEntity = mock(HttpEntity.class);
 
         Mockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
+        Mockito.doReturn(new URI("http://test.eu/schema::party")).when(httpGet).getURI();
+
         Mockito.doReturn(httpEntity).when(response).getEntity();
         Mockito.doReturn(new ByteArrayInputStream("Dummy Content".getBytes())).when(httpEntity).getContent();
         Mockito.doReturn(statusLine).when(response).getStatusLine();

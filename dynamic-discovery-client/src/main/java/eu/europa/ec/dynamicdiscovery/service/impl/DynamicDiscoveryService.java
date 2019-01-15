@@ -33,11 +33,12 @@ import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
+import org.apache.log4j.Logger;
 
 import java.net.URI;
 
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
-
+    final static Logger LOG = Logger.getLogger(DynamicDiscoveryService.class);
     private IMetadataLocator metadataLocator;
     private IMetadataProvider metadataProvider;
     private IMetadataFetcher metadataFetcher;
@@ -60,13 +61,16 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
     private FetcherResponse getFetcherResponseForServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
+        LOG.debug("Got SMP URI: " + smpURI + " for participant: " + participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
+        LOG.info("Get service metadata for URI: " + participantUnderSmpURI);
         return metadataFetcher.fetch(participantUnderSmpURI);
     }
 
     private FetcherResponse getFetcherResponseForDocs(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI smpURI = metadataLocator.lookup(participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
+        LOG.info("Get participant data / documents for URI: " + participantUnderSmpURI);
         return metadataFetcher.fetch(participantUnderSmpURI);
     }
 

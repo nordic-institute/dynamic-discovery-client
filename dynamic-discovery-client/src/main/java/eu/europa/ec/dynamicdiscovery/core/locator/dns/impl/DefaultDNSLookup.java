@@ -21,10 +21,12 @@
 package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.xbill.DNS.*;
 
 import java.util.Arrays;
@@ -33,12 +35,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DefaultDNSLookup implements IDNSLookup {
+    final static Logger LOG = Logger.getLogger(DefaultDNSLookup.class);
 
     public String getRegexFromRecord(List<Record> records) throws TechnicalException {
         String smpAddress = null;
         String naptrRegex = null;
         for (Record record : records) {
             NAPTRRecord naptrRecord = (NAPTRRecord) record;
+            LOG.trace("NAPTR Record:" + naptrRecord.rdataToString());
             String regex = ".*?(http.*[^!])";
             naptrRegex = naptrRecord.getRegexp();
             Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
