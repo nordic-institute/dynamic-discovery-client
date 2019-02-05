@@ -29,16 +29,13 @@ import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookupMock;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URI;
 
 public class DynamicDiscoveryServiceTest {
-    static {
-        BasicConfigurator.configure();
-    }
+
 
     @Test
     public void metadataLocatorCNAMETest() throws Exception {
