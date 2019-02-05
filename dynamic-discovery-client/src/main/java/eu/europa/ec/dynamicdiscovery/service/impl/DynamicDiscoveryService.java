@@ -33,12 +33,13 @@ import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
-    final static Logger LOG = Logger.getLogger(DynamicDiscoveryService.class);
+    final static Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryService.class);
     private IMetadataLocator metadataLocator;
     private IMetadataProvider metadataProvider;
     private IMetadataFetcher metadataFetcher;

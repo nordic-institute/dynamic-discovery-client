@@ -67,6 +67,7 @@
         <jaxb2.version>2.3</jaxb2.version>
         <junit.version>4.12</junit.version>
         <log4j.version>1.2.17</log4j.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <mockito.version>1.10.19</mockito.version>
         <spring.version>4.3.10.RELEASE</spring.version>
         <surefire.version>2.19.1</surefire.version>
@@ -136,9 +137,15 @@
             </dependency>
 
             <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
 
             <!-- test dependencies-->

@@ -26,11 +26,11 @@ import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
-import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
@@ -47,7 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ServiceGroupResponseParserImpl implements IServiceGroupResponseParser {
-    final static Logger LOG = Logger.getLogger(ServiceGroupResponseParserImpl.class);
+    final static Logger LOG = LoggerFactory.getLogger(ServiceGroupResponseParserImpl.class);
     private final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
 
     private Unmarshaller unmarshaller;
@@ -71,8 +71,8 @@ public class ServiceGroupResponseParserImpl implements IServiceGroupResponsePars
             IOUtils.copy(fetcherResponse.getInputStream(), baos);
             String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
             ServiceGroupType serviceGroupType = unmarshalServiceGroupType(new ByteArrayInputStream(baos.toByteArray()));
-            LOG.debug("ServiceGroup response parsed for: " + serviceGroupType.getParticipantIdentifier().getScheme()+"::"
-                    + serviceGroupType.getParticipantIdentifier().getValue());
+            LOG.debug("ServiceGroup response parsed for scheme [{}], participant identifier [{}]" , serviceGroupType.getParticipantIdentifier().getScheme() ,
+                    serviceGroupType.getParticipantIdentifier().getValue());
             return new ServiceGroup(serviceGroupType, responseBodyStr, getDocumentIdentifiers(serviceGroupType));
         } catch (TechnicalException exc) {
             throw exc;

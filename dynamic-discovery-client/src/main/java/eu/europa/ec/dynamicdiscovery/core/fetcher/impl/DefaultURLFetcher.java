@@ -32,13 +32,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.net.URI;
 
 public class DefaultURLFetcher implements IMetadataFetcher {
-    final static Logger LOG = Logger.getLogger(DefaultURLFetcher.class);
+    final static Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
 
     private IProxyConfiguration proxyConfiguration;
 
@@ -59,7 +60,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             proxyConfiguration.build(participantUnderSmpURI);
             return connect(this.proxyConfiguration.getHttpclient(), this.proxyConfiguration.getHttpget());
         } else {
-            LOG.debug("Fetch data without proxy, participantURI:" + participantUnderSmpURI);
+            LOG.debug("Fetch data without proxy, participantURI: [{}]" , participantUnderSmpURI);
             return connect(HttpClients.createDefault(), new HttpGet(participantUnderSmpURI));
         }
     }
@@ -76,7 +77,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                     throw new DNSLookupException("Got Http error code "+response.getStatusLine().getStatusCode()+" trying to access SMP URL:" +httpGet.getURI());
             }
         } catch (TechnicalException exc) {
-            LOG.error("Fetching data failed for participantURI:" + httpGet.getRequestLine() + ": "  + ExceptionUtils.getRootCauseMessage(exc), exc);
+            LOG.error("Fetching data failed for participantURI: [{}]. Error: [{}]", httpGet.getRequestLine() , ExceptionUtils.getRootCauseMessage(exc), exc);
             throw exc;
         } catch (Exception exc) {
             String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
@@ -84,7 +85,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             if (uri.startsWith("http://b-") || uri.startsWith("https://b-")) {
                 message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
             }
-            LOG.error("Fetching data failed for participantURI:" + httpGet.getRequestLine() + ": " +ExceptionUtils.getRootCauseMessage(exc)+"(" + message+")", exc);
+            LOG.error("Fetching data failed for participantURI: [{}]. Error: [{}]. Message: [{}]", httpGet.getRequestLine() , ExceptionUtils.getRootCauseMessage(exc),  message , exc);
             throw new DNSLookupException(message, exc);
         }
     }

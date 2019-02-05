@@ -26,7 +26,8 @@ import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.*;
 
 import java.util.Arrays;
@@ -35,7 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DefaultDNSLookup implements IDNSLookup {
-    final static Logger LOG = Logger.getLogger(DefaultDNSLookup.class);
+    final static Logger LOG = LoggerFactory.getLogger(DefaultDNSLookup.class);
 
     public String getRegexFromRecord(List<Record> records) throws TechnicalException {
         String smpAddress = null;

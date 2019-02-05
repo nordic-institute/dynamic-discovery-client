@@ -32,13 +32,15 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.util.Arrays;
 
-import org.apache.log4j.Logger;
 
 public class DefaultProxy implements IProxyConfiguration {
-   final static Logger LOG = Logger.getLogger(DefaultProxy.class);
+   final static Logger LOG = LoggerFactory.getLogger(DefaultProxy.class);
 
     private String user;
     private String password;

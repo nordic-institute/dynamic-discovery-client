@@ -28,7 +28,8 @@ import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.TextParseException;
 
 import java.io.UnsupportedEncodingException;
@@ -37,7 +38,7 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 public class DefaultBDXRLocator implements IMetadataLocator {
-    final static Logger LOG = Logger.getLogger(DefaultBDXRLocator.class);
+    final static Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
 
     private String domain;
     private IDNSLookup dnsLookup;
