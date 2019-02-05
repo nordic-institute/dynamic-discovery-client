@@ -4,7 +4,7 @@
 
     <groupId>eu.europa.ec.dynamic-discovery</groupId>
     <artifactId>dynamic-discovery-parent</artifactId>
-    <version>1.10</version>
+    <version>1.11-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>dynamic-discovery-parent</name>
@@ -24,7 +24,7 @@
 
     <scm>
         <developerConnection>scm:git:https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git</developerConnection>
-        <tag>1.10</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
