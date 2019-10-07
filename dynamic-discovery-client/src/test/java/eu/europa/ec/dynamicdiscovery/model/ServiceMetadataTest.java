@@ -58,6 +58,7 @@ public class ServiceMetadataTest {
         baos.close();
     }
 
+
     @Test
     public void addDocumentIdentifierTest() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/response/signed_service_metadata_urn_poland_ncpb.xml");
@@ -71,6 +72,24 @@ public class ServiceMetadataTest {
         Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getFullIdentifier());
         Assert.assertEquals("urn::epsos##services:extended:epsos::107", serviceMetadata.getDocumentIdentifier().getIdentifier());
         Assert.assertEquals("ehealth-resid-qns", serviceMetadata.getDocumentIdentifier().getScheme());
+        Assert.assertNotNull(StringUtils.isEmpty(serviceMetadata.getResponseBody()));
+        baos.close();
+    }
+
+
+    @Test
+    public void addDocumentIdentifierEBMSTestServiceText() throws Exception {
+        InputStream inputStream = getClass().getResourceAsStream("/response/signed_service_metadata_EBMS_Test_Service.xml");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        org.apache.commons.io.IOUtils.copy(inputStream, baos);
+
+        String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
+        FetcherResponse fetcherResponse = new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) unmarshal(fetcherResponse);
+        ServiceMetadata serviceMetadata = new ServiceMetadata(signedServiceMetadataType, null, responseBodyStr);
+        Assert.assertEquals("::http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", serviceMetadata.getDocumentIdentifier().getFullIdentifier());
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", serviceMetadata.getDocumentIdentifier().getIdentifier());
+        Assert.assertEquals("", serviceMetadata.getDocumentIdentifier().getScheme());
         Assert.assertNotNull(StringUtils.isEmpty(serviceMetadata.getResponseBody()));
         baos.close();
     }
@@ -102,6 +121,33 @@ public class ServiceMetadataTest {
         Assert.assertEquals("CN=IHE Europe CA, O=IHE Europe, C=FR", serviceMetadata.getEndpoints().get(0).getCertificate().getIssuerDN().toString());
         baos.close();
     }
+
+    @Test
+    public void addProcessIdentifierEBMSTestServiceTest() throws Exception {
+        InputStream inputStream = getClass().getResourceAsStream("/response/signed_service_metadata_EBMS_Test_Service.xml");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        org.apache.commons.io.IOUtils.copy(inputStream, baos);
+
+        String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
+
+        FetcherResponse fetcherResponse = new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
+        SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) unmarshal(fetcherResponse);
+
+
+        ServiceMetadata serviceMetadata = new ServiceMetadata(signedServiceMetadataType, null, responseBodyStr);
+
+
+        Assert.assertEquals(1, serviceMetadata.getEndpoints().size());
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service",
+                serviceMetadata.getEndpoints().get(0).getProcessIdentifier().getIdentifier());
+        Assert.assertEquals("", serviceMetadata.getEndpoints().get(0).getProcessIdentifier().getScheme());
+
+        // test other data
+        Assert.assertEquals("bdxr-transport-ebms3-as4-v1p0", serviceMetadata.getEndpoints().get(0).getTransportProfile().getIdentifier());
+        Assert.assertEquals("https://mypage.eu", serviceMetadata.getEndpoints().get(0).getAddress());
+        baos.close();
+    }
+
 
     @Test
     public void getEndpointTest() throws Exception {

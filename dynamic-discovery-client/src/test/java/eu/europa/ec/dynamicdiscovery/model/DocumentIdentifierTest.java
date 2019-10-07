@@ -25,6 +25,23 @@ import org.junit.Test;
 
 public class DocumentIdentifierTest {
 
+
+    @Test
+    public void checkEbMS30TestService() throws Exception {
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", null);
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getIdentifier());
+        Assert.assertEquals("", documentIdentifier.getScheme());
+        Assert.assertEquals("::http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getFullIdentifier());
+    }
+
+    @Test
+    public void checkEbMS30TestServiceEmpty() throws Exception {
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", "");
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getIdentifier());
+        Assert.assertEquals("", documentIdentifier.getScheme());
+        Assert.assertEquals("::http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getFullIdentifier());
+    }
+
     @Test
     public void checkFullIdentifierTest() throws Exception {
         DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");

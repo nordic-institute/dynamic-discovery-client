@@ -23,7 +23,22 @@ package eu.europa.ec.dynamicdiscovery.model;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ProcessIdentiferTest {
+public class ProcessIdentifierTest {
+
+
+    @Test
+    public void checkEbMS30TestService() throws Exception {
+        ProcessIdentifier processIdentifier = new ProcessIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service",null);
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service", processIdentifier.getIdentifier());
+        Assert.assertEquals("", processIdentifier.getScheme());
+    }
+
+    @Test
+    public void checkEbMS30TestServiceEmpty() throws Exception {
+        ProcessIdentifier processIdentifier = new ProcessIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service","");
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service", processIdentifier.getIdentifier());
+        Assert.assertEquals("", processIdentifier.getScheme());
+    }
 
     @Test
     public void checkFullIdentifierTest() throws Exception {

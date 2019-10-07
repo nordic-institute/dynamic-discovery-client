@@ -20,6 +20,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -31,7 +32,7 @@ public class DocumentIdentifier {
 
     public DocumentIdentifier(String documentIdentifier, String scheme) {
         this.identifier = documentIdentifier;
-        this.scheme = scheme;
+        this.scheme = StringUtils.isBlank(scheme)?"":scheme;
     }
 
 
@@ -49,7 +50,7 @@ public class DocumentIdentifier {
 
     public String urlencoded() {
         try {
-            return URLEncoder.encode(String.format("%s::%s", this.scheme, this.identifier), "UTF-8");
+            return URLEncoder.encode(String.format("%s::%s",this.scheme, this.identifier), "UTF-8");
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
         }
