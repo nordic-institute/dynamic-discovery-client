@@ -35,6 +35,10 @@ public class DocumentIdentifier {
         this.scheme = StringUtils.isBlank(scheme)?"":scheme;
     }
 
+    public DocumentIdentifier(String documentIdentifier) {
+        this(documentIdentifier, "");
+    }
+
 
     public String getScheme() {
         return this.scheme;

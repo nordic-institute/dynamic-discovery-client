@@ -39,6 +39,10 @@ public class ProcessIdentifier {
         this.scheme = StringUtils.isBlank(scheme)?"":scheme;
     }
 
+    public ProcessIdentifier(String identifier) {
+        this(identifier, "");
+    }
+
     public String getIdentifier() {
         return this.identifier;
     }
