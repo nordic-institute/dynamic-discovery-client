@@ -21,6 +21,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -35,7 +36,11 @@ public class ProcessIdentifier {
 
     public ProcessIdentifier(String identifier, String scheme) {
         this.identifier = identifier;
-        this.scheme = scheme;
+        this.scheme = StringUtils.isBlank(scheme)?"":scheme;
+    }
+
+    public ProcessIdentifier(String identifier) {
+        this(identifier, "");
     }
 
     public String getIdentifier() {

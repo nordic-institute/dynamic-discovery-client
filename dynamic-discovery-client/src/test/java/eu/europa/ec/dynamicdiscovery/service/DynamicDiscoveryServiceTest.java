@@ -85,6 +85,34 @@ public class DynamicDiscoveryServiceTest {
         Assert.assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
     }
 
+
+    @Test
+    public void metadataProviderForServiceMetadataTestEBMSTestServiceEmpty() throws Exception {
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", null);
+        DefaultDNSLookupMock defaultDNSLookup = new DefaultDNSLookupMock();
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .build();
+
+        Assert.assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/%3A%3Ahttp%3A%2F%2Fdocs.oasis-open.org%2Febxml-msg%2Febms%2Fv3.0%2Fns%2Fcore%2F200704%2Ftest", smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
+    }
+
+
+    @Test
+    public void metadataProviderForServiceMetadataTestEBMSTestService() throws Exception {
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+        DocumentIdentifier documentIdentifier = new DocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", "");
+        DefaultDNSLookupMock defaultDNSLookup = new DefaultDNSLookupMock();
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .build();
+
+        Assert.assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/%3A%3Ahttp%3A%2F%2Fdocs.oasis-open.org%2Febxml-msg%2Febms%2Fv3.0%2Fns%2Fcore%2F200704%2Ftest", smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
+    }
+
     @Test
     public void metadataFetcherForServiceMetadataTestOk() throws Exception {
         ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
