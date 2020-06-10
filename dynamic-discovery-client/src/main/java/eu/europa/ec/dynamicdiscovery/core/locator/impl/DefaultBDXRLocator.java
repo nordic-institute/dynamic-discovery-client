@@ -81,11 +81,11 @@ public class DefaultBDXRLocator implements IMetadataLocator {
 
     private URI naptrLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
-            LOG.debug("Start napr search for participant " + participantIdentifier );
+            LOG.debug("Start naptr search for participant " + participantIdentifier );
             String participantIdHashed = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
             String naptrURI =  String.format("%s.%s.%s",participantIdHashed, participantIdentifier.getScheme(), domain);
             String smpURI = naptrLookupFetcher(participantIdentifier,naptrURI);
-            LOG.debug("Got URL: "+smpURI+" for participant " + participantIdentifier + " with naprt query url: " + naptrURI);
+            LOG.debug("Got URL: "+smpURI+" for participant " + participantIdentifier + " with naptr query url: " + naptrURI);
             return new URI(smpURI);
         } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);

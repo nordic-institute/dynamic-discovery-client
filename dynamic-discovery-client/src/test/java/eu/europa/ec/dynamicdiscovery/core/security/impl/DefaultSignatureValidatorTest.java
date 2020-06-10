@@ -22,7 +22,6 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
@@ -138,8 +137,9 @@ public class DefaultSignatureValidatorTest {
         KeyStore trustStore = CommonUtil.loadTrustStore(trustStorePath);
         Certificate certificate = CommonUtil.loadCertificate(certificatePath);
 
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore, regex);
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator, methodName, certificate);
+        DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore, regex);
+
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator.getCertificateValidator() , methodName, certificate);
     }
 
 
