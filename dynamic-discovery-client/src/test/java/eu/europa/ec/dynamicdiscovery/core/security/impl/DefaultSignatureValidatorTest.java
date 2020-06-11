@@ -72,7 +72,7 @@ public class DefaultSignatureValidatorTest {
         try {
             X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
         } catch (SignatureException exc) {
-            Assert.assertEquals("TrustStore does not contain Issuer CA.", exc.getMessage());
+            Assert.assertEquals("TrustStore does not contain trusted direct Issuer or the Certificate.", exc.getMessage());
             Assert.assertTrue(exc instanceof SignatureException);
             return;
         }
@@ -81,7 +81,8 @@ public class DefaultSignatureValidatorTest {
 
     @Test
     public void testIsSignedByIntermediateCA() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts",
+                "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
     }
 
     @Test(expected = Exception.class)
@@ -92,12 +93,14 @@ public class DefaultSignatureValidatorTest {
 
     @Test
     public void testIsSignedByRootAndIntermediateCA() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        testSignedBy("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts",
+                "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
     }
 
     @Test
     public void testIsSignedByCertificateItself() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts",
+                "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
 
     }
 
