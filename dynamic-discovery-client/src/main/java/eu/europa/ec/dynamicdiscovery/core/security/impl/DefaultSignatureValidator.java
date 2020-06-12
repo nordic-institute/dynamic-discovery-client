@@ -20,11 +20,11 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.ISMPCertificateValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,32 +36,40 @@ import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
-import java.security.InvalidKeyException;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
 import java.util.Iterator;
 
-public class DefaultSignatureValidator extends AbstractSignatureValidator {
+public class DefaultSignatureValidator implements ISignatureValidator {
 
-    public DefaultSignatureValidator(KeyStore trustStore, String regexCertificateSubjectValidation) throws TechnicalException {
-        super(trustStore, regexCertificateSubjectValidation);
-    }
+    ISMPCertificateValidator certificateValidator;
 
     public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
-        super(trustStore);
+        this(trustStore, null);
+    }
+
+    public DefaultSignatureValidator(KeyStore trustStore, String regexCertificateSubjectValidation) throws TechnicalException {
+        this(new DefaultSMPCertificateValidator(trustStore, regexCertificateSubjectValidation));
+    }
+
+    public DefaultSignatureValidator(ISMPCertificateValidator smpCertificateValidator){
+        this.certificateValidator = smpCertificateValidator;
+    }
+
+    public ISMPCertificateValidator getCertificateValidator() {
+        return certificateValidator;
     }
 
     @Override
     public X509Certificate verify(Document document) throws TechnicalException {
         X509Certificate certificate = verifySignature(document);
-        verifyCertificate(certificate);
-        verifyCertificateSubject(certificate);
 
+        try {
+            certificateValidator.validateSMPCertificate(certificate);
+        } catch (CertificateException e) {
+            throw new SignatureException(e.getMessage(), e);
+        }
         return certificate;
     }
 
@@ -109,55 +117,6 @@ public class DefaultSignatureValidator extends AbstractSignatureValidator {
             return keySelector.getCertificate();
         } catch (XMLSignatureException | MarshalException e) {
             throw new SignatureException(e.getMessage(), e);
-        }
-    }
-
-    private void verifyCertificateSubject(X509Certificate signerCertificate) throws TechnicalException {
-        if (!StringUtils.isEmpty(regexCertificateSubjectValidation)) {
-            if (!signerCertificate.getSubjectX500Principal().toString().matches(regexCertificateSubjectValidation)) {
-                throw new SignatureException(String.format("Given certificate: %s does not match configured regex: %s.", signerCertificate.getSubjectX500Principal(), regexCertificateSubjectValidation));
-            }
-        }
-    }
-
-    private void verifyCertificate(X509Certificate signerCertificate) throws TechnicalException {
-        try {
-            for (String alias : Collections.list(trustStore.aliases())) {
-
-                //Checks if certificate is under the truststore and is trusted
-                KeyStore.Entry entry = trustStore.getEntry(alias, null);
-                if (!trustStore.entryInstanceOf(alias, KeyStore.TrustedCertificateEntry.class)) {
-                    continue;
-                }
-
-                //Checks if certificate is X509Certificate type
-                KeyStore.TrustedCertificateEntry certificateEntry =
-                        (KeyStore.TrustedCertificateEntry) trustStore.getEntry(alias, null);
-                Certificate trustedCertificate = certificateEntry.getTrustedCertificate();
-                if (!(trustedCertificate instanceof X509Certificate)) {
-                    continue;
-                }
-
-                // Verify trust
-                if (signerCertificate.equals(trustedCertificate) || isSignedBy(signerCertificate, trustedCertificate)) {
-                    return;
-                }
-            }
-
-            throw new IllegalStateException("TrustStore does not contain Issuer CA.");
-
-        } catch (Exception exc) {
-            throw new SignatureException(exc.getMessage(), exc);
-        }
-
-    }
-
-    private boolean isSignedBy(Certificate signed, Certificate signer) {
-        try {
-            signed.verify(signer.getPublicKey());
-            return true;
-        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | java.security.SignatureException e) {
-            return false;
         }
     }
 }

@@ -54,7 +54,7 @@ public class DefaultDNSLookup implements IDNSLookup {
         }
 
         if (StringUtils.isEmpty(smpAddress)) {
-            throw new DNSLookupException(String.format("DNS Lookup for NATPR record failed, CODE: %s", naptrRegex));
+            throw new DNSLookupException(String.format("DNS Lookup for NAPTR record failed, CODE: %s", naptrRegex));
         }
 
         return smpAddress;

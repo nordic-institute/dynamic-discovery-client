@@ -24,7 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.ServiceGroupResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetadataResponseParserImpl;
-import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
@@ -34,7 +34,7 @@ public class DefaultBDXRReader implements IMetadataReader {
     private ServiceGroupResponseParserImpl serviceGroupResponseParser;
     private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
 
-    public DefaultBDXRReader(AbstractSignatureValidator signatureValidator) {
+    public DefaultBDXRReader(ISignatureValidator signatureValidator) {
         serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
         signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(signatureValidator);
     }
