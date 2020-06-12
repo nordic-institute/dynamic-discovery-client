@@ -22,12 +22,11 @@ package eu.europa.ec.dynamicdiscovery.core.reader.parser.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.parser.ISignedServiceMetadataResponseParser;
-import eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import org.apache.commons.io.IOUtils;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
 
@@ -46,9 +45,9 @@ public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMe
 
     private Unmarshaller unmarshaller;
     private DocumentBuilderFactory documentBuilderFactory;
-    private AbstractSignatureValidator signatureValidator;
+    private ISignatureValidator signatureValidator;
 
-    public SignedServiceMetadataResponseParserImpl(AbstractSignatureValidator signatureValidator) {
+    public SignedServiceMetadataResponseParserImpl(ISignatureValidator signatureValidator) {
         try {
             this.documentBuilderFactory = DocumentBuilderFactory.newInstance();
             this.documentBuilderFactory.setNamespaceAware(true);

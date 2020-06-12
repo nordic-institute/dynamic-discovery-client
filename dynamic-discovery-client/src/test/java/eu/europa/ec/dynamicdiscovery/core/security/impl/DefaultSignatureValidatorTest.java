@@ -22,7 +22,6 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.Assert;
@@ -73,7 +72,7 @@ public class DefaultSignatureValidatorTest {
         try {
             X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
         } catch (SignatureException exc) {
-            Assert.assertEquals("TrustStore does not contain Issuer CA.", exc.getMessage());
+            Assert.assertEquals("TrustStore does not contain trusted direct Issuer or the Certificate.", exc.getMessage());
             Assert.assertTrue(exc instanceof SignatureException);
             return;
         }
@@ -82,7 +81,8 @@ public class DefaultSignatureValidatorTest {
 
     @Test
     public void testIsSignedByIntermediateCA() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts",
+                "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
     }
 
     @Test(expected = Exception.class)
@@ -93,12 +93,14 @@ public class DefaultSignatureValidatorTest {
 
     @Test
     public void testIsSignedByRootAndIntermediateCA() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        testSignedBy("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts",
+                "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
     }
 
     @Test
     public void testIsSignedByCertificateItself() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
+        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts",
+                "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
 
     }
 
@@ -138,8 +140,9 @@ public class DefaultSignatureValidatorTest {
         KeyStore trustStore = CommonUtil.loadTrustStore(trustStorePath);
         Certificate certificate = CommonUtil.loadCertificate(certificatePath);
 
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore, regex);
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator, methodName, certificate);
+        DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore, regex);
+
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator.getCertificateValidator() , methodName, certificate);
     }
 
 
