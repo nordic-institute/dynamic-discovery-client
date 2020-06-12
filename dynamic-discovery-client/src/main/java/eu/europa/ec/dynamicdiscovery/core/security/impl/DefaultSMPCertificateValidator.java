@@ -25,7 +25,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
 
     public DefaultSMPCertificateValidator(KeyStore trustStore, String regexCertificateSubjectValidation) throws TechnicalException {
         this.trustStore = trustStore;
-        this.regexCertificateSubjectValidation = StringUtils.isBlank(regexCertificateSubjectValidation)?null:
+        this.regexCertificateSubjectValidation = StringUtils.isBlank(regexCertificateSubjectValidation) ? null :
                 Pattern.compile(regexCertificateSubjectValidation);
         if (this.trustStore == null) {
             throw new SignatureException("TrustStore must be not null for signature validation.");
@@ -34,11 +34,15 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
 
     @Override
     public void validateSMPCertificate(X509Certificate certificate) throws CertificateException {
+        String certName = certificate.getSubjectX500Principal().getName();
+        LOG.debug("Validate Certificate [{}]", certName);
+        // check if certificate is valid
+        certificate.checkValidity();
+        //validate if certificdate is trusted
         verifyTrust(certificate);
         verifyCertificateSubject(certificate);
-        LOG.debug("Certificate % is trusted",certificate.getSubjectX500Principal().getName());
+        LOG.debug("Certificate % is valid and trusted", certName);
     }
-
 
     /**
      * Validate certificate subject. Because of the legacy implementation certificate string representation
@@ -49,7 +53,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
      * @throws CertificateException
      */
     private void verifyCertificateSubject(X509Certificate signerCertificate) throws CertificateException {
-        if (regexCertificateSubjectValidation!=null) {
+        if (regexCertificateSubjectValidation != null) {
             String subject = signerCertificate.getSubjectX500Principal().toString();
             Matcher matcher = regexCertificateSubjectValidation.matcher(subject);
             if (!matcher.matches()) {
@@ -113,6 +117,8 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
                 return false;
             }
 
+            X509Certificate x509TrustedCertificate = (X509Certificate) certificateEntry.getTrustedCertificate();
+
             // Verify trust
             if (signerCertificate.equals(trustedCertificate)) {
                 LOG.debug("Certificate with alias [{}] is direct trust anchor of the certificate [{}]!", alias,
@@ -120,11 +126,13 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
                 return true;
             }
 
-            if (isSignedBy(signerCertificate, trustedCertificate, certName, alias)) {
+            if (isSignedBy(signerCertificate, x509TrustedCertificate, certName, alias)) {
                 LOG.debug("Certificate with alias [{}] is 'chain' trust anchor of the certificate [{}]!", alias,
                         certName);
                 return true;
             }
+            // check if trusted certificate is still valid
+            x509TrustedCertificate.checkValidity();
         } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException exc) {
             throw new CertificateException("Truststore exception occurred when  accessing certificate with alias:" + alias
                     + ". Error message:" + exc.getMessage(), exc);
@@ -138,11 +146,11 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
     private boolean isSignedBy(Certificate signed, Certificate signer, String signedCertificateName, String alias) throws CertificateException {
         try {
             signed.verify(signer.getPublicKey());
-            LOG.debug("Certificate [{}] is signed by certificate with alias [{}] from truststore.",signedCertificateName, alias);
+            LOG.debug("Certificate [{}] is signed by certificate with alias [{}] from truststore.", signedCertificateName, alias);
             return true;
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | java.security.SignatureException e) {
-            LOG.error("Error occurred while verifying signature of the certificate ["+signedCertificateName
-                    +"] with certificate from truststore with alias ["+alias+"].",e);
+            LOG.error("Error occurred while verifying signature of the certificate [" + signedCertificateName
+                    + "] with certificate from truststore with alias [" + alias + "].", e);
             return false;
         }
     }
