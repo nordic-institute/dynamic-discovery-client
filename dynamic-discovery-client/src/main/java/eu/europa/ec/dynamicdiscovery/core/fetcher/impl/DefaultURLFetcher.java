@@ -24,14 +24,16 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
-import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.impl.client.HttpClients;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,26 +45,47 @@ public class DefaultURLFetcher implements IMetadataFetcher {
 
     private IProxyConfiguration proxyConfiguration;
 
+    private HttpRoutePlanner routePlanner;
+
     public DefaultURLFetcher(IProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
     }
 
     public DefaultURLFetcher() {
-        this(null);
+    }
+
+    public DefaultURLFetcher(HttpRoutePlanner routePlanner, IProxyConfiguration proxyConfiguration) {
+        this.routePlanner = routePlanner;
+        this.proxyConfiguration = proxyConfiguration;
+    }
+
+    public DefaultURLFetcher(HttpRoutePlanner routePlanner) {
+        this.routePlanner = routePlanner;
     }
 
     @Override
     public FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException {
-        if (this.proxyConfiguration != null) {
-            LOG.debug("Fetch data using proxy: " + (this.proxyConfiguration.getHttpget()!=null
-                    && this.proxyConfiguration.getHttpget().getConfig()!=null ?
-            this.proxyConfiguration.getHttpget().getConfig().getProxy(): "noProxy")+", participantURI:" + participantUnderSmpURI);
-            proxyConfiguration.build(participantUnderSmpURI);
-            return connect(this.proxyConfiguration.getHttpclient(), this.proxyConfiguration.getHttpget());
-        } else {
-            LOG.debug("Fetch data without proxy, participantURI: [{}]" , participantUnderSmpURI);
-            return connect(HttpClients.createDefault(), new HttpGet(participantUnderSmpURI));
+        LOG.debug("Fetch data for participantURI [{}]", participantUnderSmpURI);
+
+        String participantUnderSmpURIHost = participantUnderSmpURI.getHost();
+        HttpGet httpGet = new HttpGet(participantUnderSmpURI);
+        httpGet.setConfig(RequestConfig.custom()
+                .build());
+        HttpClient httpClient = HttpClients.custom()
+                .setRoutePlanner(routePlanner)
+                .build();
+
+        if (proxyConfiguration != null && !proxyConfiguration.isNonProxyHost(participantUnderSmpURIHost)) {
+            LOG.debug("Fetch data using proxy");
+            httpClient = HttpClients.custom()
+                    .setRoutePlanner(routePlanner)
+                    .setDefaultCredentialsProvider(proxyConfiguration.getProxyCredentials(participantUnderSmpURIHost))
+                    .build();
+            httpGet.setConfig(RequestConfig.custom()
+                    .setProxy(proxyConfiguration.getProxyHost(participantUnderSmpURIHost))
+                    .build());
         }
+        return connect(httpClient, httpGet);
     }
 
     public FetcherResponse connect(HttpClient httpClient, HttpGet httpGet) throws TechnicalException {
