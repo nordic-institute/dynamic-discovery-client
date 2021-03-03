@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,10 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
-* @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- *@author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
- *
  */
 package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
@@ -40,6 +36,12 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.net.URI;
 
+/**
+ * @author Flávio W. R. Santos
+ * @author Erlend Klakegg Bergheim
+ * @author Sebastian-Ion TINCU
+ * @since 1.13
+ */
 public class DefaultURLFetcher implements IMetadataFetcher {
     final static Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
 

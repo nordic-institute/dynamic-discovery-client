@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -15,9 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
- *
  */
 package eu.europa.ec.dynamicdiscovery;
 
@@ -28,6 +25,10 @@ import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 
+/**
+ * @author Flávio W. R. Santos
+ * @author Erlend Klakegg Bergheim
+ */
 public class DynamicDiscoveryBuilder {
 
     private IDynamicDiscoveryService service;
