@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,13 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- *
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.HashUtil;
 import org.junit.Assert;
@@ -34,6 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * @author Flávio W. R. Santos
+ */
 public class DefaultDNSLookupTest {
 
     @Test

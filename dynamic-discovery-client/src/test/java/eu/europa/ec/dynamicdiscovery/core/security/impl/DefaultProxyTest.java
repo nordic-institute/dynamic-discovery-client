@@ -19,8 +19,12 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.http.HttpHost;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.client.CredentialsProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -96,6 +100,111 @@ public class DefaultProxyTest {
 
             assertNull("for nohosts:" + host, proxyHost);
         }
+    }
+
+    @Test
+    public void isNonProxyHost_BlankConfiguration() throws Exception {
+        // GIVEN
+        String nonProxyHosts = "";
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8080, null, null, nonProxyHosts);
+        String[] nonProxyHostsField = (String[]) FieldUtils.readField(defaultProxy, "nonProxyHosts", true);
+        Assert.assertNull("Non proxy hosts should have been initialised with null", nonProxyHostsField);
+
+        // WHEN
+        boolean result = defaultProxy.isNonProxyHost("ec.europa.eu");
+
+        // THEN
+        Assert.assertFalse("Should have returned the host as not being ignored by the proxy when the non proxy host configuration is blank", result);
+    }
+
+    @Test
+    public void isNonProxyHost_MatchRegexConfiguration() throws Exception {
+        // GIVEN
+        String nonProxyHosts = "*.europa.eu";
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8080, null, null, nonProxyHosts);
+        String[] nonProxyHostsField = (String[]) FieldUtils.readField(defaultProxy, "nonProxyHosts", true);
+        Assert.assertArrayEquals("Non proxy hosts should have been correctly initialised", new String[] {"*.europa.eu"}, nonProxyHostsField);
+
+        // WHEN
+        boolean result = defaultProxy.isNonProxyHost("ec.europa.eu");
+
+        // THEN
+        Assert.assertTrue("Should have returned the host as being ignored by the proxy when it matches the regex non proxy host configuration", result);
+    }
+
+    @Test
+    public void isNonProxyHost_MatchNonRegexConfiguration() throws Exception {
+        // GIVEN
+        String nonProxyHosts = "ec.europa.eu";
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8080, null, null, nonProxyHosts);
+        String[] nonProxyHostsField = (String[]) FieldUtils.readField(defaultProxy, "nonProxyHosts", true);
+        Assert.assertArrayEquals("Non proxy hosts should have been correctly initialised", new String[] {"ec.europa.eu"}, nonProxyHostsField);
+
+        // WHEN
+        boolean result = defaultProxy.isNonProxyHost("ec.europa.eu");
+
+        // THEN
+        Assert.assertTrue("Should have returned the host as being ignored by the proxy when it matches the non regex non proxy host configuration", result);
+    }
+
+    @Test
+    public void isNonProxyHost_DoesNotMatchMultipleHostConfiguration() throws Exception {
+        // GIVEN
+        String nonProxyHosts = "|127.0.0.1||*.testa.eu|europarl.europa.eu";
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8080, null, null, nonProxyHosts);
+        String[] nonProxyHostsField = (String[]) FieldUtils.readField(defaultProxy, "nonProxyHosts", true);
+        Assert.assertArrayEquals("Non proxy hosts should have been correctly initialised",
+                new String[] {"", "127.0.0.1", "", "*.testa.eu", "europarl.europa.eu"}, nonProxyHostsField);
+
+        // WHEN
+        boolean result = defaultProxy.isNonProxyHost("ec.europa.eu");
+
+        // THEN
+        Assert.assertFalse("Should have returned the host as being ignored by the proxy when it doesn't match any of the multiple non proxy hosts configuration", result);
+    }
+
+    @Test
+    public void getProxyCredentials_nonProxyHost() throws Exception {
+        // GIVEN
+        String nonProxyHosts = "*.eu";
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8080, null, null, nonProxyHosts);
+        String[] nonProxyHostsField = (String[]) FieldUtils.readField(defaultProxy, "nonProxyHosts", true);
+        Assert.assertArrayEquals("Non proxy hosts should have been correctly initialised", new String[] {"*.eu"}, nonProxyHostsField);
+
+        // WHEN
+        CredentialsProvider result = defaultProxy.getProxyCredentials("ec.europa.eu");
+
+        // THEN
+        Assert.assertNull("Should have returned no credentials for a target host being ignored by the proxy", result);
+    }
+
+    @Test
+    public void getProxyCredentials_noUserProvided() throws Exception {
+        // GIVEN
+        String user = "";
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8080, user, "password");
+
+        // WHEN
+        CredentialsProvider result = defaultProxy.getProxyCredentials("ec.europa.eu");
+
+        // THEN
+        Assert.assertNull("Should have returned no credentials for a proxy being configured without a user", result);
+    }
+
+    @Test
+    public void getProxyCredentials() throws Exception {
+        // GIVEN
+        DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8080, "user", "password");
+
+        // WHEN
+        CredentialsProvider result = defaultProxy.getProxyCredentials("ec.europa.eu");
+        Credentials credentials = result.getCredentials(new AuthScope("127.0.0.1", 8080));
+
+        // THEN
+        Assert.assertEquals("Should have returned correct principal name for a proxy being configured with user credentials for a target host not being ignored by the proxy",
+                "user", credentials.getUserPrincipal().getName());
+        Assert.assertEquals("Should have returned correct password for a proxy being configured with user credentials for a target host not being ignored by the proxy",
+                "password", credentials.getPassword());
     }
 
     private void testSetupForExceptions(String serverAddress, int serverPort, String user, String password, String errorMessage) throws Exception {

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,15 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
- *
  */
 package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
 import org.junit.Assert;
@@ -30,6 +25,10 @@ import org.junit.Test;
 
 import java.net.URI;
 
+/**
+ * @author Flávio W. R. Santos
+ * @author Erlend Klakegg Bergheim
+ */
 public class DefaultProviderTest {
 
     @Test

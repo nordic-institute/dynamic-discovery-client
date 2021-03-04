@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,19 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- *
  */
 package eu.europa.ec.dynamicdiscovery.core.security;
-
 
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.w3c.dom.Document;
 
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+/**
+ * @author Flávio W. R. Santos
+ */
 public interface ISignatureValidator {
 
     X509Certificate verify(Document document) throws TechnicalException;

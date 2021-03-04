@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,21 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- * @author Erlend Klakegg Bergheim - erlend.klakegg.bergheim@difi.no
- *
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-@Deprecated
 /**
- *  @deprecated This class will be removed in the next version. Please
- *  use @link {@link org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType} instead.
- **/
+ * @author Flávio W. R. Santos
+ * @author Erlend Klakegg Bergheim
+ *
+ * @deprecated This class will be removed in the next version. Please use {@link org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType} instead.
+ */
+@Deprecated
 public class TransportProfile {
 
     private String identifier;
