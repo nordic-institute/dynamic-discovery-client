@@ -37,14 +37,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * @author Flávio W. R. Santos
@@ -256,7 +256,7 @@ public class DefaultURLFetcherTest {
     }
 
     private void whenFetchingFromTheTarget() throws TechnicalException, URISyntaxException {
-        defaultURLFetcher.fetch(new URI("https://" +targetHost));
+        defaultURLFetcher.fetch(new URI("https://" + targetHost));
     }
 
     private void thenNoProxyConfigurationConfigured() {

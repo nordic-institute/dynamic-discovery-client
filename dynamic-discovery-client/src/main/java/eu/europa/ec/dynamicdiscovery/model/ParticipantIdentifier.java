@@ -17,23 +17,29 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.net.URLEncoder;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  */
 public class ParticipantIdentifier {
+    public static final String EBCORE_IDENTIFIER_PREFIX = "urn:oasis:names:tc:ebcore:partyid-type";
 
     private String identifier;
     private String scheme;
 
+
     public ParticipantIdentifier(String identifier, String scheme) {
-        this.identifier = identifier.trim().toLowerCase();
-        this.scheme = scheme;
+        this.identifier = lowerCase(trim(identifier));
+        this.scheme = trim(scheme);
+        normalizeIdentifier();
     }
 
     public String getIdentifier() {
@@ -46,10 +52,23 @@ public class ParticipantIdentifier {
 
     public String urlencoded() {
         try {
-            return URLEncoder.encode(String.format("%s::%s", this.scheme, this.identifier), "UTF-8");
+            return URLEncoder.encode(isOasisPartyIdentifierType() || StringUtils.isBlank(this.scheme) ? this.identifier
+                    :appendIfMissing(this.scheme, "::") + this.identifier,
+                    "UTF-8");
         } catch (Exception exc) {
             throw new IllegalStateException(exc.getMessage(), exc);
         }
+    }
+
+    public void normalizeIdentifier() {
+        if (isNotBlank(scheme) && startsWithIgnoreCase(scheme, EBCORE_IDENTIFIER_PREFIX)) {
+            identifier = appendIfMissing(lowerCase(scheme), ":") + identifier;
+            scheme = null;
+        }
+    }
+
+    public boolean isOasisPartyIdentifierType() {
+        return startsWith(identifier, EBCORE_IDENTIFIER_PREFIX);
     }
 
     @Override
