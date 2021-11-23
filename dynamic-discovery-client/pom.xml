@@ -5,11 +5,11 @@
     <parent>
         <groupId>eu.europa.ec.dynamic-discovery</groupId>
         <artifactId>dynamic-discovery-parent</artifactId>
-        <version>1.14-SNAPSHOT</version>
+        <version>1.13.1-TEST</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>dynamic-discovery-client</artifactId>
-    <version>1.14-SNAPSHOT</version>
+    <version>1.13.1-TEST</version>
     <packaging>jar</packaging>
 
     <name>dynamic-discovery-client</name>
