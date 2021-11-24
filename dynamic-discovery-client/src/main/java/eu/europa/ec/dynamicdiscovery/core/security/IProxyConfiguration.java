@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,22 +14,46 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- *
  */
 package eu.europa.ec.dynamicdiscovery.core.security;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.HttpHost;
+import org.apache.http.client.CredentialsProvider;
 
-import java.net.URI;
-
+/**
+ * A configuration that grants access to proxy details such as the proxy host and its credentials.
+ *
+ * @author Flávio W. R. Santos
+ * @author Sebastian-Ion TINCU
+ * @since 1.13
+ */
 public interface IProxyConfiguration {
 
-    void build(URI uri);
+    /**
+     * Checks whether the proxy is going to be enabled or not for the target host passed in as a parameter.
+     *
+     * @param target The target host {@code String} representation
+     * @return {@code true}, if the proxy is not going to be used for this host; {@code false}, otherwise.
+     */
+    boolean isNonProxyHost(String target);
 
-    HttpClient getHttpclient();
+    /**
+     * Returns the host details of the proxy used for the target host passed in as a parameter.
+     *
+     * @param target The target host {@code String} representation
+     * @return the host of the proxy; {@code null} otherwise, when the target host is a non-proxy one
+     * @see #isNonProxyHost(String)
+     */
+    HttpHost getProxyHost(String target);
 
-    HttpGet getHttpget();
+    /**
+     * Returns the credentials of the proxy used for the target host passed in as a parameter.
+     *
+     * @param target The target host {@code String} representation
+     * @return the credentials used to identify against the proxy; {@code null} otherwise, when the user is not provided
+     * or when the target host is a non-proxy one
+     * @see #isNonProxyHost(String)
+     */
+    CredentialsProvider getProxyCredentials(String target);
+
 }

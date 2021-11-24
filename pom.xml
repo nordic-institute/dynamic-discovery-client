@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.europa.ec.dynamic-discovery</groupId>
@@ -23,7 +24,8 @@
     </modules>
 
     <scm>
-        <developerConnection>scm:git:https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git</developerConnection>
+        <developerConnection>scm:git:https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git
+        </developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -55,25 +57,35 @@
         <sonar.sources>src/main/java</sonar.sources>
         <surefire.argLine>-Xmx1G</surefire.argLine>
 
-
         <!-- dependencies -->
-        <bouncycastle.version>1.60</bouncycastle.version>
-        <commons-io.version>2.6</commons-io.version>
-        <commons-lang3.version>3.8.1</commons-lang3.version>
-        <compiler.version>3.5.1</compiler.version>
-        <dnsjava.version>2.1.8</dnsjava.version>
+        <bouncycastle.version>1.69</bouncycastle.version>
+        <commons-io.version>2.11.0</commons-io.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <dnsjava.version>3.4.2</dnsjava.version>
         <guava.version>18.0</guava.version>
-        <helper.version>1.12</helper.version>
-        <httpclient.version>4.5.6</httpclient.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <jacoco.version>0.7.7.201606060606</jacoco.version>
-        <jaxb2.version>2.3</jaxb2.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.2</junit.version>
         <log4j.version>1.2.17</log4j.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <mockito.version>1.10.19</mockito.version>
-        <spring.version>4.3.10.RELEASE</spring.version>
-        <surefire.version>2.19.1</surefire.version>
-        <wiremock.version>2.2.1</wiremock.version>
+        <slf4j.version>1.7.32</slf4j.version>
+        <mockito.version>4.0.0</mockito.version>
+        <spring.version>5.3.13</spring.version>
+        <wiremock.version>2.27.2</wiremock.version>
+        <surefire-junit47.version>2.19.1</surefire-junit47.version>
+        <!-- plugins -->
+        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <dependency-check-maven.version>6.5.0</dependency-check-maven.version>
+        <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
+        <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
+        <jaxb2-maven-plugin.version>2.3</jaxb2-maven-plugin.version>
+        <build-helper-maven-plugin.version>1.12</build-helper-maven-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
+        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+        <!-- latest version compatible with SonarQube 5.6 -->
+        <sonar-maven-plugin.version>3.3.0.603</sonar-maven-plugin.version>
+
+
     </properties>
 
     <profiles>
@@ -84,11 +96,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>5.2.2</version>
-                        <inherited>false</inherited>
                         <configuration>
-                            <skipProvidedScope>true</skipProvidedScope>
-                            <skipRuntimeScope>true</skipRuntimeScope>
                             <!-- Disable .Net Assembly Analyzer -->
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                         </configuration>
@@ -99,6 +107,105 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>dependency-license-check</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>download-licenses</id>
+                                <goals>
+                                    <goal>aggregate-download-licenses</goal>
+                                    <goal>aggregate-add-third-party</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <licenseMerges>
+                                <licenseMerge>Apache License, Version 2.0
+                                    |Apache Software Licenses
+                                    |Apache Software License - Version 2.0
+                                    |Apache License 2.0
+                                    |Apache 2.0
+                                    |Apache-2.0
+                                    |Similar to Apache License but with the acknowledgment clause removed
+                                    |Apache License|The Apache Software License, Version 2.0
+                                    |Apache Public License 2.0|Apache 2|Apache License, version 2.0
+                                    |The Apache License, Version 2.0
+                                </licenseMerge>
+                                <!--  Common Public License Version 1.0|CPL was replaced by Eclipse Public License -->
+                                <licenseMerge>Eclipse Public License 1.0/2.0 (EPL-1.0/2.0)
+                                    |Eclipse Public License 1.0 (EPL-1.0)
+                                    |Eclipse Public License, Version 1.0
+                                    |EPL 2.0
+                                    |Eclipse Distribution License v. 1.0
+                                    |Eclipse Public License (EPL) v1.0
+                                    |Eclipse Public License - v 1.0
+                                    |Eclipse Distribution License - v 1.0
+                                    |Eclipse Public License 1.0
+                                    |EDL 1.0
+                                    |Common Public License Version 1.0
+                                    |CPL
+                                    |MPL 2.0 or EPL 1.0
+                                </licenseMerge>
+                                <licenseMerge>The MIT License|MIT License</licenseMerge>
+                                <licenseMerge>BSD license (all versions)
+                                    |http://jaxen.codehaus.org/license.html
+                                    |BSD-2-Clause|The BSD 3-Clause License
+                                    |BSD
+                                    |The New BSD License
+                                    |BSD License
+                                    |The BSD License
+                                    |BSD 3-clause New License
+                                    |BSD Licence 3
+                                    |3-Clause BSD License
+                                    |BSD-Style License
+                                    |BSD-3-Clause
+                                    |New BSD License
+                                </licenseMerge>
+                                <licenseMerge>Dual license consisting of the CDDL v1.1 and GPL v2
+                                    |CDDL+GPLv2
+                                    |CDDL + GPLv2 with classpath exception
+                                    |CDDL/GPLv2+CE
+                                    |CDDL+GPL License
+                                </licenseMerge>
+                                <licenseMerge>Common Development and Distribution License (CDDL) (all versions)
+                                    |COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
+                                    |Common Development and Distribution License (CDDL) v1.0
+                                    |Common Development and Distribution License (CDDL)
+                                    |Common Development and Distribution License
+                                    |Common Development and Distribution
+                                    |CDDL 1.1|
+                                </licenseMerge>
+                                <!-- https://hibernate.org/community/license/ - hibernate label it as GNU Library General Public License v2.1 == GNU Lesser General Public License version 2.1  -->
+                                <licenseMerge>GNU Lesser General Public License
+                                    |GNU Lesser General Public License, version 2.1
+                                    |GNU Library General Public License v2.1 or later
+                                    |LGPL-2.1
+                                    |LGPL
+                                </licenseMerge>
+                            </licenseMerges>
+                            <failOnMissing>true</failOnMissing>
+                            <failOnBlacklist>true</failOnBlacklist>
+                            <!--  MUST not include EUPL since this is released under LGPL-->
+                            <includedLicenses>
+                                Apache License, Version 2.0|
+                                Eclipse Public License 1.0/2.0 (EPL-1.0/2.0)|
+                                The MIT License|
+                                BSD license (all versions)|
+                                Dual license consisting of the CDDL v1.1 and GPL v2|
+                                Common Development and Distribution License (CDDL) (all versions)|
+                                GNU Lesser General Public License|
+                                Bouncy Castle Licence|
+                            </includedLicenses>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -181,12 +288,66 @@
         </dependencies>
     </dependencyManagement>
 
+
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${maven-release-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>${dependency-check-maven.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>${license-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>jaxb2-maven-plugin</artifactId>
+                    <version>${jaxb2-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
                 <configuration>
                     <!-- Automatically assign submodules the parent version during the release. -->
                     <autoVersionSubmodules>true</autoVersionSubmodules>

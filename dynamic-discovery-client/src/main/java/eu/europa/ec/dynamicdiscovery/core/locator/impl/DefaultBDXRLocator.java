@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,13 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- *
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
@@ -37,9 +33,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * @author Flávio W. R. Santos
+ */
 public class DefaultBDXRLocator implements IMetadataLocator {
-    final static Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
+    final static private String PEPPOL_URL_SCHEME = "http://";
+    final static private String DOMAIN_CNAME_PREFIX = "b-";
+    final static private String DOMAIN_SEPARATOR = ".";
 
+    final static Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
     private String domain;
     private IDNSLookup dnsLookup;
 
@@ -68,32 +70,65 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         return this.lookup(new ParticipantIdentifier(participantIdentifier, participantScheme));
     }
 
-    private URI cnameLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    protected URI cnameLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
-            String e = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
-            URI uri =  new URI(String.format("http://b-%s.%s.%s", e, participantIdentifier.getScheme(), domain));
-            LOG.debug("Created CNAME lookup with url: "+uri+" for participant" + participantIdentifier.toString());
-            return uri;
-        } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException exc) {
+            return new URI(PEPPOL_URL_SCHEME + buildCNameDNSDomain(participantIdentifier));
+        } catch (URISyntaxException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
     }
 
     private URI naptrLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
-            LOG.debug("Start naptr search for participant " + participantIdentifier );
-            String participantIdHashed = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
-            String naptrURI =  String.format("%s.%s.%s",participantIdHashed, participantIdentifier.getScheme(), domain);
-            String smpURI = naptrLookupFetcher(participantIdentifier,naptrURI);
-            LOG.debug("Got URL: "+smpURI+" for participant " + participantIdentifier + " with naptr query url: " + naptrURI);
+            LOG.debug("Start naptr search for participant " + participantIdentifier);
+            String naptrURI = buildNaptrDNSDomain(participantIdentifier);
+            String smpURI = naptrLookupFetcher(participantIdentifier, naptrURI);
+            LOG.debug("Got URL: " + smpURI + " for participant " + participantIdentifier + " with naptr query url: " + naptrURI);
             return new URI(smpURI);
-        } catch (URISyntaxException | UnsupportedEncodingException | NoSuchAlgorithmException | TextParseException exc) {
+        } catch (URISyntaxException | TextParseException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         } catch (TechnicalException | NullPointerException exc) {
             LOG.debug("Naptr lookup was not possible, CNAME lookup will be used instead for participant" + participantIdentifier.toString());
             //It was not possible to lookup using NAPTR, CNAME lookup will be used instead
             return null;
         }
+    }
+
+    protected String buildCNameDNSDomain(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        String participantIdMD5Hash;
+        try {
+            participantIdMD5Hash = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException exc) {
+            throw new DNSLookupException(exc.getMessage(), exc);
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(DOMAIN_CNAME_PREFIX)
+                .append(participantIdMD5Hash);
+        if (!participantIdentifier.isOasisPartyIdentifierType()) {
+            sb.append(DOMAIN_SEPARATOR);
+            sb.append(participantIdentifier.getScheme());
+        }
+        sb.append(DOMAIN_SEPARATOR)
+                .append(domain);
+        return sb.toString();
+    }
+
+    protected String buildNaptrDNSDomain(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+        String participantIdSHA256Hash;
+        try {
+            participantIdSHA256Hash = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException exc) {
+            throw new DNSLookupException(exc.getMessage(), exc);
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(participantIdSHA256Hash);
+        if (!participantIdentifier.isOasisPartyIdentifierType()) {
+            sb.append(DOMAIN_SEPARATOR);
+            sb.append(participantIdentifier.getScheme());
+        }
+        sb.append(DOMAIN_SEPARATOR)
+                .append(domain);
+        return sb.toString();
     }
 
     public String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException, TextParseException {

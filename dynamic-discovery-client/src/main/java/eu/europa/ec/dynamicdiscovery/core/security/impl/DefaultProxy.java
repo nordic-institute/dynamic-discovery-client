@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
  *
  * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
@@ -14,9 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @author Flávio W. R. Santos - CEF-EDELIVERY-SUPPORT@ec.europa.eu
- *
  */
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
@@ -27,28 +24,27 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.Arrays;
 
-
+/**
+ * A configuration for managing the host, credentials and non-proxy host definitions when setting up an HTTP proxy.
+ *
+ * @author Sebastian-Ion TINCU
+ * @author Flávio W. R. Santos
+ * @since 1.13
+ */
 public class DefaultProxy implements IProxyConfiguration {
    final static Logger LOG = LoggerFactory.getLogger(DefaultProxy.class);
 
-    private String user;
-    private String password;
-    private String serverAddress;
-    private String[] nonProxyHosts;
-    private int serverPort;
-    private HttpClient httpclient;
-    private HttpGet httpget;
+    private final String user;
+    private final String password;
+    private final String serverAddress;
+    private final String[] nonProxyHosts;
+    private final int serverPort;
 
     public DefaultProxy(String serverAddress, int serverPort) throws ConnectionException {
         this(serverAddress, serverPort, null, null, null);
@@ -59,7 +55,6 @@ public class DefaultProxy implements IProxyConfiguration {
     }
 
     public DefaultProxy(String serverAddress, int serverPort, String user, String password, String nonProxyHosts) throws ConnectionException {
-
         // test server configuration
         if (StringUtils.isEmpty(serverAddress) || serverPort == 0) {
             throw new ConnectionException("Server configuration for Proxy Authentication is missing.");
@@ -70,70 +65,61 @@ public class DefaultProxy implements IProxyConfiguration {
             throw new ConnectionException("Password for Proxy user is missing.");
         }
 
-
         this.user = user;
         this.password = password;
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
-        this.nonProxyHosts = StringUtils.isBlank(nonProxyHosts)?null: nonProxyHosts.split("\\|");
+        this.nonProxyHosts = StringUtils.isBlank(nonProxyHosts) ? null : nonProxyHosts.split("\\|");
     }
 
     @Override
-    public void build(URI uri) {
-        // create get request
-        this.httpget = new HttpGet(uri);
-
-        // check if noproxy
-        if(!doesTargetMatchNonProxy(uri.getHost())){
-            // create host for proxy
-            HttpHost proxy = new HttpHost(this.serverAddress, this.serverPort);
-            // set credentials to http client if username exists
-            if (!StringUtils.isEmpty(user)) {
-                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(
-                        new AuthScope(this.serverAddress, this.serverPort),
-                        new UsernamePasswordCredentials(this.user, this.password));
-                this.httpclient = HttpClients.custom()
-                        .setDefaultCredentialsProvider(credentialsProvider).build();
-
-            } else {
-                this.httpclient = HttpClients.createDefault();
-            }
-            httpget.setConfig(RequestConfig.custom()
-                    .setProxy(proxy)
-                    .build());
-        } else {
-            this.httpclient = HttpClients.createDefault();
-            this.httpget.setConfig(RequestConfig.custom().build());
-        }
-
-
-    }
-
-    private boolean doesTargetMatchNonProxy(String uriHost) {
+    public boolean isNonProxyHost(String target) {
         int nphLength = this.nonProxyHosts != null ? this.nonProxyHosts.length : 0;
         if (nonProxyHosts == null || nphLength < 1) {
-            LOG.debug("host:'"+uriHost+"' : DEFAULT (0 non proxy host)");
+            LOG.debug("host [{}] DEFAULT (0 non proxy host)", target);
             return false;
         }
         for (String nonProxyHost : nonProxyHosts) {
-            if (uriHost.matches((nonProxyHost.startsWith("*")?".":"")+nonProxyHost)) {
-                LOG.debug(" host:'"+uriHost+"' matches nonProxyHost '"+nonProxyHost+"' : NO PROXY");
+            if (target.matches((nonProxyHost.startsWith("*") ? "." : "") + nonProxyHost)) {
+                LOG.debug(" host [{}] matches nonProxyHost [{}] : NO PROXY", target, nonProxyHost);
                 return true;
             }
         }
-        LOG.debug(" host:'"+uriHost+"' : DEFAULT  (no match of "+Arrays.toString(nonProxyHosts)+" non proxy host)");
+        LOG.debug(" host [{}] DEFAULT (no match of {} non proxy host)", target, Arrays.toString(nonProxyHosts));
         return false;
     }
 
     @Override
-    public HttpClient getHttpclient() {
-        return httpclient;
+    public HttpHost getProxyHost(String target) {
+        if (isNonProxyHost(target)) {
+            LOG.info("No proxy required for host [{}]", target);
+            return null;
+        }
+
+        HttpHost proxyHost = new HttpHost(this.serverAddress, this.serverPort);
+
+        LOG.info("Configured proxy host [{}]", proxyHost);
+        return proxyHost;
     }
 
     @Override
-    public HttpGet getHttpget() {
-        return httpget;
-    }
+    public CredentialsProvider getProxyCredentials(String target) {
+        if (isNonProxyHost(target)) {
+            LOG.info("No credentials required for non-proxy host [{}]", target);
+            return null;
+        }
 
+        if (StringUtils.isEmpty(user)) {
+            LOG.info("Username is empty so no credentials to be returned");
+            return null;
+        }
+
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(
+                new AuthScope(this.serverAddress, this.serverPort),
+                new UsernamePasswordCredentials(this.user, this.password));
+
+        LOG.info("Configured proxy credentials");
+        return credentialsProvider;
+    }
 }
