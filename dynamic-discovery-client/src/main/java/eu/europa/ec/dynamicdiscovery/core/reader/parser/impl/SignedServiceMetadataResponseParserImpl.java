@@ -23,7 +23,6 @@ import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-import org.apache.commons.io.IOUtils;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
 import org.w3c.dom.Document;
 
@@ -61,10 +60,10 @@ public class SignedServiceMetadataResponseParserImpl implements ISignedServiceMe
 
     public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            IOUtils.copy(fetcherResponse.getInputStream(), baos);
-            String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
 
-            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(baos.toByteArray()));
+            byte[] byteArray = eu.europa.ec.dynamicdiscovery.util.IOUtils.readResponseData(fetcherResponse);
+            String responseBodyStr = new String(byteArray, StandardCharsets.UTF_8);
+            Document document = this.documentBuilderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(byteArray));
             SignedServiceMetadataType signedServiceMetadataType = (SignedServiceMetadataType) ((JAXBElement) this.unmarshaller.unmarshal(document)).getValue();
             Certificate certificate = this.signatureValidator.verify(document);
 

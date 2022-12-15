@@ -23,10 +23,12 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import eu.europa.ec.dynamicdiscovery.util.Constants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpResponse;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -81,7 +83,7 @@ public class URLFetcherMock implements IMetadataFetcher {
                             .withHeader("Content-Type", "application/soap+xml")
                             .withBody(bodyResponse)));
 
-            HttpClient client = HttpClientBuilder.create().build();
+            CloseableHttpClient client = HttpClientBuilder.create().build();
 
             String uriStr;
             if (isCNAME()) {
@@ -91,15 +93,15 @@ public class URLFetcherMock implements IMetadataFetcher {
 
             }
             HttpPost request = new HttpPost(uriStr);
-            HttpResponse response = client.execute(request);
+            CloseableHttpResponse response = client.execute(request);
 
-            switch (response.getStatusLine().getStatusCode()) {
+            switch (response.getCode()) {
                 case 200:
                     return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
                 case 404:
                     throw new DNSLookupException("Not supported.");
                 default:
-                    throw new DNSLookupException(String.format("Received code %s for lookup.", Integer.valueOf(response.getStatusLine().getStatusCode())));
+                    throw new DNSLookupException(String.format("Received code %s for lookup.", Integer.valueOf(response.getCode())));
             }
         } catch (IOException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);

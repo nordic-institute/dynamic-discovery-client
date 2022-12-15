@@ -20,11 +20,11 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.http.HttpHost;
-
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHost;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,16 +42,20 @@ public class DefaultProxyTest {
     @Test
     public void testSetupConstructorWitCredentials() throws Exception {
         DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8000, "user", "password");
+
+        assertNotNull(defaultProxy.getProxyCredentials("127.0.0.1"));
     }
 
     @Test
     public void testSetupConstructorWithoutCredentials() throws Exception {
         DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8000, null, null);
+        assertNull(defaultProxy.getProxyCredentials("127.0.0.1"));
     }
 
     @Test
     public void testSetupConstructorWithNoProxyHosts() throws Exception {
         DefaultProxy defaultProxy = new DefaultProxy("127.0.0.1", 8000, null, null,"localhost|127.0.0.1");
+        assertNull(defaultProxy.getProxyCredentials("127.0.0.1"));
     }
 
     @Test
@@ -198,13 +202,13 @@ public class DefaultProxyTest {
 
         // WHEN
         CredentialsProvider result = defaultProxy.getProxyCredentials("ec.europa.eu");
-        Credentials credentials = result.getCredentials(new AuthScope("127.0.0.1", 8080));
+        Credentials credentials = result.getCredentials(new AuthScope("127.0.0.1", 8080), null);
 
         // THEN
         Assert.assertEquals("Should have returned correct principal name for a proxy being configured with user credentials for a target host not being ignored by the proxy",
                 "user", credentials.getUserPrincipal().getName());
         Assert.assertEquals("Should have returned correct password for a proxy being configured with user credentials for a target host not being ignored by the proxy",
-                "password", credentials.getPassword());
+                "password", new String(credentials.getPassword()));
     }
 
     private void testSetupForExceptions(String serverAddress, int serverPort, String user, String password, String errorMessage) throws Exception {

@@ -17,19 +17,22 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
-import org.apache.commons.codec.binary.Base32;
+import org.bouncycastle.util.encoders.Base32;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.util.Base64;
 
 /**
  * @author Flávio W. R. Santos
  * @author Adrien Ferial
  */
 public class HashUtil {
+    protected HashUtil() {
+    }
 
     /**
      * Returns the MD5 hash of the given String
@@ -75,7 +78,7 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    private static String getHash(String stringToBeHashed, String algorithm, boolean isBase32) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private static String getHash(String stringToBeHashed, String algorithm, boolean isBase32) throws NoSuchAlgorithmException {
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }
@@ -85,13 +88,7 @@ public class HashUtil {
         byte[] hashBytes = md.digest();
 
         if (isBase32) {
-            Base32 base32 = new Base32();
-
-
-            //convert the byte to BASE32 - noPadding '='
-            //BaseEncoding base32
-            //        = BaseEncoding.base32().omitPadding();
-            String base64Value = base32.encodeToString(hashBytes);
+            String base64Value = Base32.toBase32String(hashBytes);
             // remove padding
             return base64Value.replaceAll("=*$", "");
         } else {

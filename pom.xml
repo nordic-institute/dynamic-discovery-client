@@ -57,18 +57,17 @@
         <surefire.argLine>-Xmx1G</surefire.argLine>
 
         <!-- dependencies -->
-        <bouncycastle.version>1.69</bouncycastle.version>
-        <commons-io.version>2.11.0</commons-io.version>
+        <bouncycastle.version>1.70</bouncycastle.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <dnsjava.version>3.4.2</dnsjava.version>
+        <dnsjava.version>3.5.2</dnsjava.version>
         <guava.version>18.0</guava.version>
-        <httpclient.version>4.5.13</httpclient.version>
+        <httpclient.version>5.2.1</httpclient.version>
         <jacoco.version>0.7.7.201606060606</jacoco.version>
         <junit.version>4.13.2</junit.version>
         <log4j.version>1.2.17</log4j.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <mockito.version>4.0.0</mockito.version>
-        <spring.version>5.3.13</spring.version>
+        <slf4j.version>2.0.6</slf4j.version>
+        <mockito.version>4.10.0</mockito.version>
+        <spring-test.version>5.3.24</spring-test.version>
         <wiremock.version>2.27.2</wiremock.version>
         <surefire-junit47.version>2.19.1</surefire-junit47.version>
         <!-- plugins -->
@@ -82,7 +81,8 @@
         <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
         <!-- latest version compatible with SonarQube 5.6 -->
-        <sonar-maven-plugin.version>3.3.0.603</sonar-maven-plugin.version>
+        <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
+
 
 
     </properties>
@@ -95,6 +95,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
+                        <version>7.3.2</version>
                         <configuration>
                             <!-- Disable .Net Assembly Analyzer -->
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
@@ -215,20 +216,14 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>dnsjava</groupId>
                 <artifactId>dnsjava</artifactId>
                 <version>${dnsjava.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
                 <version>${httpclient.version}</version>
             </dependency>
 
@@ -263,7 +258,12 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -281,7 +281,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-test</artifactId>
-                <version>${spring.version}</version>
+                <version>${spring-test.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -327,9 +327,9 @@
                     <version>${build-helper-maven-plugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>${sonar-maven-plugin.version}</version>
+                    <version>${plugin.sonar.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

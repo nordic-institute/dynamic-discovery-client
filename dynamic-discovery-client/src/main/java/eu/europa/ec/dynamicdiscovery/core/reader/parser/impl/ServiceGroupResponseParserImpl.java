@@ -23,7 +23,7 @@ import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
-import org.apache.commons.io.IOUtils;
+import eu.europa.ec.dynamicdiscovery.util.IOUtils;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataReferenceType;
 import org.slf4j.Logger;
@@ -35,7 +35,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -67,10 +66,10 @@ public class ServiceGroupResponseParserImpl implements IServiceGroupResponsePars
     @Override
     public ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
         LOG.debug("Parse service group response");
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            IOUtils.copy(fetcherResponse.getInputStream(), baos);
-            String responseBodyStr = IOUtils.toString(new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8);
-            ServiceGroupType serviceGroupType = unmarshalServiceGroupType(new ByteArrayInputStream(baos.toByteArray()));
+        try {
+            byte[] byteArray = IOUtils.readResponseData(fetcherResponse);
+            String responseBodyStr = new String(byteArray, StandardCharsets.UTF_8);
+            ServiceGroupType serviceGroupType = unmarshalServiceGroupType(new ByteArrayInputStream(byteArray));
             LOG.debug("ServiceGroup response parsed for scheme [{}], participant identifier [{}]" , serviceGroupType.getParticipantIdentifier().getScheme() ,
                     serviceGroupType.getParticipantIdentifier().getValue());
             return new ServiceGroup(serviceGroupType, responseBodyStr, getDocumentIdentifiers(serviceGroupType));
@@ -97,9 +96,9 @@ public class ServiceGroupResponseParserImpl implements IServiceGroupResponsePars
             if (serviceGroupType != null && serviceGroupType.getServiceMetadataReferenceCollection() != null) {
                 List<ServiceMetadataReferenceType> serviceMetadataReferences = serviceGroupType.getServiceMetadataReferenceCollection().getServiceMetadataReference();
                 if (serviceMetadataReferences != null) {
-                    Iterator serviceMetadataReferenceTypeIterator = serviceMetadataReferences.iterator();
+                    Iterator<ServiceMetadataReferenceType> serviceMetadataReferenceTypeIterator = serviceMetadataReferences.iterator();
                     while (serviceMetadataReferenceTypeIterator.hasNext()) {
-                        ServiceMetadataReferenceType reference = (ServiceMetadataReferenceType) serviceMetadataReferenceTypeIterator.next();
+                        ServiceMetadataReferenceType reference = serviceMetadataReferenceTypeIterator.next();
                         String[] parts = URLDecoder.decode(reference.getHref().split("/services/")[1], "UTF-8").split("::", 2);
                         documentIdentifiers.add(new DocumentIdentifier(parts[1], parts[0]));
                     }
