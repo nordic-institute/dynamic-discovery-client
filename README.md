@@ -32,7 +32,7 @@ This page provides a brief description of how to use this web service client to 
 
 ## 2.1. ARTIFACTS
 
-![enter image description here](https://ec.europa.eu/cefdigital/wiki/download/attachments/35215791/Dynamic%20Discovery%20Client.PNG?version=1&modificationDate=1476951474175&api=v2)
+![enter image description here](https://ec.europa.eu/digital-building-blocks/wiki/download/attachments/35215791/Dynamic%20Discovery%20Client.PNG?version=1&modificationDate=1476951474175&api=v2)
 
 
 ## 2.2. REPOSITORY
@@ -41,18 +41,18 @@ All versions of Dynamic Discovery Client can be found on:
 
 Releases
 
-https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery/eu/europa/ec/dynamic-discovery/
+https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery/eu/europa/ec/dynamic-discovery/
 
 Snapshots
 
-https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/eu/europa/ec/dynamic-discovery/
+https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery-snapshots/eu/europa/ec/dynamic-discovery/
 
 
 ## 2.3. SOURCE CODE
 
-Please find the GIT repository on https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git
+Please find the GIT repository on https://ec.europa.eu/digital-building-blocks/code/scm/edelivery/dynamic-discovery-client.git
 
-Source code: https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+Source code: https://ec.europa.eu/digital-building-blocks/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
 
 
 ## 3. SETTING UP PARAMETERS
@@ -65,6 +65,7 @@ The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default imple
 **IMetadataLocator**
 
 This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator** for looking up NAPTR or CNAME records.
+ Alternative is the **eu.europa.ec.dynamicdiscovery.core.fetcher.impl.StaticMapMetadataLocator.** for preconfigured/default SMP URI.
 
 **IMetadataFetcher**
 
@@ -87,7 +88,39 @@ This interface is responsible for parsing the response according to the XSD. By 
 This interface is responsible for verifying the signature of the response according to the XSD and is used by the abstract class **eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator**, all the implementations must extend this abstract class.
 By default the implementation **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator** is provided.
 
-## 3.2. PROXY CONFIGURATION
+## 3.2. LOCATOR CONFIGURATION
+
+The DDC has two  Locator implementations.
+- **DefaultBDXRLocator** lookup's the authoritative domain DNS given as a constructor parameter.
+- **StaticMapMetadataLocator** returns SMP's  URI based on preconfigured party identifier and URI mapping. If the party identifier is not found in the mapping, it returns the default URI.
+
+Example how to configure with DefaultBDXRLocator (The Client will resolve SMPs URI based on PartyIdentifier and BDXL DNS lookup)
+
+      DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+      .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
+      .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+      .build();
+
+Example of how to configure with StaticMapMetadataLocator. The DDC will always fetch the party identifier's service metadata data from the give URI: " http://localhost:8090/cipa-smp-full-webapp/"
+
+    DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+    .locator(new StaticMapMetadataLocator(new URI("http://localhost:8090/cipa-smp-full-webapp/")))
+    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+    .build();
+
+Example of how to configure with StaticMapMetadataLocator with mapping. The DDC will try to looup party identifier mapping URI. If Party identifier is not found in the mapping, it will fetch the party identifier's service metadata data from the give URI: " http://localhost:8090/cipa-smp-full-webapp/"
+
+    URI defaultURI =new URI("http://localhost:8090/cipa-smp-full-webapp/");
+    Map<ParticipantIdentifier, URI> mapExceptions = new HashMap<>();
+    mapExceptions.put(new ParticipantIdentifier("testId-01", "testScheme"), new URI("http://test-01/smp/"));
+    mapExceptions.put(new ParticipantIdentifier("testId-02", "testScheme"), new URI("http://test-02/smp/"));
+
+    DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+    .locator(new StaticMapMetadataLocator(defaultURI, mapExceptions))
+    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+    .build();
+
+## 3.3. PROXY CONFIGURATION
 
 By default **eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher** does not use proxy configuration. In order to use proxy, an instance of the class **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy** must be configured and passed by parameter as follows:
 
@@ -95,7 +128,7 @@ Example:
 
     DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance().fetcher(new DefaultURLFetcher(new DefaultProxy("127.0.0.1", 8000, "user", "password"))).build();
 
-## 3.3. TRUSTSTORE CONFIGURATION
+## 3.4. TRUSTSTORE CONFIGURATION
 
 In order to check if the certificate extracted from the signed response is trusted even if the signature is valid, a truststore must be passed by parameter to the Signature Validator implementation.A trusted certificate must be included in the truststore.
 
@@ -106,7 +139,7 @@ Example:
 
      DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
 
-## 3.4. CONFIGURE REGULAR EXPRESSION TO VALIDATE CERTIFICATE SUBJECT
+## 3.5. CONFIGURE REGULAR EXPRESSION TO VALIDATE CERTIFICATE SUBJECT
 
 Apart from validating response of signer certificates against the truststore, the Dynamic Discovery gives the possibility to add (optional) a regular expression to validate any certificate metadata related to the subject of the signer certificate.
 
@@ -181,7 +214,7 @@ Please replace classes starting with **"Customized"** by implementations extende
 
 The certificates are validated against the truststore as follows.
 
-![enter image description here](https://ec.europa.eu/cefdigital/wiki/download/attachments/37749134/trustabilitymodel.PNG?version=1&modificationDate=1501168419400&api=v2)
+![enter image description here](https://ec.europa.eu/digital-building-blocks/wiki/download/attachments/37749134/trustabilitymodel.PNG?version=1&modificationDate=1501168419400&api=v2)
 
 ## 6. REFERENCES
 
