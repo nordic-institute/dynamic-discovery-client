@@ -19,6 +19,7 @@ package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
@@ -32,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -102,6 +104,25 @@ public class DocumentIdentifierIT extends AbstractIT {
         Assert.assertEquals(2, documentIdentifiers.size());
         Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", documentIdentifiers.get(1).getIdentifier());
         Assert.assertEquals("bdx-docid-qns", documentIdentifiers.get(1).getScheme());
+    }
+
+
+    @Test
+    public void getDocumentIdentifierByStaticLookup() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.STATIC, Constants.SERVICE_GROUP_URL_URN_POLAND_NCPB, "service_group_urn_poland_ncpb");
+        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new StaticMapMetadataLocator(new URI("http://localhost:8090/cipa-smp-full-webapp/")))
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .fetcher(urlFetcherURL)
+                .build();
+
+        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        Assert.assertEquals(2, documentIdentifiers.size());
+        Assert.assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
+        Assert.assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
     }
 
     @Test(expected = DNSLookupException.class)

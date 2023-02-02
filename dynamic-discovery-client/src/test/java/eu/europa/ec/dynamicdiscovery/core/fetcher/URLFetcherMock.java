@@ -42,7 +42,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 public class URLFetcherMock implements IMetadataFetcher {
 
     public enum LookupType {
-        NAPTR, CNAME;
+        NAPTR, CNAME, STATIC;
     }
 
     private LookupType lookupType;
