@@ -1,0 +1,122 @@
+package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+
+import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import gen.eu.europa.ec.ddc.api.smp10.ParticipantIdentifierType;
+import gen.eu.europa.ec.ddc.api.smp10.ServiceGroup;
+import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadataReferenceType;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+/**
+ * Purpose of the class it to provide the Oasis SMP 1.0 service group parser
+ *
+ * @author Joze Rihtarsic
+ * @since 2.0
+ */
+public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGroup> {
+    static final Logger LOG = LoggerFactory.getLogger(OasisSMP10ServiceGroupReader.class);
+    static final String REFERENCE_DOCUMENT_SEPARATOR = "/services/";
+    private static final ThreadLocal<Unmarshaller> jaxbUnmarshaller = ThreadLocal.withInitial(() -> {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
+            return jaxbContext.createUnmarshaller();
+        } catch (JAXBException ex) {
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:", ex);
+        }
+        return null;
+    });
+
+    private static final QName PARSE_ELEMENT = new QName(OasisSMP10Extension.NAMESPACE, "ServiceGroup");
+
+    /**
+     * Removes the current thread's ServiceGroup Unmarshaller for this thread-local variable. If this thread-local variable
+     * is subsequently read by the current thread, its value will be reinitialized by invoking its initialValue method.
+     */
+    public void destroyUnmarshaller() {
+        jaxbUnmarshaller.remove();
+    }
+
+    public Unmarshaller getUnmarshaller() {
+        return jaxbUnmarshaller.get();
+    }
+
+    @Override
+    public boolean handles(QName qName, Class<?> clazz) {
+        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceGroup.class;
+    }
+
+    @Override
+    public SMPServiceGroup parse(Document document) throws TechnicalException {
+        ServiceGroup serviceGroup;
+        try {
+            serviceGroup = (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while parsing serviceGroup", e);
+        }
+
+        return new SMPServiceGroup(getParticipantIdentifier(serviceGroup),
+                getDocumentIdentifiers(serviceGroup), serviceGroup);
+    }
+
+    @Override
+    public SMPServiceGroup parseAndValidateSignature(Document document, ISignatureValidator signatureValidator) throws TechnicalException {
+        // the SMP service group is not singed. Ignore signatureValidator
+        return parse(document);
+    }
+
+    protected SMPParticipantIdentifier getParticipantIdentifier(ServiceGroup serviceGroup){
+        ParticipantIdentifierType identifierType = serviceGroup.getParticipantIdentifier();
+        return new SMPParticipantIdentifier(identifierType.getValue(), identifierType.getScheme());
+    }
+
+    protected List<SMPDocumentIdentifier> getDocumentIdentifiers(ServiceGroup serviceGroup){
+
+        if (serviceGroup == null
+                || serviceGroup.getServiceMetadataReferenceCollection() == null
+                || serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences() == null) {
+            return Collections.emptyList();
+        }
+        List<ServiceMetadataReferenceType> serviceMetadataReferences =
+                serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences();
+
+        return serviceMetadataReferences.stream()
+                .map(this::getDocumentIdentifierFromReference)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    protected SMPDocumentIdentifier getDocumentIdentifierFromReference(ServiceMetadataReferenceType reference) {
+        if (reference == null
+                || StringUtils.isBlank(reference.getHref())
+                || !StringUtils.contains(reference.getHref(), REFERENCE_DOCUMENT_SEPARATOR)) {
+            return null;
+        }
+        String substr = StringUtils.substringAfter(reference.getHref(), REFERENCE_DOCUMENT_SEPARATOR);
+        try {
+            String[] parts = URLDecoder.decode(substr, "UTF-8").split("::", 2);
+            return new SMPDocumentIdentifier(parts[1], parts[0]);
+        } catch (UnsupportedEncodingException e) {
+            throw new DDCRuntimeException("Error occurred while decoding string [" + substr + "].", e);
+        }
+    }
+}

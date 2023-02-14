@@ -17,82 +17,85 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcherMock;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import eu.europa.ec.dynamicdiscovery.util.Constants;
-import org.junit.Assert;
-import org.junit.Test;
+import eu.europa.ec.dynamicdiscovery.util.TestCaseConstants;
+import gen.eu.europa.ec.ddc.api.smp10.ServiceGroup;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 
 import java.net.URI;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Flávio W. R. Santos
  */
-public class DocumentIdentifierIT extends AbstractIT {
+class DocumentIdentifierIT {
 
     @Test
-    public void getDocumentIdentifierByNaptrOK1() throws Exception {
+    void getDocumentIdentifierByNaptrOK1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, "service_group_9925_0367302178");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523");
 
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
-        Assert.assertEquals(2, documentIdentifiers.size());
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        assertEquals(2, documentIdentifiers.size());
 
     }
 
     @Test
-    public void getDocumentIdentifierByNaptrOK2() throws Exception {
+    void getDocumentIdentifierByNaptrOK2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_URN_POLAND_NCPB, "service_group_urn_poland_ncpb");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_GROUP_URL_URN_POLAND_NCPB, "service_group_urn_poland_ncpb");
 
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
-        Assert.assertEquals(2, documentIdentifiers.size());
-        Assert.assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
-        Assert.assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        assertEquals(2, documentIdentifiers.size());
+        assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
+        assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
     }
 
     @Test
-    public void getDocumentIdentifierByCNAMEOK() throws Exception {
+    void getDocumentIdentifierByCNAMEOK() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_GROUP_URL_9925_0367302178, "service_group_9925_0367302178", "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
@@ -100,89 +103,95 @@ public class DocumentIdentifierIT extends AbstractIT {
                 .fetcher(urlFetcherURL)
                 .build();
 
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
-        Assert.assertEquals(2, documentIdentifiers.size());
-        Assert.assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", documentIdentifiers.get(1).getIdentifier());
-        Assert.assertEquals("bdx-docid-qns", documentIdentifiers.get(1).getScheme());
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        assertEquals(2, documentIdentifiers.size());
+        assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", documentIdentifiers.get(1).getIdentifier());
+        assertEquals("bdx-docid-qns", documentIdentifiers.get(1).getScheme());
     }
 
 
     @Test
-    public void getDocumentIdentifierByStaticLookup() throws Exception {
+    void getDocumentIdentifierByStaticLookup() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.STATIC, Constants.SERVICE_GROUP_URL_URN_POLAND_NCPB, "service_group_urn_poland_ncpb");
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.STATIC, "/cipa-smp-full-webapp" + TestCaseConstants.SERVICE_GROUP_URL_URN_POLAND_NCPB, "service_group_urn_poland_ncpb");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new StaticMapMetadataLocator(new URI("http://localhost:8090/cipa-smp-full-webapp/")))
+                .locator(new StaticMapMetadataLocator(new URI(TestCaseConstants.SMP_STATIC_DOMAIN)))
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
 
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
-        Assert.assertEquals(2, documentIdentifiers.size());
-        Assert.assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
-        Assert.assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        assertEquals(2, documentIdentifiers.size());
+        assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
+        assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
     }
 
-    @Test(expected = DNSLookupException.class)
-    public void getDocumentIdentifierNAPTRNotOK() throws Exception {
+    @Test
+    void getDocumentIdentifierNAPTRNotOK() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, "service_group_9925_0367302178");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
-    }
 
-    @Test(expected = DNSLookupException.class)
-    public void getDocumentIdentifierByCNAMENotOK() throws Exception {
-        URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, Constants.SERVICE_GROUP_URL_9925_0367302178, "service_group_9925_0367302178", "b-12345678910.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
-                .fetcher(urlFetcherURL)
-                .build();
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
-        List<DocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
+        assertThrows(DNSLookupException.class, () -> smpClient.getDocumentIdentifiers(participantIdentifier));
     }
 
     @Test
-    public void testGetServiceGroupTypeOk() throws Exception {
-        ServiceGroupType serviceGroup = testGetServiceGroupType("9925:0367302178");
-        Assert.assertEquals("9925:0367302178", serviceGroup.getParticipantIdentifier().getValue());
-        Assert.assertEquals("iso6523-actorid-upis", serviceGroup.getParticipantIdentifier().getScheme());
-        Assert.assertEquals("http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReference().get(0).getHref());
+    void getDocumentIdentifierByCNAMENotOK() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-12345678910.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
+                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .fetcher(urlFetcherURL)
+                .build();
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+
+        assertThrows(DNSLookupException.class, () -> smpClient.getDocumentIdentifiers(participantIdentifier));
+
     }
 
-    @Test(expected = DNSLookupException.class)
-    public void testGetServiceGroupTypeParticipantNotOk() throws Exception {
-        ServiceGroupType serviceGroup = testGetServiceGroupType("9925:036730217815");
+    @Test
+    void testGetServiceGroupTypeOk() throws Exception {
+        ServiceGroup serviceGroup = testGetServiceGroupType("9925:0367302178");
+        assertEquals("9925:0367302178", serviceGroup.getParticipantIdentifier().getValue());
+        assertEquals("iso6523-actorid-upis", serviceGroup.getParticipantIdentifier().getScheme());
+        assertEquals("http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-qns%3A%3Aurn%3A%3Aepsos%3Aservices%23%23epsos-21", serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences().get(0).getHref());
     }
 
-    private ServiceGroupType testGetServiceGroupType(String participantId) throws Exception {
+    @Test
+    void testGetServiceGroupTypeParticipantNotOk() throws Exception {
+        DNSLookupException result = assertThrows(DNSLookupException.class, () -> testGetServiceGroupType("9925:036730217815"));
+        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.startsWith("Not supported"));
+    }
+
+    private ServiceGroup testGetServiceGroupType(String participantId) throws Exception {
 
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, Constants.SERVICE_GROUP_URL_9925_0367302178, "service_group_9925_0367302178");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523");
 
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(participantId, "iso6523-actorid-upis");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier(participantId, "iso6523-actorid-upis");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.lookupFetcher(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(Constants.SMP_DOMAIN_ALIAS);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
-        return smpClient.getServiceGroup(participantIdentifier).getOriginalServiceGroup();
+        return smpClient.getServiceGroup(participantIdentifier).unwrap(ServiceGroup.class);
     }
 }

@@ -17,24 +17,25 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Flávio W. R. Santos
  * @author Adrien Ferial
  */
-public class HashUtilTest {
+class HashUtilTest {
 
     @Test
-    public void testNAPTRHash() throws Exception {
+   void testNAPTRHash() throws Exception {
         String participantId = HashUtil.getSHA256HashBase32("urn:poland:ncpb");
-        Assert.assertEquals("DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ", participantId);
+        assertEquals("DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ", participantId);
     }
 
     @Test
-    public void testCNAMEHash() throws Exception {
+   void testCNAMEHash() throws Exception {
         String participantId = HashUtil.getMD5Hash("urn:poland:ncpb");
-        Assert.assertEquals("b-adb4c6d3821d142c684b13ed269fad65", "b-" + participantId);
+        assertEquals("b-adb4c6d3821d142c684b13ed269fad65", "b-" + participantId);
     }
 }

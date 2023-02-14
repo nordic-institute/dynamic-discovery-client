@@ -17,45 +17,48 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 
 /**
  * @author Flávio W. R. Santos
+ * @since 1.0
  */
-@RunWith(MockitoJUnitRunner.class)
-public class DefaultBDXRLocatorTest {
+@ExtendWith(MockitoExtension.class)
+class DefaultBDXRLocatorTest {
 
     @Captor
-    ArgumentCaptor<String> naptrUrlCaptor;
+    ArgumentCaptor<String> dnsRecordUrlCaptor;
 
     @Test
-    public void testLookupNAPTR() throws Exception {
+    void testLookupNAPTR() throws Exception {
         //GIVEN
         DefaultBDXRLocator defaultBDXRLocator = lookupNAPTR();
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:brazil:saopaulo", "country-state-qns");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:brazil:saopaulo", "country-state-qns");
 
         //WHEN
         URI uri = defaultBDXRLocator.lookup(participantIdentifier);
 
         //THEN
         assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
-        assertEquals("2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu", naptrUrlCaptor.getValue());
+        assertEquals("2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
     }
 
     @Test
-    public void testLookupNAPTRUpperCaseIdentifier() throws Exception {
+    void testLookupNAPTRUpperCaseIdentifier() throws Exception {
         //GIVEN
         DefaultBDXRLocator defaultBDXRLocator = lookupNAPTR();
 
@@ -64,11 +67,11 @@ public class DefaultBDXRLocatorTest {
 
         //THEN
         assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
-        assertEquals("2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu", naptrUrlCaptor.getValue());
+        assertEquals("2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
     }
 
     @Test
-    public void testLookupNAPTROasisPartyType() throws Exception {
+    void testLookupNAPTROasisPartyType() throws Exception {
         //GIVEN
         DefaultBDXRLocator defaultBDXRLocator = lookupNAPTR();
 
@@ -77,11 +80,11 @@ public class DefaultBDXRLocatorTest {
 
         //THEN
         assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
-        assertEquals("XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu", naptrUrlCaptor.getValue());
+        assertEquals("XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
     }
 
     @Test
-    public void testLookupNAPTROasisPartyTypeNullScheme() throws Exception {
+    void testLookupNAPTROasisPartyTypeNullScheme() throws Exception {
         //GIVEN
         DefaultBDXRLocator defaultBDXRLocator = lookupNAPTR();
 
@@ -90,11 +93,11 @@ public class DefaultBDXRLocatorTest {
 
         //THEN
         assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
-        assertEquals("XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu", naptrUrlCaptor.getValue());
+        assertEquals("XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
     }
 
     @Test
-    public void testLookupNAPTROasisPartyTypeEmptyScheme() throws Exception {
+    void testLookupNAPTROasisPartyTypeEmptyScheme() throws Exception {
         //GIVEN
         DefaultBDXRLocator defaultBDXRLocator = lookupNAPTR();
 
@@ -103,16 +106,15 @@ public class DefaultBDXRLocatorTest {
 
         //THEN
         assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
-        assertEquals("XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu", naptrUrlCaptor.getValue());
+        assertEquals("XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
     }
 
     @Test
-    public void testLookupCNAMEPeppolPartyType() throws Exception {
+    void testLookupCNAMEPeppolPartyType() throws Exception {
         //GIVEN
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn(null).when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:brazil:saopaulo", "country-state-qns");
+        DefaultBDXRLocator defaultBDXRLocator = lookupCNAME();
+        SMPParticipantIdentifier participantIdentifier
+                = new SMPParticipantIdentifier("urn:brazil:saopaulo", "country-state-qns");
 
         //WHEN
         URI uri = defaultBDXRLocator.lookup(participantIdentifier);
@@ -122,12 +124,10 @@ public class DefaultBDXRLocatorTest {
     }
 
     @Test
-    public void testLookupCNAMEOasisPartyType() throws Exception {
+    void testLookupCNAMEOasisPartyType() throws Exception {
         //GIVEN
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn(null).when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:brazil:saopaulo", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        DefaultBDXRLocator defaultBDXRLocator = lookupCNAME();
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:brazil:saopaulo", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
 
         //WHEN
         URI uri = defaultBDXRLocator.lookup(participantIdentifier);
@@ -137,12 +137,10 @@ public class DefaultBDXRLocatorTest {
     }
 
     @Test
-    public void testLookupCNAMEOasisPartyTypeNullScheme() throws Exception {
+    void testLookupCNAMEOasisPartyTypeNullScheme() throws Exception {
         //GIVEN
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn(null).when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo", null);
+        DefaultBDXRLocator defaultBDXRLocator = lookupCNAME();
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo", null);
 
         //WHEN
         URI uri = defaultBDXRLocator.lookup(participantIdentifier);
@@ -152,12 +150,10 @@ public class DefaultBDXRLocatorTest {
     }
 
     @Test
-    public void testLookupCNAMEOasisPartyTypeEmptyScheme() throws Exception {
+    void testLookupCNAMEOasisPartyTypeEmptyScheme() throws Exception {
         //GIVEN
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn(null).when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), any(String.class));
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo", "");
+        DefaultBDXRLocator defaultBDXRLocator = lookupCNAME();
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo", "");
 
         //WHEN
         URI uri = defaultBDXRLocator.lookup(participantIdentifier);
@@ -167,9 +163,21 @@ public class DefaultBDXRLocatorTest {
     }
 
     private DefaultBDXRLocator lookupNAPTR() throws Exception {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
+        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder().addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu").build();
         defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(ParticipantIdentifier.class), naptrUrlCaptor.capture());
+        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+
+        return defaultBDXRLocator;
+    }
+
+    private DefaultBDXRLocator lookupCNAME() throws Exception {
+        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder().build());
+        DefaultBDXRLocator defaultBDXRLocator = spy(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", idnsLookup));
+        defaultBDXRLocator.getDnsLookupTypeList().clear();
+        defaultBDXRLocator.getDnsLookupTypeList().add(DNSLookupType.CNAME);
+
+        Mockito.doReturn(false).when(idnsLookup).dnsRecordNotExists(
+                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture(), any(DNSLookupType.class));
 
         return defaultBDXRLocator;
     }

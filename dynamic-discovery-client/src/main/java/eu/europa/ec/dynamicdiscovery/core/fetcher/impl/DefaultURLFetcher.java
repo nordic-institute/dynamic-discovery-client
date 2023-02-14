@@ -22,8 +22,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import eu.europa.ec.dynamicdiscovery.util.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -34,7 +33,7 @@ import org.apache.hc.core5.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -48,7 +47,7 @@ import static org.apache.commons.lang3.StringUtils.startsWithAny;
  * @since 1.13
  */
 public class DefaultURLFetcher implements IMetadataFetcher {
-    final static Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
+    static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
 
     private IProxyConfiguration proxyConfiguration;
 
@@ -99,26 +98,36 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             switch (response.getCode()) {
                 case 200:
-                    return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
+                    return toInMemoryFetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
                 case 404:
                     throw new DNSLookupException("SMP lookup address " + httpGet.getUri() + " not found - response 404");
                 default:
                     throw new DNSLookupException("Got Http error code " + response.getCode() + " trying to access SMP URL:" + httpGet.getUri());
             }
-        } catch (TechnicalException exc) {
-            LOG.error("Fetching data failed for participantURI: [{}]. Error: [{}]", httpGet.getRequestUri(), ExceptionUtils.getRootCauseMessage(exc), exc);
+        } catch (DNSLookupException exc){
             throw exc;
-        } catch (Exception exc) {
+        }
+        catch (Exception exc) {
             String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
             String uri = lowerCase(getUriFromHttpRequest(httpGet));
             if (startsWithAny(uri, "http://b-", "https://b-")) {
                 message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
             }
-            LOG.error("Fetching data failed for participantURI: [{}]. Error: [{}]. Message: [{}]", uri, ExceptionUtils.getRootCauseMessage(exc), message, exc);
             throw new DNSLookupException(message, exc);
         }
     }
-    public String getUriFromHttpRequest(HttpRequest httpRequest){
+
+    public FetcherResponse toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
+
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            IOUtils.copy(inputStream, baos);
+            return new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
+        }
+
+    }
+
+
+    public String getUriFromHttpRequest(HttpRequest httpRequest) {
         try {
             return httpRequest.getUri().toString();
         } catch (URISyntaxException e) {

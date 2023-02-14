@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class DefaultSMPCertificateValidator implements ISMPCertificateValidator {
 
-    final static Logger LOG = LoggerFactory.getLogger(DefaultSMPCertificateValidator.class);
+    static final Logger LOG = LoggerFactory.getLogger(DefaultSMPCertificateValidator.class);
 
     protected KeyStore trustStore;
     protected Pattern regexCertificateSubjectValidation;
@@ -35,13 +35,13 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
     @Override
     public void validateSMPCertificate(X509Certificate certificate) throws CertificateException {
         String certName = certificate.getSubjectX500Principal().getName();
-        LOG.debug("Validate Certificate [{}]", certName);
+        LOG.debug("Validate Certificate [{}].", certName);
         // check if certificate is valid
         certificate.checkValidity();
-        //validate if certificdate is trusted
+        //validate if certificate is trusted
         verifyTrust(certificate);
         verifyCertificateSubject(certificate);
-        LOG.debug("Certificate % is valid and trusted", certName);
+        LOG.debug("Certificate % is valid and trusted [{}].", certName);
     }
 
     /**
@@ -54,12 +54,14 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
      */
     private void verifyCertificateSubject(X509Certificate signerCertificate) throws CertificateException {
         if (regexCertificateSubjectValidation != null) {
+            String patternString = regexCertificateSubjectValidation.pattern();
             String subject = signerCertificate.getSubjectX500Principal().toString();
             Matcher matcher = regexCertificateSubjectValidation.matcher(subject);
             if (!matcher.matches()) {
-                throw new CertificateException(String.format("Given certificate: %s does not match configured regex: %s.", subject, regexCertificateSubjectValidation.pattern()));
+                throw new CertificateException(String.format("Given certificate: [%s] does not match configured regex: [%s].",
+                        subject, patternString));
             }
-            LOG.debug("Given certificate: %s  match the configured regex: %s.", subject, regexCertificateSubjectValidation.pattern());
+            LOG.debug("Given certificate: [{}] match the configured regex: [{}].", subject, patternString);
         } else {
             LOG.debug("Null regular expression for subject verification!");
         }
@@ -102,7 +104,6 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
         //Checks if certificate is under the truststore and is trusted
         String certName = signerCertificate.getSubjectX500Principal().getName();
         try {
-            KeyStore.Entry entry = trustStore.getEntry(alias, null);
             if (!trustStore.entryInstanceOf(alias, KeyStore.TrustedCertificateEntry.class)) {
                 LOG.warn("Certificate with alias [{}] is not Trusted certificate entry!", alias);
                 return false;
@@ -148,7 +149,8 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
             signed.verify(signer.getPublicKey());
             LOG.debug("Certificate [{}] is signed by certificate with alias [{}] from truststore.", signedCertificateName, alias);
             return true;
-        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | java.security.SignatureException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException |
+                 java.security.SignatureException e) {
             LOG.error("Error occurred while verifying signature of the certificate [" + signedCertificateName
                     + "] with certificate from truststore with alias [" + alias + "].", e);
             return false;

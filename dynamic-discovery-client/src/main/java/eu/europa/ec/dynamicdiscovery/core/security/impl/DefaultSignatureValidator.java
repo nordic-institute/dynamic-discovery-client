@@ -22,6 +22,8 @@ import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,7 +44,9 @@ import java.util.Iterator;
  * @author Flávio W. R. Santos
  */
 public class DefaultSignatureValidator implements ISignatureValidator {
+    static final Logger LOG = LoggerFactory.getLogger(DefaultSignatureValidator.class);
 
+    boolean signatureMandatory=false;
     ISMPCertificateValidator certificateValidator;
 
     public DefaultSignatureValidator(KeyStore trustStore) throws TechnicalException {
@@ -53,7 +57,7 @@ public class DefaultSignatureValidator implements ISignatureValidator {
         this(new DefaultSMPCertificateValidator(trustStore, regexCertificateSubjectValidation));
     }
 
-    public DefaultSignatureValidator(ISMPCertificateValidator smpCertificateValidator){
+    public DefaultSignatureValidator(ISMPCertificateValidator smpCertificateValidator) {
         this.certificateValidator = smpCertificateValidator;
     }
 
@@ -64,6 +68,9 @@ public class DefaultSignatureValidator implements ISignatureValidator {
     @Override
     public X509Certificate verify(Document document) throws TechnicalException {
         X509Certificate certificate = verifySignature(document);
+        if (certificate == null){
+            return null;
+        }
 
         try {
             certificateValidator.validateSMPCertificate(certificate);
@@ -94,29 +101,51 @@ public class DefaultSignatureValidator implements ISignatureValidator {
                 }
             }
 
+
+
             if (signatureElement == null) {
-                throw new SignatureException("Unable to get the signature");
+                if (signatureMandatory){
+                    throw new SignatureException("Unable to get the signature");
+                }
+                return null;
+
             }
 
             DOMValidateContext valContext = new DOMValidateContext(keySelector, signatureElement);
+            valContext.setProperty("org.jcp.xml.dsig.secureValidation", Boolean.TRUE);
             valContext.setProperty("javax.xml.crypto.dsig.cacheReference", Boolean.TRUE);
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
             boolean coreValidity = signature.validate(valContext);
 
-            if (coreValidity == false) {
+            if (!coreValidity) {
                 boolean sv = signature.getSignatureValue().validate(valContext);
-                if (sv == false) {
-                    // Check the validation status of each Reference.
-                    Iterator i1 = signature.getSignedInfo().getReferences().iterator();
-                    for (int j = 0; i1.hasNext(); j++) {
-                        boolean refValid = ((Reference) i1.next()).validate(valContext);
-                    }
+                if (!sv) {
+                    logSignatureErrors(signature, valContext);
                 }
                 throw new SignatureException("Core Validity of the Signature is not valid.");
             }
             return keySelector.getCertificate();
         } catch (XMLSignatureException | MarshalException e) {
             throw new SignatureException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Validate signature references and print invalid references to log.
+     *
+     * @param signature  XMLSignature signature
+     * @param valContext signature context settings
+     * @throws XMLSignatureException thrown when exceptional condition occurred during the XML signature validation process
+     */
+    protected void logSignatureErrors(XMLSignature signature, DOMValidateContext valContext) throws XMLSignatureException {
+        // Check the validation status of each Reference.
+        Iterator<Reference> i1 = signature.getSignedInfo().getReferences().iterator();
+        while (i1.hasNext()) {
+            Reference reference = i1.next();
+            boolean refValid = reference.validate(valContext);
+            if (!refValid) {
+                LOG.error("Signature [{}] has invalid reference [{}]!", signature.getId(), reference.getId());
+            }
         }
     }
 }

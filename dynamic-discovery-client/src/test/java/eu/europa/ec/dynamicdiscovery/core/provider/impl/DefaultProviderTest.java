@@ -17,91 +17,98 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import org.junit.Assert;
-import org.junit.Test;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  */
-public class DefaultProviderTest {
+class DefaultProviderTest {
+    private static final String TEST_URI = "http://b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu";
+    DefaultProvider testInstance = new DefaultProvider();
+
 
     @Test
-    public void resolveDocumentIdentifiersTest() throws Exception {
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DefaultBDXRLocator location = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
-        DefaultProvider defaultProvider = new DefaultProvider();
-        Assert.assertEquals("http://b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", defaultProvider.resolveDocumentIdentifiers(new URI("http://b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu"), participantIdentifier).toString());
-        Assert.assertEquals("ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", participantIdentifier.urlencoded());
+    void resolveParticipantIdentifierTest() throws Exception {
+        // given
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        URI uri = new URI(TEST_URI);
+        //when
+        String resolvedURI = testInstance.resolveForParticipantIdentifier(uri, participantIdentifier).toString();
+        // then
+        assertEquals(TEST_URI + "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", resolvedURI);
     }
 
     @Test
-    public void resolveServiceMetadataTest() throws Exception {
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-        DefaultProvider defaultProvider = new DefaultProvider();
-        Assert.assertEquals("http://b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", defaultProvider.resolveServiceMetadata(new URI("http://b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu"), participantIdentifier, documentIdentifier).toString());
-        Assert.assertEquals("ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", participantIdentifier.urlencoded());
-        Assert.assertEquals("ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", documentIdentifier.urlencoded());
+    void resolveServiceMetadataTest() throws Exception {
+        // given
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+        URI uri = new URI(TEST_URI);
+        // when
+        String resolvedURI = testInstance.resolveServiceMetadata(uri, participantIdentifier, documentIdentifier).toString();
+
+        assertEquals(TEST_URI + "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", resolvedURI);
     }
 
     @Test
-    public void resolveDocumentIdentifiersForSmpUnderNonRootContextTest() throws Exception {
+    void resolveDocumentIdentifiersForSmpUnderNonRootContextTest() throws Exception {
         //given
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
-        String url = defaultProvider.resolveDocumentIdentifiers(new URI("http://host:666/smp_context"), participantIdentifier).toString();
+        String url = defaultProvider.resolveForParticipantIdentifier(new URI("http://host:666/smp_context"), participantIdentifier).toString();
 
         //then
-        Assert.assertEquals("http://host:666/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
+        assertEquals("http://host:666/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
     }
 
     @Test
-    public void resolveDocumentIdentifiersForSmpUnderRootContextWithExtraSlashTest() throws Exception {
+    void resolveDocumentIdentifiersForSmpUnderRootContextWithExtraSlashTest() throws Exception {
         //given
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
-        String url = defaultProvider.resolveDocumentIdentifiers(new URI("http://host:666/"), participantIdentifier).toString();
+        String url = defaultProvider.resolveForParticipantIdentifier(new URI("http://host:666/"), participantIdentifier).toString();
 
         //then
-        Assert.assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
+        assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
     }
 
     @Test
-    public void resolveServiceMetadataForSmpUnderRootContextWithoutLastSlashTest() throws Exception {
+    void resolveServiceMetadataForSmpUnderRootContextWithoutLastSlashTest() throws Exception {
         //given
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("doc_id", "ehealth-resid-qns");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("doc_id", "ehealth-resid-qns");
         DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
         String url = defaultProvider.resolveServiceMetadata(new URI("http://host:666"), participantIdentifier, documentIdentifier).toString();
 
         //then
-        Assert.assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
+        assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
     }
 
     @Test
-    public void resolveServiceMetadataForSmpUnderNonRootContextTest() throws Exception {
+    void resolveServiceMetadataForSmpUnderNonRootContextTest() throws Exception {
         //given
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("doc_id", "ehealth-resid-qns");
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("doc_id", "ehealth-resid-qns");
         DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
         String url = defaultProvider.resolveServiceMetadata(new URI("http://host:666/smp_context"), participantIdentifier, documentIdentifier).toString();
 
         //then
-        Assert.assertEquals("http://host:666/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
+        assertEquals("http://host:666/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
     }
 
 }

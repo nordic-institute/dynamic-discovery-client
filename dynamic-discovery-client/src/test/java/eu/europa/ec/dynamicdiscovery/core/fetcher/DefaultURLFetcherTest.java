@@ -32,19 +32,17 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.message.StatusLine;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
@@ -52,8 +50,8 @@ import static org.mockito.ArgumentMatchers.any;
  * @author Sebastian-Ion TINCU
  * @since 1.13
  */
-@RunWith(MockitoJUnitRunner.class)
-public class DefaultURLFetcherTest {
+@ExtendWith(MockitoExtension.class)
+class DefaultURLFetcherTest {
 
     @Mock
     private CloseableHttpClient httpClient;
@@ -89,67 +87,63 @@ public class DefaultURLFetcherTest {
 
     private HttpHost proxyHost;
 
-    @Before
-    public void setup() throws Exception {
+    @Test
+    void testConnect() throws Exception {
         Mockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
-        Mockito.doReturn(new URI("http://test.eu/schema::party")).when(httpGet).getUri();
-
         Mockito.doReturn(httpEntity).when(response).getEntity();
         Mockito.doReturn(new ByteArrayInputStream("Dummy Content".getBytes())).when(httpEntity).getContent();
         Mockito.doReturn(200).when(response).getCode();
-    }
-
-    @Test
-    public void testConnect() throws Exception {
-
         //WHEN
         FetcherResponse fetcherResponse = defaultURLFetcher.connect(httpClient, httpGet);
 
         //THEN
-        Assert.assertNotNull(fetcherResponse);
+        assertNotNull(fetcherResponse);
     }
 
     @Test
-    public void testConnectForNAPTRException() throws Exception {
+    void testConnectForNAPTRException() throws Exception {
         //GIVEN
-        givenErrorCode(200);
         String naptStr = "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu";
         URI naptrURI = new URI(naptStr);
         Mockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
         Mockito.doReturn(naptrURI).when(httpGet).getUri();
 
         //WHEN THEN
-        DNSLookupException result = Assert.assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
-        Assert.assertEquals("It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.", result.getMessage());
+        DNSLookupException result = assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
+        assertEquals("It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.", result.getMessage());
 
     }
 
     @Test
-    public void testConnectForCNAMEException() throws Exception {
+    void testConnectForCNAMEException() throws Exception {
         //GIVEN
-        givenErrorCode(200);
         String cnameStr = "http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu";
         URI naptrURI = new URI(cnameStr);
         Mockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
         Mockito.doReturn(naptrURI).when(httpGet).getUri();
 
         //WHEN THEN
-        DNSLookupException result = Assert.assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
-        Assert.assertEquals("It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.", result.getMessage());
+        DNSLookupException result = assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
+        assertEquals("It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.", result.getMessage());
     }
 
     @Test
-    public void testConnectForException404() {
+    void testConnectForException404() throws Exception {
+        Mockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
+        Mockito.doReturn(new URI("http://test.eu/schema::party")).when(httpGet).getUri();
         testConnectForExceptions("SMP lookup address http://test.eu/schema::party not found - response 404", 404);
     }
 
     @Test
-    public void testConnectForException500()  {
+    void testConnectForException500() throws Exception {
+        Mockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
+        Mockito.doReturn(new URI("http://test.eu/schema::party")).when(httpGet).getUri();
+
         testConnectForExceptions("Got Http error code 500 trying to access SMP URL:http://test.eu/schema::party", 500);
     }
 
     @Test
-    public void fetch_proxyIgnoresTargetHost() throws Exception {
+    void fetch_proxyIgnoresTargetHost() throws Exception {
         // GIVEN
         givenTargetHost("ec.europa.eu");
         givenIgnoringConnectWithCapture();
@@ -163,7 +157,7 @@ public class DefaultURLFetcherTest {
     }
 
     @Test
-    public void fetch_proxyDoesNotIgnoreTargetHost() throws Exception {
+    void fetch_proxyDoesNotIgnoreTargetHost() throws Exception {
         // GIVEN
         givenTargetHost("ec.europa.eu");
         givenIgnoringConnect();
@@ -177,7 +171,7 @@ public class DefaultURLFetcherTest {
     }
 
     @Test
-    public void fetch() throws Exception {
+    void fetch() throws Exception {
         // GIVEN
         givenTargetHost("ec.europa.eu");
         givenIgnoringConnect();
@@ -192,13 +186,13 @@ public class DefaultURLFetcherTest {
         thenHttpConnectionDetailsCorrect();
     }
 
-    private void testConnectForExceptions(String errorMessage, int errorCode)  {
+    private void testConnectForExceptions(String errorMessage, int errorCode) {
         //GIVEN
         givenErrorCode(errorCode);
 
         //WHEN THEN
-        DNSLookupException result = Assert.assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
-        Assert.assertEquals(errorMessage, result.getMessage());
+        DNSLookupException result = assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
+        assertEquals(errorMessage, result.getMessage());
     }
 
     private void givenErrorCode(int errorCode) {
@@ -263,8 +257,8 @@ public class DefaultURLFetcherTest {
         CredentialsProvider actualCredentialsProvider = (CredentialsProvider) FieldUtils.readField(httpClient, "credentialsProvider", true);
         HttpHost actualProxyHost = (HttpHost) FieldUtils.readField(httpGet.getConfig(), "proxy", true);
 
-        Assert.assertSame("Should have configured the connection using the provided route planner", routePlanner, actualRoutePlanner);
-        Assert.assertSame("Should have configured the connection using the provided proxy host", proxyHost, actualProxyHost);
-        Assert.assertSame("Should have configured the connection using the provided credentials provider", credentialsProvider, actualCredentialsProvider);
+        assertSame(routePlanner, actualRoutePlanner);
+        assertSame(proxyHost, actualProxyHost);
+        assertSame(credentialsProvider, actualCredentialsProvider);
     }
 }

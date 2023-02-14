@@ -17,63 +17,57 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * @author Flávio W. R. Santos
  */
-public class DocumentIdentifierTest {
+class DocumentIdentifierTest {
 
     @Test
-    public void checkEbMS30TestService() throws Exception {
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", null);
-        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getIdentifier());
-        Assert.assertEquals("", documentIdentifier.getScheme());
-        Assert.assertEquals("::http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getFullIdentifier());
+    void checkEbMS30TestService() throws Exception {
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", null);
+        assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getIdentifier());
+        assertEquals(null, documentIdentifier.getScheme());
     }
 
     @Test
-    public void checkEbMS30TestServiceEmpty() throws Exception {
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", "");
-        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getIdentifier());
-        Assert.assertEquals("", documentIdentifier.getScheme());
-        Assert.assertEquals("::http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getFullIdentifier());
+    void checkEbMS30TestServiceEmpty() throws Exception {
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", "");
+        assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test", documentIdentifier.getIdentifier());
+        assertEquals("", documentIdentifier.getScheme());
     }
 
     @Test
-    public void checkFullIdentifierTest() throws Exception {
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-        Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
-        Assert.assertEquals("ehealth-resid-qns", documentIdentifier.getScheme());
-        Assert.assertEquals("ehealth-resid-qns::urn::epsos##services:extended:epsos::107", documentIdentifier.getFullIdentifier());
+    void checkFullIdentifierTest() throws Exception {
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+        assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
+        assertEquals("ehealth-resid-qns", documentIdentifier.getScheme());
     }
 
     @Test
-    public void checkEncodedURLTest() throws Exception {
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-        Assert.assertEquals("ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", documentIdentifier.urlencoded());
+    void checkIdentifierNotCaseManagedTest() throws Exception {
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+        assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
+        assertNotEquals("URN::EPSOS##SERVICES:EXTENDED:EPSOS::107", documentIdentifier.getIdentifier());
+
+        documentIdentifier = new SMPDocumentIdentifier("URN::EPSOS##SERVICES:EXTENDED:EPSOS::107", "ehealth-resid-qns");
+        assertNotEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
+        assertEquals("URN::EPSOS##SERVICES:EXTENDED:EPSOS::107", documentIdentifier.getIdentifier());
     }
 
     @Test
-    public void checkIdentifierNotCaseManagedTest() throws Exception {
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-        Assert.assertEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
-        Assert.assertNotEquals("URN::EPSOS##SERVICES:EXTENDED:EPSOS::107", documentIdentifier.getIdentifier());
+    void checkSchemeNotCaseManagedTest() throws Exception {
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+        assertEquals("ehealth-resid-qns", documentIdentifier.getScheme());
+        assertNotEquals("EHEALTH-RESID-QNS", documentIdentifier.getScheme());
 
-        documentIdentifier = new DocumentIdentifier("URN::EPSOS##SERVICES:EXTENDED:EPSOS::107", "ehealth-resid-qns");
-        Assert.assertNotEquals("urn::epsos##services:extended:epsos::107", documentIdentifier.getIdentifier());
-        Assert.assertEquals("URN::EPSOS##SERVICES:EXTENDED:EPSOS::107", documentIdentifier.getIdentifier());
-    }
-
-    @Test
-    public void checkSchemeNotCaseManagedTest() throws Exception {
-        DocumentIdentifier documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-        Assert.assertEquals("ehealth-resid-qns", documentIdentifier.getScheme());
-        Assert.assertNotEquals("EHEALTH-RESID-QNS", documentIdentifier.getScheme());
-
-         documentIdentifier = new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "EHEALTH-RESID-QNS");
-        Assert.assertNotEquals("ehealth-resid-qns", documentIdentifier.getScheme());
-        Assert.assertEquals("EHEALTH-RESID-QNS", documentIdentifier.getScheme());
+        documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "EHEALTH-RESID-QNS");
+        assertNotEquals("ehealth-resid-qns", documentIdentifier.getScheme());
+        assertEquals("EHEALTH-RESID-QNS", documentIdentifier.getScheme());
     }
 }

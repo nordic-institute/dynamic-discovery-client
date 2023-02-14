@@ -20,123 +20,212 @@ package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
+import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.util.HashUtil;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.TextParseException;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Flávio W. R. Santos
+ * @since 1.0
  */
 public class DefaultBDXRLocator implements IMetadataLocator {
-    final static private String PEPPOL_URL_SCHEME = "http://";
-    final static private String DOMAIN_CNAME_PREFIX = "b-";
-    final static private String DOMAIN_SEPARATOR = ".";
 
-    final static Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
-    private String domain;
+    ParticipantIdentifierFormatter participantIdentifierFormatter = new ParticipantIdentifierFormatter();
+    private static final String PEPPOL_URL_SCHEME = "http://";
+    private static final String DOMAIN_SEPARATOR = ".";
+
+    static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
+    private List<String> topDnsDomains;
+    private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
+
     private IDNSLookup dnsLookup;
 
-    public DefaultBDXRLocator(String domain) {
-        this(domain, new DefaultDNSLookup());
+    private DefaultBDXRLocator(Builder builder) {
+        this.topDnsDomains = new ArrayList<>(builder.topDnsDomains);
+        this.dnsLookupTypeList = new ArrayList<>(builder.dnsLookupTypeList);
+        this.dnsLookup = builder.dnsLookup;
+
+    }
+
+    public DefaultBDXRLocator(List<String> domains) {
+        this(domains, new DefaultDNSLookup.Builder().build());
     }
 
     public DefaultBDXRLocator(String domain, IDNSLookup dnsLookup) {
-        this.domain = domain;
+        this(Collections.singletonList(domain), dnsLookup);
+    }
+
+    public DefaultBDXRLocator(List<String> domains, IDNSLookup dnsLookup) {
+        this.topDnsDomains = domains;
         this.dnsLookup = dnsLookup;
     }
 
+    public List<String> getTopDnsDomains() {
+        return topDnsDomains;
+    }
+
+    public List<DNSLookupType> getDnsLookupTypeList() {
+        return dnsLookupTypeList;
+    }
+
+    /**
+     * Method validates record by record until
+     *
+     * @param participantIdentifier
+     * @return
+     * @throws TechnicalException
+     */
     @Override
-    public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI participantIdentifierURI = naptrLookup(participantIdentifier);
-        if (participantIdentifierURI == null) {
-            LOG.debug("Did not find NAPTR record try cname lookup for participant: " + participantIdentifier);
-            participantIdentifierURI = cnameLookup(participantIdentifier);
+    public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+
+        for (String domain : topDnsDomains) {
+            for (DNSLookupType type : dnsLookupTypeList) {
+                URI participantIdentifierURI = getUrlForTopDomain(participantIdentifier, domain, type);
+                if (participantIdentifierURI != null) {
+                    return participantIdentifierURI;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private URI getUrlForTopDomain(SMPParticipantIdentifier identifier, String topDomain, DNSLookupType lookupType) throws TechnicalException {
+        switch (lookupType) {
+            case NAPTR:
+                return naptrLookup(identifier, topDomain);
+            case CNAME:
+                return cnameLookup(identifier, topDomain);
+            default:
+                throw new DNSLookupException("DNS record type [" + lookupType + "] is not supported!");
         }
 
-        return participantIdentifierURI;
     }
 
     @Override
     public URI lookup(String participantIdentifier, String participantScheme) throws TechnicalException {
-        return this.lookup(new ParticipantIdentifier(participantIdentifier, participantScheme));
+        return this.lookup(participantIdentifierFormatter.normalize(participantScheme, participantIdentifier));
     }
 
-    protected URI cnameLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    protected URI cnameLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
+        String dnsDomain = buildCNameDNSDomain(participantIdentifier, topDomain);
+        if (getDnsLookup().dnsRecordNotExists(participantIdentifier, dnsDomain, DNSLookupType.CNAME)) {
+            return null;
+        }
+
         try {
-            return new URI(PEPPOL_URL_SCHEME + buildCNameDNSDomain(participantIdentifier));
+            return new URI(PEPPOL_URL_SCHEME + buildCNameDNSDomain(participantIdentifier, topDomain));
         } catch (URISyntaxException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
     }
 
-    private URI naptrLookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    private URI naptrLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
         try {
-            LOG.debug("Start naptr search for participant " + participantIdentifier);
-            String naptrURI = buildNaptrDNSDomain(participantIdentifier);
+            LOG.debug("Start naptr search for participant [{}].", participantIdentifier);
+            String naptrURI = buildNaptrDNSDomain(participantIdentifier, topDomain);
             String smpURI = naptrLookupFetcher(participantIdentifier, naptrURI);
-            LOG.debug("Got URL: " + smpURI + " for participant " + participantIdentifier + " with naptr query url: " + naptrURI);
+            LOG.debug("Got URL: [{}] for participant [{}] with naptr query url: [{}].", smpURI, participantIdentifier, naptrURI);
             return new URI(smpURI);
-        } catch (URISyntaxException | TextParseException exc) {
+        } catch (URISyntaxException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         } catch (TechnicalException | NullPointerException exc) {
-            LOG.debug("Naptr lookup was not possible, CNAME lookup will be used instead for participant" + participantIdentifier.toString());
+            LOG.debug("Naptr lookup was not possible, CNAME lookup will be used instead for participant [{}]", participantIdentifier);
             //It was not possible to lookup using NAPTR, CNAME lookup will be used instead
             return null;
         }
     }
 
-    protected String buildCNameDNSDomain(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        String participantIdMD5Hash;
-        try {
-            participantIdMD5Hash = HashUtil.getMD5Hash(participantIdentifier.getIdentifier());
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException exc) {
-            throw new DNSLookupException(exc.getMessage(), exc);
-        }
+    protected String buildCNameDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain) {
+
         StringBuilder sb = new StringBuilder();
-        sb.append(DOMAIN_CNAME_PREFIX)
-                .append(participantIdMD5Hash);
-        if (!participantIdentifier.isOasisPartyIdentifierType()) {
-            sb.append(DOMAIN_SEPARATOR);
-            sb.append(participantIdentifier.getScheme());
-        }
+        sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.MD5_HEX));
         sb.append(DOMAIN_SEPARATOR)
-                .append(domain);
+                .append(topDomain);
         return sb.toString();
     }
 
-    protected String buildNaptrDNSDomain(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        String participantIdSHA256Hash;
-        try {
-            participantIdSHA256Hash = HashUtil.getSHA256HashBase32(participantIdentifier.getIdentifier());
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException exc) {
-            throw new DNSLookupException(exc.getMessage(), exc);
-        }
+    protected String buildNaptrDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain) {
+
         StringBuilder sb = new StringBuilder();
-        sb.append(participantIdSHA256Hash);
-        if (!participantIdentifier.isOasisPartyIdentifierType()) {
-            sb.append(DOMAIN_SEPARATOR);
-            sb.append(participantIdentifier.getScheme());
-        }
+        sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.SHA256_BASE32));
         sb.append(DOMAIN_SEPARATOR)
-                .append(domain);
+                .append(topDomain);
         return sb.toString();
     }
 
-    public String naptrLookupFetcher(ParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException, TextParseException {
-        return getDnsLookup().lookupFetcher(participantIdentifier, participantURI);
+    public String naptrLookupFetcher(SMPParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException {
+        return getDnsLookup().naptrUrlValueLookup(participantIdentifier, participantURI);
     }
 
     @Override
     public IDNSLookup getDnsLookup() {
         return dnsLookup;
     }
+
+    public static class Builder {
+
+        static final List<DNSLookupType> DEFAULT_LOOKUPS = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
+        private List<String> topDnsDomains = new ArrayList<>();
+        private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
+        private IDNSLookup dnsLookup;
+
+        public Builder addDnsLookupType(DNSLookupType recordType) {
+            this.dnsLookupTypeList.add(recordType);
+            return this;
+        }
+
+        public Builder addDnsLookupTypes(List<DNSLookupType> recordTypes) {
+            this.dnsLookupTypeList.addAll(recordTypes);
+            return this;
+        }
+
+        public Builder addTopDnsDomain(String domain) {
+            this.topDnsDomains.add(domain);
+            return this;
+        }
+
+        public Builder addTopDnsDomains(List<String> domains) {
+            this.topDnsDomains.addAll(domains);
+            return this;
+        }
+
+        public Builder dnsLookup(IDNSLookup dnsLookup) {
+            this.dnsLookup = dnsLookup;
+            return this;
+        }
+
+        public DefaultBDXRLocator build() {
+            validate();
+            return new DefaultBDXRLocator(this);
+        }
+
+        private void validate() {
+            if (topDnsDomains.isEmpty()) {
+                throw new DDCRuntimeException("List of top domains must not be empty!");
+            }
+            if (dnsLookupTypeList.isEmpty()) {
+                dnsLookupTypeList.addAll(DEFAULT_LOOKUPS);
+            }
+            if (dnsLookup == null) {
+                dnsLookup = new DefaultDNSLookup.Builder().build();
+            }
+        }
+
+    }
+
+
 }
