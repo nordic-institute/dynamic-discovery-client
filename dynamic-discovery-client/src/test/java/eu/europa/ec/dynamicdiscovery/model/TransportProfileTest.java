@@ -17,22 +17,25 @@
  */
 package eu.europa.ec.dynamicdiscovery.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * @author Flávio W. R. Santos
  */
-public class TransportProfileTest {
+class TransportProfileTest {
 
     @Test
-    public void checkIdentifierNotCaseManagedTest() throws Exception {
-        TransportProfile transportProfile = new TransportProfile("urn:ihe:iti:2013:xcpd");
-        Assert.assertEquals("urn:ihe:iti:2013:xcpd", transportProfile.getIdentifier());
-        Assert.assertNotEquals("URN:IHE:ITI:2013:XCPD", transportProfile.getIdentifier());
+    void checkIdentifierNotCaseManagedTest() throws Exception {
+        SMPTransportProfile transportProfile = new SMPTransportProfile("urn:ihe:iti:2013:xcpd");
+        assertEquals("urn:ihe:iti:2013:xcpd", transportProfile.getIdentifier());
+        assertNotEquals("URN:IHE:ITI:2013:XCPD", transportProfile.getIdentifier());
 
-        transportProfile = new TransportProfile("URN:IHE:ITI:2013:XCPD");
-        Assert.assertNotEquals("urn:ihe:iti:2013:xcpd", transportProfile.getIdentifier());
-        Assert.assertEquals("URN:IHE:ITI:2013:XCPD", transportProfile.getIdentifier());
+        transportProfile = new SMPTransportProfile("URN:IHE:ITI:2013:XCPD");
+        assertNotEquals("urn:ihe:iti:2013:xcpd", transportProfile.getIdentifier());
+        assertEquals("URN:IHE:ITI:2013:XCPD", transportProfile.getIdentifier());
     }
 }

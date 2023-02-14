@@ -1,9 +1,8 @@
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import org.junit.Assert;
-import org.junit.Test;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.net.URI;
@@ -11,16 +10,18 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 
 /**
  * @author Joze RIHTARSIC
  * @since 1.14
  */
-public class StaticMapMetadataLocatorTest {
+class StaticMapMetadataLocatorTest {
 
     @Test
-    public void testDefaultLookupNull() throws TechnicalException {
+    void testDefaultLookupNull() throws TechnicalException {
         URI defaultURI = Mockito.mock(URI.class);
         StaticMapMetadataLocator testInstance = new StaticMapMetadataLocator(defaultURI);
         URI result = testInstance.lookup(null);
@@ -29,20 +30,20 @@ public class StaticMapMetadataLocatorTest {
     }
 
     @Test
-    public void testDefaultLookupNotNull() throws TechnicalException {
+    void testDefaultLookupNotNull() throws TechnicalException {
         URI defaultURI = Mockito.mock(URI.class);
         StaticMapMetadataLocator testInstance = new StaticMapMetadataLocator(defaultURI);
-        URI result = testInstance.lookup(new ParticipantIdentifier("test", "test"));
+        URI result = testInstance.lookup(new SMPParticipantIdentifier("test", "test"));
         assertEquals(defaultURI, result);
     }
 
     @Test
-    public void testMapLookupExceptionTrue() throws TechnicalException, URISyntaxException {
+    void testMapLookupExceptionTrue() throws TechnicalException, URISyntaxException {
 
         URI defaultURI = new URI("http://default/smp");
         URI targetURI = new URI("http://target/smp");
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("testId", "testScheme");
-        Map<ParticipantIdentifier, URI> map = new HashMap<>();
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("testId", "testScheme");
+        Map<SMPParticipantIdentifier, URI> map = new HashMap<>();
         map.put(participantIdentifier, targetURI);
 
         StaticMapMetadataLocator testInstance = new StaticMapMetadataLocator(defaultURI, map);
@@ -52,12 +53,12 @@ public class StaticMapMetadataLocatorTest {
     }
 
     @Test
-    public void testMapLookupExceptionFalse() throws TechnicalException, URISyntaxException {
+    void testMapLookupExceptionFalse() throws TechnicalException, URISyntaxException {
 
         URI defaultURI = new URI("http://default/smp");
         URI targetURI = new URI("http://target/smp");
-        ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("testId", "testScheme");
-        Map<ParticipantIdentifier, URI> map = new HashMap<>();
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("testId", "testScheme");
+        Map<SMPParticipantIdentifier, URI> map = new HashMap<>();
         map.put(participantIdentifier, targetURI);
 
         StaticMapMetadataLocator testInstance = new StaticMapMetadataLocator(defaultURI, map);
@@ -67,9 +68,9 @@ public class StaticMapMetadataLocatorTest {
     }
 
     @Test
-    public void testGetDnsLookup() {
+    void testGetDnsLookup() {
         StaticMapMetadataLocator testInstance = new StaticMapMetadataLocator((URI) null);
         // return null
-        Assert.assertNull(testInstance.getDnsLookup());
+        assertNull(testInstance.getDnsLookup());
     }
 }

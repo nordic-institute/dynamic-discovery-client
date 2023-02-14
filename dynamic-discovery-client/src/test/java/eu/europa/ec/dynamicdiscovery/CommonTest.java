@@ -18,44 +18,50 @@
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.model.*;
-import org.junit.Assert;
-import org.junit.Test;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import org.junit.jupiter.api.Test;
+import java.security.cert.X509Certificate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * @author Flávio W. R. Santos
  */
-public class CommonTest {
+class CommonTest {
 
     @Test
-    public void equalsTest() throws Exception {
-        ProcessIdentifier processIdentifier1 = new ProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
-        ProcessIdentifier processIdentifier2 = new ProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
-        TransportProfile transportProfile1 = new TransportProfile("urn:ihe:iti:2013:xcpd");
-        TransportProfile transportProfile2 = new TransportProfile("urn:ihe:iti:2013:xcpd");
-        Endpoint endpoint1 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu", null);
-        Endpoint endpoint2 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu", null);
+    void equalsTest() {
+        SMPProcessIdentifier processIdentifier1 = new SMPProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
+        SMPProcessIdentifier processIdentifier2 = new SMPProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
+        SMPTransportProfile transportProfile1 = new SMPTransportProfile("urn:ihe:iti:2013:xcpd");
+        SMPTransportProfile transportProfile2 = new SMPTransportProfile("urn:ihe:iti:2013:xcpd");
+        SMPEndpoint endpoint1 = new SMPEndpoint.Builder().addProcessIdentifier(processIdentifier1).transportProfile(transportProfile1).address("http://edelivery.tech.ec.europa.eu").build();
+        SMPEndpoint endpoint2 = new SMPEndpoint.Builder().addProcessIdentifier(processIdentifier1).transportProfile(transportProfile1).address("http://edelivery.tech.ec.europa.eu").build();
 
-        Assert.assertEquals(new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"), new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"));
-        Assert.assertEquals(new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"), new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"));
-        Assert.assertEquals(processIdentifier1, processIdentifier2);
-        Assert.assertEquals(transportProfile1, transportProfile2);
-        Assert.assertEquals(endpoint1, endpoint2);
+        assertEquals(new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"), new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"));
+        assertEquals(new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"), new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"));
+        assertEquals(processIdentifier1, processIdentifier2);
+        assertEquals(transportProfile1, transportProfile2);
+        assertEquals(endpoint1, endpoint2);
     }
 
     @Test
-    public void notEqualsTest() throws Exception {
-        ProcessIdentifier processIdentifier1 = new ProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
-        ProcessIdentifier processIdentifier2 = new ProcessIdentifier("urn:epsosPatientService::List1", "scheme='ehealth-procid-qns");
-        TransportProfile transportProfile1 = new TransportProfile("urn:ihe:iti:2013d:xcpd");
-        TransportProfile transportProfile2 = new TransportProfile("urn:ihe:iti:2013:xcpd1");
-        Endpoint endpoint1 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu", null);
-        Endpoint endpoint2 = new Endpoint(processIdentifier1, transportProfile1, "http://edelivery.tech.ec.europa.eu1", null);
+    void notEqualsTest() {
+        SMPProcessIdentifier processIdentifier1 = new SMPProcessIdentifier("urn:epsosPatientService::List", "scheme='ehealth-procid-qns");
+        SMPProcessIdentifier processIdentifier2 = new SMPProcessIdentifier("urn:epsosPatientService::List1", "scheme='ehealth-procid-qns");
+        SMPTransportProfile transportProfile1 = new SMPTransportProfile("urn:ihe:iti:2013d:xcpd");
+        SMPTransportProfile transportProfile2 = new SMPTransportProfile("urn:ihe:iti:2013:xcpd1");
+        SMPEndpoint endpoint1 = new SMPEndpoint.Builder().addProcessIdentifier(processIdentifier1).transportProfile(transportProfile1).address("http://edelivery.tech.ec.europa.eu").build();
+        SMPEndpoint endpoint2 =  new SMPEndpoint.Builder().addProcessIdentifier(processIdentifier1).transportProfile(transportProfile1).address("http://edelivery.tech.ec.europa.eu1").build();;
 
-        Assert.assertNotEquals(new ParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"), new ParticipantIdentifier("urn:poland:ncpb1", "ehealth-actorid-qns"));
-        Assert.assertNotEquals(new DocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"), new DocumentIdentifier("urn::epsos##services:extended:epsos::1071", "ehealth-resid-qns"));
-        Assert.assertNotEquals(processIdentifier1, processIdentifier2);
-        Assert.assertNotEquals(transportProfile1, transportProfile2);
-        Assert.assertNotEquals(endpoint1, endpoint2);
+        assertNotEquals(new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns"), new SMPParticipantIdentifier("urn:poland:ncpb1", "ehealth-actorid-qns"));
+        assertNotEquals(new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"), new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::1071", "ehealth-resid-qns"));
+        assertNotEquals(processIdentifier1, processIdentifier2);
+        assertNotEquals(transportProfile1, transportProfile2);
+        assertNotEquals(endpoint1, endpoint2);
     }
 }
 

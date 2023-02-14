@@ -17,35 +17,77 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
+import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP10Extension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.ServiceGroupResponseParserImpl;
-import eu.europa.ec.dynamicdiscovery.core.reader.parser.impl.SignedServiceMetadataResponseParserImpl;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Flávio W. R. Santos
+ * @since 1.0
  */
-public class DefaultBDXRReader implements IMetadataReader {
+public class DefaultBDXRReader extends AbstractXMLResponseReader implements IMetadataReader {
+    static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRReader.class);
+    private ISignatureValidator signatureValidator;
 
-    private ServiceGroupResponseParserImpl serviceGroupResponseParser;
-    private SignedServiceMetadataResponseParserImpl signedServiceMetadataResponseParser;
+
+    List<IExtension> listExtensions = new ArrayList<>();
 
     public DefaultBDXRReader(ISignatureValidator signatureValidator) {
-        serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
-        signedServiceMetadataResponseParser = new SignedServiceMetadataResponseParserImpl(signatureValidator);
+        this(Arrays.asList(new OasisSMP10Extension(),
+                new OasisSMP20Extension()),
+                signatureValidator);
+    }
+
+    public DefaultBDXRReader(List<IExtension> listExtensions, ISignatureValidator signatureValidator) {
+        // register default parser
+        this.listExtensions.addAll(listExtensions);
+        this.signatureValidator = signatureValidator;
+    }
+
+    public DefaultBDXRReader addExtension(IExtension extension) {
+        listExtensions.add(extension);
+        return this;
+    }
+
+    public List<IExtension> getExtensions() {
+        return listExtensions;
+    }
+
+
+    @Override
+    public <T> IObjectReader<T> getParser(QName qName, Class<T> clazz) {
+        Optional<IExtension> optionalIExtension = listExtensions.stream().filter(parser -> parser.handles(qName, clazz)).findFirst();
+        if (!optionalIExtension.isPresent()) {
+            LOG.error("No parses registered for [{}] and class [{}]", qName, clazz);
+            return null;
+        }
+        return optionalIExtension.get().getParser(qName, clazz);
     }
 
     @Override
-    public ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
-        return serviceGroupResponseParser.getServiceGroup(fetcherResponse);
+    public SMPServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
+        return readObject(fetcherResponse, SMPServiceGroup.class, this.signatureValidator);
     }
 
     @Override
-    public ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
-        return signedServiceMetadataResponseParser.getServiceMetadata(fetcherResponse);
+    public SMPServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
+        return readObject(fetcherResponse, SMPServiceMetadata.class, this.signatureValidator);
     }
+
+
 }

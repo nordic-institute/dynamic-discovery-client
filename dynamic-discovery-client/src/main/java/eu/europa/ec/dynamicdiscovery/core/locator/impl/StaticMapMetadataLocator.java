@@ -3,7 +3,7 @@ package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +24,9 @@ import java.util.Map;
  * @since 1.14
  */
 public class StaticMapMetadataLocator implements IMetadataLocator {
-    final static Logger LOG = LoggerFactory.getLogger(StaticMapMetadataLocator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StaticMapMetadataLocator.class);
     final URI defaultURI;
-    Map<ParticipantIdentifier, URI> mapExceptionsUri;
+    Map<SMPParticipantIdentifier, URI> mapExceptionsUri;
 
     public StaticMapMetadataLocator(String defaultURI) throws URISyntaxException {
         this(new URI(defaultURI), null);
@@ -37,18 +37,18 @@ public class StaticMapMetadataLocator implements IMetadataLocator {
         this(defaultURI, null);
     }
 
-    public StaticMapMetadataLocator(URI defaultURI, Map<ParticipantIdentifier, URI> mapExceptionsUri) {
+    public StaticMapMetadataLocator(URI defaultURI, Map<SMPParticipantIdentifier, URI> mapExceptionsUri) {
         this.defaultURI = defaultURI;
         this.mapExceptionsUri = mapExceptionsUri;
     }
 
     @Override
     public URI lookup(String participantId, String participantScheme) throws TechnicalException {
-        return lookup(new ParticipantIdentifier(participantId, participantScheme));
+        return lookup(new SMPParticipantIdentifier(participantId, participantScheme));
     }
 
     @Override
-    public URI lookup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         if (mapExceptionsUri != null && mapExceptionsUri.containsKey(participantIdentifier)) {
             URI uri = mapExceptionsUri.get(participantIdentifier);
             LOG.debug("Return uri [{}] for participant [{}]!", uri, participantIdentifier);

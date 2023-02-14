@@ -22,8 +22,6 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -48,7 +46,7 @@ import static org.apache.commons.lang3.StringUtils.startsWithAny;
  * @since 1.13
  */
 public class DefaultURLFetcher implements IMetadataFetcher {
-    final static Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
+    static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
 
     private IProxyConfiguration proxyConfiguration;
 
@@ -105,20 +103,20 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 default:
                     throw new DNSLookupException("Got Http error code " + response.getCode() + " trying to access SMP URL:" + httpGet.getUri());
             }
-        } catch (TechnicalException exc) {
-            LOG.error("Fetching data failed for participantURI: [{}]. Error: [{}]", httpGet.getRequestUri(), ExceptionUtils.getRootCauseMessage(exc), exc);
+        } catch (DNSLookupException exc){
             throw exc;
-        } catch (Exception exc) {
+        }
+        catch (Exception exc) {
             String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
             String uri = lowerCase(getUriFromHttpRequest(httpGet));
             if (startsWithAny(uri, "http://b-", "https://b-")) {
                 message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
             }
-            LOG.error("Fetching data failed for participantURI: [{}]. Error: [{}]. Message: [{}]", uri, ExceptionUtils.getRootCauseMessage(exc), message, exc);
             throw new DNSLookupException(message, exc);
         }
     }
-    public String getUriFromHttpRequest(HttpRequest httpRequest){
+
+    public String getUriFromHttpRequest(HttpRequest httpRequest) {
         try {
             return httpRequest.getUri().toString();
         } catch (URISyntaxException e) {

@@ -17,8 +17,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.dns;
 
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import org.xbill.DNS.Record;
 
 import java.util.List;
@@ -28,7 +29,12 @@ import java.util.List;
  */
 public interface IDNSLookup {
 
-    List<Record> getAllRecords(ParticipantIdentifier participantIdentifier,String uri) throws TechnicalException;
+    List<Record> getAllNaptrRecords(SMPParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
+    List<Record> getAllCNameRecords(SMPParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
 
-    String lookupFetcher(ParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
+    List<Record> getAllRecordsForType(SMPParticipantIdentifier participantIdentifier, String uri, DNSLookupType recordType) throws TechnicalException;
+
+    String naptrUrlValueLookup(SMPParticipantIdentifier participantIdentifier, String uri) throws TechnicalException;
+
+    boolean dnsRecordNotExists(SMPParticipantIdentifier participantIdentifier, String participantURI, DNSLookupType type) throws TechnicalException;
 }

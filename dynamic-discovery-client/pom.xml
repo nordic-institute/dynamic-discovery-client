@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>eu.europa.ec.dynamic-discovery</groupId>
         <artifactId>dynamic-discovery-parent</artifactId>
-        <version>1.14-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>dynamic-discovery-client</artifactId>
-    <version>1.14-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>dynamic-discovery-client</name>
@@ -50,6 +50,48 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
                 <executions>
+
+                    <!-- execution>
+                        <id>OasisSMP10</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <packageName>gen.eu.europa.ec.ddc.smp10.api</packageName>
+                            <xjbSources>
+                                <xjbSource>${project.basedir}/src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
+                            </xjbSources>
+                            <sources>
+                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
+                            </sources>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution -->
+
+                    <execution>
+                        <id>OasisSMP20</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <xjbSources>
+                                <xjbSource>${project.basedir}/src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
+                                <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP10Binding.xjb</xjbSource>
+                                <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP20Binding.xjb</xjbSource>
+                            </xjbSources>
+                            <sources>
+                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
+                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceGroup-2.0.xsd</source>
+                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceMetadata-2.0.xsd</source>
+                            </sources>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
+
+                </executions>
+
+
+                <!-- executions>
                     <execution>
                         <id>xjc</id>
                         <goals>
@@ -58,13 +100,16 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <packageName>gen.eu.europa.ec.ddc.smp.api</packageName>
                     <xjbSources>
-                        <xjbSource>src/main/resources/commonServiceBinding.xjb</xjbSource>
+                        <xjbSource>src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
                     </xjbSources>
                     <sources>
-                        <source>src/main/resources/bdx-smp-201605.xsd</source>
+                        <source>src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
+                        <source>src/main/resources/xsd/bdx-smp-2.0/ServiceGroup-2.0.xsd</source>
+                        <source>src/main/resources/xsd/bdx-smp-2.0/ServiceMetadata-2.0.xsd</source>
                     </sources>
-                </configuration>
+                </configuration -->
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -109,7 +154,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
@@ -155,13 +199,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>${surefire-junit47.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -207,13 +244,23 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-standalone</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

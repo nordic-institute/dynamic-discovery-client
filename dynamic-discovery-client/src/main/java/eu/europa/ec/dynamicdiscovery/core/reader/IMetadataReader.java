@@ -19,11 +19,8 @@ package eu.europa.ec.dynamicdiscovery.core.reader;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
-
-import java.util.List;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 
 /**
  * @author Flávio W. R. Santos
@@ -31,8 +28,8 @@ import java.util.List;
  */
 public interface IMetadataReader {
 
-    ServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException;
+    SMPServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException;
 
-    ServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
+    SMPServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
 }
 

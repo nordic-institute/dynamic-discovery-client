@@ -1,0 +1,137 @@
+package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
+import gen.eu.europa.ec.ddc.api.smp10.SignedServiceMetadata;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.w3c.dom.Document;
+
+import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
+import java.security.cert.X509Certificate;
+
+import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.PARTICIPANT_IDENTIFIER_ISO6253_02;
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * @author Joze Rihtarsic
+ * @since 2.0
+ */
+class OasisSMP10ServiceMetadataReaderTest {
+
+    OasisSMP10ServiceMetadataReader testInstance = new OasisSMP10ServiceMetadataReader();
+
+    @Test
+    void testDestroyUnmarshaller() {
+        Unmarshaller unmarshaller = testInstance.getUnmarshaller();
+        assertNotNull(unmarshaller);
+        Unmarshaller unmarshaller1 = testInstance.getUnmarshaller();
+        assertEquals(unmarshaller, unmarshaller1);
+        testInstance.destroyUnmarshaller();
+        Unmarshaller unmarshaller3 = testInstance.getUnmarshaller();
+        assertNotEquals(unmarshaller, unmarshaller3);
+    }
+
+    @Test
+    void testHandlesTrue() {
+        // given
+        QName qName = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2016/05", "SignedServiceMetadata");
+        Class targetClass = SMPServiceMetadata.class;
+        // when
+        boolean result = testInstance.handles(qName, targetClass);
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    void testHandlesFalse() {
+        // given
+        QName qName = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2016/Wrong", "SignedServiceMetadata");
+        Class targetClass = SMPServiceMetadata.class;
+        // when
+        boolean result = testInstance.handles(qName, targetClass);
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    void testParseOK() throws Exception {
+        // given
+        Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("signed_service_metadata_signed_valid_iso6523");
+        // when
+        SMPServiceMetadata result = testInstance.parse(doc);
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getParticipantIdentifier());
+        assertTrue(result.isWrapperFor(SignedServiceMetadata.class));
+        assertNotNull(result.unwrap(SignedServiceMetadata.class));
+        assertEquals(PARTICIPANT_IDENTIFIER_ISO6253_02, result.getParticipantIdentifier());
+        assertEquals(1, result.getEndpoints().size());
+        SMPEndpoint endpoint = result.getEndpoints().get(0);
+        assertEquals("https://test.erechnung.gv.at/as4/msh/", endpoint.getAddress());
+        assertEquals(1, result.getEndpoints().get(0).getProcessIdentifiers().size());
+        assertEquals(endpoint.getProcessIdentifier(), endpoint.getProcessIdentifiers().get(0));
+        assertEquals(new SMPProcessIdentifier("urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl"), endpoint.getProcessIdentifiers().get(0));
+        assertEquals(new SMPTransportProfile("bdxr-transport-ebms3-as4-v1p0"), endpoint.getTransportProfile());
+
+        assertNotNull(endpoint.getCertificate());
+
+        assertEquals(1, endpoint.getCertificates().size());
+        assertEquals(endpoint.getCertificate(), endpoint.getCertificates().get(SMPEndpoint.DEFAULT_CERTIFICATE));
+
+        // verify signature
+        assertNull(result.getSignerCertificate());
+    }
+
+    @Test
+    void parseAndValidateSignature() throws Exception {
+        // given
+        Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("signed_service_metadata_signed_valid_iso6523");
+        ISignatureValidator signatureValidator = Mockito.mock(ISignatureValidator.class);
+        X509Certificate cert = Mockito.mock(X509Certificate.class);
+        Mockito.doReturn(cert).when(signatureValidator).verify(Mockito.any(Document.class));
+        // when
+        SMPServiceMetadata result = testInstance.parseAndValidateSignature(doc, signatureValidator);
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getParticipantIdentifier());
+        assertTrue(result.isWrapperFor(SignedServiceMetadata.class));
+        assertNotNull(result.unwrap(SignedServiceMetadata.class));
+        assertEquals(PARTICIPANT_IDENTIFIER_ISO6253_02, result.getParticipantIdentifier());
+        assertEquals(1, result.getEndpoints().size());
+        SMPEndpoint endpoint = result.getEndpoints().get(0);
+        assertEquals("https://test.erechnung.gv.at/as4/msh/", endpoint.getAddress());
+        assertEquals(1, result.getEndpoints().get(0).getProcessIdentifiers().size());
+        assertEquals(endpoint.getProcessIdentifier(), endpoint.getProcessIdentifiers().get(0));
+        assertEquals(new SMPProcessIdentifier("urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl"), endpoint.getProcessIdentifiers().get(0));
+
+        assertNotNull(endpoint.getCertificate());
+        assertNotNull(endpoint.getCertificates());
+        assertEquals(1, endpoint.getCertificates().size());
+        assertEquals(endpoint.getCertificate(), endpoint.getCertificates().get(SMPEndpoint.DEFAULT_CERTIFICATE));
+
+        assertEquals(cert, result.getSignerCertificate());
+        Mockito.verify(signatureValidator).verify(Mockito.any(Document.class));
+
+    }
+
+    @Test
+    void parseAndValidateSignatureInvalid() throws Exception {
+        // given
+        Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("signed_service_metadata_signed_valid_iso6523");
+        ISignatureValidator signatureValidator = Mockito.mock(ISignatureValidator.class);
+        TechnicalException signatureException = Mockito.mock(TechnicalException.class);
+        Mockito.doThrow(signatureException).when(signatureValidator).verify(Mockito.any(Document.class));
+        // when
+        TechnicalException technicalException = assertThrows(TechnicalException.class, () -> testInstance.parseAndValidateSignature(doc, signatureValidator));
+
+        // then
+        assertEquals(technicalException, signatureException);
+    }
+}

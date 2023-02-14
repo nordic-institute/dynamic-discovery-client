@@ -22,29 +22,31 @@ import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  */
-public class DynamicDiscoveryBuilderTest {
+class DynamicDiscoveryBuilderTest {
 
     @Test
-    public void testDefaultParameters() throws Exception {
+   void testDefaultParameters() throws Exception {
         DynamicDiscoveryBuilder builder = DynamicDiscoveryBuilder.newInstance();
         DynamicDiscovery smpClient = builder
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
-        Assert.assertNotNull(smpClient);
-        Assert.assertNotNull(builder.getService());
-        Assert.assertNotNull(builder.getService().getMetadataFetcher());
-        Assert.assertNotNull(builder.getService().getMetadataLocator());
-        Assert.assertNotNull(builder.getService().getMetadataLocator().getDnsLookup());
-        Assert.assertEquals(DefaultDNSLookup.class, builder.getService().getMetadataLocator().getDnsLookup().getClass());
-        Assert.assertNotNull(builder.getService().getMetadataProvider());
-        Assert.assertNotNull(builder.getService().getMetadataReader());
+        assertNotNull(smpClient);
+        assertNotNull(builder.getService());
+        assertNotNull(builder.getService().getMetadataFetcher());
+        assertNotNull(builder.getService().getMetadataLocator());
+        assertNotNull(builder.getService().getMetadataLocator().getDnsLookup());
+        assertEquals(DefaultDNSLookup.class, builder.getService().getMetadataLocator().getDnsLookup().getClass());
+        assertNotNull(builder.getService().getMetadataProvider());
+        assertNotNull(builder.getService().getMetadataReader());
     }
 }

@@ -24,11 +24,12 @@ import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ import java.net.URI;
  * @author Flávio W. R. Santos
  */
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
-    final static Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryService.class);
+    static final Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryService.class);
     private IMetadataLocator metadataLocator;
     private IMetadataProvider metadataProvider;
     private IMetadataFetcher metadataFetcher;
@@ -51,28 +52,37 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     @Override
-    public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public SMPServiceGroup getServiceGroup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         return metadataReader.getServiceGroup(getFetcherResponseForDocs(participantIdentifier));
     }
 
     @Override
-    public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
+    public SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
         return metadataReader.getServiceMetadata(getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier));
     }
 
-    private FetcherResponse getFetcherResponseForServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
-        URI smpURI = metadataLocator.lookup(participantIdentifier);
-        LOG.debug("Got SMP URI: " + smpURI + " for participant: " + participantIdentifier);
+    private FetcherResponse getFetcherResponseForServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
+        URI smpURI = lookupParticipantSMPUri(participantIdentifier);
+        LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
-        LOG.info("Get service metadata for URI: " + participantUnderSmpURI);
+        LOG.info("Get service metadata for URI: [{}].", participantUnderSmpURI);
         return metadataFetcher.fetch(participantUnderSmpURI);
     }
 
-    private FetcherResponse getFetcherResponseForDocs(ParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI smpURI = metadataLocator.lookup(participantIdentifier);
+    private FetcherResponse getFetcherResponseForDocs(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+        URI smpURI = lookupParticipantSMPUri(participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
-        LOG.info("Get participant data / documents for URI: " + participantUnderSmpURI);
+        LOG.info("Get participant data / documents for URI: [{}].", participantUnderSmpURI);
         return metadataFetcher.fetch(participantUnderSmpURI);
+    }
+
+    private URI lookupParticipantSMPUri(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+        URI smpURI = metadataLocator.lookup(participantIdentifier);
+        if (smpURI == null) {
+            throw new DNSLookupException("DNS record for participant [" + participantIdentifier + "] can not be resolved!");
+        }
+        LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
+        return smpURI;
     }
 
     @Override

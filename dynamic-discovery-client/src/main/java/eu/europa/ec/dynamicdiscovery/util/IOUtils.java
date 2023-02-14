@@ -9,11 +9,11 @@ import java.io.OutputStream;
 import java.util.Objects;
 
 /**
- * This class provides static utility methods for input/output operations, to replace other similar libraries with
+ * This class provides static utility methods for input/output operations, to replace other similar libraries
  * as: org.apache.commons.io.IOUtils to reduce dependent libraries
  *
  * @author Joze Rihtarsic
- * @since 1.14
+ * @since 2.0
  */
 public class IOUtils {
     private static final int BUFFER_LENGTH = 8192;
@@ -51,7 +51,6 @@ public class IOUtils {
      * @throws NullPointerException if the InputStream is {@code null}.
      * @throws NullPointerException if the OutputStream is {@code null}.
      * @throws IOException          if an I/O error occurs.
-     * @since 1.1
      */
     public static long copy(final InputStream inputStream, final OutputStream outputStream) throws IOException {
         Objects.requireNonNull(inputStream, "inputStream");

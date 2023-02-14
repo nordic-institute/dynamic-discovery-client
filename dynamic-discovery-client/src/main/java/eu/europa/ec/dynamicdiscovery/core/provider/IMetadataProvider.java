@@ -17,8 +17,8 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.provider;
 
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 
 import java.net.URI;
 
@@ -27,7 +27,7 @@ import java.net.URI;
  */
 public interface IMetadataProvider {
 
-    URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier);
+    URI resolveDocumentIdentifiers(URI smpURI, SMPParticipantIdentifier participantIdentifier);
 
-    URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier);
+    URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier);
 }

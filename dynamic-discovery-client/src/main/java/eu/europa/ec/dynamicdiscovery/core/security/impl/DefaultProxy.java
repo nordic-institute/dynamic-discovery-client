@@ -28,8 +28,6 @@ import org.apache.hc.core5.http.HttpHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-
 /**
  * A configuration for managing the host, credentials and non-proxy host definitions when setting up an HTTP proxy.
  *
@@ -38,7 +36,7 @@ import java.util.Arrays;
  * @since 1.13
  */
 public class DefaultProxy implements IProxyConfiguration {
-   final static Logger LOG = LoggerFactory.getLogger(DefaultProxy.class);
+    static final Logger LOG = LoggerFactory.getLogger(DefaultProxy.class);
 
     private final String user;
     private final String password;

@@ -17,9 +17,13 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.DocumentBuilder;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -30,20 +34,55 @@ import java.security.cert.CertificateFactory;
  */
 public class CommonUtil {
 
-    public static String getStringFromXmlFile(String fileName) throws Exception {
-        try {
-            return new String(Files.readAllBytes(Paths.get("src","test","resources","response",fileName+".xml")), "UTF-8");
-        } catch (Exception exc) {
-            throw new Exception(exc.getMessage(), exc);
+    private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> AbstractXMLResponseReader.createDocumentBuilder());
+    static final Logger LOG = LoggerFactory.getLogger(CommonUtil.class);
+    static final String ROOT_RESPONSE = "/response";
+    static final String OASIS_SMP_10 = "/oasis-smp-1.0";
+    static final String OASIS_SMP_20 = "/oasis-smp-2.0";
+
+    public static String getResourcePath(String name, String standard) {
+        return ROOT_RESPONSE + standard + "/" + name + ".xml";
+    }
+
+    public static InputStream getISForName(String name, String standard) {
+        String path = getResourcePath(name, standard);
+        LOG.debug("Get resource from path: [{}]", path);
+        return CommonUtil.class.getResourceAsStream(path);
+
+    }
+
+    public static byte[] getContentFromOasisSMP10XmlResource(String fileName) throws Exception {
+        try (InputStream is = getInputStreamFromOasisSMP10XmlResource(fileName)) {
+            return readAllBytes(is);
         }
     }
 
-    public static InputStream getStreamFromXmlFile(String fileName) throws Exception {
-        try {
-            return CommonUtil.class.getResourceAsStream("/response/" + fileName + ".xml");
-        } catch (Exception exc) {
-            throw new Exception(exc.getMessage(), exc);
+    public static Document getOasisSMP10DocumentFromXmlFile(String fileName) throws Exception {
+        try (InputStream is = getInputStreamFromOasisSMP10XmlResource(fileName)) {
+            return threadLocalDocumentBuilder.get().parse(is);
         }
+    }
+
+    public static Document getOasisSMP20DocumentFromXmlFile(String fileName) throws Exception {
+        try (InputStream is = getInputStreamFromOasisSMP20XmlResource(fileName)) {
+            return threadLocalDocumentBuilder.get().parse(is);
+        }
+    }
+
+    public static String getStringFromXmlFile(String fileName) throws Exception {
+        return getStringFromXmlBytes(getContentFromOasisSMP10XmlResource(fileName));
+    }
+
+    public static String getStringFromXmlBytes(byte[] ba) throws Exception {
+        return new String(ba, "UTF-8");
+    }
+
+    public static InputStream getInputStreamFromOasisSMP10XmlResource(String fileName) throws Exception {
+        return getISForName(fileName, OASIS_SMP_10);
+    }
+
+    public static InputStream getInputStreamFromOasisSMP20XmlResource(String fileName) throws Exception {
+        return getISForName(fileName, OASIS_SMP_20);
     }
 
     public static KeyStore loadTrustStore(String fileName) throws Exception {
@@ -52,11 +91,17 @@ public class CommonUtil {
         return keyStore;
     }
 
-    public static  Certificate loadCertificate(String certFilename) throws IOException, CertificateException {
+    public static Certificate loadCertificate(String certFilename) throws IOException, CertificateException {
         InputStream fis = Thread.currentThread().getContextClassLoader().getResource(certFilename).openStream();
         BufferedInputStream bis = new BufferedInputStream(fis);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
         return cf.generateCertificate(bis);
+    }
+
+    public static byte[] readAllBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        IOUtils.copy(inputStream, bos);
+        return bos.toByteArray();
     }
 }

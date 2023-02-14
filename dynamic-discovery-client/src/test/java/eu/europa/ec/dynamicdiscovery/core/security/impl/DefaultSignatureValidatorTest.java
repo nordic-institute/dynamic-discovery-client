@@ -21,8 +21,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 
@@ -31,109 +30,107 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * @author Flávio W. R. Santos
  */
-public class DefaultSignatureValidatorTest {
+class DefaultSignatureValidatorTest {
 
     @Test
-    public void testVerifyValidSignature() throws Exception {
+    void testVerifyValidSignature() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
         X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
-        Assert.assertNotNull(certificate);
-        Assert.assertEquals("CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE", certificate.getSubjectDN().toString());
-    }
-
-    @Test(expected = SignatureException.class)
-    public void testVerifyNotValidSignature() throws Exception {
-        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
-        Document document = parseDocument("signed_service_metadata_9915_123456789_invalid_signature");
-        Certificate certificate = signatureValidator.verify(document);
+        assertNotNull(certificate);
+        assertEquals("CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE", certificate.getSubjectDN().toString());
     }
 
     @Test
-    public void testVerifyValidSignerCertificate() throws Exception {
+    void testVerifyNotValidSignature() throws Exception {
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
+        ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
+        Document document = parseDocument("signed_service_metadata_urn_poland_ncpb_invalid_signature");
+        assertThrows(SignatureException.class, () -> signatureValidator.verify(document));
+    }
+
+    @Test
+    void testVerifyValidSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
         X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
-        Assert.assertNotNull(certificate);
-        Assert.assertEquals("CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE", certificate.getSubjectDN().toString());
+        assertNotNull(certificate);
+        assertEquals("CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE", certificate.getSubjectDN().toString());
     }
 
     @Test
-    public void testVerifyNotTrustedSignerCertificate() throws Exception {
+    void testVerifyNotTrustedSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
         ISignatureValidator signatureValidator = new DefaultSignatureValidator(keyStore);
         Document document = parseDocument("signed_service_metadata_urn_poland_ncpb");
-        try {
-            X509Certificate certificate = (X509Certificate) signatureValidator.verify(document);
-        } catch (SignatureException exc) {
-            Assert.assertEquals("TrustStore does not contain trusted direct Issuer or the Certificate.", exc.getMessage());
-            Assert.assertTrue(exc instanceof SignatureException);
-            return;
-        }
-        Assert.fail("Exception should have been thrown");
+
+        SignatureException result = assertThrows(SignatureException.class, () -> signatureValidator.verify(document));
+
+        assertEquals("TrustStore does not contain trusted direct Issuer or the Certificate.", result.getMessage());
     }
 
     @Test
-    public void testIsSignedByIntermediateCA() throws Exception {
+    void testIsSignedByIntermediateCA() throws Exception {
         testSignedBy("truststore/truststoreForTrustedCertificate-OnlyIntermediateCA.ts",
                 "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
     }
 
-    @Test(expected = Exception.class)
-    public void testIsSignedByRootCA() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-OnlyRootCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
-        Assert.fail("Exception should have been thrown");
+    @Test
+    void testIsSignedByRootCA() {
+        assertThrows(Exception.class,
+                () -> testSignedBy("truststore/truststoreForTrustedCertificate-OnlyRootCA.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate"));
     }
 
     @Test
-    public void testIsSignedByRootAndIntermediateCA() throws Exception {
+    void testIsSignedByRootAndIntermediateCA() throws Exception {
         testSignedBy("truststore/truststoreForTrustedCertificate-RootAndIntermediateCA.ts",
                 "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
     }
 
     @Test
-    public void testIsSignedByCertificateItself() throws Exception {
+    void testIsSignedByCertificateItself() throws Exception {
         testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts",
                 "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyTrust");
 
     }
 
-    @Test(expected = Exception.class)
-    public void testIsSignedByDifferentAndNotOkCA() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate");
-        Assert.fail("Exception should have been thrown");
+    @Test
+    void testIsSignedByDifferentAndNotOkCA() {
+        assertThrows(Exception.class,
+                () -> testSignedBy("truststore/truststoreForTrustedCertificate.ts", "certificate/eDelivery_SMP_TEST_1.cer", null, "verifyCertificate"));
     }
 
     @Test
-    public void testVerifyCertificateSubjectAcceptsAll() throws Exception {
+    void testVerifyCertificateSubjectAcceptsAll() throws Exception {
         testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^.*$", "verifyCertificateSubject");
     }
 
     @Test
-    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly() throws Exception {
+    void testVerifyCertificateSubjectAcceptsDefinedCNOnly() throws Exception {
         testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_TEST_1.*$", "verifyCertificateSubject");
     }
 
     @Test
-    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly1() throws Exception {
+    void testVerifyCertificateSubjectAcceptsDefinedCNOnly1() throws Exception {
         testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^(CN=eDelivery_SMP_TEST_8|CN=eDelivery_SMP_TEST_1).*$", "verifyCertificateSubject");
     }
 
     @Test
-    public void testVerifyCertificateSubjectAcceptsDefinedCNOnly2() throws Exception {
+    void testVerifyCertificateSubjectAcceptsDefinedCNOnly2() throws Exception {
         testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_\\\\*.*$", "verifyCertificateSubject");
     }
 
-    @Test(expected = Exception.class)
-    public void testVerifyCertificateSubjectAcceptsDefinedCNOnlyFail() throws Exception {
-        testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_TEST_8.*$", "verifyCertificateSubject");
-        Assert.fail("Exception should have been thrown");
+    @Test
+    void testVerifyCertificateSubjectAcceptsDefinedCNOnlyFail() {
+        assertThrows(Exception.class, () ->
+                testSignedBy("truststore/truststoreForTrustedCertificate-CertificateItself.ts", "certificate/eDelivery_SMP_TEST_1.cer", "^CN=eDelivery_SMP_TEST_8.*$", "verifyCertificateSubject"));
     }
 
     private void testSignedBy(String trustStorePath, String certificatePath, String regex, String methodName) throws Exception {
@@ -142,12 +139,12 @@ public class DefaultSignatureValidatorTest {
 
         DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(trustStore, regex);
 
-        ReflectionTestUtils.invokeSetterMethod(signatureValidator.getCertificateValidator() , methodName, certificate);
+        ReflectionTestUtils.invokeSetterMethod(signatureValidator.getCertificateValidator(), methodName, certificate);
     }
 
 
     private Document parseDocument(String fileName) throws Exception {
-        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getStreamFromXmlFile(fileName));
+        FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource(fileName));
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         return documentBuilderFactory.newDocumentBuilder().parse(fetcherResponse.getInputStream());
