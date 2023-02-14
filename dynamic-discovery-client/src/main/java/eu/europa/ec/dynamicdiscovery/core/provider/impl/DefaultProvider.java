@@ -18,10 +18,7 @@
 package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.DocumentIdentifierFormatter;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.*;
 
 import java.net.URI;
 
@@ -34,8 +31,9 @@ public class DefaultProvider implements IMetadataProvider {
     ParticipantIdentifierFormatter participantIdentifierFormatter = new ParticipantIdentifierFormatter();
     DocumentIdentifierFormatter documentIdentifierFormatter = new DocumentIdentifierFormatter();
 
+
     @Override
-    public URI resolveDocumentIdentifiers(URI smpURI, SMPParticipantIdentifier participantIdentifier) {
+    public URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier) {
         String participantPathParameter = participantIdentifierFormatter.urlEncodedFormat(participantIdentifier);
         return URI.create(smpURI.toString() + String.format("/%s", participantPathParameter)).normalize();
     }

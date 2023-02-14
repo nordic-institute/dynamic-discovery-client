@@ -22,6 +22,7 @@ import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
+import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
@@ -47,13 +48,16 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     private static final String DOMAIN_SEPARATOR = ".";
 
     static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
-    private List<String> domains;
+    private List<String> topDnsDomains;
     private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
 
     private IDNSLookup dnsLookup;
 
-    public DefaultBDXRLocator(String domain) {
-        this(Collections.singletonList(domain));
+    private DefaultBDXRLocator(Builder builder) {
+        this.topDnsDomains = new ArrayList<>(builder.topDnsDomains);
+        this.dnsLookupTypeList = new ArrayList<>(builder.dnsLookupTypeList);
+        this.dnsLookup = builder.dnsLookup;
+
     }
 
     public DefaultBDXRLocator(List<String> domains) {
@@ -65,12 +69,12 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     }
 
     public DefaultBDXRLocator(List<String> domains, IDNSLookup dnsLookup) {
-        this.domains = domains;
+        this.topDnsDomains = domains;
         this.dnsLookup = dnsLookup;
     }
 
-    public List<String> getDomains() {
-        return domains;
+    public List<String> getTopDnsDomains() {
+        return topDnsDomains;
     }
 
     public List<DNSLookupType> getDnsLookupTypeList() {
@@ -87,7 +91,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     @Override
     public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
 
-        for (String domain : domains) {
+        for (String domain : topDnsDomains) {
             for (DNSLookupType type : dnsLookupTypeList) {
                 URI participantIdentifierURI = getUrlForTopDomain(participantIdentifier, domain, type);
                 if (participantIdentifierURI != null) {
@@ -145,7 +149,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         }
     }
 
-    protected String buildCNameDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain){
+    protected String buildCNameDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.MD5_HEX));
@@ -154,7 +158,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         return sb.toString();
     }
 
-    protected String buildNaptrDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain){
+    protected String buildNaptrDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.SHA256_BASE32));
@@ -171,4 +175,57 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     public IDNSLookup getDnsLookup() {
         return dnsLookup;
     }
+
+    public static class Builder {
+
+        static final List<DNSLookupType> DEFAULT_LOOKUPS = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
+        private List<String> topDnsDomains = new ArrayList<>();
+        private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
+        private IDNSLookup dnsLookup;
+
+        public Builder addDnsLookupType(DNSLookupType recordType) {
+            this.dnsLookupTypeList.add(recordType);
+            return this;
+        }
+
+        public Builder addDnsLookupTypes(List<DNSLookupType> recordTypes) {
+            this.dnsLookupTypeList.addAll(recordTypes);
+            return this;
+        }
+
+        public Builder addTopDnsDomain(String domain) {
+            this.topDnsDomains.add(domain);
+            return this;
+        }
+
+        public Builder addTopDnsDomains(List<String> domains) {
+            this.topDnsDomains.addAll(domains);
+            return this;
+        }
+
+        public Builder dnsLookup(IDNSLookup dnsLookup) {
+            this.dnsLookup = dnsLookup;
+            return this;
+        }
+
+        public DefaultBDXRLocator build() {
+            validate();
+            return new DefaultBDXRLocator(this);
+        }
+
+        private void validate() {
+            if (topDnsDomains.isEmpty()) {
+                throw new DDCRuntimeException("List of top domains must not be empty!");
+            }
+            if (dnsLookupTypeList.isEmpty()) {
+                dnsLookupTypeList.addAll(DEFAULT_LOOKUPS);
+            }
+            if (dnsLookup == null) {
+                dnsLookup = new DefaultDNSLookup.Builder().build();
+            }
+        }
+
+    }
+
+
 }

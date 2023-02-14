@@ -40,7 +40,7 @@ class DefaultProviderTest {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         URI uri = new URI(TEST_URI);
         //when
-        String resolvedURI = testInstance.resolveDocumentIdentifiers(uri, participantIdentifier).toString();
+        String resolvedURI = testInstance.resolveForParticipantIdentifier(uri, participantIdentifier).toString();
         // then
         assertEquals(TEST_URI + "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", resolvedURI);
     }
@@ -64,7 +64,7 @@ class DefaultProviderTest {
         DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
-        String url = defaultProvider.resolveDocumentIdentifiers(new URI("http://host:666/smp_context"), participantIdentifier).toString();
+        String url = defaultProvider.resolveForParticipantIdentifier(new URI("http://host:666/smp_context"), participantIdentifier).toString();
 
         //then
         assertEquals("http://host:666/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
@@ -77,7 +77,7 @@ class DefaultProviderTest {
         DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
-        String url = defaultProvider.resolveDocumentIdentifiers(new URI("http://host:666/"), participantIdentifier).toString();
+        String url = defaultProvider.resolveForParticipantIdentifier(new URI("http://host:666/"), participantIdentifier).toString();
 
         //then
         assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);

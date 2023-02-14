@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @author Flávio W. R. Santos
  * @since 1.0
  */
-public class SMPDocumentIdentifier extends AbstractIdentifier {
+public class SMPDocumentIdentifier extends IdentifierType {
 
     public SMPDocumentIdentifier(String documentIdentifier, String scheme) {
         super(documentIdentifier, scheme);

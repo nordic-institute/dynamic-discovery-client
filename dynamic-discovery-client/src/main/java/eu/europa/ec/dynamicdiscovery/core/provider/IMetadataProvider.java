@@ -27,7 +27,7 @@ import java.net.URI;
  */
 public interface IMetadataProvider {
 
-    URI resolveDocumentIdentifiers(URI smpURI, SMPParticipantIdentifier participantIdentifier);
+    URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier);
 
     URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier);
 }

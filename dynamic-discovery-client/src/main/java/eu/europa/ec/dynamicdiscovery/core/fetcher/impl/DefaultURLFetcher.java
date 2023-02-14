@@ -22,6 +22,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.util.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -32,7 +33,7 @@ import org.apache.hc.core5.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -97,7 +98,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             switch (response.getCode()) {
                 case 200:
-                    return new FetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
+                    return toInMemoryFetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
                 case 404:
                     throw new DNSLookupException("SMP lookup address " + httpGet.getUri() + " not found - response 404");
                 default:
@@ -115,6 +116,16 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             throw new DNSLookupException(message, exc);
         }
     }
+
+    public FetcherResponse toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
+
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            IOUtils.copy(inputStream, baos);
+            return new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
+        }
+
+    }
+
 
     public String getUriFromHttpRequest(HttpRequest httpRequest) {
         try {

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SMPEqualsBuilder {
-    private boolean isEquals = true;
+    private boolean equals = true;
 
     public <T> SMPEqualsBuilder append(List<T> lhs, List<T> rhs) {
 
@@ -14,7 +14,7 @@ public class SMPEqualsBuilder {
         if (equalsList(lhs, rhs)) {
             return this;
         }
-        this.isEquals = false;
+        this.equals = false;
         return this;
     }
 
@@ -42,7 +42,7 @@ public class SMPEqualsBuilder {
     }
 
     public boolean isEquals() {
-        return isEquals;
+        return equals;
     }
 
     /**
@@ -51,13 +51,13 @@ public class SMPEqualsBuilder {
      * @param isEquals The value to set.
      */
     protected void setEquals(final boolean isEquals) {
-        this.isEquals = isEquals;
+        this.equals = isEquals;
     }
 
     /**
      * Reset the Builder to initial value for re-usage.
      */
     public void reset() {
-        this.isEquals = true;
+        this.equals = true;
     }
 }

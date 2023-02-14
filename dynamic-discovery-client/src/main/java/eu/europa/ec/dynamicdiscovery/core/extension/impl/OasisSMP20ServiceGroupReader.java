@@ -36,7 +36,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceMetadata. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:", ex);
         }
         return null;
     });

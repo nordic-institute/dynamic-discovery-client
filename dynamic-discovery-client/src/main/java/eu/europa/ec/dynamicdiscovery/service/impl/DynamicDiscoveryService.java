@@ -71,7 +71,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
     private FetcherResponse getFetcherResponseForDocs(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI smpURI = lookupParticipantSMPUri(participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveDocumentIdentifiers(smpURI, participantIdentifier);
+        URI participantUnderSmpURI = metadataProvider.resolveForParticipantIdentifier(smpURI, participantIdentifier);
         LOG.info("Get participant data / documents for URI: [{}].", participantUnderSmpURI);
         return metadataFetcher.fetch(participantUnderSmpURI);
     }

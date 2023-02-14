@@ -151,7 +151,7 @@ class DocumentIdentifierIT {
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-12345678910.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();

@@ -27,12 +27,6 @@
     <build>
         <resources>
             <resource>
-                <directory>${basedir}</directory>
-                <includes>
-                    <include>README.md</include>
-                </includes>
-            </resource>
-            <resource>
                 <directory>${basedir}/src/main/resources/</directory>
                 <includes>
                     <include>bdx-smp-201605.xsd</include>
@@ -50,26 +44,8 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
                 <executions>
-
-                    <!-- execution>
-                        <id>OasisSMP10</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <configuration>
-                            <packageName>gen.eu.europa.ec.ddc.smp10.api</packageName>
-                            <xjbSources>
-                                <xjbSource>${project.basedir}/src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
-                            </xjbSources>
-                            <sources>
-                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
-                            </sources>
-                            <clearOutputDir>false</clearOutputDir>
-                        </configuration>
-                    </execution -->
-
                     <execution>
-                        <id>OasisSMP20</id>
+                        <id>OasisSMP</id>
                         <goals>
                             <goal>xjc</goal>
                         </goals>
@@ -87,29 +63,7 @@
                             <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
-
                 </executions>
-
-
-                <!-- executions>
-                    <execution>
-                        <id>xjc</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <packageName>gen.eu.europa.ec.ddc.smp.api</packageName>
-                    <xjbSources>
-                        <xjbSource>src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
-                    </xjbSources>
-                    <sources>
-                        <source>src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
-                        <source>src/main/resources/xsd/bdx-smp-2.0/ServiceGroup-2.0.xsd</source>
-                        <source>src/main/resources/xsd/bdx-smp-2.0/ServiceMetadata-2.0.xsd</source>
-                    </sources>
-                </configuration -->
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

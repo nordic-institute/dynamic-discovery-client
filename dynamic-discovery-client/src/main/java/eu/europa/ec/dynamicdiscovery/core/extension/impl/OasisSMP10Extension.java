@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Oasis SMP 1.0 extension  providing je ServiceGroup and SignedServiceMetadata parser
+ * Oasis SMP 1.0 extension providing je ServiceGroup and SignedServiceMetadata parser
  *
  * @author Joze Rihtarsic
  * @since 2.0
@@ -17,7 +17,7 @@ public class OasisSMP10Extension implements IExtension {
 
     public static final String NAMESPACE = "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05";
 
-    List<IObjectReader<?>> parsers;
+    final List<IObjectReader<?>> parsers;
     final OasisSMP10ServiceGroupReader serviceGroupReader;
     final OasisSMP10ServiceMetadataReader serviceMetadataReader;
 
@@ -28,7 +28,6 @@ public class OasisSMP10Extension implements IExtension {
     public OasisSMP10Extension(boolean ignoreInvalidServices) {
         serviceGroupReader =  new OasisSMP10ServiceGroupReader();
         serviceMetadataReader =  new OasisSMP10ServiceMetadataReader(ignoreInvalidServices);
-
         parsers = Arrays.asList(serviceGroupReader,serviceMetadataReader);
     }
 

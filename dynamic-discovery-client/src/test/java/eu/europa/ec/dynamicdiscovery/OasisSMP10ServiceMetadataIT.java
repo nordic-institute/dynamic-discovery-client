@@ -326,7 +326,7 @@ class OasisSMP10ServiceMetadataIT {
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb", "b-123456.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu"))
+                .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
                 .fetcher(urlFetcherURL)
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();

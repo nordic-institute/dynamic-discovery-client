@@ -163,7 +163,7 @@ class DefaultBDXRLocatorTest {
     }
 
     private DefaultBDXRLocator lookupNAPTR() throws Exception {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu");
+        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder().addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu").build();
         defaultBDXRLocator = spy(defaultBDXRLocator);
         Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
 

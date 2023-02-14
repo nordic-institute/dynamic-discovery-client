@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Oasis SMP 2.0 extension  providing je ServiceGroup and SignedServiceMetadata parser
+ * Oasis SMP 2.0 extension providing je ServiceGroup and SignedServiceMetadata parser
  *
  * @author Joze Rihtarsic
  * @since 2.0

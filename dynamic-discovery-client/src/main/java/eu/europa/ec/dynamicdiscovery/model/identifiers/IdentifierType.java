@@ -4,15 +4,15 @@ package eu.europa.ec.dynamicdiscovery.model.identifiers;
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class AbstractIdentifier {
+public class IdentifierType {
 
     protected String identifier;
     protected String scheme;
 
-    public AbstractIdentifier() {
+    public IdentifierType() {
     }
 
-    public AbstractIdentifier(String identifier, String scheme) {
+    public IdentifierType(String identifier, String scheme) {
         this.identifier = identifier;
         this.scheme = scheme;
     }

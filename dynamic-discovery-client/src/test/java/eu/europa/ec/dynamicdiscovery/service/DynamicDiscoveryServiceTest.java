@@ -91,7 +91,7 @@ class DynamicDiscoveryServiceTest {
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178",
-                smpClient.getService().getMetadataProvider().resolveDocumentIdentifiers(new URI("http://smp.ec.europa.eu/"), participantIdentifier).toString());
+                smpClient.getService().getMetadataProvider().resolveForParticipantIdentifier(new URI("http://smp.ec.europa.eu/"), participantIdentifier).toString());
     }
 
     @Test

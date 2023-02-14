@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.europa.ec.dynamic-discovery</groupId>
@@ -20,6 +21,7 @@
 
     <modules>
         <module>dynamic-discovery-client</module>
+        <module>dynamic-discovery-cli</module>
     </modules>
 
     <scm>
@@ -71,6 +73,8 @@
         <mockito.version>4.10.0</mockito.version>
         <spring-test.version>5.3.24</spring-test.version>
         <!-- plugins -->
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <dependency-check-maven.version>6.5.0</dependency-check-maven.version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
@@ -82,7 +86,6 @@
         <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
         <!-- latest version compatible with SonarQube 5.6 -->
         <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
-
 
 
     </properties>
@@ -216,6 +219,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>dynamic-discovery-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>dnsjava</groupId>
                 <artifactId>dnsjava</artifactId>
                 <version>${dnsjava.version}</version>
@@ -301,6 +309,16 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>

@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  */
-public class SMPParticipantIdentifier extends AbstractIdentifier {
+public class SMPParticipantIdentifier extends IdentifierType {
 
     public SMPParticipantIdentifier(String identifier, String scheme) {
         super(identifier, scheme);

@@ -25,7 +25,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @author Erlend Klakegg Bergheim
  * @since 1.0
  */
-public class SMPProcessIdentifier extends AbstractIdentifier {
+public class SMPProcessIdentifier extends IdentifierType {
 
 
     public SMPProcessIdentifier(String identifier, String scheme) {
