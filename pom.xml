@@ -82,7 +82,7 @@
         <dependency-check-maven.version>6.5.0</dependency-check-maven.version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
-        <jaxb2-maven-plugin.version>2.3</jaxb2-maven-plugin.version>
+        <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
         <build-helper-maven-plugin.version>1.12</build-helper-maven-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
@@ -365,6 +365,24 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
                     <version>${jaxb2-maven-plugin.version}</version>
+                    <!--add for building it with jdk9+ -->
+                    <dependencies>
+                        <dependency>
+                            <groupId>javax.xml.bind</groupId>
+                            <artifactId>jaxb-api</artifactId>
+                            <version>${jaxb-api.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.glassfish.jaxb</groupId>
+                            <artifactId>jaxb-xjc</artifactId>
+                            <version>${org.glassfish.jaxb.jaxb-runtime.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.glassfish.jaxb</groupId>
+                            <artifactId>jaxb-runtime</artifactId>
+                            <version>${org.glassfish.jaxb.jaxb-runtime.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
