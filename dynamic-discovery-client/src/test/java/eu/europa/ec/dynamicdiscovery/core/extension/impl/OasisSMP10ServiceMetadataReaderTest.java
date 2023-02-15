@@ -7,16 +7,23 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
+import gen.eu.europa.ec.ddc.api.smp10.EndpointType;
 import gen.eu.europa.ec.ddc.api.smp10.SignedServiceMetadata;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
+import java.time.OffsetDateTime;
+import java.util.stream.Stream;
 
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.PARTICIPANT_IDENTIFIER_ISO6253_02;
+import static java.time.OffsetDateTime.now;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -24,6 +31,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2.0
  */
 class OasisSMP10ServiceMetadataReaderTest {
+
+    private static Stream<Arguments> testActivationArguments() {
+        return Stream.of(
+                Arguments.of(now().minusDays(1), now().plusDays(1), true),
+                Arguments.of(now().minusDays(2), now().minusDays(1), false),
+                Arguments.of(now().plusDays(1), now().plusDays(2), false),
+                Arguments.of(null, now().plusDays(1), true),
+                Arguments.of(null, now().minusDays(1), false),
+                Arguments.of(now().minusDays(1), null, true),
+                Arguments.of(now().plusDays(1), null, false)
+        );
+    }
 
     OasisSMP10ServiceMetadataReader testInstance = new OasisSMP10ServiceMetadataReader();
 
@@ -134,4 +153,16 @@ class OasisSMP10ServiceMetadataReaderTest {
         // then
         assertEquals(technicalException, signatureException);
     }
+
+    @ParameterizedTest(name = "{index}: Test expire service")
+    @MethodSource("testActivationArguments")
+    void testIsServiceValid(OffsetDateTime activateDate, OffsetDateTime expireDate, boolean isValid) {
+        EndpointType endpoint = new EndpointType();
+        endpoint.setServiceActivationDate(activateDate);
+        endpoint.setServiceExpirationDate(expireDate);
+
+        assertEquals(isValid, testInstance.isServiceValid(endpoint));
+    }
+
+
 }

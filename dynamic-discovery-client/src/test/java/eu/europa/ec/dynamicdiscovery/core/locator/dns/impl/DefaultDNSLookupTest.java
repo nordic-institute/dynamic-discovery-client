@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -137,4 +138,36 @@ class DefaultDNSLookupTest {
         assertEquals("http://smp-mock-1.ehealth.eu:8888",
                 defaultDNSLookup.getURLFromNaptrRecord(records, Collections.singletonList("Meta:SMP"), Arrays.asList("http:", "https:")));
     }
+
+    @Test
+    void testDefaultConfiguration(){
+        DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder().build();
+        assertEquals(1, defaultDNSLookup.getRequiredNaptrServices().size());
+        assertEquals(2, defaultDNSLookup.getRequiredURLSchemas().size());
+        assertTrue(defaultDNSLookup.getRequiredNaptrServices().contains("Meta:SMP"));
+        assertTrue(defaultDNSLookup.getRequiredURLSchemas().containsAll(Arrays.asList("http:","https:")));
+    }
+
+    @Test
+    void testConfiguration(){
+        DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder()
+                .addRequiredNaptrService("meta:cppa3")
+                .addRequiredNaptrURLSchema("http:").build();
+        assertEquals(1, defaultDNSLookup.getRequiredNaptrServices().size());
+        assertEquals(1, defaultDNSLookup.getRequiredURLSchemas().size());
+        assertTrue(defaultDNSLookup.getRequiredNaptrServices().contains("meta:cppa3"));
+        assertTrue(defaultDNSLookup.getRequiredURLSchemas().contains("http:"));
+    }
+
+    @Test
+    void testConfigurationAddList(){
+        DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder()
+                .addRequiredNaptrServices(Collections.singletonList("meta:cppa3"))
+                .addRequiredNaptrURLSchemas(Collections.singletonList("http:")).build();
+        assertEquals(1, defaultDNSLookup.getRequiredNaptrServices().size());
+        assertEquals(1, defaultDNSLookup.getRequiredURLSchemas().size());
+        assertTrue(defaultDNSLookup.getRequiredNaptrServices().contains("meta:cppa3"));
+        assertTrue(defaultDNSLookup.getRequiredURLSchemas().contains("http:"));
+    }
+
 }

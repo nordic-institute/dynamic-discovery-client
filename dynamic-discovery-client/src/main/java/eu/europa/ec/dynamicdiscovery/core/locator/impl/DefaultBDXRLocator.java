@@ -88,8 +88,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
      * @return
      * @throws TechnicalException
      */
-    @Override
-    public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public URI lookupPrivate(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
 
         for (String domain : topDnsDomains) {
             for (DNSLookupType type : dnsLookupTypeList) {
@@ -114,10 +113,14 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         }
 
     }
+    @Override
+    public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+        return this.lookupPrivate(participantIdentifierFormatter.normalize(participantIdentifier));
+    }
 
     @Override
     public URI lookup(String participantIdentifier, String participantScheme) throws TechnicalException {
-        return this.lookup(participantIdentifierFormatter.normalize(participantScheme, participantIdentifier));
+        return this.lookupPrivate(participantIdentifierFormatter.normalize(participantScheme, participantIdentifier));
     }
 
     protected URI cnameLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {

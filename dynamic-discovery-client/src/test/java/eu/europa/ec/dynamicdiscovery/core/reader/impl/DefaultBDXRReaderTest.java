@@ -37,7 +37,7 @@ class DefaultBDXRReaderTest {
 
     @Test
     void testGetServiceGroup() throws Exception {
-        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")));
+        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("/truststore/truststoreForTrustedCertificate.ts")));
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("service_group_urn_poland_ncpb"));
         SMPServiceGroup serviceGroup = defaultBDXRReader.getServiceGroup(fetcherResponse);
 
@@ -52,7 +52,7 @@ class DefaultBDXRReaderTest {
 
     @Test
     void testGetServiceGroupNullContent() throws Exception {
-        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")));
+        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("/truststore/truststoreForTrustedCertificate.ts")));
         FetcherResponse fetcherResponse = new FetcherResponse(null);
 
         BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getServiceGroup(fetcherResponse));
@@ -61,7 +61,7 @@ class DefaultBDXRReaderTest {
 
     @Test
     void testGetServiceMetadata() throws Exception {
-        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")));
+        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("/truststore/truststoreForTrustedCertificate.ts")));
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_invalid_certificate"));
         SMPServiceMetadata serviceMetadata = defaultBDXRReader.getServiceMetadata(fetcherResponse);
 
@@ -70,7 +70,7 @@ class DefaultBDXRReaderTest {
 
     @Test
     void testGetServiceMetadataNotOk() throws Exception {
-        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")));
+        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("/truststore/truststoreForTrustedCertificate.ts")));
         FetcherResponse fetcherResponse = new FetcherResponse(null);
 
         BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getServiceMetadata(fetcherResponse));

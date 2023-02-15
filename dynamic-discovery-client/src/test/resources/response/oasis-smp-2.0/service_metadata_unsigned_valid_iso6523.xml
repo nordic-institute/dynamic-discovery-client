@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ServiceMetadata xmlns:smb="http://docs.oasis-open.org/bdxr/ns/SMP/2/BasicComponents"  xmlns:sma="http://docs.oasis-open.org/bdxr/ns/SMP/2/AggregateComponents" xmlns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceMetadata">
     <smb:SMPVersionID>2.0</smb:SMPVersionID>
-    <smb:ID schemeID="bdx-docid-qns">urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0:extended:urn:www.difi.no:ehf:faktura:ver2.0::2.1</smb:ID>
+    <smb:ServiceID schemeID="bdx-docid-qns">urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0:extended:urn:www.difi.no:ehf:faktura:ver2.0::2.1</smb:ServiceID>
     <smb:ParticipantID schemeID="iso6523-actorid-upis">9915:123456789</smb:ParticipantID>
     <sma:ProcessMetadata>
         <sma:Process>

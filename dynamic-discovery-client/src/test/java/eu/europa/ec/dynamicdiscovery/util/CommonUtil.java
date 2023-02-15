@@ -87,15 +87,14 @@ public class CommonUtil {
 
     public static KeyStore loadTrustStore(String fileName) throws Exception {
         KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource(fileName).getFile()), null);
+        keyStore.load(CommonUtil.class.getResourceAsStream(fileName), null);
         return keyStore;
     }
 
     public static Certificate loadCertificate(String certFilename) throws IOException, CertificateException {
-        InputStream fis = Thread.currentThread().getContextClassLoader().getResource(certFilename).openStream();
+        InputStream fis = CommonUtil.class.getResourceAsStream(certFilename);
         BufferedInputStream bis = new BufferedInputStream(fis);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
         return cf.generateCertificate(bis);
     }
 
@@ -104,4 +103,11 @@ public class CommonUtil {
         IOUtils.copy(inputStream, bos);
         return bos.toByteArray();
     }
+
+    public static byte[] readAllBytesForResource(String resource) throws IOException {
+        LOG.info("Get resource bytes [{}]", resource);
+        InputStream fis = CommonUtil.class.getResourceAsStream(resource);
+        return readAllBytes(fis);
+    }
+
 }

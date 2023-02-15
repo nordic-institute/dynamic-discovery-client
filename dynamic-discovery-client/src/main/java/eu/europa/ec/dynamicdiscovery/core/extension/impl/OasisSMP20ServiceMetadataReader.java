@@ -132,7 +132,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
      * @param serviceMetadata Oasis SMP 2.0 ServiceMetadata
      * @return object SMPParticipantIdentifier with schema and id of participant identifier.
      */
-    private SMPParticipantIdentifier readParticipantIdentifier(ServiceMetadata serviceMetadata) {
+    protected SMPParticipantIdentifier readParticipantIdentifier(ServiceMetadata serviceMetadata) {
         if (serviceMetadata.getParticipantID() == null) {
             return null;
         }
@@ -147,7 +147,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
      * @param serviceMetadata Oasis SMP 2.0 ServiceMetadata
      * @return object SMPDocumentIdentifier with schema and id of document identifier.
      */
-    private SMPDocumentIdentifier readDocumentIdentifier(ServiceMetadata serviceMetadata) {
+    protected SMPDocumentIdentifier readDocumentIdentifier(ServiceMetadata serviceMetadata) {
         if (serviceMetadata.getServiceID() == null) {
             return null;
         }
@@ -163,7 +163,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
      * @param processMetadata Oasis SMP 2.0 ProcessMetadata
      * @return List of  SMPProcessIdentifiers with schema and id of process identifier.
      */
-    private List<SMPProcessIdentifier> readProcessIdentifier(ProcessMetadata processMetadata) {
+    protected List<SMPProcessIdentifier> readProcessIdentifier(ProcessMetadata processMetadata) {
         if (processMetadata == null) {
             return Collections.emptyList();
         }
@@ -183,7 +183,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
      * @param serviceMetadata Oasis SMP 2.0 ServiceMetadata
      * @return list of SMPEndpoints with process list, certificate map and the endpoint URL address
      */
-    private List<SMPEndpoint> readEndpoints(ServiceMetadata serviceMetadata) {
+    protected List<SMPEndpoint> readEndpoints(ServiceMetadata serviceMetadata) {
 
         List<SMPEndpoint> endpoints = new ArrayList<>();
 
@@ -207,7 +207,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
                         .addProcessIdentifiers(processIdentifiers)
                         .transportProfile(transportProfile)
                         .address(addressURI)
-                        .addCertificates(getX509Certificate(endpointType))
+                        .addCertificates(getX509Certificates(endpointType))
                         .activationDate(endpointType.getActivationDate() == null ? null : endpointType.getActivationDate().getValue())
                         .expirationDate(endpointType.getExpirationDate() == null ? null : endpointType.getExpirationDate().getValue())
                         .build();
@@ -225,7 +225,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
      *
      * @return
      */
-    public boolean isServiceValid(Endpoint endpointType) {
+    protected boolean isServiceValid(Endpoint endpointType) {
         OffsetDateTime currentDateTime = OffsetDateTime.now();
         if (endpointType.getActivationDate() != null &&
                 endpointType.getActivationDate().getValue() != null &&
@@ -248,7 +248,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
      * @param endpointType
      * @return
      */
-    private Map<String, X509Certificate> getX509Certificate(Endpoint endpointType) {
+    protected Map<String, X509Certificate> getX509Certificates(Endpoint endpointType) {
         if (endpointType == null ||
                 endpointType.getCertificates() == null ||
                 endpointType.getCertificates().isEmpty()
@@ -257,12 +257,27 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
         }
         List<Certificate> certificates = endpointType.getCertificates();
 
-        return certificates.stream().collect(Collectors.toMap(this::getCertificateType, this::getCertificate));
+        Map<String, X509Certificate> map = new HashMap<>();
+        for (Certificate certificate : certificates) {
+            X509Certificate cert = getCertificate(certificate);
+            String key = getCertificateType(certificate);
+            if (cert == null) {
+                LOG.warn("Certificate with key [{}], is null. Skip entry", key);
+                continue;
+            }
+            if (!map.containsKey(key)) {
+                map.put(key, cert);
+            } else {
+                LOG.warn("Certificate with key [{}], is has duplicate key! Skip entry [{}]", key, cert);
+            }
+
+        }
+        return map;
 
 
     }
 
-    private String getCertificateType(Certificate certificate) {
+    protected String getCertificateType(Certificate certificate) {
         if (certificate == null ||
                 certificate.getTypeCode() == null ||
                 certificate.getTypeCode().getValue() == null) {
@@ -271,7 +286,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
         return certificate.getTypeCode().getValue();
     }
 
-    private X509Certificate getCertificate(Certificate certificate) {
+    protected X509Certificate getCertificate(Certificate certificate) {
         if (certificate == null ||
                 certificate.getContentBinaryObject() == null ||
                 certificate.getContentBinaryObject().getValue() == null) {
