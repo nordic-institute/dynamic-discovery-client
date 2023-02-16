@@ -258,6 +258,33 @@ DynamicDiscovery smpClient = builder
         .build();
 ----
 
+===== Example: Basic discovery with custom participant formatter
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on custom PartyIdentifier types. By default ebCoreParty Identifier type and Peppol Party identifier types are registered.
+
+The DefaultBDXRLocator will format/normalize the PartyIdentifier before lookup according to custom FormatterType
+
+[source,java]
+----
+// Use template formatter or create own formatter type
+FormatterType customFormatter = new TemplateFormatterType(Pattern.compile("^(?i)mailto.*$"),
+                "${scheme}-->${identifier}","${identifier}",
+                Pattern.compile("^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$"),
+                DNSLookupFormatType.SCHEMA_AFTER_HASH);
+
+// register formatter to DefaultBDXRLocator
+DynamicDiscovery smpClient = builder
+        .locator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addFormatterType(customFormatter)
+                .dnsLookup(new DefaultDNSLookup.Builder()
+                        .addRequiredNaptrService("meta:cppa3")
+                        .addRequiredNaptrURLSchema("https:")
+                        .build())
+                .build())
+        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+
 ===== Example: Static Metadata Locator with single SMP url
 Example of how to configure with StaticMapMetadataLocator. The DDC will always fetch the party identifier's service metadata data from the give URI: " http://localhost:8090/cipa-smp-full-webapp/"
 [source,java]

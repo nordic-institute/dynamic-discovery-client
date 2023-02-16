@@ -81,6 +81,34 @@ public abstract class AbstractIdentifierFormatter<T> {
     }
 
     /**
+     * Method add formatter to the list of identifier formatter
+     *
+     * @param formatterType formatter of the identifier
+     */
+    public void addFormatter(FormatterType formatterType) {
+        this.formatterTypes.add(formatterType);
+    }
+
+    /**
+     * Method replaces the list of formatters with the new list
+     *
+     * @param formatterTypes formatter of the identifier
+     */
+    public void setFormatters(List<FormatterType> formatterTypes) {
+        this.formatterTypes.clear();
+        this.formatterTypes.addAll(formatterTypes);
+    }
+
+    /**
+     * Method returns the list of formatters
+     *
+     * @return formatterTypes formatter of the identifier
+     */
+    public List<FormatterType> getFormatters() {
+        return this.formatterTypes;
+    }
+
+    /**
      * Formats the object according to formatTemplate. If template is 'blank' the scheme and identifier are concatenated
      * with separator
      *
@@ -90,7 +118,7 @@ public abstract class AbstractIdentifierFormatter<T> {
      */
     public String format(String scheme, String identifier) {
         // find the formatter
-        FormatterType formatter = findFormatterByScheme(scheme);
+        FormatterType formatter = findFormatterByScheme(StringUtils.isEmpty(scheme)?identifier:scheme);
         return formatter.format(scheme, identifier);
     }
 

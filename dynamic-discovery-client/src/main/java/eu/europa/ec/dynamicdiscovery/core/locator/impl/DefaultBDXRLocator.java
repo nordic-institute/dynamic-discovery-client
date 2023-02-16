@@ -27,6 +27,8 @@ import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.types.FormatterType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author Flávio W. R. Santos
@@ -58,6 +61,21 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         this.dnsLookupTypeList = new ArrayList<>(builder.dnsLookupTypeList);
         this.dnsLookup = builder.dnsLookup;
 
+        if (builder.schemeMandatory!=null) {
+            this.participantIdentifierFormatter.setSchemeMandatory(builder.schemeMandatory);
+        }
+
+        if (builder.schemeValidationPattern!=null) {
+            this.participantIdentifierFormatter.setSchemeValidationPattern(builder.schemeValidationPattern);
+        }
+
+        if (!builder.caseSensitiveSchemas.isEmpty()) {
+            this.participantIdentifierFormatter.setCaseSensitiveSchemas(builder.caseSensitiveSchemas);
+        }
+
+        if (!builder.formatterTypes.isEmpty()) {
+            this.participantIdentifierFormatter.setFormatters(builder.formatterTypes);
+        }
     }
 
     public DefaultBDXRLocator(List<String> domains) {
@@ -186,6 +204,12 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
         private IDNSLookup dnsLookup;
 
+
+        protected Boolean schemeMandatory;
+        protected Pattern schemeValidationPattern;
+        protected List<String> caseSensitiveSchemas = new ArrayList<>();
+        protected List<FormatterType> formatterTypes = new ArrayList<>();
+
         public Builder addDnsLookupType(DNSLookupType recordType) {
             this.dnsLookupTypeList.add(recordType);
             return this;
@@ -210,6 +234,37 @@ public class DefaultBDXRLocator implements IMetadataLocator {
             this.dnsLookup = dnsLookup;
             return this;
         }
+
+        public Builder schemeMandatory(Boolean schemeMandatory) {
+            this.schemeMandatory = schemeMandatory;
+            return this;
+        }
+
+        public Builder schemeValidationPattern(Pattern schemeValidationPattern) {
+            this.schemeValidationPattern = schemeValidationPattern;
+            return this;
+        }
+
+        public Builder addCaseSensitiveSchema(String scheme) {
+            if (StringUtils.isNotEmpty(scheme)) {
+                this.caseSensitiveSchemas.add(scheme);
+            }
+            return this;
+        }
+        public Builder addCaseSensitiveSchemas(List<String> schemes) {
+            this.caseSensitiveSchemas.addAll(schemes);
+            return this;
+        }
+
+        public Builder addFormatterType(FormatterType formatter) {
+            this.formatterTypes.add(formatter);
+            return this;
+        }
+        public Builder addFormatterTypes(List<FormatterType> formatters) {
+            this.formatterTypes.addAll(formatters);
+            return this;
+        }
+
 
         public DefaultBDXRLocator build() {
             validate();

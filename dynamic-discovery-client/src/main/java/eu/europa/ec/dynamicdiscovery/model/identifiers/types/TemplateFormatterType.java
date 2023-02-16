@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringUtils.replaceEach;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
@@ -25,16 +26,23 @@ public class TemplateFormatterType implements FormatterType {
     public static final String SPLIT_GROUP_IDENTIFIER_NAME = "identifier";
     protected static final String[] REPLACE_TAGS = new String[]{"${" + SPLIT_GROUP_SCHEME_NAME + "}", "${" + SPLIT_GROUP_IDENTIFIER_NAME + "}"};
 
-    private DNSLookupFormatType dnsLookupFormatType = null;
+    private final DNSLookupFormatType dnsLookupFormatType;
 
     private final Pattern splitRegularExpression;
     private final Pattern schemaPattern;
     private final String formatTemplate;
+    private final String formatTemplateNullScheme;
 
     public TemplateFormatterType(Pattern matchSchema, String formatTemplate, Pattern splitRegularExpression) {
+        this(matchSchema, formatTemplate, formatTemplate, splitRegularExpression, DNSLookupFormatType.ALL_IN_HASH);
+    }
+
+    public TemplateFormatterType(Pattern matchSchema, String formatTemplate, String formatTemplateNullScheme, Pattern splitRegularExpression, DNSLookupFormatType dnsLookupFormatType) {
         this.schemaPattern = matchSchema;
         this.formatTemplate = formatTemplate;
+        this.formatTemplateNullScheme = formatTemplateNullScheme;
         this.splitRegularExpression = splitRegularExpression;
+        this.dnsLookupFormatType = dnsLookupFormatType;
     }
 
     /**
@@ -65,7 +73,7 @@ public class TemplateFormatterType implements FormatterType {
 
     @Override
     public String format(String scheme, String identifier, boolean noDelimiterOnEmptyScheme) {
-        return StringUtils.replaceEach(formatTemplate, REPLACE_TAGS, new String[]{scheme, identifier});
+        return replaceEach(scheme == null ? formatTemplateNullScheme : formatTemplate, REPLACE_TAGS, new String[]{scheme, identifier});
 
     }
 
@@ -97,9 +105,6 @@ public class TemplateFormatterType implements FormatterType {
         return result;
     }
 
-    public void setDnsLookupFormatType(DNSLookupFormatType dnsLookupFormatType) {
-        this.dnsLookupFormatType = dnsLookupFormatType;
-    }
 
     @Override
     public DNSLookupFormatType getDNSFormatType() {
