@@ -54,6 +54,15 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("Meta:SMP"),
                         Arrays.asList("http:", "https:"),
+                        Collections.singletonList("U"),
+                        "Meta:SMP",
+                        "http://test:8080/smp",
+                        "http://test:8080/smp"),
+                Arguments.of("Oasis SMP lookup multiple flags",
+                        testParticipantIdentifier,
+                        Collections.singletonList("Meta:SMP"),
+                        Arrays.asList("http:", "https:"),
+                        Arrays.asList("U","A","P"),
                         "Meta:SMP",
                         "http://test:8080/smp",
                         "http://test:8080/smp"),
@@ -61,6 +70,7 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("Meta:SMP"),
                         Arrays.asList("http:", "https:"),
+                        Collections.singletonList("U"),
                         "MEtA:SmP",
                         "http://test:8080/smp",
                         "http://test:8080/smp"),
@@ -68,6 +78,7 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("Meta:SMP"),
                         Arrays.asList("HTTP:", "HTTPS:"),
+                        Collections.singletonList("U"),
                         "Meta:SMP",
                         "http://test:8080/smp",
                         "http://test:8080/smp"),
@@ -75,6 +86,7 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("Meta:SMP"),
                         Arrays.asList("http:", "https:"),
+                        Collections.singletonList("U"),
                         "Wrong:SMP",
                         "http://test:8080/smp",
                         null),
@@ -82,6 +94,7 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("Meta:SMP"),
                         Collections.singletonList("https:"),
+                        Collections.singletonList("U"),
                         "Wrong:SMP",
                         "http://test:8080/smp",
                         null),
@@ -89,20 +102,90 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("meta:cppa3"),
                         Arrays.asList("http:", "https:"),
+                        Collections.singletonList("U"),
                         "meta:cppa3",
                         "http://test:8080/cpp",
-                        "http://test:8080/cpp")
+                        "http://test:8080/cpp"),
+                Arguments.of("Oasis SMP lookup wrong flags",
+                        testParticipantIdentifier,
+                        Collections.singletonList("Meta:SMP"),
+                        Arrays.asList("http:", "https:"),
+                        Arrays.asList("S"),
+                        "Meta:SMP",
+                        "http://test:8080/smp",
+                        "http://test:8080/smp")
+        );
+    }
+
+    private static Stream<Arguments> urlFromNaptrRecordArguments() {
+        return Stream.of(
+                Arguments.of("The u-naptr",
+                        "!.*!http://smp-mock-1.ehealth.eu!",
+                        "test.ehealth.acc.edelivery.tech.ec.europa.eu",
+                        "http://smp-mock-1.ehealth.eu"
+                ),
+                Arguments.of("The u-naptr - legacy ",
+                        "!^.*$!http://smp-mock-1.ehealth.eu!",
+                        "test.ehealth.acc.edelivery.tech.ec.europa.eu",
+                        "http://smp-mock-1.ehealth.eu"
+                ),
+                Arguments.of("Not U-Naptr! Regular u-naptr with simple domain match",
+                        "!^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\\.)+[a-zA-Z]{2,}\\.?$!http://smp-test-regexp-1.eu!",
+                        "test.ehealth.acc.edelivery.tech.ec.europa.eu",
+                        "http://smp-test-regexp-1.eu"
+                ),
+                Arguments.of("Not U-Naptr!!, Test custom regular expression  change first part of naptr [A-Z0-9]+.ehealth-actorid-qns.ehealth.europa. with https://smp-mock-1.",
+                        "![A-Z0-9]+.ehealth-actorid-qns.ehealth.europa.!https://smp-mock-1.example.!",
+                        "ehealth.europa.eu",
+                        "https://smp-mock-1.example.eu"
+                )
+        );
+    }
+
+    private static Stream<Arguments> naptrValueExamplesArguments() {
+        return Stream.of(
+                Arguments.of("The correct u-naptr",
+                        "!.*!http://smp-mock-1.ehealth.eu!",
+                        "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu",
+                        "http://smp-mock-1.ehealth.eu"
+                ),
+                Arguments.of("The legacy/invalid u-naptr ",
+                        "!^.*$!http://smp-mock-1.ehealth.eu!",
+                        "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu",
+                        "http://smp-mock-1.ehealth.eu"
+                ),
+                Arguments.of("Not U-Naptr! Regular u-naptr with simple domain match",
+                        "!^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\\.)+[a-zA-Z]{2,}\\.?$!http://smp-test-regexp-1.eu!",
+                        "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu",
+                        "http://smp-test-regexp-1.eu"
+                ),
+                Arguments.of("Not U-Naptr!!, Test custom regular expression  change first part of naptr [A-Z0-9]+.ehealth-actorid-qns.ehealth.europa. with https://smp-mock-1.",
+                        "![A-Z0-9]+.ehealth-actorid-qns.ehealth.europa.!https://smp-mock-1.example.!",
+                        "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.ehealth-actorid-qns.ehealth.europa.eu",
+                        "https://smp-mock-1.example.eu"
+                )
         );
     }
 
     @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("naptrValueExamplesArguments")
+    void testResolveNaptrValue(String name, String regularExpression, String hostname, String expectedResult) throws Exception {
+        DefaultDNSLookup testInstance = Mockito.spy(new DefaultDNSLookup.
+                Builder().build());
+
+        String result = testInstance.resolveNaptrValue( regularExpression, hostname);
+        assertEquals(expectedResult, result);
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("naptrUrlValueLookupTestArguments")
-    void testNaptrUrlValueLookup(String name, SMPParticipantIdentifier identifier, List<String> services, List<String> schemas, String recordService, String naptrValue, String expectedResult) throws Exception {
+    void testNaptrUrlValueLookup(String name, SMPParticipantIdentifier identifier, List<String> services, List<String> schemas, List<String> flagsList, String recordService, String naptrValue, String expectedResult) throws Exception {
         String testUri = "localhost";
         DefaultDNSLookup testInstance = Mockito.spy(new DefaultDNSLookup.
                 Builder()
                 .addRequiredNaptrURLSchemas(schemas)
                 .addRequiredNaptrServices(services)
+                .addRequiredNaptrServices(flagsList)
                 .build());
 
         Mockito.doReturn(DNSUtils.createSmpDnsNaptrResponse(identifier, recordService, naptrValue, recordService))
@@ -114,17 +197,19 @@ class DefaultDNSLookupTest {
         assertEquals(expectedResult, result);
     }
 
-    @Test
-    void lookupFetcherTest1() throws Exception {
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("urlFromNaptrRecordArguments")
+    void testGetURLFromNaptrRecord(String name, String value, String hostname, String result) throws Exception {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder().build();
         List<Record> records = new ArrayList<>();
         records.add(new NAPTRRecord(DNSUtils.createSmpDnsNaptrDomainName(participantIdentifier.getIdentifier(), participantIdentifier.getScheme(),
-                "ehealth.acc.edelivery.tech.ec.europa.eu"), DClass.IN, 60, 100, 10, "U",
+                hostname), DClass.IN, 60, 100, 10, "U",
                 "Meta:SMP",
-                "!^.*$!http://smp-mock-1.ehealth.eu!", Name.fromString(".")));
-        assertEquals("http://smp-mock-1.ehealth.eu", defaultDNSLookup.getURLFromNaptrRecord(records,
-                Collections.singletonList("Meta:SMP"), Arrays.asList("http:", "https:")));
+                value, Name.fromString(".")));
+
+        assertEquals(result, defaultDNSLookup.getURLFromNaptrRecord(records,
+                Collections.singletonList("Meta:SMP"), Arrays.asList("http:", "https:"), Collections.singletonList("U")));
     }
 
     @Test
@@ -136,20 +221,20 @@ class DefaultDNSLookupTest {
                 "ehealth.acc.edelivery.tech.ec.europa.eu"), DClass.IN, 60, 100, 10, "U", "Meta:SMP",
                 "!^.*$!http://smp-mock-1.ehealth.eu:8888!", Name.fromString(".")));
         assertEquals("http://smp-mock-1.ehealth.eu:8888",
-                defaultDNSLookup.getURLFromNaptrRecord(records, Collections.singletonList("Meta:SMP"), Arrays.asList("http:", "https:")));
+                defaultDNSLookup.getURLFromNaptrRecord(records, Collections.singletonList("Meta:SMP"), Arrays.asList("http:", "https:"), Collections.singletonList("U")));
     }
 
     @Test
-    void testDefaultConfiguration(){
+    void testDefaultConfiguration() {
         DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder().build();
         assertEquals(1, defaultDNSLookup.getRequiredNaptrServices().size());
         assertEquals(2, defaultDNSLookup.getRequiredURLSchemas().size());
         assertTrue(defaultDNSLookup.getRequiredNaptrServices().contains("Meta:SMP"));
-        assertTrue(defaultDNSLookup.getRequiredURLSchemas().containsAll(Arrays.asList("http:","https:")));
+        assertTrue(defaultDNSLookup.getRequiredURLSchemas().containsAll(Arrays.asList("http:", "https:")));
     }
 
     @Test
-    void testConfiguration(){
+    void testConfiguration() {
         DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder()
                 .addRequiredNaptrService("meta:cppa3")
                 .addRequiredNaptrURLSchema("http:").build();
@@ -160,7 +245,7 @@ class DefaultDNSLookupTest {
     }
 
     @Test
-    void testConfigurationAddList(){
+    void testConfigurationAddList() {
         DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder()
                 .addRequiredNaptrServices(Collections.singletonList("meta:cppa3"))
                 .addRequiredNaptrURLSchemas(Collections.singletonList("http:")).build();

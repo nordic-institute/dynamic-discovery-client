@@ -32,6 +32,9 @@ public class TemplateFormatterType implements FormatterType {
     private final Pattern schemaPattern;
     private final String formatTemplate;
     private final String formatTemplateNullScheme;
+    private boolean wildcardEnabled = true;
+
+
 
     public TemplateFormatterType(Pattern matchSchema, String formatTemplate, Pattern splitRegularExpression) {
         this(matchSchema, formatTemplate, formatTemplate, splitRegularExpression, DNSLookupFormatType.ALL_IN_HASH);
@@ -44,6 +47,7 @@ public class TemplateFormatterType implements FormatterType {
         this.splitRegularExpression = splitRegularExpression;
         this.dnsLookupFormatType = dnsLookupFormatType;
     }
+
 
     /**
      * {@inheritDoc}
@@ -69,6 +73,16 @@ public class TemplateFormatterType implements FormatterType {
         }
         Matcher matcher = schemaPattern.matcher(value);
         return matcher.matches();
+    }
+
+    @Override
+    public boolean isWildcardEnabled() {
+        return wildcardEnabled;
+    }
+
+    @Override
+    public void setWildcardEnabled(boolean wildcardEnabled) {
+        this.wildcardEnabled = wildcardEnabled;
     }
 
     @Override

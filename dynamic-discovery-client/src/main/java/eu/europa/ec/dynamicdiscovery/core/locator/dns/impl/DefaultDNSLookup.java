@@ -43,18 +43,23 @@ import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
  */
 public class DefaultDNSLookup implements IDNSLookup {
     static final Logger LOG = LoggerFactory.getLogger(DefaultDNSLookup.class);
-    List<String> requiredURLSchemas;
-    List<String> requiredNaptrServices;
+    final List<String> requiredURLSchemas;
+    final List<String> requiredNaptrServices;
+    final List<String> requiredNaptrFlagsList;
+
+
 
     protected DefaultDNSLookup(Builder builder) {
         this.requiredURLSchemas = new ArrayList<>(builder.requiredURLSchemas);
         this.requiredNaptrServices = new ArrayList<>(builder.requiredNaptrServices);
+        this.requiredNaptrFlagsList = new ArrayList<>(builder.requiredNaptrFlagsList);
     }
 
 
     public String getURLFromNaptrRecord(List<Record> records,
                                         List<String> services,
-                                        List<String> schemas){
+                                        List<String> schemas,
+                                        List<String> flagsList){
 
         for (Record dnsRecord : records) {
             NAPTRRecord naptrRecord = (NAPTRRecord) dnsRecord;
@@ -64,19 +69,33 @@ public class DefaultDNSLookup implements IDNSLookup {
                 LOG.debug("NAPTR Record: [{}] does not have any of required services [{}].", recordDescription, services);
                 continue;
             }
-            LOG.trace("Parse NAPTR Record: [{}].", recordDescription);
-            String recordValue = StringUtils.trim(naptrRecord.getRegexp());
-            String[] split = StringUtils.split(recordValue, "!");
-            if (split.length != 2) {
-                LOG.warn("Parse NAPTR Record value: [{}] does not have 2 parts separated by character '!'.", recordValue);
+
+            if (!validNaptrFlags(naptrRecord.getFlags(), flagsList)) {
+                LOG.debug("NAPTR Record: [{}] does not have any of required flag [{}].", recordDescription, flagsList);
                 continue;
             }
-            String smpAddress = split[1];
+
+            String smpAddress = resolveNaptrValue(naptrRecord.getRegexp(), StringUtils.removeEnd(naptrRecord.getName().toString(),"."));
             if (validURLSchema(smpAddress, schemas)) {
                 return smpAddress;
             }
         }
         return null;
+    }
+
+    public String resolveNaptrValue(String recordValue, String hostname) {
+        String[] split = StringUtils.split(recordValue, "!");
+        if (split.length != 2) {
+            LOG.warn("Parse NAPTR Record value: [{}] does not have 2 parts separated by character '!'.", recordValue);
+            return null;
+        }
+        String regExp = split[0];
+        String value = split[1];
+        // Fast parse (used for U-NAPTR and the legacy '^.*$'
+        if (StringUtils.equalsAny(regExp, ".*","^.*$"))
+            return value;
+        // Using regex
+        return hostname.replaceAll(regExp, value);
     }
 
     protected boolean validURLSchema(String url, List<String> requiredSchemas) {
@@ -89,10 +108,15 @@ public class DefaultDNSLookup implements IDNSLookup {
                 .anyMatch(targetService -> equalsIgnoreCase(service, targetService));
     }
 
+    protected boolean validNaptrFlags(String flags, List<String> requiredFlagsList) {
+        return requiredFlagsList.stream()
+                .anyMatch(targetFlags -> equalsIgnoreCase(flags, targetFlags));
+    }
+
     @Override
     public String naptrUrlValueLookup(SMPParticipantIdentifier participantIdentifier, String uri) throws TechnicalException {
         List<Record> records = getAllNaptrRecords(participantIdentifier, uri);
-        return getURLFromNaptrRecord(records, requiredNaptrServices, requiredURLSchemas);
+        return getURLFromNaptrRecord(records, requiredNaptrServices, requiredURLSchemas, requiredNaptrFlagsList);
     }
 
     @Override
@@ -170,9 +194,12 @@ public class DefaultDNSLookup implements IDNSLookup {
     public static class Builder {
 
         static final List<String> DEFAULT_SCHEMAS = Arrays.asList("http:", "https:");
-        static final List<String> DEFAULT_NAPTR_SERVICES = Arrays.asList("Meta:SMP");
+        static final List<String> DEFAULT_NAPTR_SERVICES = Collections.singletonList("Meta:SMP");
+
+        static final List<String> DEFAULT_NAPTR_FLAGS = Collections.singletonList("U");
         List<String> requiredURLSchemas = new ArrayList<>();
         List<String> requiredNaptrServices = new ArrayList<>();
+        List<String> requiredNaptrFlagsList = new ArrayList<>();
 
         public DefaultDNSLookup.Builder addRequiredNaptrURLSchema(String schema) {
             this.requiredURLSchemas.add(schema);
@@ -194,6 +221,16 @@ public class DefaultDNSLookup implements IDNSLookup {
             return this;
         }
 
+        public DefaultDNSLookup.Builder addRequiredNaptrFlags(String flag) {
+            this.requiredNaptrFlagsList.add(flag);
+            return this;
+        }
+
+        public DefaultDNSLookup.Builder addRequiredNaptrFlagsList(List<String> flags) {
+            this.requiredNaptrFlagsList.addAll(flags);
+            return this;
+        }
+
         public DefaultDNSLookup build() {
             validate();
             return new DefaultDNSLookup(this);
@@ -205,6 +242,10 @@ public class DefaultDNSLookup implements IDNSLookup {
             }
             if (requiredURLSchemas.isEmpty()) {
                 requiredURLSchemas.addAll(DEFAULT_SCHEMAS);
+            }
+
+            if (requiredNaptrFlagsList.isEmpty()) {
+                requiredNaptrFlagsList.addAll(DEFAULT_NAPTR_FLAGS);
             }
         }
     }

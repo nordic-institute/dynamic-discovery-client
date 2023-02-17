@@ -64,17 +64,17 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         if (builder.schemeMandatory!=null) {
             this.participantIdentifierFormatter.setSchemeMandatory(builder.schemeMandatory);
         }
-
         if (builder.schemeValidationPattern!=null) {
             this.participantIdentifierFormatter.setSchemeValidationPattern(builder.schemeValidationPattern);
         }
-
         if (!builder.caseSensitiveSchemas.isEmpty()) {
             this.participantIdentifierFormatter.setCaseSensitiveSchemas(builder.caseSensitiveSchemas);
         }
-
         if (!builder.formatterTypes.isEmpty()) {
             this.participantIdentifierFormatter.setFormatters(builder.formatterTypes);
+        }
+        if (builder.wildcardEnabled!=null) {
+            this.participantIdentifierFormatter.setWildcardEnabled(builder.wildcardEnabled);
         }
     }
 
@@ -203,9 +203,8 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         private List<String> topDnsDomains = new ArrayList<>();
         private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
         private IDNSLookup dnsLookup;
-
-
         protected Boolean schemeMandatory;
+        protected Boolean wildcardEnabled;
         protected Pattern schemeValidationPattern;
         protected List<String> caseSensitiveSchemas = new ArrayList<>();
         protected List<FormatterType> formatterTypes = new ArrayList<>();
@@ -237,6 +236,11 @@ public class DefaultBDXRLocator implements IMetadataLocator {
 
         public Builder schemeMandatory(Boolean schemeMandatory) {
             this.schemeMandatory = schemeMandatory;
+            return this;
+        }
+
+        public Builder wildcardEnabled(Boolean wildcardEnabled) {
+            this.wildcardEnabled = wildcardEnabled;
             return this;
         }
 

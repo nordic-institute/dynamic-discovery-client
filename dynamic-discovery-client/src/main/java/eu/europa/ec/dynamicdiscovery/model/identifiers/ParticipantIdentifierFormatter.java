@@ -16,6 +16,11 @@ public class ParticipantIdentifierFormatter extends AbstractIdentifierFormatter<
         this.formatterTypes.add(new EBCorePartyIdFormatterType());
     }
 
+    public void setWildcardEnabled(boolean enable){
+        this.formatterTypes.forEach(formatterType -> formatterType.setWildcardEnabled(enable));
+        getDefaultFormatter().setWildcardEnabled(enable);
+    }
+
     @Override
     protected String getSchemeFromObject(SMPParticipantIdentifier object) {
         return object != null ? object.getScheme() : null;

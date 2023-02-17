@@ -67,13 +67,7 @@ public class DNSUtils {
     }
 
     public static String createSmpDnsNaptrDomain(String participantId, String scheme, String dnsZoneName) throws Exception {
-        String smpDnsName;
-        if ("*".equals(participantId)) {
-            smpDnsName = participantId + DNS_NAME_SEPARATOR + scheme + DNS_NAME_SEPARATOR + dnsZoneName;
-        } else {
-            smpDnsName = identifierFormatter.dnsLookupFormat(scheme, participantId, DNSLookupHashType.SHA256_BASE32) + DNS_NAME_SEPARATOR + dnsZoneName;
-        }
-        return smpDnsName;
+        return  identifierFormatter.dnsLookupFormat(scheme, participantId, DNSLookupHashType.SHA256_BASE32) + DNS_NAME_SEPARATOR + dnsZoneName;
     }
 
     public static Name createSmpDnsNaptrDomainName(String participantId, String scheme, String dnsZoneName) throws Exception {

@@ -31,6 +31,9 @@ public interface FormatterType {
      */
     boolean isType(final String value);
 
+    boolean isWildcardEnabled();
+    void setWildcardEnabled(boolean wildcardEnabled);
+
     String format(final String scheme, final String identifier);
 
     String format(final String scheme, final String identifier, boolean noDelimiterOnEmptyScheme);
@@ -53,12 +56,19 @@ public interface FormatterType {
     }
 
     default String dnsLookupFormatAllInHash(final String scheme, final String identifier, DNSLookupHashType dnsType) {
+        // wildcard case see the document "Software Architecture Document"  bdmsl_allowed_wildcard
+        if (isWildcardEnabled() && StringUtils.equals("*",identifier)){
+            return "*";
+        }
         String hashValue = format(scheme, identifier, true);
         return HashUtil.getDnsDiscoveryHash(hashValue, dnsType);
     }
 
     default String dnsLookupFormatSchemaAfterHash(final String scheme, final String identifier, DNSLookupHashType dnsType) {
-        return HashUtil.getDnsDiscoveryHash(identifier, dnsType) + (StringUtils.isEmpty(scheme) ? "" : "." + scheme);
+        // wildcard case see the document "Software Architecture Document"  bdmsl_allowed_wildcard
+        String value = isWildcardEnabled() && StringUtils.equals("*",identifier)?identifier :HashUtil.getDnsDiscoveryHash(identifier, dnsType);
+
+        return value+ (StringUtils.isEmpty(scheme) ? "" : "." + scheme);
     }
 
 }

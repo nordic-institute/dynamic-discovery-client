@@ -12,9 +12,10 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @since 2.0
  */
 public class OasisSMPFormatterType implements FormatterType {
-    private static final String SEPARATOR = "::";
+    static final String SEPARATOR = "::";
 
-    private  DNSLookupFormatType dnsLookupFormatType = null;
+    DNSLookupFormatType dnsLookupFormatType = null;
+    boolean wildcardEnabled = true;
 
     @Override
     public boolean isTypeByScheme(final String scheme) {
@@ -26,6 +27,16 @@ public class OasisSMPFormatterType implements FormatterType {
     public boolean isType(final String value){
         // the value should start with valid scheme
         return true;
+    }
+
+    @Override
+    public boolean isWildcardEnabled() {
+        return wildcardEnabled;
+    }
+
+    @Override
+    public void setWildcardEnabled(boolean wildcardEnabled) {
+        this.wildcardEnabled = wildcardEnabled;
     }
 
     @Override

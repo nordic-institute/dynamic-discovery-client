@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -42,17 +43,28 @@ import java.util.Optional;
  */
 public class DefaultBDXRReader extends AbstractXMLResponseReader implements IMetadataReader {
     static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRReader.class);
-    private ISignatureValidator signatureValidator;
+    final ISignatureValidator signatureValidator;
+    final List<IExtension> listExtensions = new ArrayList<>();
 
+    private DefaultBDXRReader(Builder builder) {
+        signatureValidator = builder.signatureValidator;
+        listExtensions.addAll(builder.listExtensions);
+    }
 
-    List<IExtension> listExtensions = new ArrayList<>();
-
+    /**
+     * @deprecated use builder
+     */
+    @Deprecated
     public DefaultBDXRReader(ISignatureValidator signatureValidator) {
         this(Arrays.asList(new OasisSMP10Extension(),
-                new OasisSMP20Extension()),
+                        new OasisSMP20Extension()),
                 signatureValidator);
     }
 
+    /**
+     * @deprecated use builder
+     */
+    @Deprecated
     public DefaultBDXRReader(List<IExtension> listExtensions, ISignatureValidator signatureValidator) {
         // register default parser
         this.listExtensions.addAll(listExtensions);
@@ -87,6 +99,41 @@ public class DefaultBDXRReader extends AbstractXMLResponseReader implements IMet
     @Override
     public SMPServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
         return readObject(fetcherResponse, SMPServiceMetadata.class, this.signatureValidator);
+    }
+
+
+    public static class Builder {
+
+        static final List<DNSLookupType> DEFAULT_LOOKUPS = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
+        private ISignatureValidator signatureValidator;
+        List<IExtension> listExtensions = new ArrayList<>();
+
+        public Builder addExtension(IExtension extension) {
+            this.listExtensions.add(extension);
+            return this;
+        }
+
+        public Builder addExtensions(List<IExtension> extensions) {
+            this.listExtensions.addAll(extensions);
+            return this;
+        }
+
+        public Builder signatureValidator(ISignatureValidator signatureValidator) {
+            this.signatureValidator = signatureValidator;
+            return this;
+        }
+
+        public DefaultBDXRReader build() {
+            validate();
+            return new DefaultBDXRReader(this);
+        }
+
+        private void validate() {
+            if (listExtensions.isEmpty()) {
+                listExtensions.addAll(Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension()));
+            }
+        }
+
     }
 
 

@@ -47,9 +47,10 @@ import static org.apache.commons.lang3.StringUtils.*;
 public abstract class AbstractIdentifierFormatter<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIdentifierFormatter.class);
 
-    protected static final FormatterType DEFAULT_FORMATTER = new OasisSMPFormatterType();
+    protected  FormatterType defaultFormatter = new OasisSMPFormatterType();
 
     protected boolean schemeMandatory = false;
+
     protected Pattern schemeValidationPattern;
     protected List<String> caseSensitiveSchemas;
     protected List<FormatterType> formatterTypes = new ArrayList<>();
@@ -77,7 +78,7 @@ public abstract class AbstractIdentifierFormatter<T> {
         Optional<FormatterType> optionalFormatterType = formatterTypes.stream().filter(formatterType ->
                 formatterType.isTypeByScheme(scheme)).findFirst();
 
-        return optionalFormatterType.orElse(DEFAULT_FORMATTER);
+        return optionalFormatterType.orElse(getDefaultFormatter());
     }
 
     /**
@@ -191,7 +192,7 @@ public abstract class AbstractIdentifierFormatter<T> {
         if (optionalFormatterType.isPresent()) {
             parseResult = optionalFormatterType.get().parse(pValue);
         } else {
-            parseResult = DEFAULT_FORMATTER.parse(pValue);
+            parseResult = getDefaultFormatter().parse(pValue);
         }
         boolean isSchemeBlank = isBlank(parseResult[0]);
         if (isSchemeMandatory() && isSchemeBlank) {
@@ -208,6 +209,9 @@ public abstract class AbstractIdentifierFormatter<T> {
         return createObject(parseResult[0], parseResult[1]);
     }
 
+    public FormatterType getDefaultFormatter(){
+        return defaultFormatter;
+    }
     /**
      * Method parses the object then it validates if scheme is case-sensitive and lower case the values accordingly.
      *
