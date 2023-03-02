@@ -192,10 +192,10 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         private SSLContextBuilder sslContextBuilder = SSLContexts.custom();
         private String[] tlsVersions;
         private String[] tlsCipherSuites;
-        private boolean noHostnameValidation = false;
+        private boolean noHostnameValidation;
 
-        private boolean enableHttpScheme = true;
-        private boolean enableHttpsScheme = true;
+        private boolean httpSchemeEnabled = true;
+        private boolean httpsSchemeEnabled = true;
 
         private IProxyConfiguration proxyConfiguration;
 
@@ -292,19 +292,19 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          * @param enableHttpScheme
          * @return this builder
          */
-        public Builder enableHttpScheme(final boolean enableHttpScheme) {
-            this.enableHttpScheme = enableHttpScheme;
+        public Builder setHttpSchemeEnabled(final boolean enableHttpScheme) {
+            this.httpSchemeEnabled = enableHttpScheme;
             return this;
         }
 
         /**
          * enable/disable to use https scheme
          *
-         * @param enableHttpsScheme
+         * @param httpsSchemeEnabled
          * @return this builder
          */
-        public Builder enableHttpsScheme(final boolean enableHttpsScheme) {
-            this.enableHttpsScheme = enableHttpsScheme;
+        public Builder setHttpsSchemeEnabled(final boolean httpsSchemeEnabled) {
+            this.httpsSchemeEnabled = httpsSchemeEnabled;
             return this;
         }
 
@@ -316,10 +316,10 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         public DefaultURLFetcher build() {
 
             RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
-            if (enableHttpScheme) {
+            if (httpSchemeEnabled) {
                 registryBuilder.register("http", new PlainConnectionSocketFactory());
             }
-            if (enableHttpsScheme) {
+            if (httpsSchemeEnabled) {
                 registryBuilder.register("https", buildSSLConnectionSocketFactory());
             }
 

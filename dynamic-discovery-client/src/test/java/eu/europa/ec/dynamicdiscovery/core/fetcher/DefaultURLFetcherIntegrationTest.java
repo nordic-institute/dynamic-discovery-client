@@ -127,7 +127,7 @@ public class DefaultURLFetcherIntegrationTest {
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
-                .enableHttpScheme(false)
+                .setHttpSchemeEnabled(false)
                 .tlsKeystore(clientKeystore, PASSWD.toCharArray())
                 .tlsTruststore(clientTruststore)
                 .build();
@@ -144,7 +144,7 @@ public class DefaultURLFetcherIntegrationTest {
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
-                .enableHttpScheme(false)
+                .setHttpSchemeEnabled(false)
                 .tlsCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
                 .tlsKeystore(clientKeystore, PASSWD.toCharArray())
                 .tlsTruststore(clientTruststore)
@@ -165,7 +165,7 @@ public class DefaultURLFetcherIntegrationTest {
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
-                .enableHttpScheme(false)
+                .setHttpSchemeEnabled(false)
                 .tlsVersions("TLSv1.1")
                 .tlsKeystore(clientKeystore, PASSWD.toCharArray())
                 .tlsTruststore(clientTruststore)
@@ -184,7 +184,7 @@ public class DefaultURLFetcherIntegrationTest {
         KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
-                .enableHttpScheme(false)
+                .setHttpSchemeEnabled(false)
                 .tlsKeystore(clientKeystore, PASSWD.toCharArray())
                 .build();
 
@@ -202,7 +202,7 @@ public class DefaultURLFetcherIntegrationTest {
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
-                .enableHttpScheme(false)
+                .setHttpSchemeEnabled(false)
                 .tlsTruststore(clientTruststore)
                 .build();
 
@@ -218,7 +218,7 @@ public class DefaultURLFetcherIntegrationTest {
     void testDisableHTTP() {
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
-                .enableHttpScheme(false)
+                .setHttpSchemeEnabled(false)
                 .build();
 
         ConnectionException result = assertThrows(ConnectionException.class, () -> testInstance.fetch(serverHTTPUri.resolve("oasis-smp-1.0/extension.xml")));
