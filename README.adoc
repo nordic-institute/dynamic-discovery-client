@@ -320,7 +320,7 @@ Example:
 DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance().fetcher(new DefaultURLFetcher(new DefaultProxy("127.0.0.1", 8000, "user", "password"))).build();
 ----
 
-=== Truststore configuration
+=== Signature Truststore configuration
 
 In order to check if the certificate extracted from the signed response is trusted even if the signature is valid, a truststore must be passed by parameter to the Signature Validator implementation.A trusted certificate must be included in the truststore.
 
@@ -333,7 +333,7 @@ Example:
  DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
 ----
 
-=== Configure regular expression to validate certificate subject
+=== Configure regular expression to validate signature certificate subject
 
 Apart from validating response of signer certificates against the truststore, the Dynamic Discovery gives the possibility to add (optional) a regular expression to validate any certificate metadata related to the subject of the signer certificate.
 
@@ -354,6 +354,59 @@ KeyStore truststore = KeyStore.getInstance("JKS");
 truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
 
 DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
+----
+
+=== Configure only HTTPS  with mutual TLS authentication
+
+Following example configures the default fetcher to allow retrieving SMP data only via https schema.
+
+[source,java]
+----
+// load truststore
+KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+
+// build DefaultURLFetcher
+DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+        .enableHttpScheme(false)
+        .tlsTruststore(clientTruststore)
+        .build();
+----
+
+
+=== Configure Default Fetcher HTTPS with mutual TLS authentication
+
+Following example configures the default fetcher to use mutual TLS authentication when retrieving SMP data.
+[source,java]
+----
+KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+
+DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+        .enableHttpScheme(false)
+        .tlsKeystore(clientKeystore, PASSWD.toCharArray())
+        .tlsTruststore(clientTruststore)
+        .build();
+----
+
+=== Configure Default Fetcher HTTPS with mutual TLS authentication and allowed algorithms
+
+Following example configures the default fetcher with allowed TLS Cipher suites and TLS versions.
+The cipher suits names and TLS versions are supported and defined by JCE provider or JAVA version standard names:
+
+https://docs.oracle.com/en/java/javase/18/docs/specs/security/standard-names.html#sslcontext-algorithms
+
+[source,java]
+----
+KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+
+DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+        .enableHttpScheme(false)
+        .tlsKeystore(clientKeystore, PASSWD.toCharArray())
+        .tlsTruststore(clientTruststore)
+        .tlsCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+        .tlsVersions("TLSv1.2","TLSv1.3")
+        .build();
 ----
 
 == How to use the dynamic discovery client

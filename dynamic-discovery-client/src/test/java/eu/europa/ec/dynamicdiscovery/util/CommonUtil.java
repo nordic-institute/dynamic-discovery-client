@@ -18,6 +18,7 @@
 package eu.europa.ec.dynamicdiscovery.util;
 
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -91,6 +92,12 @@ public class CommonUtil {
         return keyStore;
     }
 
+    public static KeyStore loadKeystore(String fileName, String type, String password) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance(type);
+        keyStore.load(CommonUtil.class.getResourceAsStream(fileName), StringUtils.isBlank(password)?null: password.toCharArray());
+        return keyStore;
+    }
+
     public static Certificate loadCertificate(String certFilename) throws IOException, CertificateException {
         InputStream fis = CommonUtil.class.getResourceAsStream(certFilename);
         BufferedInputStream bis = new BufferedInputStream(fis);
@@ -109,5 +116,4 @@ public class CommonUtil {
         InputStream fis = CommonUtil.class.getResourceAsStream(resource);
         return readAllBytes(fis);
     }
-
 }

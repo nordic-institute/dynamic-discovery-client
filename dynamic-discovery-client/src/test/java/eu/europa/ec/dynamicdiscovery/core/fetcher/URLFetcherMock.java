@@ -77,7 +77,6 @@ public class URLFetcherMock implements IMetadataFetcher {
         }
 
         throw new DNSLookupException("Not supported.");
-
     }
 
 }
