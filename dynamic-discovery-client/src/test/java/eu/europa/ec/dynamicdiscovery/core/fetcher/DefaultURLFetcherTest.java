@@ -53,35 +53,31 @@ import static org.mockito.ArgumentMatchers.any;
 @ExtendWith(MockitoExtension.class)
 class DefaultURLFetcherTest {
 
-    @Mock
-    private CloseableHttpClient httpClient;
-
-    @Mock
-    private IProxyConfiguration proxyConfiguration;
-
-    @Mock
-    private HttpRoutePlanner routePlanner;
-
-    @Mock
-    private HttpGet httpGet;
-
-    @Mock
-    private CloseableHttpResponse response;
-
-    @Mock
-    private HttpEntity httpEntity;
-
     @Captor
     private ArgumentCaptor<CloseableHttpClient> httpClientCaptor;
 
     @Captor
     private ArgumentCaptor<HttpGet> httpGetCaptor;
 
-    @Mock
-    private CredentialsProvider credentialsProvider;
+    private CloseableHttpClient httpClient= Mockito.mock(CloseableHttpClient.class);
 
-    @InjectMocks
-    private DefaultURLFetcher defaultURLFetcher = new DefaultURLFetcher();
+    private HttpGet httpGet= Mockito.mock(HttpGet.class);
+
+    private CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
+
+    private HttpEntity httpEntity  = Mockito.mock(HttpEntity.class);
+
+    private CredentialsProvider credentialsProvider  = Mockito.mock(CredentialsProvider.class);
+
+    private IProxyConfiguration proxyConfiguration = Mockito.mock(IProxyConfiguration.class);
+
+    private HttpRoutePlanner routePlanner = Mockito.mock(HttpRoutePlanner.class);
+
+    private DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+            .proxyConfiguration(proxyConfiguration)
+                .routePlanner(routePlanner)
+                .build();
+
 
     private String targetHost;
 
@@ -94,7 +90,7 @@ class DefaultURLFetcherTest {
         Mockito.doReturn(new ByteArrayInputStream("Dummy Content".getBytes())).when(httpEntity).getContent();
         Mockito.doReturn(200).when(response).getCode();
         //WHEN
-        FetcherResponse fetcherResponse = defaultURLFetcher.connect(httpClient, httpGet);
+        FetcherResponse fetcherResponse = testInstance.connect(httpClient, httpGet);
 
         //THEN
         assertNotNull(fetcherResponse);
@@ -109,7 +105,7 @@ class DefaultURLFetcherTest {
         Mockito.doReturn(naptrURI).when(httpGet).getUri();
 
         //WHEN THEN
-        DNSLookupException result = assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
+        DNSLookupException result = assertThrows(DNSLookupException.class, () -> testInstance.connect(httpClient, httpGet));
         assertEquals("It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.", result.getMessage());
 
     }
@@ -123,7 +119,7 @@ class DefaultURLFetcherTest {
         Mockito.doReturn(naptrURI).when(httpGet).getUri();
 
         //WHEN THEN
-        DNSLookupException result = assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
+        DNSLookupException result = assertThrows(DNSLookupException.class, () -> testInstance.connect(httpClient, httpGet));
         assertEquals("It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.", result.getMessage());
     }
 
@@ -147,7 +143,7 @@ class DefaultURLFetcherTest {
         // GIVEN
         givenTargetHost("ec.europa.eu");
         givenIgnoringConnectWithCapture();
-        givenTargetHostIgnoredByProxy(targetHost);
+        givenProxyForTargetHost(targetHost, Boolean.TRUE);
 
         // WHEN
         whenFetchingFromTheTarget();
@@ -191,7 +187,7 @@ class DefaultURLFetcherTest {
         givenErrorCode(errorCode);
 
         //WHEN THEN
-        DNSLookupException result = assertThrows(DNSLookupException.class, () -> defaultURLFetcher.connect(httpClient, httpGet));
+        DNSLookupException result = assertThrows(DNSLookupException.class, () -> testInstance.connect(httpClient, httpGet));
         assertEquals(errorMessage, result.getMessage());
     }
 
@@ -204,13 +200,13 @@ class DefaultURLFetcherTest {
     }
 
     private void givenIgnoringConnectWithCapture() throws TechnicalException {
-        defaultURLFetcher = Mockito.spy(defaultURLFetcher);
-        Mockito.doReturn(null).when(defaultURLFetcher).connect(any(CloseableHttpClient.class), any(HttpGet.class));
+        testInstance = Mockito.spy(testInstance);
+        Mockito.doReturn(null).when(testInstance).connect(any(CloseableHttpClient.class), any(HttpGet.class));
     }
 
     private void givenIgnoringConnect() throws TechnicalException {
-        defaultURLFetcher = Mockito.spy(defaultURLFetcher);
-        Mockito.doReturn(null).when(defaultURLFetcher).connect(any(CloseableHttpClient.class), any(HttpGet.class));
+        testInstance = Mockito.spy(testInstance);
+        Mockito.doReturn(null).when(testInstance).connect(any(CloseableHttpClient.class), any(HttpGet.class));
     }
 
     private void givenTargetHostIgnoredByProxy(String targetHost) {
@@ -235,7 +231,7 @@ class DefaultURLFetcherTest {
     }
 
     private void whenFetchingFromTheTarget() throws TechnicalException, URISyntaxException {
-        defaultURLFetcher.fetch(new URI("https://" + targetHost));
+        testInstance.fetch(new URI("https://" + targetHost));
     }
 
     private void thenNoProxyConfigurationConfigured() {
@@ -249,7 +245,7 @@ class DefaultURLFetcherTest {
     }
 
     private void thenHttpConnectionDetailsCorrect() throws TechnicalException, IllegalAccessException {
-        Mockito.verify(defaultURLFetcher).connect(httpClientCaptor.capture(), httpGetCaptor.capture());
+        Mockito.verify(testInstance).connect(httpClientCaptor.capture(), httpGetCaptor.capture());
         HttpClient httpClient = httpClientCaptor.getValue();
         HttpGet httpGet = httpGetCaptor.getValue();
 

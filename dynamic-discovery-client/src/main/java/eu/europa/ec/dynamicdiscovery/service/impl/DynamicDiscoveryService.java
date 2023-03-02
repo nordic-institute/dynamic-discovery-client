@@ -48,7 +48,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
     public DynamicDiscoveryService() {
         this.metadataProvider = new DefaultProvider();
-        this.metadataFetcher = new DefaultURLFetcher();
+        this.metadataFetcher = new DefaultURLFetcher.Builder().build();
     }
 
     @Override
