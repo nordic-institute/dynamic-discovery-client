@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<jaxb:bindings version="2.0" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-               jaxb:extensionBindingPrefixes="xjc"
->
+<jaxb:bindings version="2.0" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb">
 
     <!--  bind various namespaces to dedicated packages to prevent object collision -->
     <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup" >

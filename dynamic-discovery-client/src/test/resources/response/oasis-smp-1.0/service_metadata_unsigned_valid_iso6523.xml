@@ -10,7 +10,7 @@
                         <EndpointURI>https://test.erechnung.gv.at/as4/msh/</EndpointURI>
                         <RequireBusinessLevelSignature>false</RequireBusinessLevelSignature>
                         <Certificate>
-                            "MIIEUjCCAzqgAwIBAgIQP9HNsiz9c3LG08fQy1VibDANBgkqhkiG9w0BAQsFADBX
+                            MIIEUjCCAzqgAwIBAgIQP9HNsiz9c3LG08fQy1VibDANBgkqhkiG9w0BAQsFADBX
                             MQswCQYDVQQGEwJESzEnMCUGA1UEChMeTkFUSU9OQUwgSVQgQU5EIFRFTEVDT00g
                             QUdFTkNZMR8wHQYDVQQDExZQRVBQT0wgQUNDRVNTIFBPSU5UIENBMB4XDTE1MDMw
                             NjAwMDAwMFoXDTE3MDMwNTIzNTk1OVowVzELMAkGA1UEBhMCQVQxFzAVBgNVBAMM
@@ -42,6 +42,5 @@
                 </ServiceEndpointList>
             </Process>
         </ProcessList>
-        <Extension></Extension>
     </ServiceInformation>
 </ServiceMetadata>

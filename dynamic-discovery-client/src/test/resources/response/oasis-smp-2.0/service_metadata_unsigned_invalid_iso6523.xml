@@ -15,6 +15,7 @@
             <smb:ActivationDate>2018-04-12</smb:ActivationDate>
             <smb:ExpirationDate>2020-04-12</smb:ExpirationDate>
             <sma:Certificate>
+                <smb:Description>contact@example.com</smb:Description>
                 <smb:Subject>CN=EXAMPLE AP,C=NO</smb:Subject>
                 <smb:Issuer>CN=EXAMPLE AP,C=NO</smb:Issuer>
                 <smb:ActivationDate>2018-04-12</smb:ActivationDate>

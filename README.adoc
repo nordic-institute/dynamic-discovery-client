@@ -6,23 +6,23 @@ eDelivery Support Team <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
 :icons: font
 
 
-== INTRODUCTION
+== Introduction
 
 This Dynamic Discovery Client is a web service client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the SMP profile based on the OASIS SMP 1.0 and  OASIS SMP 2.0 specifications.
 
-=== PURPOSE OF THIS DOCUMENT
+=== Purpose of this document
 
 This page provides a brief description of how to use this web service client to connect to a Service Metadata Publisher using CNAME or NAPTR record to find out and retrieve Receiver Recipient Metadata.
 
 
-== PROJECT
+== Project
 
-=== ARTIFACTS
+=== Artifacts
 
 ![enter image description here](https://ec.europa.eu/digital-building-blocks/wiki/download/attachments/35215791/Dynamic%20Discovery%20Client.PNG?version=1&modificationDate=1476951474175&api=v2)
 
 
-=== REPOSITORY
+=== Repository
 
 All versions of Dynamic Discovery Client can be found on:
 
@@ -35,19 +35,19 @@ Snapshots
 https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery-snapshots/eu/europa/ec/dynamic-discovery/
 
 
-=== SOURCE CODE
+=== Source code
 
 Please find the GIT repository on https://ec.europa.eu/digital-building-blocks/code/scm/edelivery/dynamic-discovery-client.git
 
 Source code: https://ec.europa.eu/digital-building-blocks/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
 
 
-== SETTING UP PARAMETERS
+== Setting up parameters
 
 The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations, however, the user is free to use customized implementations to fit other needs.
 
 
-=== INTERFACES AND IMPLEMENTATIONS
+=== Interfaces and implementations
 
 **IMetadataLocator**
 

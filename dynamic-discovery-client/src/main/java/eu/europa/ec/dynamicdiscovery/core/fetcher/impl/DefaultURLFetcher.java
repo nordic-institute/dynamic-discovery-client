@@ -324,8 +324,6 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             }
 
             final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(registryBuilder.build());
-
-
             return new DefaultURLFetcher(connectionManager, routePlanner, proxyConfiguration);
         }
 
