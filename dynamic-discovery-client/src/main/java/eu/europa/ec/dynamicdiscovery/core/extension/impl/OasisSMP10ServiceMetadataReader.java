@@ -26,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -163,7 +164,8 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
     /**
      * Method validates if service is valid!
      *
-     * @return
+     * @param endpointType the endpoint to validate its data
+     * @return true if endpoint is valid.
      */
     public boolean isServiceValid(EndpointType endpointType) {
         OffsetDateTime currentDateTime = OffsetDateTime.now();
@@ -207,7 +209,7 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
         List<ProcessType> processTypes = serviceMetadata.getServiceMetadata().getServiceInformation().getProcessList().getProcesses();
         return processTypes.stream().map(this::readEndpointsForProcess)
                 .filter(smpEndpoints -> !smpEndpoints.isEmpty())
-                .flatMap(Collection::stream)
+                .flatMap(Collection::stream).filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
     }
