@@ -22,10 +22,12 @@ import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
@@ -52,6 +54,21 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
         return null;
     });
 
+    private static final ThreadLocal<Marshaller> jaxbMarshaller = ThreadLocal.withInitial(() -> {
+        try {
+
+            JAXBContext jaxbContext = JAXBContext.newInstance(ServiceMetadata.class);
+            return jaxbContext.createMarshaller();
+        } catch (JAXBException ex) {
+            LOG.error("Error occurred while initializing JAXBContext for OasisSMP20ServiceMetadataReader. Cause message:", ex);
+        }
+        return null;
+    });
+
+    private static Marshaller getMarshaller() {
+        return jaxbMarshaller.get();
+    }
+
 
     /**
      * Skip out-dated services
@@ -76,6 +93,9 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
      */
     public void destroyUnmarshaller() {
         jaxbUnmarshaller.remove();
+    }
+    public void destroyMarshaller() {
+        jaxbMarshaller.remove();
     }
 
     public Unmarshaller getUnmarshaller() {
@@ -105,13 +125,45 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
     }
 
     @Override
-    public SMPServiceMetadata parseAndValidateSignature(Document document, ISignatureValidator signatureValidator) throws TechnicalException {
-        ServiceMetadata serviceMetadata;
+    public ServiceMetadata parseNative(Document document) throws TechnicalException {
         try {
-            serviceMetadata = (ServiceMetadata) jaxbUnmarshaller.get().unmarshal(document);
+            return (ServiceMetadata) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
+            throw new BindException("Error occurred while parsing ServiceMetadata", e);
         }
+    }
+
+    @Override
+    public void serializeNative(Object jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
+        if (jaxbObject == null) {
+            return;
+        }
+        Marshaller jaxbMarshaller = getMarshaller();
+        // Pretty Print XML
+        try {
+            if (prettyPrint) {
+                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
+            }
+            // to remove xmlDeclaration
+            jaxbMarshaller.marshal(jaxbObject, outputStream);
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+        }
+    }
+
+    @Override
+    public ServiceMetadata parseNative(InputStream inputStream) throws TechnicalException {
+        try {
+            return (ServiceMetadata) jaxbUnmarshaller.get().unmarshal(inputStream);
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while parsing ServiceMetadata", e);
+        }
+    }
+
+    @Override
+    public SMPServiceMetadata parseAndValidateSignature(Document document, ISignatureValidator signatureValidator) throws TechnicalException {
+        ServiceMetadata serviceMetadata = parseNative(document);
+
         X509Certificate certificate = signatureValidator != null ? signatureValidator.verify(document) : null;
 
         SMPParticipantIdentifier participantIdentifierType = readParticipantIdentifier(serviceMetadata);

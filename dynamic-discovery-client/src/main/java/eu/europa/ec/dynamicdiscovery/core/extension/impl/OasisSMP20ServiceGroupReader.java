@@ -7,6 +7,8 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadata;
+import gen.eu.europa.ec.ddc.api.smp10.SignedServiceMetadata;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.ServiceReference;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
@@ -16,8 +18,11 @@ import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -41,6 +46,21 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
         return null;
     });
 
+    private static final ThreadLocal<Marshaller> jaxbMarshaller = ThreadLocal.withInitial(() -> {
+        try {
+
+            JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
+            return jaxbContext.createMarshaller();
+        } catch (JAXBException ex) {
+            LOG.error("Error occurred while initializing JAXBContext for OasisSMP20ServiceGroupReader. Cause message:", ex);
+        }
+        return null;
+    });
+
+    private static Marshaller getMarshaller() {
+        return jaxbMarshaller.get();
+    }
+
 
     private static final QName PARSE_ELEMENT = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup", "ServiceGroup");
 
@@ -50,6 +70,9 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
      */
     public void destroyUnmarshaller() {
         jaxbUnmarshaller.remove();
+    }
+    public void destroyMarshaller() {
+        jaxbMarshaller.remove();
     }
 
     public Unmarshaller getUnmarshaller() {
@@ -63,15 +86,45 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
 
     @Override
     public SMPServiceGroup parse(Document document) throws TechnicalException {
-        ServiceGroup serviceGroup;
+        ServiceGroup serviceGroup = parseNative(document);
+        return new SMPServiceGroup(getParticipantIdentifier(serviceGroup),
+                getDocumentIdentifiers(serviceGroup), serviceGroup);
+    }
+
+    @Override
+    public ServiceGroup parseNative(Document document) throws TechnicalException {
         try {
-            serviceGroup = (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
+            return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
             throw new BindException("Error occurred while parsing serviceGroup", e);
         }
+    }
 
-        return new SMPServiceGroup(getParticipantIdentifier(serviceGroup),
-                getDocumentIdentifiers(serviceGroup), serviceGroup);
+    @Override
+    public ServiceGroup parseNative(InputStream inputStream) throws TechnicalException {
+        try {
+            return  (ServiceGroup) jaxbUnmarshaller.get().unmarshal(inputStream);
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while parsing serviceGroup", e);
+        }
+    }
+
+    @Override
+    public void serializeNative(Object jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
+        if (jaxbObject == null) {
+            return;
+        }
+        Marshaller jaxbMarshaller = getMarshaller();
+        // Pretty Print XML
+        try {
+            if (prettyPrint) {
+                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
+            }
+            // to remove xmlDeclaration
+            jaxbMarshaller.marshal(jaxbObject, outputStream);
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+        }
     }
 
     @Override
