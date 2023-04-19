@@ -44,6 +44,8 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
+
+            LOG.error("Error  type: [{}], to string [{}]", ex.getClass(), ex.toString());
             LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:", ex);
         }
         return null;
@@ -100,7 +102,8 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
         try {
             return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
+            LOG.error("Error  type: [{}], to string [{}]", e.getCause().getClass(), e);
+            throw new BindException("Error occurred while parsing document serviceGroup", e);
         }
     }
 
@@ -109,7 +112,8 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
         try {
             return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(inputStream);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
+            LOG.error("Error  type: [{}], to string [{}]", e.getCause().getClass(), e);
+            throw new BindException("Error occurred while parsing serviceGroup from input stream", e);
         }
     }
 
@@ -118,14 +122,14 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
         if (jaxbObject == null) {
             return;
         }
-        Marshaller jaxbMarshaller = getMarshaller();
+        Marshaller marshaller = getMarshaller();
         // Pretty Print XML
         try {
             if (prettyPrint) {
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
+                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
             }
             // to remove xmlDeclaration
-            jaxbMarshaller.marshal(jaxbObject, outputStream);
+            marshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
             throw new BindException("Error occurred while serializing the ServiceGroup", e);
         }
