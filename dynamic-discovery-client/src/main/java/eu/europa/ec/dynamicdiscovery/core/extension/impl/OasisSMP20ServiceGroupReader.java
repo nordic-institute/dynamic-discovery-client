@@ -1,14 +1,13 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
-import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadata;
-import gen.eu.europa.ec.ddc.api.smp10.SignedServiceMetadata;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.ServiceReference;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
@@ -21,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -41,7 +41,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
         }
         return null;
     });
@@ -52,15 +52,18 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for OasisSMP20ServiceGroupReader. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
         }
         return null;
     });
 
-    private static Marshaller getMarshaller() {
+    public Marshaller getMarshaller() {
         return jaxbMarshaller.get();
     }
 
+    public Unmarshaller getUnmarshaller() {
+        return jaxbUnmarshaller.get();
+    }
 
     private static final QName PARSE_ELEMENT = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup", "ServiceGroup");
 
@@ -71,12 +74,9 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
     public void destroyUnmarshaller() {
         jaxbUnmarshaller.remove();
     }
+
     public void destroyMarshaller() {
         jaxbMarshaller.remove();
-    }
-
-    public Unmarshaller getUnmarshaller() {
-        return jaxbUnmarshaller.get();
     }
 
     @Override
@@ -100,10 +100,21 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
         }
     }
 
+    public Document objectToDocument(ServiceGroup serviceGroup) throws TechnicalException {
+        try {
+            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
+            Document document = db.newDocument();
+            getMarshaller().marshal(serviceGroup, document);
+            return document;
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while parsing serviceGroup", e);
+        }
+    }
+
     @Override
     public ServiceGroup parseNative(InputStream inputStream) throws TechnicalException {
         try {
-            return  (ServiceGroup) jaxbUnmarshaller.get().unmarshal(inputStream);
+            return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(inputStream);
         } catch (JAXBException e) {
             throw new BindException("Error occurred while parsing serviceGroup", e);
         }
@@ -140,7 +151,8 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
 
     /**
      * Method reads the Oasis SMP 2.0 Service group and returns all the DocumentIdentifiers
-     * @param serviceGroup  the Oasis SMP 2.0 Service group
+     *
+     * @param serviceGroup the Oasis SMP 2.0 Service group
      * @return List of SMPDocumentIdentifier
      */
     protected List<SMPDocumentIdentifier> getDocumentIdentifiers(ServiceGroup serviceGroup) {

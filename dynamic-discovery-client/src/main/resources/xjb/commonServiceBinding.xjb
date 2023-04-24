@@ -8,7 +8,7 @@
                        adapter="eu.europa.ec.dynamicdiscovery.xml.OffsetDateTimeAdapter"
                        />
         <xjc:javaType name="java.time.OffsetDateTime" xmlType="xs:date"
-                       adapter="eu.europa.ec.dynamicdiscovery.xml.OffsetDateTimeAdapter"
+                       adapter="eu.europa.ec.dynamicdiscovery.xml.OffsetDateAdapter"
                        />
        <xjc:simple/>
     </jaxb:globalBindings>

@@ -39,10 +39,10 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
     static final Logger LOG = LoggerFactory.getLogger(OasisSMP10ServiceMetadataReader.class);
     private static final ThreadLocal<Unmarshaller> jaxbUnmarshaller = ThreadLocal.withInitial(() -> {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(ServiceMetadata.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(SignedServiceMetadata.class, ServiceMetadata.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceMetadata. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" +  ex, ex);
         }
         return null;
     });
@@ -53,7 +53,7 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
             JAXBContext jaxbContext = JAXBContext.newInstance(SignedServiceMetadata.class, ServiceMetadata.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for OasisSMP10ServiceMetadataReader. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" +  ex, ex);
         }
         return null;
     });

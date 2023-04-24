@@ -1,6 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -9,6 +10,7 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceMetadata;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.Certificate;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.Endpoint;
@@ -25,6 +27,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -49,7 +52,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceMetadata.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceMetadata. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceMetadata. Cause message:" +  ex, ex);
         }
         return null;
     });
@@ -60,7 +63,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceMetadata.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for OasisSMP20ServiceMetadataReader. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceMetadata. Cause message:" +  ex, ex);
         }
         return null;
     });
@@ -130,6 +133,17 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             return (ServiceMetadata) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
             throw new BindException("Error occurred while parsing ServiceMetadata", e);
+        }
+    }
+
+    public Document objectToDocument(ServiceMetadata serviceMetadata) throws TechnicalException {
+        try {
+            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
+            Document document = db.newDocument();
+            getMarshaller().marshal(serviceMetadata, document);
+            return document;
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while parsing ServiceMetadata object", e);
         }
     }
 

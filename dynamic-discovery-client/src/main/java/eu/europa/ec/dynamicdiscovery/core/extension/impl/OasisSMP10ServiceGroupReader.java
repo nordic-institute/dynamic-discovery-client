@@ -44,9 +44,7 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-
-            LOG.error("Error  type: [{}], to string [{}]", ex.getClass(), ex.toString());
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
         }
         return null;
     });
@@ -57,12 +55,16 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup10Converter. Cause message:", ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
         }
         return null;
     });
 
-    private static Marshaller getMarshaller() {
+    public Unmarshaller getUnmarshaller() {
+        return jaxbUnmarshaller.get();
+    }
+
+    public Marshaller getMarshaller() {
         return jaxbMarshaller.get();
     }
 
@@ -78,10 +80,6 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
 
     public void destroyMarshaller() {
         jaxbMarshaller.remove();
-    }
-
-    public Unmarshaller getUnmarshaller() {
-        return jaxbUnmarshaller.get();
     }
 
     @Override
@@ -106,6 +104,7 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
             throw new BindException("Error occurred while parsing document serviceGroup", e);
         }
     }
+
 
     @Override
     public ServiceGroup parseNative(InputStream inputStream) throws TechnicalException {

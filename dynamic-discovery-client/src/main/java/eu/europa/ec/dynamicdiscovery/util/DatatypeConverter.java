@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +64,10 @@ public class DatatypeConverter {
     }
 
     public static String printDateTime(OffsetDateTime value) {
-        return value.toString();
+        return value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
+
+    public static String printDate(OffsetDateTime value) {
+        return value.format(DateTimeFormatter.ISO_OFFSET_DATE);
     }
 }
