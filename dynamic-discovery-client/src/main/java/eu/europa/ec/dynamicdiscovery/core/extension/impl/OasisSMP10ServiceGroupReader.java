@@ -1,6 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
@@ -15,12 +16,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -97,6 +101,7 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
 
     @Override
     public ServiceGroup parseNative(Document document) throws TechnicalException {
+
         try {
             return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
@@ -109,9 +114,12 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
     @Override
     public ServiceGroup parseNative(InputStream inputStream) throws TechnicalException {
         try {
-            return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(inputStream);
-        } catch (JAXBException e) {
-            LOG.error("Error  type: [{}], to string [{}]", e.getCause().getClass(), e);
+            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
+            // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
+            Document document = db.parse(inputStream);
+            return parseNative(document);
+        } catch ( SAXException | IOException e) {
+            LOG.error("Error  type: [{}], to string [{}]", e.getClass(), e);
             throw new BindException("Error occurred while parsing serviceGroup from input stream", e);
         }
     }

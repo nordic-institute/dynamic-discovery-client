@@ -1,6 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -13,13 +14,16 @@ import gen.eu.europa.ec.ddc.api.smp10.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.cert.CertificateFactory;
@@ -125,8 +129,11 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
     @Override
     public Object parseNative(InputStream inputStream) throws TechnicalException {
         try {
-            return  jaxbUnmarshaller.get().unmarshal(inputStream);
-        } catch (JAXBException e) {
+            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
+            // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
+            Document document = db.parse(inputStream);
+            return parseNative(document);
+        } catch (SAXException | IOException e) {
             throw new BindException("Error occurred while SignedServiceMetadata serviceGroup", e);
         }
     }

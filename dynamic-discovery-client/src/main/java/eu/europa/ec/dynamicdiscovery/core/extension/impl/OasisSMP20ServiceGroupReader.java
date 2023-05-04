@@ -14,6 +14,7 @@ import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -21,6 +22,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -114,9 +116,12 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
     @Override
     public ServiceGroup parseNative(InputStream inputStream) throws TechnicalException {
         try {
-            return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(inputStream);
-        } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
+            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
+            // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
+            Document document = db.parse(inputStream);
+            return parseNative(document);
+        } catch (SAXException | IOException e) {
+            throw new BindException("Error occurred while parsing serviceGroup: [{}]" , e);
         }
     }
 

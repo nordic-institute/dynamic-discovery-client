@@ -32,7 +32,7 @@ public abstract class AbstractXMLResponseReader {
     private static final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
     private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> createDocumentBuilder());
 
-    public static DocumentBuilder createDocumentBuilder() {
+        public static DocumentBuilder createDocumentBuilder() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         try {
@@ -96,5 +96,4 @@ public abstract class AbstractXMLResponseReader {
         String namespace = element.getNamespaceURI();
         return new QName(namespace, element.getTagName());
     }
-
 }
