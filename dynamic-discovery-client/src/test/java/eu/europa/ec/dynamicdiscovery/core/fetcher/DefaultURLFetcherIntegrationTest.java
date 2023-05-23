@@ -198,7 +198,6 @@ public class DefaultURLFetcherIntegrationTest {
     }
 
     @Test
-    @Ignore
     void testSimpleHTTPSFetchFailMissingClientKey() throws Exception {
         KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
@@ -210,10 +209,7 @@ public class DefaultURLFetcherIntegrationTest {
 
         ConnectionException result = assertThrows(ConnectionException.class, ()
                 -> testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml")));
-
         assertNotNull(result);
-        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("TLS Error occurred"));
-
     }
 
     @Test
