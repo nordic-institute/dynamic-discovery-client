@@ -22,11 +22,11 @@ package eu.europa.ec.dynamicdiscovery.exception;
  */
 public abstract class TechnicalException extends Exception {
 
-    public TechnicalException(String message) {
+    protected TechnicalException(String message) {
         super(message);
     }
 
-    public TechnicalException(String message, Throwable cause) {
+    protected TechnicalException(String message, Throwable cause) {
         super(message, cause);
     }
 }

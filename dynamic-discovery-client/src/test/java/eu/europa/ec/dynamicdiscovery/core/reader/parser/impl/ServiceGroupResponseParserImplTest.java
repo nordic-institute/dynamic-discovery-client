@@ -18,42 +18,42 @@
 package eu.europa.ec.dynamicdiscovery.core.reader.parser.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
+import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import org.junit.Test;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Flávio W. R. Santos
  */
-public class ServiceGroupResponseParserImplTest {
+class ServiceGroupResponseParserImplTest {
 
     @Test
-    public void testDocumentBuilderWithDocTypeDisabled1() throws Exception {
+    void testDocumentBuilderWithDocTypeDisabled1() throws Exception {
         testForDocType("service_group_with_doctype_filesystem");
     }
 
     @Test
-    public void testDocumentBuilderWithDocTypeDisabled2() throws Exception {
+    void testDocumentBuilderWithDocTypeDisabled2() throws Exception {
         testForDocType("service_group_with_doctype_multiplying_entities_out_of_memory");
     }
 
     private void testForDocType(String filename, String... errorMessage) throws Exception {
         //given
-        ServiceGroupResponseParserImpl serviceGroupResponseParser = new ServiceGroupResponseParserImpl();
-        InputStream serviceGroupStream = CommonUtil.getStreamFromXmlFile(filename);
+        DefaultBDXRReader responseParser = new DefaultBDXRReader(null);
+
+        InputStream serviceGroupStream = CommonUtil.getInputStreamFromOasisSMP10XmlResource(filename);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceGroupStream);
 
-        //when then
-        try {
-            serviceGroupResponseParser.getServiceGroup(fetcherResponse);
-        } catch (Exception e) {
-            assertTrue(e.getMessage().contains("DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true."));
-            return;
-        }
-        fail("DOCTYPE declaration must be blocked to prevent from XXE attacks");
+        //when
+        BindException result = Assertions.assertThrows(BindException.class, () -> responseParser.getServiceGroup(fetcherResponse));
+        //then
+        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("DOCTYPE is disallowed"));
     }
 }

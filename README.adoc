@@ -1,0 +1,491 @@
+= Getting started with the Dynamic Discovery Client for SMP
+eDelivery Support Team <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
+2.0, 8/2/2022:
+:toc:
+:sectnums:
+:icons: font
+
+
+== Introduction
+
+This Dynamic Discovery Client is a web service client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the SMP profile based on the OASIS SMP 1.0 and  OASIS SMP 2.0 specifications.
+
+=== Purpose of this document
+
+This page provides a brief description of how to use this web service client to connect to a Service Metadata Publisher using CNAME or NAPTR record to find out and retrieve Receiver Recipient Metadata.
+
+
+== Project
+
+=== Repository
+
+All versions of Dynamic Discovery Client can be found on:
+
+Releases
+
+https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery/eu/europa/ec/dynamic-discovery/
+
+Snapshots
+
+https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery-snapshots/eu/europa/ec/dynamic-discovery/
+
+
+=== Source code
+
+Please find the GIT repository on https://ec.europa.eu/digital-building-blocks/code/scm/edelivery/dynamic-discovery-client.git
+
+Source code: https://ec.europa.eu/digital-building-blocks/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+
+
+== Setting up parameters
+
+The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations, however, the user is free to use customized implementations to fit other needs.
+
+
+=== Interfaces and implementations
+
+**IMetadataLocator**
+
+This interface is responsible for managing the lookup algorithm and providing the URL or URI for the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator** for looking up NAPTR or CNAME records.
+Alternative is the **eu.europa.ec.dynamicdiscovery.core.fetcher.impl.StaticMapMetadataLocator.** for preconfigured/default SMP URI.
+
+**IMetadataFetcher**
+
+This interface is responsible for fetching the response from the request. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher.**
+
+**IDNSLookup**
+
+This interface is responsible for looking up the participant identifier. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup.**
+
+**IMetadataProvider**
+
+This interface is responsible for resolving URIs for participant identifier metadata. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider.**
+
+**IMetadataReader**
+
+This interface is responsible for parsing the response according to the **IExtensions**. By default it provides the implementation **eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader.** with Oasis SMP 1.0 and  Oasis SMP 2.0 extensions.
+
+**IExtensions**
+
+This interface contains a list of **IObjectReader** for the extension. The purpose of the implementation is to provide necessary methods for DDDC client to ready various document and to produce standard internal SMP objects.  By default DDC contains
+
+* **eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP10Extension** implementation of the Oasis SMP 1.0 standard
+* **eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP20Extension** implementation of the Oasis SMP 2.0 standard
+
+
+**IObjectReader**
+
+Reads the XML Document and generates the specified output object.
+
+
+
+**ISignatureValidator**
+
+This interface is responsible for verifying the signature of the response according to the XSD and is used by the abstract class **eu.europa.ec.dynamicdiscovery.core.security.AbstractSignatureValidator**, all the implementations must extend this abstract class.
+By default the implementation **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator** is provided.
+
+=== Discovery process
+
+Below is the diagram of executed when discovery process is executed
+
+.Discovery process sequence diagram
+[mermaid]
+....
+sequenceDiagram
+
+    actor DDC as DynamicDiscovery
+    participant DDS as DynamicDiscoveryService
+    participant LOC as URLLocator <br /> IMetadataLocator
+    participant RB as RequestBuilder <br /> IMetadataProvider
+    participant FC as Fetcher <br /> IMetadataFetcher
+    participant RD as Reader <br /> IMetadataReader
+
+    DDC ->>  DDS:  getServiceGroup
+    DDS ->>  LOC:  lookup
+    LOC -->> DDS: URL Data
+    DDS ->>  RB: Build request
+    RB -->>  DDS: Build request
+    DDS ->>  FC: Fetch data with request and URL
+    FC -->>  DDS: Response
+
+    DDS ->>  RD: Parse data
+    RD  -->> DDS: Data
+    DDS -->> DDC:Return Data
+....
+
+=== Class diagram
+
+ResponseParseFactory has list of Extensions which are responsible for reading XML documents. Each extension has two methods:
+
+- **handles(QName, Class)** returns true if extension can read XML document  and Object Class
+- **getParser(QName, Class)** return instance of parser to read the XML document to  Object type Class
+
+.parser plugin
+[mermaid]
+....
+classDiagram
+
+class IExtension {
+    <<interface>>
+    handles(QName, Class): boolean
+    getParser(QName, Class)
+}
+
+class OasisSMP10Extension {
+    handles(QName, Class): boolean
+    getParser(QName, Class)
+}
+
+class IObjectParser {
+    <<interface>>
+    handles(Class): boolean
+    <T> parse(Document): T
+}
+
+class OasisSMP10ServiceGroup {
+   handles(Class): boolean
+    <T> parse(Document): T
+}
+
+class OasisSMP10ServiceMetadata {
+   handles(Class): boolean
+    <T> parse(Document): T
+}
+
+class ResponseParserFactory {
+    register(IExtension)
+    createParser(QName, Class): IObjectParser
+}
+
+
+
+ResponseParserFactory "1" ..> "n" IExtension
+IExtension "1" ..> "n" IObjectParser
+
+OasisSMP10Extension --|> IExtension
+
+
+OasisSMP10ServiceGroup --|> IObjectParser
+OasisSMP10ServiceMetadata --|> IObjectParser
+
+OasisSMP10ServiceGroup --> OasisSMP10Extension
+OasisSMP10ServiceMetadata --> OasisSMP10Extension
+
+
+....
+
+=== Locator configuration
+
+The DDC has two  Locator implementations.
+- **DefaultBDXRLocator** lookup's the authoritative domain DNS given as a constructor parameter.
+- **StaticMapMetadataLocator** returns SMP's  URI based on preconfigured party identifier and URI mapping. If the party identifier is not found in the mapping, it returns the default URI.
+
+==== BDXL DNS Locator configuration (DefaultBDXRLocator)
+
+===== Example: Basic discovery with one top domain
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier one top dns domain
+[source,java]
+----
+DynamicDiscovery smpClient = builder
+        .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
+        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+===== Example: Basic discovery with a list of top domain
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains
+[source,java]
+----
+DynamicDiscovery smpClient = builder
+        .locator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addTopDnsDomain("acc.second.domain.com")
+                .build())
+        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+
+===== Example: Basic discovery with one top domain with only NAPTR lookup type
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier one top dns domain.
+The client will use only NAPTR DNS records with default service "Meta:SMP".
+[source,java]
+----
+DynamicDiscovery smpClient = builder
+        .locator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupTypes(Collections.singletonList(DNSLookupType.NAPTR))
+                .build())
+        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+
+===== Example: Basic discovery with one top domain with only NAPTR and meta:cppa3 service
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier one top dns domain.
+The client will use only NAPTR DNS records with service "meta:cppa3" (Default is Meta:SMP).
+[source,java]
+----
+DynamicDiscovery smpClient = builder
+        .locator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(new DefaultDNSLookup.Builder()
+                        .addRequiredNaptrService("meta:cppa3")
+                        .build())
+                .build())
+        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+
+===== Example: Basic discovery with one top domain with only NAPTR and meta:cppa3 service and only urls with https: schema
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier one top dns domain.
+The client will use only NAPTR DNS records with service "meta:cppa3" (Default is Meta:SMP) and will return only results with URL schema: "https:".
+[source,java]
+----
+DynamicDiscovery smpClient = builder
+        .locator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(new DefaultDNSLookup.Builder()
+                        .addRequiredNaptrService("meta:cppa3")
+                        .addRequiredNaptrURLSchema("https:")
+                        .build())
+                .build())
+        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+
+===== Example: Basic discovery with custom participant formatter
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on custom PartyIdentifier types. By default ebCoreParty Identifier type and Peppol Party identifier types are registered.
+
+The DefaultBDXRLocator will format/normalize the PartyIdentifier before lookup according to custom FormatterType
+
+[source,java]
+----
+// Use template formatter or create own formatter type
+FormatterType customFormatter = new TemplateFormatterType(Pattern.compile("^(?i)mailto.*$"),
+                "${scheme}-->${identifier}","${identifier}",
+                Pattern.compile("^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$"),
+                DNSLookupFormatType.SCHEMA_AFTER_HASH);
+
+// register formatter to DefaultBDXRLocator
+DynamicDiscovery smpClient = builder
+        .locator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addFormatterType(customFormatter)
+                .dnsLookup(new DefaultDNSLookup.Builder()
+                        .addRequiredNaptrService("meta:cppa3")
+                        .addRequiredNaptrURLSchema("https:")
+                        .build())
+                .build())
+        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+
+===== Example: Static Metadata Locator with single SMP url
+Example of how to configure with StaticMapMetadataLocator. The DDC will always fetch the party identifier's service metadata data from the give URI: " http://localhost:8090/cipa-smp-full-webapp/"
+[source,java]
+----
+DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+    .locator(new StaticMapMetadataLocator(new URI("http://localhost:8090/cipa-smp-full-webapp/")))
+    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+    .build();
+----
+===== Example: Static Metadata Locator with List of SMP urls
+Example of how to configure with StaticMapMetadataLocator with mapping. The DDC will try to looup party identifier mapping URI. If Party identifier is not found in the mapping, it will fetch the party identifier's service metadata data from the give URI: " http://localhost:8090/cipa-smp-full-webapp/"
+
+[source,java]
+----
+URI defaultURI =new URI("http://localhost:8090/cipa-smp-full-webapp/");
+Map<ParticipantIdentifier, URI> mapExceptions = new HashMap<>();
+mapExceptions.put(new ParticipantIdentifier("testId-01", "testScheme"), new URI("http://test-01/smp/"));
+mapExceptions.put(new ParticipantIdentifier("testId-02", "testScheme"), new URI("http://test-02/smp/"));
+
+DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+    .locator(new StaticMapMetadataLocator(defaultURI, mapExceptions))
+    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+    .build();
+----
+
+=== Proxy configuration
+
+By default **eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher** does not use proxy configuration. In order to use proxy, an instance of the class **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy** must be configured and passed by parameter as follows:
+
+Example:
+[source,java]
+----
+DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance().fetcher(new DefaultURLFetcher(new DefaultProxy("127.0.0.1", 8000, "user", "password"))).build();
+----
+
+=== Signature Truststore configuration
+
+In order to check if the certificate extracted from the signed response is trusted even if the signature is valid, a truststore must be passed by parameter to the Signature Validator implementation.A trusted certificate must be included in the truststore.
+
+Example:
+[source,java]
+----
+ KeyStore truststore = KeyStore.getInstance("JKS");
+ truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+ DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
+----
+
+=== Configure regular expression to validate signature certificate subject
+
+Apart from validating response of signer certificates against the truststore, the Dynamic Discovery gives the possibility to add (optional) a regular expression to validate any certificate metadata related to the subject of the signer certificate.
+
+In order to add this optional validation, please follow the steps below:
+[source,java]
+----
+// Default Signature Validator with regex to check certificate subject
+
+KeyStore truststore = KeyStore.getInstance("JKS");
+truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+String regexSubjectValidation = "^CN=eDelivery_SMP_TEST_1.*$"
+DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore,regexSubjectValidation);
+
+// Default Signature Validator
+
+KeyStore truststore = KeyStore.getInstance("JKS");
+truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+DefaultSignatureValidator signatureValidator = new DefaultSignatureValidator(truststore);
+----
+
+=== Configure only HTTPS  with mutual TLS authentication
+
+Following example configures the default fetcher to allow retrieving SMP data only via https schema.
+
+[source,java]
+----
+// load truststore
+KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+
+// build DefaultURLFetcher
+DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+        .enableHttpScheme(false)
+        .tlsTruststore(clientTruststore)
+        .build();
+----
+
+
+=== Configure Default Fetcher HTTPS with mutual TLS authentication
+
+Following example configures the default fetcher to use mutual TLS authentication when retrieving SMP data.
+[source,java]
+----
+KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+
+DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+        .enableHttpScheme(false)
+        .tlsKeystore(clientKeystore, PASSWD.toCharArray())
+        .tlsTruststore(clientTruststore)
+        .build();
+----
+
+=== Configure Default Fetcher HTTPS with mutual TLS authentication and allowed algorithms
+
+Following example configures the default fetcher with allowed TLS Cipher suites and TLS versions.
+The cipher suits names and TLS versions are supported and defined by JCE provider or JAVA version standard names:
+
+https://docs.oracle.com/en/java/javase/18/docs/specs/security/standard-names.html#sslcontext-algorithms
+
+[source,java]
+----
+KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+
+DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+        .enableHttpScheme(false)
+        .tlsKeystore(clientKeystore, PASSWD.toCharArray())
+        .tlsTruststore(clientTruststore)
+        .tlsCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
+        .tlsVersions("TLSv1.2","TLSv1.3")
+        .build();
+----
+
+== How to use the dynamic discovery client
+
+The DynamicDiscoveryBuilder is responsible for creating a new instance of the Dynamic Discovery Client. By default, there are implementations for all core services provided by the tool however new customized implementations can be used by the user.
+
+Default implementation example:
+[source,java]
+----
+KeyStore truststore = KeyStore.getInstance("JKS");
+truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+.locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu"))
+.reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
+.build();
+
+ParticipantIdentifier participantIdentifier = new ParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+----
+
+=== Get list of service group documents
+[source,java]
+----
+SMPServiceGroup serviceGroup = smpClient.getServiceGroup(participantIdentifier);
+List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers();
+----
+
+===  Get document service metadata
+[source,java]
+----
+SMPServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, new SMPDocumentIdentifier("urn::epsos:services== epsos-21", "epsos-docid-qns"));
+SMPEndpoint endpoint = serviceMetadata.getEndpoints().get(0);
+----
+
+== Customized implementation example
+
+Please replace classes starting with **"Customized"** by implementations extended from the aforementioned interfaces.It is not mandatory to have implementations for all the components (Locator, Reader, DNSLookup, Provider, Fetcher)
+
+[source,java]
+----
+KeyStore truststore = KeyStore.getInstance("PKCS12");
+truststore.load(new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("example/truststore.ts").getFile()), null);
+
+DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+        .locator(new CustomizedBDXRLocator("acc.edelivery.tech.ec.europa.eu", new CustomizedDNSLookup()))
+        .reader(new CustomizedBdxrReader(new CustomizedSignatureValidator(truststore)))
+        .provider(new CustomizedProvider())
+        .fetcher(new CustomizedURLFetcher(new CustomizedProxyConfiguration("127.0.0.1", 8000, "user", "password")))
+        .build();
+SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+----
+
+== Trustability model
+
+The certificates are validated against the truststore as follows.
+
+![enter image description here](https://ec.europa.eu/digital-building-blocks/wiki/download/attachments/37749134/trustabilitymodel.PNG?version=1&modificationDate=1501168419400&api=v2)
+
+== References
+
+e-SENS/PR-BDXL - http://wiki.ds.unipi.gr/display/ESENS/PR+-+BDXL
+
+PEPPOL BUSDOX - https://joinup.ec.europa.eu/community/epractice/document/eu-peppol-project-deliverable-busdox-specifications-v10
+
+Service Metadata Publisher (SMP) - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/bdx-smp-v1.0.html
+
+SMP XML schema - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/cs03/schemas/bdx-smp-201605.xsd
+
+
+== License
+
+Dynamic Discovery Client is under license LGPL-2.1.
+
+More Information:
+
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+
+
+==  Contact information
+
+CEF Support Team
+
+By email: CEF-EDELIVERY-SUPPORT@ec.europa.eu
+Standard Service: 8am to 6pm (Normal EC working Days)
+Standby Service**: 6pm to 8am (Commission and Public Holidays, Weekends)
+
+** Only for critical and urgent incidents and only by phone

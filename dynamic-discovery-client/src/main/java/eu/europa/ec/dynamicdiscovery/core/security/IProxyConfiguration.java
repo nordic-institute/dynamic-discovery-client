@@ -17,8 +17,8 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.security;
 
-import org.apache.http.HttpHost;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
+import org.apache.hc.core5.http.HttpHost;
 
 /**
  * A configuration that grants access to proxy details such as the proxy host and its credentials.

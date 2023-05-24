@@ -20,15 +20,13 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.core5.http.HttpHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
 
 /**
  * A configuration for managing the host, credentials and non-proxy host definitions when setting up an HTTP proxy.
@@ -38,7 +36,7 @@ import java.util.Arrays;
  * @since 1.13
  */
 public class DefaultProxy implements IProxyConfiguration {
-   final static Logger LOG = LoggerFactory.getLogger(DefaultProxy.class);
+    static final Logger LOG = LoggerFactory.getLogger(DefaultProxy.class);
 
     private final String user;
     private final String password;
@@ -85,7 +83,7 @@ public class DefaultProxy implements IProxyConfiguration {
                 return true;
             }
         }
-        LOG.debug(" host [{}] DEFAULT (no match of {} non proxy host)", target, Arrays.toString(nonProxyHosts));
+        LOG.debug(" host [{}] DEFAULT (no match of {} non proxy host)", target, nonProxyHosts);
         return false;
     }
 
@@ -114,10 +112,10 @@ public class DefaultProxy implements IProxyConfiguration {
             return null;
         }
 
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(
                 new AuthScope(this.serverAddress, this.serverPort),
-                new UsernamePasswordCredentials(this.user, this.password));
+                new UsernamePasswordCredentials(this.user, this.password.toCharArray()));
 
         LOG.info("Configured proxy credentials");
         return credentialsProvider;

@@ -17,7 +17,10 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
-import org.apache.commons.codec.binary.Base32;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
+import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.encoders.Base32;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -28,8 +31,11 @@ import java.security.Security;
 /**
  * @author Flávio W. R. Santos
  * @author Adrien Ferial
+ * @since 1.0
  */
 public class HashUtil {
+    protected HashUtil() {
+    }
 
     /**
      * Returns the MD5 hash of the given String
@@ -39,8 +45,8 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public static String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        return getHash(stringToBeHashed, "MD5", false);
+    public static String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
+        return getHash(stringToBeHashed, "MD5", false, false);
     }
 
     /**
@@ -51,8 +57,8 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public static String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        return getHash(stringToBeHashed, "SHA224", false);
+    public static String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
+        return getHash(stringToBeHashed, "SHA224", false, false);
     }
 
     /**
@@ -63,19 +69,22 @@ public class HashUtil {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    public static String getSHA256HashBase32(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        return getHash(stringToBeHashed, "SHA256", true);
+    public static String getSHA256HashBase32(String stringToBeHashed) throws NoSuchAlgorithmException {
+        return getHash(stringToBeHashed, "SHA256", true, true);
     }
 
     /**
      * Returns the hash of the given String
      *
-     * @param stringToBeHashed
+     * @param stringToBeHashed input value for hashing
+     * @param algorithm        hash algorithm
+     * @param isBase32         result encoding. if true it returns base32 encoded else result is  hexadecimal encoded
      * @return the hash of the given string
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    private static String getHash(String stringToBeHashed, String algorithm, boolean isBase32) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private static String getHash(String stringToBeHashed, String algorithm, boolean isBase32, boolean toUpperCase) throws NoSuchAlgorithmException {
+
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }
@@ -85,15 +94,10 @@ public class HashUtil {
         byte[] hashBytes = md.digest();
 
         if (isBase32) {
-            Base32 base32 = new Base32();
-
-
-            //convert the byte to BASE32 - noPadding '='
-            //BaseEncoding base32
-            //        = BaseEncoding.base32().omitPadding();
-            String base64Value = base32.encodeToString(hashBytes);
+            String base32Value = Base32.toBase32String(hashBytes);
+            base32Value = base32Value.replaceAll("=*$", "");
             // remove padding
-            return base64Value.replaceAll("=*$", "");
+            return updateStringCase(base32Value, toUpperCase);
         } else {
             //convert the byte to hex format method 2
             StringBuilder hexString = new StringBuilder();
@@ -104,7 +108,26 @@ public class HashUtil {
                 }
                 hexString.append(hex);
             }
-            return hexString.toString();
+            return updateStringCase(hexString.toString(), toUpperCase);
+        }
+    }
+
+    /**
+     * Method updates string character case
+     *
+     * @param value       value to update the case
+     * @param toUpperCase if true it returns upper case string, else it returns lower case string.
+     * @return updated case string
+     */
+    public static String updateStringCase(String value, boolean toUpperCase) {
+        return toUpperCase ? StringUtils.upperCase(value) : StringUtils.lowerCase(value);
+    }
+
+    public static String getDnsDiscoveryHash(String value, DNSLookupHashType dnsType) {
+        try {
+            return StringUtils.trimToEmpty(dnsType.getPrefix()) + getHash(value, dnsType.getAlgorithm(), dnsType.isBase32(), dnsType.isUpperCase());
+        } catch (NoSuchAlgorithmException e) {
+            throw new DDCRuntimeException("Hash algorithm implementation [" + dnsType.getAlgorithm() + "] not exist!", e);
         }
     }
 }

@@ -1,3 +1,10 @@
+Dynamic Discovery 1.4
+ - update libraries
+   - org.apache.httpcomponents to org.apache.httpcomponents.client5 see the: https://hc.apache.org/httpcomponents-client-5.2.x/migration-guide/migration-to-classic.html (https changes!)
+   - dnsjava to 3.5.2
+ - remove library commons-io:2.11.0
+
+
 Dynamic Discovery 1.2
 - Fix the collision between XML DSIG generated classes
 Dynamic Discovery 1.1

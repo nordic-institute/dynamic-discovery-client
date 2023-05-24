@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jaxb:bindings version="2.0" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb">
+
+    <!--  bind various namespaces to dedicated packages to prevent object collision -->
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup" >
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.smp20"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceMetadata">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.smp20"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/BasicComponents">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.smp20.basic"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ExtensionComponents">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.smp20.extension"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/AggregateComponents">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.smp20.aggregate"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="urn:un:unece:uncefact:data:specification:CoreComponentTypeSchemaModule:2">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.smp20.uncefact"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/UnqualifiedDataTypes">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.smp20.UnqualifiedDataTypes"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://www.w3.org/2000/09/xmldsig#">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.xmldsig"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://uri.etsi.org/01903/v1.3.2#">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.xmldsig.xades132"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://uri.etsi.org/01903/v1.4.1#">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.xmldsig.xades141"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://www.w3.org/2009/xmldsig11#">
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.xmldsig.xmldsig11"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+</jaxb:bindings>

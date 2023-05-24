@@ -19,6 +19,8 @@ package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
  * @author Flávio W. R. Santos
+ * @since 1.0
+ *
  */
 public class BindException extends TechnicalException {
 

@@ -18,25 +18,47 @@
 package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.*;
 
 import java.net.URI;
 
 /**
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
+ * @since 1.0
  */
 public class DefaultProvider implements IMetadataProvider {
+    ParticipantIdentifierFormatter participantIdentifierFormatter = new ParticipantIdentifierFormatter();
+    DocumentIdentifierFormatter documentIdentifierFormatter = new DocumentIdentifierFormatter();
+
 
     @Override
-    public URI resolveDocumentIdentifiers(URI smpURI, ParticipantIdentifier participantIdentifier) {
-        return URI.create(smpURI.toString() + String.format("/%s", participantIdentifier.urlencoded())).normalize();
+    public URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier) {
+        String participantPathParameter = participantIdentifierFormatter.urlEncodedFormat(participantIdentifier);
+        return URI.create(smpURI.toString() + String.format("/%s", participantPathParameter)).normalize();
     }
 
     @Override
-    public URI resolveServiceMetadata(URI smpURI, ParticipantIdentifier participantIdentifier, DocumentIdentifier
-            documentIdentifier) {
-        return URI.create(smpURI.toString() + String.format("/%s/services/%s", participantIdentifier.urlencoded(), documentIdentifier.urlencoded())).normalize();
+    public URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier,
+                                      SMPDocumentIdentifier documentIdentifier) {
+        String participantPathParameter = participantIdentifierFormatter.urlEncodedFormat(participantIdentifier);
+        String documentPathParameter = documentIdentifierFormatter.urlEncodedFormat(documentIdentifier);
+
+        return URI.create(smpURI.toString() + String.format("/%s/services/%s", participantPathParameter,documentPathParameter)).normalize();
+    }
+
+    public String format(SMPParticipantIdentifier identifier){
+        return participantIdentifierFormatter.format(identifier);
+    }
+    public String urlEncodedFormat(SMPParticipantIdentifier identifier){
+        return participantIdentifierFormatter.urlEncodedFormat(identifier);
+    }
+
+    public String format(SMPDocumentIdentifier identifier){
+        return documentIdentifierFormatter.format(identifier);
+    }
+
+    public String urlEncodedFormat(SMPDocumentIdentifier identifier){
+        return documentIdentifierFormatter.urlEncodedFormat(identifier);
     }
 }

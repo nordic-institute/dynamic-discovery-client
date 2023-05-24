@@ -18,16 +18,17 @@
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.ServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
 
 import java.util.List;
 
 /**
  * @author Flávio W. R. Santos
+ * @since 1.0
  */
 public class DynamicDiscovery {
 
@@ -37,20 +38,15 @@ public class DynamicDiscovery {
         this.service = service;
     }
 
-    public ServiceGroup getServiceGroup(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public SMPServiceGroup getServiceGroup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         return service.getServiceGroup(participantIdentifier);
     }
-
-    @Deprecated
-    /**
-     *@deprecated Replaced by {@link #getServiceGroup(ParticipantIdentifier)}.getDocumentIdentifiers()
-     *
-     *  * */
-    public List<DocumentIdentifier> getDocumentIdentifiers(ParticipantIdentifier participantIdentifier) throws TechnicalException {
+    
+    public List<SMPDocumentIdentifier> getDocumentIdentifiers(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         return getServiceGroup(participantIdentifier).getDocumentIdentifiers();
     }
 
-    public ServiceMetadata getServiceMetadata(ParticipantIdentifier participantIdentifier, DocumentIdentifier documentIdentifier) throws TechnicalException {
+    public SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
         return service.getServiceMetadata(participantIdentifier, documentIdentifier);
     }
 
