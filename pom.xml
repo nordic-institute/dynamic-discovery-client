@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.europa.ec.dynamic-discovery</groupId>
     <artifactId>dynamic-discovery-parent</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>dynamic-discovery-parent</name>
@@ -25,7 +24,7 @@
     </modules>
 
     <scm>
-        <developerConnection>scm:git:https://ec.europa.eu/cefdigital/code/scm/edelivery/dynamic-discovery-client.git
+        <developerConnection>scm:git:https://ec.europa.eu/digital-building-blocks/code/scm/edelivery/dynamic-discovery-client.git
         </developerConnection>
         <tag>HEAD</tag>
     </scm>
@@ -33,11 +32,11 @@
     <distributionManagement>
         <repository>
             <id>cefdigital-releases</id>
-            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery/</url>
+            <url>https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery/</url>
         </repository>
         <snapshotRepository>
             <id>cefdigital-snapshots</id>
-            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots/</url>
+            <url>https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -48,6 +47,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <release.arguments>-Dmaven.javadoc.skip=true -Dmaven.test.skipTests=true -Dmaven.test.skip=true</release.arguments>
 
         <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
@@ -437,6 +437,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
+                    <arguments>-Dmaven.javadoc.skip=true -Dmaven.test.skipTests=true -Dmaven.test.skip=true</arguments>
                     <!-- Automatically assign submodules the parent version during the release. -->
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                 </configuration>
