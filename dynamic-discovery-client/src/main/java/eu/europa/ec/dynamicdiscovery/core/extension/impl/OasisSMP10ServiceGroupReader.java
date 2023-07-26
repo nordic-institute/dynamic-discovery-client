@@ -13,6 +13,7 @@ import gen.eu.europa.ec.ddc.api.smp10.ParticipantIdentifierType;
 import gen.eu.europa.ec.ddc.api.smp10.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadataReferenceType;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -105,7 +106,7 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
         try {
             return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            LOG.error("Error  type: [{}], to string [{}]", e.getCause().getClass(), e);
+            LOG.error("Error  type: [{}], to string [{}]", e.getCause().getClass(), ExceptionUtils.getRootCauseMessage(e));
             throw new BindException("Error occurred while parsing document serviceGroup", e);
         }
     }
