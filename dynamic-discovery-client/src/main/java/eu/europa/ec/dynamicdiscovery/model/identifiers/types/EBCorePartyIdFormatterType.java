@@ -37,8 +37,8 @@ public class EBCorePartyIdFormatterType extends AbstractFormatterType {
 
     @Override
     public boolean isSchemeValid(final String scheme) {
-        String partyIdPrivate = StringUtils.trim(scheme);
-        if (StringUtils.isBlank(scheme)) {
+        String partyIdPrivate = StringUtils.trimToEmpty(scheme);
+        if (StringUtils.isEmpty(scheme)) {
             LOG.debug("EBCorePartyIdFormatterType does not support identifiers with Null/Blank scheme");
             return false;
         }

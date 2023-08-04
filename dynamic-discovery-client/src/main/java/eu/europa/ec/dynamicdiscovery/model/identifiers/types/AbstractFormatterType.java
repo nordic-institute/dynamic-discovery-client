@@ -10,10 +10,10 @@ public abstract class AbstractFormatterType implements  FormatterType {
 
     boolean isSchemeMandatory = true;
     boolean wildcardEnabled = true;
-    Integer schemeMaxLength = null;
-    Integer valueMaxLength = null;
-    Pattern valuePattern = null;
-    Pattern schemePattern = null;
+    Integer schemeMaxLength;
+    Integer valueMaxLength;
+    Pattern valuePattern;
+    Pattern schemePattern;
 
 
     @Override
