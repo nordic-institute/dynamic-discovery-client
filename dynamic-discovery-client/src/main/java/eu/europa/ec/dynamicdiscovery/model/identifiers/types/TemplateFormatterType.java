@@ -20,7 +20,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class TemplateFormatterType implements FormatterType {
+public class TemplateFormatterType  extends AbstractFormatterType {
     private static final Logger LOG = LoggerFactory.getLogger(TemplateFormatterType.class);
     public static final String SPLIT_GROUP_SCHEME_NAME = "scheme";
     public static final String SPLIT_GROUP_IDENTIFIER_NAME = "identifier";
@@ -32,8 +32,6 @@ public class TemplateFormatterType implements FormatterType {
     private final Pattern schemaPattern;
     private final String formatTemplate;
     private final String formatTemplateNullScheme;
-    private boolean wildcardEnabled = true;
-
 
 
     public TemplateFormatterType(Pattern matchSchema, String formatTemplate, Pattern splitRegularExpression) {
@@ -53,10 +51,14 @@ public class TemplateFormatterType implements FormatterType {
      * {@inheritDoc}
      */
     @Override
-    public boolean isTypeByScheme(final String scheme) {
+    public boolean isSchemeValid(final String scheme) {
         if (StringUtils.isBlank(scheme)) {
             LOG.debug("TemplateFormatterType does not support identifiers with Null/Blank scheme");
             return false;
+        }
+        if (schemaPattern == null) {
+            LOG.debug("TemplateFormatterType schemaPattern is not defined - all schemes are valid");
+            return true;
         }
         Matcher matcher = schemaPattern.matcher(scheme);
         return matcher.matches();
@@ -71,18 +73,12 @@ public class TemplateFormatterType implements FormatterType {
             LOG.debug("Formatter does not support Null/Blank identifiers ");
             return false;
         }
-        Matcher matcher = schemaPattern.matcher(value);
+        if (splitRegularExpression == null) {
+            LOG.debug("TemplateFormatterType split regular expression is not defined!");
+            return false;
+        }
+        Matcher matcher = splitRegularExpression.matcher(value);
         return matcher.matches();
-    }
-
-    @Override
-    public boolean isWildcardEnabled() {
-        return wildcardEnabled;
-    }
-
-    @Override
-    public void setWildcardEnabled(boolean wildcardEnabled) {
-        this.wildcardEnabled = wildcardEnabled;
     }
 
     @Override

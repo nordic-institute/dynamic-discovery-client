@@ -1,6 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.model.identifiers;
 
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.EBCorePartyIdFormatterType;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.types.PeppolPartyIdFormatterType;
 
 /**
  * Formatter for the ParticipantIdentifier with default "ebCoreParty" split regular expression and
@@ -12,8 +13,9 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.types.EBCorePartyIdFormat
 public class ParticipantIdentifierFormatter extends AbstractIdentifierFormatter<SMPParticipantIdentifier> {
 
     public ParticipantIdentifierFormatter() {
-
-        this.formatterTypes.add(new EBCorePartyIdFormatterType());
+        addFormatterTypes(new EBCorePartyIdFormatterType());
+        setDefaultFormatter(new PeppolPartyIdFormatterType());
+        this.defaultFormatter = new PeppolPartyIdFormatterType();
     }
 
     public void setWildcardEnabled(boolean enable){

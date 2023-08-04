@@ -71,7 +71,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
             this.participantIdentifierFormatter.setCaseSensitiveSchemas(builder.caseSensitiveSchemas);
         }
         if (!builder.formatterTypes.isEmpty()) {
-            this.participantIdentifierFormatter.setFormatters(builder.formatterTypes);
+            this.participantIdentifierFormatter.setFormatterTypes(builder.formatterTypes);
         }
         if (builder.wildcardEnabled!=null) {
             this.participantIdentifierFormatter.setWildcardEnabled(builder.wildcardEnabled);

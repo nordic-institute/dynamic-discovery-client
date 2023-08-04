@@ -2,8 +2,8 @@ package eu.europa.ec.dynamicdiscovery.model.identifiers;
 
 
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
-import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.MalformedIdentifierException;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.types.AbstractFormatterType;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.FormatterType;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.OasisSMPFormatterType;
 import org.apache.commons.lang3.StringUtils;
@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -26,7 +26,6 @@ import static org.apache.commons.lang3.StringUtils.*;
  * <p>
  * This class provides parsing and formatting method for identifier objects as:
  * ParticipantIdentifierType, DocumentIdentifier, and ProcessIdentifier.
- *
  * <b>Parsing the identifier</b>
  * Parse method tries to detect the scheme and identifier part of the identifier string using the
  * regular expression and separator sequence.
@@ -42,20 +41,17 @@ import static org.apache.commons.lang3.StringUtils.*;
  * In case the schemeMandatory is set to true and the scheme is null, the MalformedIdentifierException is thrown.
  *
  * @author Joze Rihtarsic
- * @since 2.0
+ * @since 4.3
  */
 public abstract class AbstractIdentifierFormatter<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIdentifierFormatter.class);
 
-    protected  FormatterType defaultFormatter = new OasisSMPFormatterType();
+    protected AbstractFormatterType defaultFormatter = new OasisSMPFormatterType();
 
-    protected boolean schemeMandatory = false;
-
-    protected Pattern schemeValidationPattern;
     protected List<String> caseSensitiveSchemas;
     protected List<FormatterType> formatterTypes = new ArrayList<>();
 
-
+    protected Integer maxSchemeLength = null;
 
     /**
      * Formats the object according to formatTemplate. If template is 'blank' the scheme and identifier are concatenated
@@ -74,9 +70,24 @@ public abstract class AbstractIdentifierFormatter<T> {
      * @param scheme identifier scheme
      * @return FormatterType. If not Formatter is found it returns DEFAULT_FORMATTER
      */
-    public FormatterType findFormatterByScheme(String scheme) {
+    public FormatterType findFormatter(String scheme, String identifier) {
+
+
         Optional<FormatterType> optionalFormatterType = formatterTypes.stream().filter(formatterType ->
-                formatterType.isTypeByScheme(scheme)).findFirst();
+                formatterType.isType(scheme, identifier)).findFirst();
+
+        return optionalFormatterType.orElse(getDefaultFormatter());
+    }
+
+    /**
+     * Method locates formatter based on identifier
+     *
+     * @param identifier concatenated identifier using scheme and  value
+     * @return FormatterType. If not Formatter is found it returns DEFAULT_FORMATTER
+     */
+    public FormatterType findFormatterByIdentifier(String identifier) {
+        Optional<FormatterType> optionalFormatterType = formatterTypes.stream().filter(formatterType ->
+                formatterType.isType(identifier)).findFirst();
 
         return optionalFormatterType.orElse(getDefaultFormatter());
     }
@@ -84,10 +95,13 @@ public abstract class AbstractIdentifierFormatter<T> {
     /**
      * Method add formatter to the list of identifier formatter
      *
-     * @param formatterType formatter of the identifier
+     * @param formatterTypes formatter of the identifier
      */
-    public void addFormatter(FormatterType formatterType) {
-        this.formatterTypes.add(formatterType);
+    public void addFormatterTypes(FormatterType ... formatterTypes) {
+        if (formatterTypes == null || formatterTypes.length == 0)
+            return;
+
+        this.formatterTypes.addAll(Arrays.asList(formatterTypes));
     }
 
     /**
@@ -95,7 +109,7 @@ public abstract class AbstractIdentifierFormatter<T> {
      *
      * @param formatterTypes formatter of the identifier
      */
-    public void setFormatters(List<FormatterType> formatterTypes) {
+    public void setFormatterTypes(List<FormatterType> formatterTypes) {
         this.formatterTypes.clear();
         this.formatterTypes.addAll(formatterTypes);
     }
@@ -105,8 +119,16 @@ public abstract class AbstractIdentifierFormatter<T> {
      *
      * @return formatterTypes formatter of the identifier
      */
-    public List<FormatterType> getFormatters() {
+    public List<FormatterType> getFormatterTypes() {
         return this.formatterTypes;
+    }
+
+    public void setDefaultFormatter(AbstractFormatterType defaultFormatter) {
+        if (defaultFormatter == null) {
+            LOG.warn("Can not set null default formatter!");
+            return;
+        }
+        this.defaultFormatter = defaultFormatter;
     }
 
     /**
@@ -119,7 +141,7 @@ public abstract class AbstractIdentifierFormatter<T> {
      */
     public String format(String scheme, String identifier) {
         // find the formatter
-        FormatterType formatter = findFormatterByScheme(StringUtils.isEmpty(scheme)?identifier:scheme);
+        FormatterType formatter = findFormatter(scheme, identifier);
         return formatter.format(scheme, identifier);
     }
 
@@ -133,7 +155,7 @@ public abstract class AbstractIdentifierFormatter<T> {
      * @return String representation of the identifier
      */
     public String format(String scheme, String identifier, boolean noDelimiterOnBlankScheme) {
-        FormatterType formatter = findFormatterByScheme(scheme);
+        FormatterType formatter = findFormatter(scheme, identifier);
         return formatter.format(scheme, identifier, noDelimiterOnBlankScheme);
     }
 
@@ -149,7 +171,7 @@ public abstract class AbstractIdentifierFormatter<T> {
         // find the formatter
         String scheme = getSchemeFromObject(identifierObject);
         String identifier = getIdentifierFromObject(identifierObject);
-        FormatterType formatter = findFormatterByScheme(scheme);
+        FormatterType formatter = findFormatter(scheme, identifier);
         return formatter.dnsLookupFormat(scheme, identifier, dnsLookupHashType);
     }
 
@@ -164,7 +186,7 @@ public abstract class AbstractIdentifierFormatter<T> {
      */
     public String dnsLookupFormat(String scheme, String identifier, DNSLookupHashType dnsLookupHashType) {
         // find the formatter
-        FormatterType formatter = findFormatterByScheme(scheme);
+        FormatterType formatter = findFormatter(scheme, identifier);
         return formatter.dnsLookupFormat(scheme, identifier, dnsLookupHashType);
     }
 
@@ -174,44 +196,32 @@ public abstract class AbstractIdentifierFormatter<T> {
      * <p>
      * Method parse the identifier.
      *
-     * @param value
+     * @param identifier
      * @return
      */
-    public T parse(final String value) {
-        if (isBlank(value)) {
+    public T parse(final String identifier) {
+        if (isBlank(identifier)) {
             throw new MalformedIdentifierException("Can not parse empty identifier value!");
         }
 
-        String pValue = trim(value);
+        String pIdentifier = trim(identifier);
 
         // find the formatter
-        Optional<FormatterType> optionalFormatterType = formatterTypes.stream().filter(formatterType ->
-                formatterType.isType(pValue)).findFirst();
+        FormatterType formatter = findFormatterByIdentifier(pIdentifier);
+        String[] parseResult = formatter.parse(pIdentifier);
+        String scheme = parseResult[0];
+        String value = parseResult[1];
 
-        String[] parseResult;
-        if (optionalFormatterType.isPresent()) {
-            parseResult = optionalFormatterType.get().parse(pValue);
-        } else {
-            parseResult = getDefaultFormatter().parse(pValue);
-        }
-        boolean isSchemeBlank = isBlank(parseResult[0]);
-        if (isSchemeMandatory() && isSchemeBlank) {
-            throw new MalformedIdentifierException("Invalid Identifier: [" + pValue + "]. Can not detect schema!");
-        }
-
-        if (!isSchemeBlank && schemeValidationPattern != null) {
-            Matcher schemeMatcher = schemeValidationPattern.matcher(parseResult[0]);
-            if (!schemeMatcher.matches()) {
-                throw new MalformedIdentifierException("Invalid Identifier: [" + pValue + "]. Scheme does not match pattern: [" + schemeValidationPattern.pattern() + "]!");
-            }
-        }
-
-        return createObject(parseResult[0], parseResult[1]);
+        formatter.validateScheme(scheme, pIdentifier);
+        formatter.validateValue(value, pIdentifier);
+        return createObject(scheme, value);
     }
 
-    public FormatterType getDefaultFormatter(){
+
+    public AbstractFormatterType getDefaultFormatter() {
         return defaultFormatter;
     }
+
     /**
      * Method parses the object then it validates if scheme is case-sensitive and lower case the values accordingly.
      *
@@ -226,9 +236,9 @@ public abstract class AbstractIdentifierFormatter<T> {
             String identifier = getIdentifierFromObject(result);
             updateObject(result, lowerCase(schema), lowerCase(identifier));
         }
-
         return result;
     }
+
 
     /**
      * Method normalize the identifier using the format/parse and sets schema and identifier to lower case if
@@ -250,12 +260,19 @@ public abstract class AbstractIdentifierFormatter<T> {
         return normalize(getSchemeFromObject(value), getIdentifierFromObject(value));
     }
 
+    /**
+     * Method normalize the identifier using the format/parse and sets schema and identifier to lower case if
+     *
+     * @param scheme
+     * @param identifier
+     * @return
+     */
     public T normalize(String scheme, String identifier) {
         return normalizeIdentifier(format(scheme, identifier));
     }
 
     /**
-     * Return true if identifier schema is not defined in list of case sensitive schemas, else return false.
+     * Return true if identifier schema is not defined in list of case-sensitive schemas, else return false.
      *
      * @param schema
      * @return
@@ -280,9 +297,9 @@ public abstract class AbstractIdentifierFormatter<T> {
         try {
             String encodedString = URLEncoder.encode(s, UTF_8.name());
             // fix spaces %20 instead of +
-            return StringUtils.replace(encodedString, "+","%20");
+            return StringUtils.replace(encodedString, "+", "%20");
         } catch (UnsupportedEncodingException e) {
-            throw new DDCRuntimeException("Unsupported UTF-8 Encoding. Please enable UTF-8 encoding!", e);
+            throw new MalformedIdentifierException("Unsupported UTF-8 Encoding. Please enable UTF-8 encoding!", e);
         }
     }
 
@@ -309,18 +326,27 @@ public abstract class AbstractIdentifierFormatter<T> {
     }
 
     public boolean isSchemeMandatory() {
-        return schemeMandatory;
+        return defaultFormatter.isSchemeMandatory();
     }
 
     public void setSchemeMandatory(boolean schemeMandatory) {
-        this.schemeMandatory = schemeMandatory;
+        this.defaultFormatter.setSchemeMandatory(schemeMandatory);
     }
 
     public Pattern getSchemeValidationPattern() {
-        return schemeValidationPattern;
+        return defaultFormatter.getSchemeValidationPattern();
     }
 
     public void setSchemeValidationPattern(Pattern schemeValidationPattern) {
-        this.schemeValidationPattern = schemeValidationPattern;
+        this.defaultFormatter.setSchemeValidationPattern(schemeValidationPattern);
+    }
+
+    public Integer getMaxSchemeLength() {
+        return maxSchemeLength;
+    }
+
+    public void setMaxSchemeLength(Integer maxSchemeLength) {
+        this.maxSchemeLength = maxSchemeLength;
     }
 }
+

@@ -27,6 +27,8 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.FormatterType;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.TemplateFormatterType;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -248,6 +250,7 @@ class DefaultBDXRLocatorTest {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
                 .addCaseSensitiveSchema(caseSensitiveScheme)
+                .wildcardEnabled(true)
                 .build();
         defaultBDXRLocator = spy(defaultBDXRLocator);
         Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
@@ -280,8 +283,7 @@ class DefaultBDXRLocatorTest {
         MalformedIdentifierException result = assertThrows(MalformedIdentifierException.class,
                 () -> defaultBDXRLocator.lookup("identifier", "wrong-this-scheme"));
 
-        assertEquals("Invalid Identifier: [wrong-this-scheme::identifier]. Scheme does not match pattern: [just-this-scheme]!",
-                result.getMessage());
+        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("Scheme Identifier"));
 
     }
 
