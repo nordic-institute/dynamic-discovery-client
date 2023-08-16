@@ -11,7 +11,7 @@ public enum DNSLookupHashType {
      * The complete participant identifier is in hash
      * hashed(format(<identifier>,<schema>)>
      */
-    MD5_HEX("b-", "MD5", false, false),
+    MD5_HEX("B-", "MD5", false, false),
     /**
      * schema is appended after hashed identifier
      * hashed(<identifier>)>[.<schema>]
@@ -19,10 +19,10 @@ public enum DNSLookupHashType {
     SHA256_BASE32("", "SHA256", true, true);
 
 
-    String algorithm;
-    boolean isBase32;
-    String prefix;
-    boolean upperCase;
+    private final String algorithm;
+    private final boolean isBase32;
+    private final String prefix;
+    private final boolean upperCase;
 
 
     DNSLookupHashType(String prefix, String algorithm, boolean isBase32, boolean upperCase) {

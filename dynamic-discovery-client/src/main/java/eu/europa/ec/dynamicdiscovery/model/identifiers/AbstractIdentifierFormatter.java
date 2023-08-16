@@ -190,6 +190,19 @@ public abstract class AbstractIdentifierFormatter<T> {
         return formatter.dnsLookupFormat(scheme, identifier, dnsLookupHashType);
     }
 
+    /**
+     *  Returns only the hash value as part of the lookup request
+     * @param scheme
+     * @param identifier
+     * @param dnsLookupHashType
+     * @return
+     */
+    public String dnsLookupHash(String scheme, String identifier, DNSLookupHashType dnsLookupHashType) {
+        // find the formatter
+        FormatterType formatter = findFormatter(scheme, identifier);
+        return formatter.dnsLookupHash(scheme, identifier, dnsLookupHashType);
+    }
+
 
     /**
      * Parse identifier.

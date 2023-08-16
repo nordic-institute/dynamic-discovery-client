@@ -59,7 +59,7 @@ class DynamicDiscoveryServiceTest {
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .build();
 
-        assertEquals("http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu",
+        assertEquals("http://B-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu",
                 smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
     }
 

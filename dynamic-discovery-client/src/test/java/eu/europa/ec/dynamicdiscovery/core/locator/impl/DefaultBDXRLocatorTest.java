@@ -121,42 +121,42 @@ class DefaultBDXRLocatorTest {
                         "urn:brazil:saopaulo",
                         "country-state-qns",
                         null,
-                        "http://b-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
                 Arguments.of("testLookupCNameCaseInsentitive",
                         "urn:BRAZIL:saoPaulo",
                         "country-state-qns",
                         null,
-                        "http://b-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
                 Arguments.of("testLookupCNameCaseSentitive",
                         "urn:BRAZIL:saoPaulo",
                         "country-state-qns",
                         "country-state-qns",
-                        "http://b-66dc923ee75a737cae33562297567763.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-66dc923ee75a737cae33562297567763.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
                 Arguments.of("testLookupCNAMEOasisPartyType",
                         "urn:brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered",
                         null,
-                        "http://b-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalized",
                         "brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://b-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalizedCaseInsensitive",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://b-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalizedCaseSensitie",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
-                        "http://b-dbb71b7c50103af1f3bb6dc67e3b5781.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-dbb71b7c50103af1f3bb6dc67e3b5781.ehealth.acc.edelivery.tech.ec.europa.eu"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNullScheme",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo",
                         null,
                         null,
-                        "http://b-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu")
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu")
         );
     }
 
@@ -398,7 +398,7 @@ class DefaultBDXRLocatorTest {
         DefaultBDXRLocator.Builder testInstance = new DefaultBDXRLocator.Builder();
 
         DDCRuntimeException result = assertThrows(DDCRuntimeException.class,
-                () -> testInstance.build());
+                testInstance::build);
 
         assertEquals("List of top domains must not be empty!", result.getMessage());
     }

@@ -40,34 +40,21 @@ public class HashUtil {
     /**
      * Returns the MD5 hash of the given String
      *
-     * @param stringToBeHashed
+     * @param stringToBeHashed the string to be hashed
      * @return the MD5 hash of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException  if the algorithm is not supported
      */
     public static String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
         return getHash(stringToBeHashed, "MD5", false, false);
     }
 
-    /**
-     * Returns the SHA224 hash of the given String
-     *
-     * @param stringToBeHashed
-     * @return the SHA224 hash of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
-     */
-    public static String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
-        return getHash(stringToBeHashed, "SHA224", false, false);
-    }
 
     /**
      * Returns the SHA256 hash BASE 32 of the given String
      *
-     * @param stringToBeHashed
+     * @param stringToBeHashed the string to be hashed
      * @return the SHA256 hash BASE 32 of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException if the algorithm is not supported
      */
     public static String getSHA256HashBase32(String stringToBeHashed) throws NoSuchAlgorithmException {
         return getHash(stringToBeHashed, "SHA256", true, true);
@@ -80,8 +67,7 @@ public class HashUtil {
      * @param algorithm        hash algorithm
      * @param isBase32         result encoding. if true it returns base32 encoded else result is  hexadecimal encoded
      * @return the hash of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException if the algorithm is not supported
      */
     private static String getHash(String stringToBeHashed, String algorithm, boolean isBase32, boolean toUpperCase) throws NoSuchAlgorithmException {
 
@@ -123,9 +109,10 @@ public class HashUtil {
         return toUpperCase ? StringUtils.upperCase(value) : StringUtils.lowerCase(value);
     }
 
-    public static String getDnsDiscoveryHash(String value, DNSLookupHashType dnsType) {
+        public static String getDnsDiscoveryHash(String value, DNSLookupHashType dnsType, boolean withPrefix) {
+        String hashPrefix =withPrefix?StringUtils.trimToEmpty(dnsType.getPrefix()):"";
         try {
-            return StringUtils.trimToEmpty(dnsType.getPrefix()) + getHash(value, dnsType.getAlgorithm(), dnsType.isBase32(), dnsType.isUpperCase());
+            return hashPrefix + getHash(value, dnsType.getAlgorithm(), dnsType.isBase32(), dnsType.isUpperCase());
         } catch (NoSuchAlgorithmException e) {
             throw new DDCRuntimeException("Hash algorithm implementation [" + dnsType.getAlgorithm() + "] not exist!", e);
         }

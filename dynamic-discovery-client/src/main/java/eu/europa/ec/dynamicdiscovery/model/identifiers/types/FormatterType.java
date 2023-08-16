@@ -55,8 +55,11 @@ public interface FormatterType {
     void setWildcardEnabled(boolean wildcardEnabled);
 
     boolean isSchemeMandatory();
+
     Integer getSchemeMaxLength();
+
     Integer getValueMaxLength();
+
     Pattern getValueValidationPattern();
 
     String format(final String scheme, final String identifier);
@@ -72,26 +75,39 @@ public interface FormatterType {
     default String dnsLookupFormat(final String scheme, final String identifier, DNSLookupHashType dnsType) {
         switch (getDNSFormatType()) {
             case ALL_IN_HASH:
-                return dnsLookupFormatAllInHash(scheme, identifier, dnsType);
+                return dnsLookupFormatAllInHash(scheme, identifier, dnsType, true);
             case SCHEMA_AFTER_HASH:
-                return dnsLookupFormatSchemaAfterHash(scheme, identifier, dnsType);
+                return dnsLookupFormatSchemaAfterHash(scheme, identifier, dnsType, true);
             default:
                 throw new DDCRuntimeException("DNS lookup [" + getDNSFormatType() + "] is not supported!");
         }
     }
 
-    default String dnsLookupFormatAllInHash(final String scheme, final String identifier, DNSLookupHashType dnsType) {
+    default String dnsLookupHash(final String scheme, final String identifier, DNSLookupHashType dnsType) {
+        switch (getDNSFormatType()) {
+            case ALL_IN_HASH:
+                return dnsLookupFormatAllInHash(scheme, identifier, dnsType, false);
+            case SCHEMA_AFTER_HASH:
+                return dnsLookupFormatSchemaAfterHash("", identifier, dnsType, false);
+            default:
+                throw new DDCRuntimeException("DNS lookup [" + getDNSFormatType() + "] is not supported!");
+        }
+    }
+
+    default String dnsLookupFormatAllInHash(final String scheme, final String identifier, DNSLookupHashType dnsType, boolean withPrefix) {
         // wildcard case see the document "Software Architecture Document"  bdmsl_allowed_wildcard
         if (isWildcardEnabled() && StringUtils.equals("*", identifier)) {
             return "*";
         }
         String hashValue = format(scheme, identifier, true);
-        return HashUtil.getDnsDiscoveryHash(hashValue, dnsType);
+        return HashUtil.getDnsDiscoveryHash(hashValue, dnsType, withPrefix);
     }
 
-    default String dnsLookupFormatSchemaAfterHash(final String scheme, final String identifier, DNSLookupHashType dnsType) {
+
+    default String dnsLookupFormatSchemaAfterHash(final String scheme, final String identifier, DNSLookupHashType dnsType, boolean withPrefix) {
         // wildcard case see the document "Software Architecture Document"  bdmsl_allowed_wildcard
-        String value = isWildcardEnabled() && StringUtils.equals("*", identifier) ? identifier : HashUtil.getDnsDiscoveryHash(identifier, dnsType);
+        String value = isWildcardEnabled() && StringUtils.equals("*", identifier) ? identifier :
+                HashUtil.getDnsDiscoveryHash(identifier, dnsType, withPrefix);
 
         return value + (StringUtils.isEmpty(scheme) ? "" : "." + scheme);
     }
