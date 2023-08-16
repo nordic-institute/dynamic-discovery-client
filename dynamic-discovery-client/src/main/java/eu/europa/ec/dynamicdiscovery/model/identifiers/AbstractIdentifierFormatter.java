@@ -71,8 +71,7 @@ public abstract class AbstractIdentifierFormatter<T> {
      * @return FormatterType. If not Formatter is found it returns DEFAULT_FORMATTER
      */
     public FormatterType findFormatter(String scheme, String identifier) {
-
-
+        LOG.debug("Find formatter for scheme: [{}] and identifier: [{}]", scheme, identifier);
         Optional<FormatterType> optionalFormatterType = formatterTypes.stream().filter(formatterType ->
                 formatterType.isType(scheme, identifier)).findFirst();
 
@@ -192,15 +191,15 @@ public abstract class AbstractIdentifierFormatter<T> {
 
     /**
      *  Returns only the hash value as part of the lookup request
-     * @param scheme
-     * @param identifier
-     * @param dnsLookupHashType
-     * @return
+     * @param scheme          scheme part of identifier
+     * @param value      value part of identifier
+     * @param dnsLookupHashType dns lookup type
+     * @return  hash value
      */
-    public String dnsLookupHash(String scheme, String identifier, DNSLookupHashType dnsLookupHashType) {
+    public String dnsLookupHash(String scheme, String value, DNSLookupHashType dnsLookupHashType) {
         // find the formatter
-        FormatterType formatter = findFormatter(scheme, identifier);
-        return formatter.dnsLookupHash(scheme, identifier, dnsLookupHashType);
+        FormatterType formatter = findFormatter(scheme, value);
+        return formatter.dnsLookupHash(scheme, value, dnsLookupHashType);
     }
 
 
@@ -266,8 +265,8 @@ public abstract class AbstractIdentifierFormatter<T> {
      * Must always result in the same normalized object:
      * scheme [urn:oasis:names:tc:ebcore:partyid-type:iso6523:0088]: party id: [123456789]
      *
-     * @param value
-     * @return
+     * @param value the identifier object with scheme and identifier values
+     * @return the normalized identifier object
      */
     public T normalize(final T value) {
         return normalize(getSchemeFromObject(value), getIdentifierFromObject(value));
@@ -276,8 +275,8 @@ public abstract class AbstractIdentifierFormatter<T> {
     /**
      * Method normalize the identifier using the format/parse and sets schema and identifier to lower case if
      *
-     * @param scheme
-     * @param identifier
+     * @param scheme    scheme part of identifier
+     * @param identifier identifier part of identifier
      * @return
      */
     public T normalize(String scheme, String identifier) {
