@@ -170,8 +170,7 @@ public abstract class AbstractIdentifierFormatter<T> {
         // find the formatter
         String scheme = getSchemeFromObject(identifierObject);
         String identifier = getIdentifierFromObject(identifierObject);
-        FormatterType formatter = findFormatter(scheme, identifier);
-        return formatter.dnsLookupFormat(scheme, identifier, dnsLookupHashType);
+        return dnsLookupFormat(scheme, identifier, dnsLookupHashType);
     }
 
     /**
@@ -185,8 +184,12 @@ public abstract class AbstractIdentifierFormatter<T> {
      */
     public String dnsLookupFormat(String scheme, String identifier, DNSLookupHashType dnsLookupHashType) {
         // find the formatter
-        FormatterType formatter = findFormatter(scheme, identifier);
-        return formatter.dnsLookupFormat(scheme, identifier, dnsLookupHashType);
+        String nScheme = trim(scheme);
+        String nIdentifier = trim(identifier);
+        nIdentifier = isCaseInsensitiveSchema(nScheme)? lowerCase(nIdentifier): nIdentifier;
+        FormatterType formatter = findFormatter(nScheme, identifier);
+
+        return formatter.dnsLookupFormat(nScheme, nIdentifier, dnsLookupHashType);
     }
 
     /**
@@ -280,6 +283,9 @@ public abstract class AbstractIdentifierFormatter<T> {
      * @return
      */
     public T normalize(String scheme, String identifier) {
+        if (StringUtils.isBlank(scheme) && StringUtils.isBlank(identifier)) {
+            throw new MalformedIdentifierException("Identifier must not be 'null' or empty");
+        }
         return normalizeIdentifier(format(scheme, identifier));
     }
 

@@ -148,7 +148,7 @@ public interface FormatterType {
         String trimmedValue = trim(value);
 
         if (isBlank(trimmedValue)) {
-            throw new MalformedIdentifierException("Participant Identifier Value cannot be 'null' or empty!");
+            throw new MalformedIdentifierException("Identifier must not be 'null' or empty");
         }
         Integer valueMaxLength = getValueMaxLength();
 
@@ -157,7 +157,7 @@ public interface FormatterType {
         }
         Pattern valueValidationPattern = getValueValidationPattern();
         if (trimmedValue != null && valueValidationPattern != null && !valueValidationPattern.matcher(trimmedValue).matches()) {
-            throw new MalformedIdentifierException(String.format("Participant Identifier value " + trimmedValue + " is illegal."));
+            throw new MalformedIdentifierException(String.format("Identifier value " + trimmedValue + " is illegal."));
         }
     }
 
