@@ -61,8 +61,8 @@
         <surefire.argLine>-Xmx1G</surefire.argLine>
 
         <!-- dependencies -->
-        <bouncycastle.version>1.75</bouncycastle.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <bouncycastle.version>1.76</bouncycastle.version>
+        <commons-lang3.version>3.13.0</commons-lang3.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <dnsjava.version>3.5.2</dnsjava.version>
         <httpclient.version>5.2.1</httpclient.version>
@@ -74,7 +74,7 @@
         <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
         <junit.version>5.10.0</junit.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <slf4j.version>2.0.7</slf4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <mockito.version>4.11.0</mockito.version>
         <spring-test.version>5.3.29</spring-test.version>
         <!-- plugins -->
