@@ -58,7 +58,7 @@ class TemplateFormatterTypeTest {
     @MethodSource("participantIdentifierPositiveCases")
     void isTypeByScheme(String testName, boolean isValidPartyId, String toParseIdentifier, String schemaPart, String idPart, Class errorClass, String containsErrorMessage) {
 
-        boolean result = testInstance.isTypeByScheme(schemaPart);
+        boolean result = testInstance.isSchemeValid(schemaPart);
         assertEquals(isValidPartyId, result);
     }
 

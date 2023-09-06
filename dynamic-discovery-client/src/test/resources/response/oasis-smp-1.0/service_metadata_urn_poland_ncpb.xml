@@ -25,6 +25,5 @@
                 </ServiceEndpointList>
             </Process>
         </ProcessList>
-        <Extension></Extension>
     </ServiceInformation>
 </ServiceMetadata>

@@ -47,6 +47,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <plugin.dependency-check-maven.version>8.3.1</plugin.dependency-check-maven.version>
+
         <release.arguments>-Dmaven.javadoc.skip=true -Dmaven.test.skipTests=true -Dmaven.test.skip=true</release.arguments>
 
         <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
@@ -59,8 +61,8 @@
         <surefire.argLine>-Xmx1G</surefire.argLine>
 
         <!-- dependencies -->
-        <bouncycastle.version>1.70</bouncycastle.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <bouncycastle.version>1.76</bouncycastle.version>
+        <commons-lang3.version>3.13.0</commons-lang3.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <dnsjava.version>3.5.2</dnsjava.version>
         <httpclient.version>5.2.1</httpclient.version>
@@ -70,12 +72,11 @@
         <org.eclipse.jetty.version>9.4.51.v20230217</org.eclipse.jetty.version>
 
         <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
-        <junit.version>5.9.2</junit.version>
+        <junit.version>5.10.0</junit.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <log4j.version>1.2.17</log4j.version>
-        <slf4j.version>2.0.6</slf4j.version>
-        <mockito.version>4.10.0</mockito.version>
-        <spring-test.version>5.3.27</spring-test.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <mockito.version>4.11.0</mockito.version>
+        <spring-test.version>5.3.29</spring-test.version>
         <!-- plugins -->
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
@@ -100,7 +101,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>8.2.1</version>
+                        <version>${plugin.dependency-check-maven.version}</version>
                         <configuration>
                             <!-- Disable .Net Assembly Analyzer -->
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
@@ -239,7 +240,7 @@
 
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
+                <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${bouncycastle.version}</version>
             </dependency>
 

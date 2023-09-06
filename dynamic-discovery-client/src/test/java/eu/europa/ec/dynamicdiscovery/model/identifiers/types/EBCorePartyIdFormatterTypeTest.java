@@ -109,7 +109,7 @@ class EBCorePartyIdFormatterTypeTest {
     @MethodSource("participantIdentifierPositiveCases")
     void isTypeByScheme(String testName, boolean isEBCorePartyId, String toParseIdentifier, String schemaPart, String idPart, Class errorClass, String containsErrorMessage) {
 
-        boolean result = testInstance.isTypeByScheme(schemaPart);
+        boolean result = testInstance.isSchemeValid(schemaPart);
         assertEquals(isEBCorePartyId, result);
     }
 

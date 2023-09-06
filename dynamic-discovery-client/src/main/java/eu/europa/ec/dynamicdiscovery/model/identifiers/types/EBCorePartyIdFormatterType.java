@@ -25,7 +25,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class EBCorePartyIdFormatterType implements FormatterType {
+public class EBCorePartyIdFormatterType extends AbstractFormatterType {
     private static final Logger LOG = LoggerFactory.getLogger(EBCorePartyIdFormatterType.class);
 
     public static final String EBCORE_IDENTIFIER_PREFIX = "urn:oasis:names:tc:ebcore:partyid-type:";
@@ -34,13 +34,11 @@ public class EBCorePartyIdFormatterType implements FormatterType {
     private static final String EBCORE_SEPARATOR = ":";
     private static final String OASIS_SMP_SEPARATOR = "::";
 
-    boolean wildcardEnabled = true;
-
 
     @Override
-    public boolean isTypeByScheme(final String scheme) {
-        String partyIdPrivate = StringUtils.trim(scheme);
-        if (StringUtils.isBlank(scheme)) {
+    public boolean isSchemeValid(final String scheme) {
+        String partyIdPrivate = StringUtils.trimToEmpty(scheme);
+        if (StringUtils.isEmpty(scheme)) {
             LOG.debug("EBCorePartyIdFormatterType does not support identifiers with Null/Blank scheme");
             return false;
         }
@@ -52,17 +50,7 @@ public class EBCorePartyIdFormatterType implements FormatterType {
     @Override
     public boolean isType(final String value) {
         // the value should start with valid scheme
-        return isTypeByScheme(value);
-    }
-
-    @Override
-    public boolean isWildcardEnabled() {
-        return wildcardEnabled;
-    }
-
-    @Override
-    public void setWildcardEnabled(boolean wildcardEnabled) {
-        this.wildcardEnabled = wildcardEnabled;
+        return isSchemeValid(value);
     }
 
     @Override

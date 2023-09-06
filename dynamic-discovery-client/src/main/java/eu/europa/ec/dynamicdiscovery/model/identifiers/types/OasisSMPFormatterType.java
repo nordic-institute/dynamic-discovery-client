@@ -11,32 +11,26 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class OasisSMPFormatterType implements FormatterType {
+public class OasisSMPFormatterType extends AbstractFormatterType {
     static final String SEPARATOR = "::";
 
     DNSLookupFormatType dnsLookupFormatType = null;
-    boolean wildcardEnabled = true;
 
-    @Override
-    public boolean isTypeByScheme(final String scheme) {
-        // by default format all identifier as defined in OasisSMP
-        return true;
+    public OasisSMPFormatterType() {
+        setWildcardEnabled(true);
+        setSchemeMandatory(false);
     }
 
     @Override
-    public boolean isType(final String value){
+    public boolean isSchemeValid(final String scheme) {
+
+        return StringUtils.isBlank(scheme) || schemePattern == null || schemePattern.matcher(trim(scheme)).matches();
+    }
+
+    @Override
+    public boolean isType(final String value) {
         // the value should start with valid scheme
         return true;
-    }
-
-    @Override
-    public boolean isWildcardEnabled() {
-        return wildcardEnabled;
-    }
-
-    @Override
-    public void setWildcardEnabled(boolean wildcardEnabled) {
-        this.wildcardEnabled = wildcardEnabled;
     }
 
     @Override
@@ -69,6 +63,8 @@ public class OasisSMPFormatterType implements FormatterType {
     @Override
     public DNSLookupFormatType getDNSFormatType() {
         // default SCHEMA_AFTER_HASH
-        return dnsLookupFormatType== null? DNSLookupFormatType.SCHEMA_AFTER_HASH:dnsLookupFormatType;
+        return dnsLookupFormatType == null ? DNSLookupFormatType.SCHEMA_AFTER_HASH : dnsLookupFormatType;
     }
+
+
 }
