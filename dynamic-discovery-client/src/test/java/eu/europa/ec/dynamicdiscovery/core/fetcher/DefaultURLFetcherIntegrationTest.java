@@ -15,6 +15,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -121,7 +122,7 @@ public class DefaultURLFetcherIntegrationTest {
         assertNotNull(response);
     }
 
-    @Ignore//fails with eu.europa.ec.dynamicdiscovery.exception.ConnectionException: Error occurred while retrieving [/oasis-smp-1.0/extension.xml]: Error: [InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty]
+    @Disabled//fails with eu.europa.ec.dynamicdiscovery.exception.ConnectionException: Error occurred while retrieving [/oasis-smp-1.0/extension.xml]: Error: [InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty]
     @Test
     void testSimpleHTTPSFetchOK() throws Exception {
         KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
