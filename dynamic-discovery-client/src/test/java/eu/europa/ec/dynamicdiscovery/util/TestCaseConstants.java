@@ -17,14 +17,10 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
-import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
-
-import java.util.Arrays;
 
 /**
  * @author Flávio W. R. Santos

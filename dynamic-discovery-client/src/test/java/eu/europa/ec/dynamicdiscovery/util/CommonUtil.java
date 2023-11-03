@@ -24,7 +24,10 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -88,7 +91,8 @@ public class CommonUtil {
 
     public static KeyStore loadTrustStore(String fileName) throws Exception {
         KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(CommonUtil.class.getResourceAsStream(fileName), null);
+        final InputStream resourceAsStream = CommonUtil.class.getClassLoader().getResourceAsStream(fileName);
+        keyStore.load(resourceAsStream, null);
         return keyStore;
     }
 

@@ -26,6 +26,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class SMPDocumentIdentifier extends IdentifierType {
 
+    /**
+     * The URI of this document identifier. Filled in case the DocumentIdentifier was retrieved from the ServiceGroup
+     */
+    protected String href;
+
     public SMPDocumentIdentifier(String documentIdentifier, String scheme) {
         super(documentIdentifier, scheme);
     }
@@ -34,11 +39,25 @@ public class SMPDocumentIdentifier extends IdentifierType {
         this(documentIdentifier, null);
     }
 
+    public SMPDocumentIdentifier(String documentIdentifier, String scheme, String href) {
+        this(documentIdentifier, scheme);
+        this.href = href;
+    }
+
+    public String getHref() {
+        return href;
+    }
+
+    public void setHref(String href) {
+        this.href = href;
+    }
+
     @Override
     public String toString() {
         return "DocumentIdentifier{" +
                 "identifier='" + identifier + '\'' +
                 ", scheme='" + scheme + '\'' +
+                ", href='" + href + '\'' +
                 '}';
     }
 

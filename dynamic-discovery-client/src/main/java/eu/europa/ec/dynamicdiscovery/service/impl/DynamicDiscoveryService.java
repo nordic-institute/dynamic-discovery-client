@@ -31,6 +31,7 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +63,24 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     private FetcherResponse getFetcherResponseForServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
+        final URI documentURI = getDocumentURI(participantIdentifier, documentIdentifier);
+        LOG.info("Fetching service metadata using URI: [{}].", documentURI);
+        return metadataFetcher.fetch(documentURI);
+    }
+
+    protected URI getDocumentURI(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
+        final String documentIdentifierHref = documentIdentifier.getHref();
+        //in case the document identifier was previously discovered from the ServiceGroup, we skip the DNS lookup and reuse the discovered URL
+        if (StringUtils.isNotBlank(documentIdentifierHref)) {
+            final URI documentIdentifierUri = URI.create(documentIdentifierHref);
+            LOG.info("Using service metadata from SMPDocumentIdentifier already discovered");
+            return documentIdentifierUri;
+        }
+
         URI smpURI = lookupParticipantSMPUri(participantIdentifier);
         LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
-        LOG.info("Get service metadata for URI: [{}].", participantUnderSmpURI);
-        return metadataFetcher.fetch(participantUnderSmpURI);
+        return participantUnderSmpURI;
     }
 
     private FetcherResponse getFetcherResponseForDocs(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {

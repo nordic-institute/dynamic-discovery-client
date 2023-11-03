@@ -48,11 +48,13 @@
                                 <xjbSource>${project.basedir}/src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
                                 <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP10Binding.xjb</xjbSource>
                                 <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP20Binding.xjb</xjbSource>
+                                <xjbSource>${project.basedir}/src/main/resources/xjb/peppolSMPBinding.xjb</xjbSource>
                             </xjbSources>
                             <sources>
                                 <source>${project.basedir}/src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
                                 <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceGroup-2.0.xsd</source>
                                 <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceMetadata-2.0.xsd</source>
+                                <source>${project.basedir}/src/main/resources/xsd/peppol/peppol-smp-types-v1.xsd</source>
                             </sources>
                             <clearOutputDir>false</clearOutputDir>
                         </configuration>
@@ -184,6 +186,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
