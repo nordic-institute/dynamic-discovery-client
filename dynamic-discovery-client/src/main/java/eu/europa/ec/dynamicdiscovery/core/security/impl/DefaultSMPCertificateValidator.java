@@ -85,7 +85,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
                     return;
                 }
             }
-            throw new CertificateException("TrustStore does not contain trusted direct Issuer or the Certificate.");
+            throw new CertificateException("TrustStore does not contain trusted direct Issuer or the leaf certificate for [" + signedCertificate.getSubjectDN() + "]");
         } catch (RuntimeException | KeyStoreException exc) {
             throw new CertificateException("Could not verify trust for certificate [" + signedCertificate.getSubjectDN() + "]:" + exc.getMessage(), exc);
         }

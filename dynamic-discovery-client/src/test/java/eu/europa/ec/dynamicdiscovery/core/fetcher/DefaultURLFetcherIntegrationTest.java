@@ -123,8 +123,8 @@ public class DefaultURLFetcherIntegrationTest {
 
     @Test
     void testSimpleHTTPSFetchOK() throws Exception {
-        KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
-        KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
@@ -140,8 +140,8 @@ public class DefaultURLFetcherIntegrationTest {
 
     @Test
     void testSimpleHTTPSFetchMissmatchCipherSuite() throws Exception {
-        KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
-        KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
@@ -161,8 +161,8 @@ public class DefaultURLFetcherIntegrationTest {
 
     @Test
     void testSimpleHTTPSFetchMissmatchTLSVersion() throws Exception {
-        KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
-        KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
@@ -182,7 +182,7 @@ public class DefaultURLFetcherIntegrationTest {
 
     @Test
     void testSimpleHTTPSFetchFailMissingTrustStore() throws Exception {
-        KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
                 .setHttpSchemeEnabled(false)
@@ -199,7 +199,7 @@ public class DefaultURLFetcherIntegrationTest {
 
     @Test
     void testSimpleHTTPSFetchFailMissingClientKey() throws Exception {
-        KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()

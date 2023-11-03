@@ -88,7 +88,7 @@ class PeppolDocumentIdentifierIT {
         SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
         DefaultURLFetcher urlFetcher = new DefaultURLFetcher.Builder().build();
 
-        final KeyStore trustStore = CommonUtil.loadTrustStore("truststore/peppol-truststoreForTrustedCertificate-OnlyRootCA.ts");
+        final KeyStore trustStore = CommonUtil.loadTrustStore("truststore/peppol-truststore.jks");
         final DefaultSignatureValidator defaultSignatureValidator = new DefaultSignatureValidator(trustStore);
         final DefaultBDXRReader bdxReader = new DefaultBDXRReader.Builder()
                 .addExtension(new PeppolSMPExtension())
