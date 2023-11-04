@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.List;
@@ -181,7 +182,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
         String substr = StringUtils.substringAfter(metadataHref, REFERENCE_DOCUMENT_SEPARATOR);
         try {
             String[] parts = URLDecoder.decode(substr, "UTF-8").split("::", 2);
-            return new SMPDocumentIdentifier(parts[1], parts[0], metadataHref);
+            return new SMPDocumentIdentifier(parts[1], parts[0], URI.create(metadataHref));
         } catch (UnsupportedEncodingException e) {
             throw new DDCRuntimeException("Error occurred while decoding string [" + substr + "].", e);
         }

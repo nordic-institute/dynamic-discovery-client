@@ -1,19 +1,16 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
-import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
-import gen.eu.europa.ec.ddc.api.smp10.ParticipantIdentifierType;
-import gen.eu.europa.ec.ddc.api.smp10.ServiceGroup;
-import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadataReferenceType;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
+import gen.eu.europa.ec.ddc.api.smp20.aggregate.ServiceReference;
+import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -28,22 +25,19 @@ import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Purpose of the class it to provide the Oasis SMP 1.0 service group parser
+ * Purpose of the class it to provide the Oasis SMP 2.0 service group parser
  *
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGroup> {
-    static final Logger LOG = LoggerFactory.getLogger(OasisSMP10ServiceGroupReader.class);
-    static final String REFERENCE_DOCUMENT_SEPARATOR = "/services/";
+public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGroup> {
+    static final Logger LOG = LoggerFactory.getLogger(OasisSMP20ServiceGroupReader.class);
     private static final ThreadLocal<Unmarshaller> jaxbUnmarshaller = ThreadLocal.withInitial(() -> {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
@@ -65,15 +59,15 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
         return null;
     });
 
-    public Unmarshaller getUnmarshaller() {
-        return jaxbUnmarshaller.get();
-    }
-
     public Marshaller getMarshaller() {
         return jaxbMarshaller.get();
     }
 
-    private static final QName PARSE_ELEMENT = new QName(OasisSMP10Extension.NAMESPACE, "ServiceGroup");
+    public Unmarshaller getUnmarshaller() {
+        return jaxbUnmarshaller.get();
+    }
+
+    private static final QName PARSE_ELEMENT = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup", "ServiceGroup");
 
     /**
      * Removes the current thread's ServiceGroup Unmarshaller for this thread-local variable. If this thread-local variable
@@ -94,7 +88,6 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
 
     @Override
     public SMPServiceGroup parse(Document document) throws TechnicalException {
-
         ServiceGroup serviceGroup = parseNative(document);
         return new SMPServiceGroup(getParticipantIdentifier(serviceGroup),
                 getDocumentIdentifiers(serviceGroup), serviceGroup);
@@ -102,15 +95,23 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
 
     @Override
     public ServiceGroup parseNative(Document document) throws TechnicalException {
-
         try {
             return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            LOG.error("Error  type: [{}], to string [{}]", e.getCause().getClass(), ExceptionUtils.getRootCauseMessage(e));
-            throw new BindException("Error occurred while parsing document serviceGroup", e);
+            throw new BindException("Error occurred while parsing serviceGroup", e);
         }
     }
 
+    public Document objectToDocument(ServiceGroup serviceGroup) throws TechnicalException {
+        try {
+            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
+            Document document = db.newDocument();
+            getMarshaller().marshal(serviceGroup, document);
+            return document;
+        } catch (JAXBException e) {
+            throw new BindException("Error occurred while parsing serviceGroup", e);
+        }
+    }
 
     @Override
     public ServiceGroup parseNative(InputStream inputStream) throws TechnicalException {
@@ -119,9 +120,8 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
             // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
             Document document = db.parse(inputStream);
             return parseNative(document);
-        } catch ( SAXException | IOException e) {
-            LOG.error("Error  type: [{}], to string [{}]", e.getClass(), e);
-            throw new BindException("Error occurred while parsing serviceGroup from input stream", e);
+        } catch (SAXException | IOException e) {
+            throw new BindException("Error occurred while parsing serviceGroup: [{}]" , e);
         }
     }
 
@@ -130,14 +130,14 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
         if (jaxbObject == null) {
             return;
         }
-        Marshaller marshaller = getMarshaller();
+        Marshaller jaxbMarshaller = getMarshaller();
         // Pretty Print XML
         try {
             if (prettyPrint) {
-                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
+                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
             }
             // to remove xmlDeclaration
-            marshaller.marshal(jaxbObject, outputStream);
+            jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
             throw new BindException("Error occurred while serializing the ServiceGroup", e);
         }
@@ -150,38 +150,24 @@ public class OasisSMP10ServiceGroupReader implements IObjectReader<SMPServiceGro
     }
 
     protected SMPParticipantIdentifier getParticipantIdentifier(ServiceGroup serviceGroup) {
-        ParticipantIdentifierType identifierType = serviceGroup.getParticipantIdentifier();
-        return new SMPParticipantIdentifier(identifierType.getValue(), identifierType.getScheme());
+        ParticipantID identifier = serviceGroup.getParticipantID();
+        return identifier == null ? null : new SMPParticipantIdentifier(identifier.getValue(), identifier.getSchemeID());
     }
 
+    /**
+     * Method reads the Oasis SMP 2.0 Service group and returns all the DocumentIdentifiers
+     *
+     * @param serviceGroup the Oasis SMP 2.0 Service group
+     * @return List of SMPDocumentIdentifier
+     */
     protected List<SMPDocumentIdentifier> getDocumentIdentifiers(ServiceGroup serviceGroup) {
-
-        if (serviceGroup == null
-                || serviceGroup.getServiceMetadataReferenceCollection() == null
-                || serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences() == null) {
+        if (serviceGroup == null || serviceGroup.getServiceReferences() == null) {
             return Collections.emptyList();
         }
-        List<ServiceMetadataReferenceType> serviceMetadataReferences =
-                serviceGroup.getServiceMetadataReferenceCollection().getServiceMetadataReferences();
-
-        return serviceMetadataReferences.stream()
-                .map(this::getDocumentIdentifierFromReference)
+        return serviceGroup.getServiceReferences().stream()
+                .map(ServiceReference::getID)
                 .filter(Objects::nonNull)
+                .map(id -> new SMPDocumentIdentifier(id.getValue(), id.getSchemeID()))
                 .collect(Collectors.toList());
-    }
-
-    protected SMPDocumentIdentifier getDocumentIdentifierFromReference(ServiceMetadataReferenceType reference) {
-        if (reference == null
-                || StringUtils.isBlank(reference.getHref())
-                || !StringUtils.contains(reference.getHref(), REFERENCE_DOCUMENT_SEPARATOR)) {
-            return null;
-        }
-        String substr = StringUtils.substringAfter(reference.getHref(), REFERENCE_DOCUMENT_SEPARATOR);
-        try {
-            String[] parts = URLDecoder.decode(substr, "UTF-8").split("::", 2);
-            return new SMPDocumentIdentifier(parts[1], parts[0]);
-        } catch (UnsupportedEncodingException e) {
-            throw new DDCRuntimeException("Error occurred while decoding string [" + substr + "].", e);
-        }
     }
 }

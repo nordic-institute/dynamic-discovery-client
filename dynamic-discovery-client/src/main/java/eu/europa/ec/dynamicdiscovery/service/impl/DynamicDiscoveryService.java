@@ -19,6 +19,7 @@ package eu.europa.ec.dynamicdiscovery.service.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.SMPParticipantIdentifierLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
@@ -54,12 +55,16 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
     @Override
     public SMPServiceGroup getServiceGroup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
-        return metadataReader.getServiceGroup(getFetcherResponseForDocs(participantIdentifier));
+        final SMPParticipantIdentifierLookupResult lookupParticipantInSMP = lookupParticipantInSMP(participantIdentifier);
+        final SMPServiceGroup serviceGroup = metadataReader.getServiceGroup(lookupParticipantInSMP.getFetcherResponse());
+        serviceGroup.setServiceGroupSmpURI(lookupParticipantInSMP.getParticipantUnderSmpURI());
+        return serviceGroup;
     }
 
     @Override
     public SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
-        return metadataReader.getServiceMetadata(getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier));
+        final FetcherResponse fetcherResponseForServiceMetadata = getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier);
+        return metadataReader.getServiceMetadata(fetcherResponseForServiceMetadata);
     }
 
     private FetcherResponse getFetcherResponseForServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
@@ -69,25 +74,25 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     protected URI getDocumentURI(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
-        final String documentIdentifierHref = documentIdentifier.getHref();
+        final URI documentIdentifierSmpURI = documentIdentifier.getDocumentIdentifierSmpURI();
         //in case the document identifier was previously discovered from the ServiceGroup, we skip the DNS lookup and reuse the discovered URL
-        if (StringUtils.isNotBlank(documentIdentifierHref)) {
-            final URI documentIdentifierUri = URI.create(documentIdentifierHref);
+        if (documentIdentifierSmpURI != null) {
             LOG.info("Using service metadata from SMPDocumentIdentifier already discovered");
-            return documentIdentifierUri;
+            return documentIdentifierSmpURI;
         }
 
         URI smpURI = lookupParticipantSMPUri(participantIdentifier);
         LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
-        return participantUnderSmpURI;
+        URI resolvedDocumentIdentifierSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
+        return resolvedDocumentIdentifierSmpURI;
     }
 
-    private FetcherResponse getFetcherResponseForDocs(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public SMPParticipantIdentifierLookupResult lookupParticipantInSMP(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI smpURI = lookupParticipantSMPUri(participantIdentifier);
         URI participantUnderSmpURI = metadataProvider.resolveForParticipantIdentifier(smpURI, participantIdentifier);
         LOG.info("Get participant data / documents for URI: [{}].", participantUnderSmpURI);
-        return metadataFetcher.fetch(participantUnderSmpURI);
+        final FetcherResponse fetcherResponse = metadataFetcher.fetch(participantUnderSmpURI);
+        return new SMPParticipantIdentifierLookupResult(smpURI, participantUnderSmpURI, fetcherResponse);
     }
 
     private URI lookupParticipantSMPUri(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {

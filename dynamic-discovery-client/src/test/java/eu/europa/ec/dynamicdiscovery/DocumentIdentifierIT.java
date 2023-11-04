@@ -17,8 +17,6 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
-import eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP10Extension;
-import eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;

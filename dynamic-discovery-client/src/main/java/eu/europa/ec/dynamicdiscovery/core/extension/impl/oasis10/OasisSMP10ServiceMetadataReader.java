@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
@@ -10,11 +10,7 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
-import gen.eu.europa.ec.ddc.api.peppol.*;
-import gen.eu.europa.ec.ddc.api.peppol.identifiers.transport.DocumentIdentifier;
-import gen.eu.europa.ec.ddc.api.peppol.identifiers.transport.ParticipantIdentifierType;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
+import gen.eu.europa.ec.ddc.api.smp10.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -33,17 +29,18 @@ import java.io.OutputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @author Cosmin Baciu
- * @since 2.1
+ * @author Joze Rihtarsic
+ * @since 2.0
  */
-public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceMetadata> {
-    static final Logger LOG = LoggerFactory.getLogger(PeppolSMPServiceMetadataReader.class);
+public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPServiceMetadata> {
+    static final Logger LOG = LoggerFactory.getLogger(OasisSMP10ServiceMetadataReader.class);
     private static final ThreadLocal<Unmarshaller> jaxbUnmarshaller = ThreadLocal.withInitial(() -> {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(SignedServiceMetadata.class, ServiceMetadata.class);
@@ -69,7 +66,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
         return jaxbMarshaller.get();
     }
 
-    private static final QName PARSE_ELEMENT = new QName(PeppolSMPExtension.NAMESPACE, "smp:SignedServiceMetadata");
+    private static final QName PARSE_ELEMENT = new QName(OasisSMP10Extension.NAMESPACE, "SignedServiceMetadata");
 
     /**
      * Skip out-dated services
@@ -80,10 +77,10 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
 
     boolean ignoreInvalidServices = false;
 
-    public PeppolSMPServiceMetadataReader() {
+    public OasisSMP10ServiceMetadataReader() {
     }
 
-    public PeppolSMPServiceMetadataReader(boolean ignoreInvalidServices) {
+    public OasisSMP10ServiceMetadataReader(boolean ignoreInvalidServices) {
         this.ignoreInvalidServices = ignoreInvalidServices;
     }
 
@@ -205,27 +202,22 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
 
 
     protected SMPEndpoint readEndpointForProcess(EndpointType endpointType, SMPProcessIdentifier processIdentifier) {
-        final String endpointUrl = getEndpointUrl(endpointType);
         if (!(isIgnoreInvalidServices() || isServiceValid(endpointType))) {
-            LOG.debug("Ignore not-active/expired service for process [{}], transport [{}], url [{}]", processIdentifier.getIdentifier(), endpointType.getTransportProfile(), endpointUrl);
+            LOG.debug("Ignore not-active/expired service for process [{}], transport [{}], url [{}]", processIdentifier.getIdentifier(), endpointType.getTransportProfile(), endpointType.getEndpointURI());
             return null;
         }
 
         X509Certificate certificate = getX509Certificate(endpointType);
-        LOG.debug("Found transport for process: [{}], transport [{}], url [{}]", processIdentifier.getIdentifier(), endpointType.getTransportProfile(), endpointUrl);
+        LOG.debug("Found transport for process: [{}], transport [{}], url [{}]", processIdentifier.getIdentifier(), endpointType.getTransportProfile(), endpointType.getEndpointURI());
 
         return new SMPEndpoint.Builder()
                 .addProcessIdentifier(processIdentifier)
                 .transportProfile(endpointType.getTransportProfile())
-                .address(endpointUrl)
+                .address(endpointType.getEndpointURI())
                 .addCertificate(SMPEndpoint.DEFAULT_CERTIFICATE, certificate)
                 .activationDate(endpointType.getServiceActivationDate())
                 .expirationDate(endpointType.getServiceExpirationDate())
                 .build();
-    }
-
-    private String getEndpointUrl(EndpointType endpointType) {
-        return endpointType.getEndpointReference().getAddress().getValue();
     }
 
     /**
@@ -276,22 +268,20 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
         List<ProcessType> processTypes = serviceMetadata.getServiceMetadata().getServiceInformation().getProcessList().getProcesses();
         return processTypes.stream().map(this::readEndpointsForProcess)
                 .filter(smpEndpoints -> !smpEndpoints.isEmpty())
-                .flatMap(java.util.Collection::stream).filter(Objects::nonNull)
+                .flatMap(Collection::stream).filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
     }
 
     protected X509Certificate getX509Certificate(EndpointType endpointType) {
-        final String certificateBase64 = endpointType.getCertificate();
-        if (endpointType == null || StringUtils.isBlank(certificateBase64)) {
+        if (endpointType == null || endpointType.getCertificate() == null) {
             LOG.debug("Null endpoint type or certificate. Return null certificate");
             return null;
         }
-        final byte[] certificateBytes = Base64.decodeBase64(certificateBase64);
-        try (InputStream is = new ByteArrayInputStream(certificateBytes)) {
+        try (InputStream is = new ByteArrayInputStream(endpointType.getCertificate())) {
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         } catch (Exception e) {
-            LOG.error("Can not parse Certificate for endpoint [{}]!", getEndpointUrl(endpointType), e);
+            LOG.error("Can not parse Certificate for endpoint [{}]!", endpointType.getEndpointURI(), e);
             return null;
         }
     }

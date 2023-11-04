@@ -20,8 +20,11 @@ package eu.europa.ec.dynamicdiscovery.model.identifiers;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.net.URI;
+
 /**
  * @author Flávio W. R. Santos
+ * @author Cosmin Baciu
  * @since 1.0
  */
 public class SMPDocumentIdentifier extends IdentifierType {
@@ -29,7 +32,7 @@ public class SMPDocumentIdentifier extends IdentifierType {
     /**
      * The URI of this document identifier. Filled in case the DocumentIdentifier was retrieved from the ServiceGroup
      */
-    protected String href;
+    protected URI documentIdentifierSmpURI;
 
     public SMPDocumentIdentifier(String documentIdentifier, String scheme) {
         super(documentIdentifier, scheme);
@@ -39,17 +42,17 @@ public class SMPDocumentIdentifier extends IdentifierType {
         this(documentIdentifier, null);
     }
 
-    public SMPDocumentIdentifier(String documentIdentifier, String scheme, String href) {
+    public SMPDocumentIdentifier(String documentIdentifier, String scheme, URI documentIdentifierSmpURI) {
         this(documentIdentifier, scheme);
-        this.href = href;
+        this.documentIdentifierSmpURI = documentIdentifierSmpURI;
     }
 
-    public String getHref() {
-        return href;
+    public URI getDocumentIdentifierSmpURI() {
+        return documentIdentifierSmpURI;
     }
 
-    public void setHref(String href) {
-        this.href = href;
+    public void setDocumentIdentifierSmpURI(URI documentIdentifierSmpURI) {
+        this.documentIdentifierSmpURI = documentIdentifierSmpURI;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class SMPDocumentIdentifier extends IdentifierType {
         return "DocumentIdentifier{" +
                 "identifier='" + identifier + '\'' +
                 ", scheme='" + scheme + '\'' +
-                ", href='" + href + '\'' +
+                ", documentIdentifierSmpURI='" + documentIdentifierSmpURI + '\'' +
                 '}';
     }
 

@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
@@ -8,26 +8,26 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Peppol SMP extension providing the ServiceGroup and SignedServiceMetadata parser
+ * Oasis SMP 1.0 extension providing je ServiceGroup and SignedServiceMetadata parser
  *
- * @author Cosmin Baciu
- * @since 2.1
+ * @author Joze Rihtarsic
+ * @since 2.0
  */
-public class PeppolSMPExtension implements IExtension {
+public class OasisSMP10Extension implements IExtension {
 
-    public static final String NAMESPACE = "http://busdox.org/serviceMetadata/publishing/1.0/";
+    public static final String NAMESPACE = "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05";
 
     final List<IObjectReader<?>> parsers;
-    final PeppolSMPServiceGroupReader serviceGroupReader;
-    final PeppolSMPServiceMetadataReader serviceMetadataReader;
+    final OasisSMP10ServiceGroupReader serviceGroupReader;
+    final OasisSMP10ServiceMetadataReader serviceMetadataReader;
 
-    public PeppolSMPExtension() {
+    public OasisSMP10Extension() {
         this(false);
     }
 
-    public PeppolSMPExtension(boolean ignoreInvalidServices) {
-        serviceGroupReader =  new PeppolSMPServiceGroupReader();
-        serviceMetadataReader =  new PeppolSMPServiceMetadataReader(ignoreInvalidServices);
+    public OasisSMP10Extension(boolean ignoreInvalidServices) {
+        serviceGroupReader =  new OasisSMP10ServiceGroupReader();
+        serviceMetadataReader =  new OasisSMP10ServiceMetadataReader(ignoreInvalidServices);
         parsers = Arrays.asList(serviceGroupReader,serviceMetadataReader);
     }
 

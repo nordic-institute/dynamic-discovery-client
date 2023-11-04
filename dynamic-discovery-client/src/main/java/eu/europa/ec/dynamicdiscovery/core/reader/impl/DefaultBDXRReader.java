@@ -19,8 +19,8 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
-import eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP10Extension;
-import eu.europa.ec.dynamicdiscovery.core.extension.impl.OasisSMP20Extension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
