@@ -93,6 +93,7 @@
         <!-- latest version compatible with SonarQube 5.6 -->
         <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
     </properties>
 
     <profiles>

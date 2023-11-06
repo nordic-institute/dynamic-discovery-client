@@ -1,6 +1,7 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol;
 
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
@@ -44,8 +45,13 @@ public class PeppolDynamicDiscoveryService {
      * @return the discovered SMPServiceMetadata or null
      * @throws TechnicalException in case the participant cannot be discovered or no SMPServiceMetadata was found
      */
-    public SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, String documentIdentifierToCheck) throws TechnicalException {
-        final SMPServiceGroup serviceGroup = smpClient.getServiceGroup(participantIdentifier);
+    public SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, String documentIdentifierToCheck) throws SMPServiceMetadataException {
+        SMPServiceGroup serviceGroup = null;
+        try {
+            serviceGroup = smpClient.getServiceGroup(participantIdentifier);
+        } catch (TechnicalException e) {
+            throw new SMPServiceMetadataException(SMPExceptionCode.SERVICE_GROUP, "Could not find SMPServiceGroup for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifierToCheck + "]", e);
+        }
 
         //the document identifiers supported by the participant
         final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = serviceGroup.getDocumentIdentifiers();
@@ -53,17 +59,25 @@ public class PeppolDynamicDiscoveryService {
         final SMPDocumentIdentifier exactMatchDocumentIdentifier = getExactMatchDocumentIdentifier(discoveredDocumentIdentifiers, documentIdentifierToCheck);
         if (exactMatchDocumentIdentifier != null) {
             LOG.debug("Found SMPDocumentIdentifier exact match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", participantIdentifier, documentIdentifierToCheck);
-            final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(participantIdentifier, exactMatchDocumentIdentifier);
-            return discoveredServiceMetadata;
+            try {
+                final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(participantIdentifier, exactMatchDocumentIdentifier);
+                return discoveredServiceMetadata;
+            } catch (TechnicalException e) {
+                throw new SMPServiceMetadataException(SMPExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata using exact match for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifierToCheck + "]", e);
+            }
         }
 
         final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = getWilcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifierToCheck);
         if (wildcardDocumentIdentifierWithLongestMatch != null) {
             LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", participantIdentifier, documentIdentifierToCheck);
-            final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
-            return discoveredServiceMetadata;
+            try {
+                final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
+                return discoveredServiceMetadata;
+            } catch (TechnicalException e) {
+                throw new SMPServiceMetadataException(SMPExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata using wildcard match for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifierToCheck + "]", e);
+            }
         }
-        throw new SMPServiceMetadataException("Could not find SMPServiceMetadata for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifierToCheck + "]");
+        throw new SMPServiceMetadataException(SMPExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifierToCheck + "]");
 
     }
 
@@ -105,6 +119,11 @@ public class PeppolDynamicDiscoveryService {
                             return false;
                         }
                 ).collect(Collectors.toList());
+        if (wildcardDocumentIdentifierCandidates == null || wildcardDocumentIdentifierCandidates.size() == 0) {
+            LOG.debug("Not SMP document identifier candidates matching [{}]", documentIdentifierToCheck);
+            return null;
+        }
+
         final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = getDocumentIdentifierWithWildcardLongestMatch(wildcardDocumentIdentifierCandidates);
         return wildcardDocumentIdentifierWithLongestMatch;
     }
@@ -118,6 +137,10 @@ public class PeppolDynamicDiscoveryService {
      * Get the longest document identifier having a wildcard match
      */
     protected SMPDocumentIdentifier getDocumentIdentifierWithWildcardLongestMatch(List<SMPDocumentIdentifier> documentIdentifierCandidates) {
+        if (documentIdentifierCandidates == null || documentIdentifierCandidates.size() == 0) {
+            return null;
+        }
+
         SMPDocumentIdentifier result = null;
 
         for (SMPDocumentIdentifier documentIdentifierCandidate : documentIdentifierCandidates) {

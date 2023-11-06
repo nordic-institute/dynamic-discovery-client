@@ -25,6 +25,8 @@ import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
@@ -34,10 +36,15 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
+import gen.eu.europa.ec.ddc.api.peppol.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.peppol.SignedServiceMetadata;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +53,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolDynamicDiscoveryService.BUSDOX_DOCID_QNS;
+import static eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolDynamicDiscoveryService.PEPPOL_DOCTYPE_WILDCARD;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Cosmin Baciu
@@ -54,7 +64,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class PeppolDocumentIdentifierIT {
 
     static final Logger LOG = LoggerFactory.getLogger(PeppolDocumentIdentifierIT.class);
-
 
 
     @Test
@@ -95,16 +104,16 @@ class PeppolDocumentIdentifierIT {
 
         toCheckDocumentIdentifierCapabilities.add(new SMPDocumentIdentifier(
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1*::2.1",
-                PeppolDynamicDiscoveryService.PEPPOL_DOCTYPE_WILDCARD));
+                PEPPOL_DOCTYPE_WILDCARD));
         toCheckDocumentIdentifierCapabilities.add(new SMPDocumentIdentifier(
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0*::2.1",
-                PeppolDynamicDiscoveryService.PEPPOL_DOCTYPE_WILDCARD));
+                PEPPOL_DOCTYPE_WILDCARD));
         toCheckDocumentIdentifierCapabilities.add(new SMPDocumentIdentifier(
                 "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:peppol:pint:billing-3.0@jp:peppol-1*::2.1",
-                PeppolDynamicDiscoveryService.PEPPOL_DOCTYPE_WILDCARD));
+                PEPPOL_DOCTYPE_WILDCARD));
         toCheckDocumentIdentifierCapabilities.add(new SMPDocumentIdentifier(
                 "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:peppol:pint:billing-3.0*::2.1",
-                PeppolDynamicDiscoveryService.PEPPOL_DOCTYPE_WILDCARD));
+                PEPPOL_DOCTYPE_WILDCARD));
 
         getDocumentIdentifierAndAssert(toCheckParticipantIdentifierValue,
                 toCheckParticipantIdentifierScheme,
@@ -198,12 +207,15 @@ class PeppolDocumentIdentifierIT {
         assertNotNull(signedServiceMetadata.getServiceMetadata());
         assertNotNull(signedServiceMetadata.getSignature());
 
-        //check endpoint
+        //check endpoints
         final List<SMPEndpoint> endpoints = discoveredServiceMetadata.getEndpoints();
         assertNotNull(endpoints);
         assertEquals(1, endpoints.size());
         final SMPEndpoint smpEndpoint = endpoints.get(0);
         assertNotNull(smpEndpoint.getCertificate());
+
+        assertNotNull(smpEndpoint.getTechnicalContactUrl());
+        assertNotNull(smpEndpoint.getServiceDescription());
 
         //check transport profile
         final SMPTransportProfile transportProfile = smpEndpoint.getTransportProfile();
@@ -266,7 +278,7 @@ class PeppolDocumentIdentifierIT {
     }
 
     @Test
-    void lookupCapability() throws Exception {
+    void getServiceMetadataBasedOnProvidedDocumentWithWildcardMatch() throws Exception {
         final String toCheckParticipantIdentifierValue = "9901:pint_c4_jp_sb";
         final String toCheckParticipantIdentifierScheme = "iso6523-actorid-upis";
         SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
@@ -278,7 +290,6 @@ class PeppolDocumentIdentifierIT {
         final DynamicDiscovery smpClient = createClient();
 
         PeppolDynamicDiscoveryService peppolDynamicDiscoveryService = new PeppolDynamicDiscoveryService(smpClient);
-//        final SMPServiceGroup serviceGroup = smpClient.getServiceGroup(toCheckParticipantIdentifier);
 
         //get the service metadata from SMP for using document identifier which is not supported by the participant
         final String documentIdentifierToCheck = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1";
@@ -287,10 +298,134 @@ class PeppolDocumentIdentifierIT {
         assertTrue(StringUtils.containsIgnoreCase(documentIdentifierToCheck, peppolDynamicDiscoveryService.getValueUntilWildcardCharacter(discoveredServiceMetadata.getDocumentIdentifier().getIdentifier())));
     }
 
-    //TODO test with a mix of exact and wildcard match with final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = serviceGroup.getDocumentIdentifiers();
+    @Test
+    void getServiceMetadataBasedOnProvidedDocumentWithNoMatch() throws Exception {
+        final String toCheckParticipantIdentifierValue = "9901:pint_c4_jp_sb";
+        final String toCheckParticipantIdentifierScheme = "iso6523-actorid-upis";
+        SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
+
+        final DynamicDiscovery smpClient = createClient();
+
+        PeppolDynamicDiscoveryService peppolDynamicDiscoveryService = new PeppolDynamicDiscoveryService(smpClient);
+
+        //get the service metadata from SMP for using document identifier which is not supported by the participant
+        final String documentIdentifierToCheck = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notExistent";
+
+        final SMPServiceMetadataException exception = assertThrows(SMPServiceMetadataException.class, () -> {
+            final SMPServiceMetadata discoveredServiceMetadata = peppolDynamicDiscoveryService.getServiceMetadata(toCheckParticipantIdentifier, documentIdentifierToCheck);
+        });
+        assertEquals(SMPExceptionCode.SERVICE_METADATA, exception.getSmpExceptionCode());
+        assertTrue(exception.getMessage().contains("Could not find SMPServiceMetadata for participant"));
+
+    }
+
+    @Test
+    void getServiceMetadataForNonRegisteredParticipant() throws Exception {
+        final String toCheckParticipantIdentifierValue = "9901:eDeliveryNotRegisteredParticipant";
+        final String toCheckParticipantIdentifierScheme = "iso6523-actorid-upis";
+        SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
+
+        final DynamicDiscovery smpClient = createClient();
+        PeppolDynamicDiscoveryService peppolDynamicDiscoveryService = new PeppolDynamicDiscoveryService(smpClient);
+
+        //get the service metadata from SMP for using document identifier which is not supported by the participant
+        final String documentIdentifierToCheck = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notExistent";
+
+        final SMPServiceMetadataException exception = assertThrows(SMPServiceMetadataException.class, () -> {
+            final SMPServiceMetadata discoveredServiceMetadata = peppolDynamicDiscoveryService.getServiceMetadata(toCheckParticipantIdentifier, documentIdentifierToCheck);
+        });
+        assertEquals(SMPExceptionCode.SERVICE_GROUP, exception.getSmpExceptionCode());
+        assertTrue(exception.getMessage().contains("Could not find SMPServiceGroup for participant"));
+    }
+
+    @Test
+    void testGetServiceMetadataWithExactMatch() throws TechnicalException {
+        //invoice capability to check
+        final String invoiceDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1";
+
+        List<SMPDocumentIdentifier> supportedDocumentIdentifiers = new ArrayList<>();
+
+        //exatch match
+        final SMPDocumentIdentifier notMatchingDocumentIdentifier = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#notMatching",
+                BUSDOX_DOCID_QNS);
+        supportedDocumentIdentifiers.add(notMatchingDocumentIdentifier);
+
+        //exatch match
+        final SMPDocumentIdentifier exactMatchDocumentIdentifier = new SMPDocumentIdentifier(
+                invoiceDocumentIdentifier,
+                BUSDOX_DOCID_QNS);
+        supportedDocumentIdentifiers.add(exactMatchDocumentIdentifier);
+
+        //invoice capability with wildcard(this document type is not existing, it is just added for testing purposes)
+        final SMPDocumentIdentifier wildcardDocumentIdentifier = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0*",
+                PEPPOL_DOCTYPE_WILDCARD);
+        supportedDocumentIdentifiers.add(wildcardDocumentIdentifier);
+
+        doTestGetServiceMetadataAndAssert(invoiceDocumentIdentifier, supportedDocumentIdentifiers, exactMatchDocumentIdentifier);
+    }
+
+    @Test
+    void testGetServiceMetadataWithWildcardMatch() throws TechnicalException {
+        //invoice capability to check
+        final String invoiceDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1";
+
+        List<SMPDocumentIdentifier> supportedDocumentIdentifiers = new ArrayList<>();
+
+        //invoice capability with wildcard(this document type is not existing, it is just added for testing purposes)
+        final SMPDocumentIdentifier notMatching = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notMatching*",
+                PEPPOL_DOCTYPE_WILDCARD);
+        supportedDocumentIdentifiers.add(notMatching);
+
+        //invoice capability with wildcard(this document type is not existing, it is just added for testing purposes)
+        final SMPDocumentIdentifier wildcardDocumentIdentifierShort = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol*",
+                PEPPOL_DOCTYPE_WILDCARD);
+        supportedDocumentIdentifiers.add(wildcardDocumentIdentifierShort);
+
+        //invoice capability with wildcard(this document type is not existing, it is just added for testing purposes)
+        final SMPDocumentIdentifier wildcardDocumentIdentifierLong = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0*",
+                PEPPOL_DOCTYPE_WILDCARD);
+        supportedDocumentIdentifiers.add(wildcardDocumentIdentifierLong);
+
+        //we expect that the longest match is used
+        doTestGetServiceMetadataAndAssert(invoiceDocumentIdentifier, supportedDocumentIdentifiers, wildcardDocumentIdentifierLong);
+    }
+
+    private void doTestGetServiceMetadataAndAssert(final String invoiceDocumentIdentifier, List<SMPDocumentIdentifier> supportedDocumentIdentifiers, SMPDocumentIdentifier expectedMatch) throws TechnicalException {
+        SMPParticipantIdentifier participantIdentifier = Mockito.mock(SMPParticipantIdentifier.class);
+        DynamicDiscovery dynamicDiscovery = Mockito.mock(DynamicDiscovery.class);
+
+        //START record mocks
+
+        final SMPServiceGroup serviceGroup = Mockito.mock(SMPServiceGroup.class);
+        //record discovered supported documents
+        Mockito.doReturn(supportedDocumentIdentifiers).when(serviceGroup).getDocumentIdentifiers();
+        Mockito.doReturn(serviceGroup).when(dynamicDiscovery).getServiceGroup(participantIdentifier);
+
+        //END record mocks
+
+        //call the method we know to check
+        PeppolDynamicDiscoveryService peppolDynamicDiscoveryService = new PeppolDynamicDiscoveryService(dynamicDiscovery);
+        peppolDynamicDiscoveryService.getServiceMetadata(participantIdentifier, invoiceDocumentIdentifier);
+
+        //record capture
+        ArgumentCaptor<SMPDocumentIdentifier> smpDocumentIdentifierArgumentCaptor = ArgumentCaptor.forClass(SMPDocumentIdentifier.class);
+        verify(dynamicDiscovery, times(1)).getServiceMetadata(ArgumentMatchers.any(), smpDocumentIdentifierArgumentCaptor.capture());
+
+        //we check the discovered SMPServiceMetadata
+        final SMPDocumentIdentifier capturedSmpDocumentIdentifier = smpDocumentIdentifierArgumentCaptor.getValue();
+
+        //we expect that the exact match id done
+        assertEquals(expectedMatch, capturedSmpDocumentIdentifier);
+    }
 
 
-    @Disabled//Enable when testing looking up a participant while it is registered in the DNS. Useful to check if this participant is not cached for a long time in the DNS cache.
+    @Disabled
+//Enable when testing looking up a participant while it is registered in the DNS. Useful to check if this participant is not cached for a long time in the DNS cache.
     @Test
     void lookupParticipantWhileItIsRegistered() throws Exception {
         final String toCheckParticipantIdentifierValue = "9925:EDELIVERY_TEST3";

@@ -143,7 +143,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             switch (response.getCode()) {
                 case 200:
-                    return toInMemoryFetcherResponse(new BufferedInputStream(response.getEntity().getContent()));
+                    try (final BufferedInputStream bufferedInputStream = new BufferedInputStream(response.getEntity().getContent())) {
+                        return toInMemoryFetcherResponse(bufferedInputStream);
+                    }
                 case 404:
                     throw new DNSLookupException("SMP lookup address " + httpGet.getUri() + " not found - response 404");
                 default:
@@ -166,12 +168,10 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     }
 
     public FetcherResponse toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
-
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             IOUtils.copy(inputStream, baos);
             return new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
         }
-
     }
 
 

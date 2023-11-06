@@ -50,7 +50,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" + ex, ex);
         }
         return null;
     });
@@ -61,7 +61,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" + ex, ex);
         }
         return null;
     });
@@ -74,7 +74,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
         return jaxbMarshaller.get();
     }
 
-    private static final QName PARSE_ELEMENT = new QName(PeppolSMPExtension.NAMESPACE, "smp:ServiceGroup");
+    private static final QName PARSE_ELEMENT = new QName(PeppolSMPExtension.NAMESPACE, "ServiceGroup");
 
 
     /**
@@ -91,7 +91,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceGroup.class;
+        return PeppolNamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceGroup.class, qName, clazz);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
             // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
             Document document = db.parse(inputStream);
             return parseNative(document);
-        } catch ( SAXException | IOException e) {
+        } catch (SAXException | IOException e) {
             LOG.error("Error  type: [{}], to string [{}]", e.getClass(), e);
             throw new BindException("Error occurred while parsing serviceGroup from input stream", e);
         }

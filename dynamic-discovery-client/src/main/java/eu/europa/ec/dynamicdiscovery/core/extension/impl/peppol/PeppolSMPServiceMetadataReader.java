@@ -10,7 +10,10 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
-import gen.eu.europa.ec.ddc.api.peppol.*;
+import gen.eu.europa.ec.ddc.api.peppol.EndpointType;
+import gen.eu.europa.ec.ddc.api.peppol.ProcessType;
+import gen.eu.europa.ec.ddc.api.peppol.ServiceMetadata;
+import gen.eu.europa.ec.ddc.api.peppol.SignedServiceMetadata;
 import gen.eu.europa.ec.ddc.api.peppol.identifiers.transport.DocumentIdentifier;
 import gen.eu.europa.ec.ddc.api.peppol.identifiers.transport.ParticipantIdentifierType;
 import org.apache.commons.codec.binary.Base64;
@@ -69,7 +72,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
         return jaxbMarshaller.get();
     }
 
-    private static final QName PARSE_ELEMENT = new QName(PeppolSMPExtension.NAMESPACE, "smp:SignedServiceMetadata");
+    private static final QName PARSE_ELEMENT = new QName(PeppolSMPExtension.NAMESPACE, "SignedServiceMetadata");
 
     /**
      * Skip out-dated services
@@ -112,7 +115,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceMetadata.class;
+        return PeppolNamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceMetadata.class, qName, clazz);
     }
 
     @Override
@@ -137,7 +140,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
             Document document = db.parse(inputStream);
             return parseNative(document);
         } catch (SAXException | IOException e) {
-            throw new BindException("Error occurred while SignedServiceMetadata serviceGroup", e);
+            throw new BindException("Error occurred while SignedServiceMetadata", e);
         }
     }
 
@@ -221,6 +224,9 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
                 .addCertificate(SMPEndpoint.DEFAULT_CERTIFICATE, certificate)
                 .activationDate(endpointType.getServiceActivationDate())
                 .expirationDate(endpointType.getServiceExpirationDate())
+                .serviceDescription(endpointType.getServiceDescription())
+                .technicalContactUrl(endpointType.getTechnicalContactUrl())
+                .technicalInformationUrl(endpointType.getTechnicalInformationUrl())
                 .build();
     }
 
