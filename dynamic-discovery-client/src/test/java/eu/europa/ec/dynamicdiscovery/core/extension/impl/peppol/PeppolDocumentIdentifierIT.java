@@ -60,6 +60,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Cosmin Baciu
+ * @since 2.1
  */
 class PeppolDocumentIdentifierIT {
 

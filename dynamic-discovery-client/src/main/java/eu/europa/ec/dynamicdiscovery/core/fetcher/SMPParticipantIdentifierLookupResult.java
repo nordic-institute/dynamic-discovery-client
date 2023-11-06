@@ -4,6 +4,7 @@ import java.net.URI;
 
 /**
  * @author Cosmin Baciu
+ * @since 2.1
  */
 public class SMPParticipantIdentifierLookupResult {
 

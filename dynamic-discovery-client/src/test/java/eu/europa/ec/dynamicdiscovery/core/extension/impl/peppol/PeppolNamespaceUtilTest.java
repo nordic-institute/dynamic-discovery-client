@@ -7,6 +7,10 @@ import javax.xml.namespace.QName;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * @author Cosmin Baciu
+ * @since 2.1
+ */
 public class PeppolNamespaceUtilTest {
 
     @Test

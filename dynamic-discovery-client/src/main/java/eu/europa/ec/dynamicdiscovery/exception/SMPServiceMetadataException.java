@@ -19,6 +19,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
  * @author Cosmin Baciu
+ * @since 2.1
  */
 public class SMPServiceMetadataException extends TechnicalException {
 

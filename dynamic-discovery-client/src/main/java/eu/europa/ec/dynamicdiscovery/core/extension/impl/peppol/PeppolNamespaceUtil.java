@@ -4,6 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.namespace.QName;
 
+/**
+ * @author Cosmin Baciu
+ * @since 2.1
+ */
 public class PeppolNamespaceUtil {
 
     private static final String LOCAL_NAMESPACE_SEPARATOR = ":";
