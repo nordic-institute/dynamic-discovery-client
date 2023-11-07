@@ -11,6 +11,7 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.addressing.AttributedURIType;
 import gen.eu.europa.ec.ddc.api.addressing.EndpointReferenceType;
 import gen.eu.europa.ec.ddc.api.peppol.EndpointType;
@@ -119,7 +120,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PeppolNamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceMetadata.class, qName, clazz);
+        return NamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceMetadata.class, qName, clazz);
     }
 
     @Override

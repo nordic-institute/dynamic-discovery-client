@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol;
+package eu.europa.ec.dynamicdiscovery.util;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -8,7 +8,7 @@ import javax.xml.namespace.QName;
  * @author Cosmin Baciu
  * @since 2.1
  */
-public class PeppolNamespaceUtil {
+public class NamespaceUtil {
 
     private static final String LOCAL_NAMESPACE_SEPARATOR = ":";
 

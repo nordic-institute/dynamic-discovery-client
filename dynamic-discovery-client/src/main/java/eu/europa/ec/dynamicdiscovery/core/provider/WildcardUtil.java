@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author Cosmin Baciu
+ * @since 2.1
+ */
 public class WildcardUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(WildcardUtil.class);

@@ -10,6 +10,7 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.peppol.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.peppol.ServiceMetadataReferenceType;
 import gen.eu.europa.ec.ddc.api.peppol.identifiers.transport.ParticipantIdentifierType;
@@ -92,7 +93,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PeppolNamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceGroup.class, qName, clazz);
+        return NamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceGroup.class, qName, clazz);
     }
 
     @Override
