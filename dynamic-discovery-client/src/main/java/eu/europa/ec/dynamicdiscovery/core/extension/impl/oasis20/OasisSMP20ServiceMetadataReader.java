@@ -18,6 +18,7 @@ import gen.eu.europa.ec.ddc.api.smp20.aggregate.Process;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.ProcessMetadata;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ServiceID;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -209,8 +210,8 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             return null;
         }
         ParticipantID identifierType = serviceMetadata.getParticipantID();
-        return new SMPParticipantIdentifier(identifierType.getValue(),
-                identifierType.getSchemeID());
+        return new SMPParticipantIdentifier(StringUtils.trim(identifierType.getValue()),
+                StringUtils.trim(identifierType.getSchemeID()));
     }
 
     /**
@@ -225,7 +226,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
         }
         ServiceID identifierType = serviceMetadata.getServiceID();
 
-        return new SMPDocumentIdentifier(identifierType.getValue(), identifierType.getSchemeID());
+        return new SMPDocumentIdentifier(StringUtils.trim(identifierType.getValue()), StringUtils.trim(identifierType.getSchemeID()));
     }
 
     /**

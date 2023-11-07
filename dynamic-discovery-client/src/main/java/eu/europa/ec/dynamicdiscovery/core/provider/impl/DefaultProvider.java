@@ -94,7 +94,7 @@ public class DefaultProvider implements IMetadataProvider {
         //the document identifiers supported by the participant
         final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = serviceGroup.getDocumentIdentifiers();
 
-        final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = wildcardUtil.getWilcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifier);
+        final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = wildcardUtil.getWildcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifier);
         if (wildcardDocumentIdentifierWithLongestMatch != null) {
             LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
             return getDocumentIdentifierWithExactMatch(smpURI, participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);

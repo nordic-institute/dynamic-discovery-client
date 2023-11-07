@@ -315,7 +315,11 @@ public abstract class AbstractIdentifierFormatter<T> {
         try {
             String encodedString = URLEncoder.encode(s, UTF_8.name());
             // fix spaces %20 instead of +
-            return StringUtils.replace(encodedString, "+", "%20");
+            String result = replace(encodedString, "+", "%20");
+
+            //fix wildcard instead of *
+            result = replace(result, "*", "%2A");
+            return result;
         } catch (UnsupportedEncodingException e) {
             throw new MalformedIdentifierException("Unsupported UTF-8 Encoding. Please enable UTF-8 encoding!", e);
         }

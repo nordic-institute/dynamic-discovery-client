@@ -17,7 +17,7 @@ public class WildcardUtil {
     /**
      * Gets the document identifier using a wildcard match(peppol-doctype-wildcard scheme)
      */
-    public SMPDocumentIdentifier getWilcardDocumentIdentifierWithLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers, SMPDocumentIdentifier documentIdentifierToCheck) {
+    public SMPDocumentIdentifier getWildcardDocumentIdentifierWithLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers, SMPDocumentIdentifier documentIdentifierToCheck) {
         final List<SMPDocumentIdentifier> wildcardDocumentIdentifierCandidates = discoveredDocumentIdentifiers.stream()
                 .filter(smpDocumentIdentifier -> {
                             final String discoveredSmpDocumentScheme = smpDocumentIdentifier.getScheme();

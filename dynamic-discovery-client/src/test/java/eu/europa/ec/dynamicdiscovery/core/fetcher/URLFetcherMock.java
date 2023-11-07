@@ -29,9 +29,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.PEPPOL_DOCTYPE_WILDCARD;
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.WILDCARD_SCHEME;
 
 
@@ -77,7 +80,7 @@ public class URLFetcherMock implements IMetadataFetcher {
         if (CommonUtil.OASIS_SMP_20.equals(resourceType)) {
             return CommonUtil.getContentFromOasisSMP20XmlResource(responseFileName);
         }
-        if (CommonUtil.OASIS_SMP_10.equals(resourceType)) {
+        if (CommonUtil.PEPPOL.equals(resourceType)) {
             return CommonUtil.getContentFromPeppolXmlResource(responseFileName);
         }
         throw new RuntimeException("Unknown resource type [" + resourceType + "]");
@@ -119,12 +122,12 @@ public class URLFetcherMock implements IMetadataFetcher {
             final String serviceURL = response.getKey();
 
             //wildcard match
-            if (uriPath.contains(WILDCARD_SCHEME)) {
+            if (uriPath.contains(WILDCARD_SCHEME) || uriPath.contains(PEPPOL_DOCTYPE_WILDCARD)) {
                 final String serviceURLDecoded = decodeURl(serviceURL);
 
                 //recorded service URL does not contain wildcard scheme
-                if(!serviceURLDecoded.contains(WILDCARD_SCHEME)) {
-                    return false;
+                if(!serviceURLDecoded.contains(WILDCARD_SCHEME) && !serviceURLDecoded.contains(PEPPOL_DOCTYPE_WILDCARD)) {
+                    continue;
                 }
 
                 String uriPathDecoded = decodeURl(uriPath);

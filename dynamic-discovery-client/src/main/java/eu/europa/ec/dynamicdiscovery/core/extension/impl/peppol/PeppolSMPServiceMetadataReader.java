@@ -194,8 +194,8 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
 
 
         ParticipantIdentifierType identifierType = serviceMetadata.getServiceMetadata().getServiceInformation().getParticipantIdentifier();
-        return new SMPParticipantIdentifier(identifierType.getValue(),
-                identifierType.getScheme());
+        return new SMPParticipantIdentifier(StringUtils.trim(identifierType.getValue()),
+                StringUtils.trim(identifierType.getScheme()));
     }
 
     protected SMPDocumentIdentifier readDocumentIdentifier(SignedServiceMetadata serviceMetadata) {
@@ -207,7 +207,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
         }
         DocumentIdentifier identifierType = serviceMetadata.getServiceMetadata().getServiceInformation().getDocumentIdentifier();
 
-        return new SMPDocumentIdentifier(identifierType.getValue(), identifierType.getScheme());
+        return new SMPDocumentIdentifier(StringUtils.trim(identifierType.getValue()), StringUtils.trim(identifierType.getScheme()));
     }
 
 

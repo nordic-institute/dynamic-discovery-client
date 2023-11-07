@@ -59,7 +59,6 @@ public class TestCaseConstants {
 
     public static final String WILDCARD_SCHEME = "bdx-docid-wildcard";
 
-
     public static final String PEPPOL_DOCTYPE_WILDCARD = "peppol-doctype-wildcard";
     public static final String BUSDOX_DOCID_QNS = "busdox-docid-qns";
     public static final String WILDCARD_CHARACTER = "*";

@@ -18,6 +18,7 @@
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolSMPExtension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
@@ -46,6 +47,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 
+import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.PEPPOL_DOCTYPE_WILDCARD;
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.WILDCARD_SCHEME;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -223,7 +225,7 @@ class DocumentIdentifierIT {
 
         final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
 
-        SMPServiceMetadataException result = assertThrows(SMPServiceMetadataException.class, () -> getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier));
+        SMPServiceMetadataException result = assertThrows(SMPServiceMetadataException.class, () -> getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier, WILDCARD_SCHEME));
 
     }
 
@@ -244,7 +246,7 @@ class DocumentIdentifierIT {
 
         final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
 
-        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier);
+        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier, WILDCARD_SCHEME);
     }
 
     @Test
@@ -264,10 +266,33 @@ class DocumentIdentifierIT {
 
         final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
 
-        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier);
+        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier, WILDCARD_SCHEME);
     }
 
-    private void getDocumentWithWildcardSchemeAndAssert(URLFetcherMock urlFetcherMock, SMPDocumentIdentifier smpDocumentIdentifierToCheck, String expectedDiscoveredDocumentIdentifier) throws Exception {
+    @Test
+    void getPeppolDocumentIdentifierWithWildcardSchemeBasedOnDocumentIdentifierValuedWhichMatchesSMPWildcardDocument() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+
+        urlFetcherURL.setParameters(CommonUtil.PEPPOL,
+                URLFetcherMock.LookupType.CNAME,
+                "/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/peppol-doctype-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3AInvoice-2%3A%3AInvoice%23%23urn%3Apeppol%3Apint%3Abilling-3.0%40jp%3Apeppol-1%2A%3A%3A2.1",
+                "peppol_service_metadata_valid_iso6523_wildcard",
+                "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.addParameters(CommonUtil.PEPPOL, "peppol_service_group_valid_iso6523_wildcard", TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178);
+
+        final SMPDocumentIdentifier smpDocumentIdentifierToCheck = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1:invoice::2.1",
+                PEPPOL_DOCTYPE_WILDCARD);
+
+        final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1*::2.1";
+
+        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier, PEPPOL_DOCTYPE_WILDCARD);
+    }
+
+    private void getDocumentWithWildcardSchemeAndAssert(URLFetcherMock urlFetcherMock,
+                                                        SMPDocumentIdentifier smpDocumentIdentifierToCheck,
+                                                        String expectedDiscoveredDocumentIdentifier,
+                                                        String expectedDiscoveredDocumentScheme) throws Exception {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
@@ -288,12 +313,13 @@ class DocumentIdentifierIT {
                 .build();
         final DefaultBDXRReader bdxReader = new DefaultBDXRReader.Builder()
                 .addExtension(new OasisSMP10Extension())
+                .addExtension(new PeppolSMPExtension())
                 .signatureValidator(emptyValidator)
                 .build();
         final DefaultProvider defaultProvider = new DefaultProvider.Builder()
                 .metadataFetcher(urlFetcherMock)
                 .metadataReader(bdxReader)
-                .wildcardSchemes(Arrays.asList(WILDCARD_SCHEME))
+                .wildcardSchemes(Arrays.asList(expectedDiscoveredDocumentScheme))
                 .build();
 
 
@@ -310,6 +336,6 @@ class DocumentIdentifierIT {
         assertNotNull(documentIdentifier);
 
         assertEquals(expectedDiscoveredDocumentIdentifier, documentIdentifier.getIdentifier());
-        assertEquals(WILDCARD_SCHEME, documentIdentifier.getScheme());
+        assertEquals(expectedDiscoveredDocumentScheme, documentIdentifier.getScheme());
     }
 }
