@@ -72,22 +72,22 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
      * Method verifies if certificate has trust anchor in truststore. Trust anchor is certificate itself
      * or direct issuer.
      *
-     * @param signerCertificate
+     * @param signedCertificate
      * @throws CertificateException
      */
-    private void verifyTrust(X509Certificate signerCertificate) throws CertificateException {
+    private void verifyTrust(X509Certificate signedCertificate) throws CertificateException {
         try {
-            for (String alias : Collections.list(trustStore.aliases())) {
+            for (String signerCertificateAlias : Collections.list(trustStore.aliases())) {
 
-                if (isAliasCertificateTrustAnchor(signerCertificate, alias)) {
-                    LOG.debug("Certificate with alias [{}] is trust anchor of the certificate [{}]!", alias,
-                            signerCertificate.getSubjectDN().getName());
+                if (isAliasCertificateTrustAnchor(signedCertificate, signerCertificateAlias)) {
+                    LOG.debug("Certificate with alias [{}] is trust anchor of the certificate [{}]!", signerCertificateAlias,
+                            signedCertificate.getSubjectDN().getName());
                     return;
                 }
             }
-            throw new CertificateException("TrustStore does not contain trusted direct Issuer or the Certificate.");
+            throw new CertificateException("TrustStore does not contain trusted direct Issuer or the leaf certificate for [" + signedCertificate.getSubjectDN() + "]");
         } catch (RuntimeException | KeyStoreException exc) {
-            throw new CertificateException("Runtime exception:" + exc.getMessage(), exc);
+            throw new CertificateException("Could not verify trust for certificate [" + signedCertificate.getSubjectDN() + "]:" + exc.getMessage(), exc);
         }
     }
 
@@ -95,50 +95,49 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
      * Method verifies if certificate with given alias is valid trust anchor for signer certificate. TrustAnchor is
      * the certificate itself or direct issuer!
      *
-     * @param signerCertificate
-     * @param alias
+     * @param signedCertificate
+     * @param signerCertificateAlias
      * @return true is certificate with given alias in truststore is valid trust achor
      * @throws CertificateException
      */
-    protected boolean isAliasCertificateTrustAnchor(X509Certificate signerCertificate, String alias) throws CertificateException {
+    protected boolean isAliasCertificateTrustAnchor(X509Certificate signedCertificate, String signerCertificateAlias) throws CertificateException {
         //Checks if certificate is under the truststore and is trusted
-        String certName = signerCertificate.getSubjectX500Principal().getName();
+        String certName = signedCertificate.getSubjectX500Principal().getName();
         try {
-            if (!trustStore.entryInstanceOf(alias, KeyStore.TrustedCertificateEntry.class)) {
-                LOG.warn("Certificate with alias [{}] is not Trusted certificate entry!", alias);
+            if (!trustStore.entryInstanceOf(signerCertificateAlias, KeyStore.TrustedCertificateEntry.class)) {
+                LOG.warn("Certificate with alias [{}] is not Trusted certificate entry!", signerCertificateAlias);
                 return false;
             }
 
             //Checks if certificate is X509Certificate type
-            KeyStore.TrustedCertificateEntry certificateEntry =
-                    (KeyStore.TrustedCertificateEntry) trustStore.getEntry(alias, null);
-            Certificate trustedCertificate = certificateEntry.getTrustedCertificate();
+            KeyStore.TrustedCertificateEntry signerCertificateEntry = (KeyStore.TrustedCertificateEntry) trustStore.getEntry(signerCertificateAlias, null);
+            Certificate trustedCertificate = signerCertificateEntry.getTrustedCertificate();
             if (!(trustedCertificate instanceof X509Certificate)) {
-                LOG.warn("Certificate with alias [{}] is not X509Certificate! Only X509Certificate type is supported!", alias);
+                LOG.warn("Certificate with alias [{}] is not X509Certificate! Only X509Certificate type is supported!", signerCertificateAlias);
                 return false;
             }
 
-            X509Certificate x509TrustedCertificate = (X509Certificate) certificateEntry.getTrustedCertificate();
+            X509Certificate x509TrustedCertificate = (X509Certificate) signerCertificateEntry.getTrustedCertificate();
 
             // Verify trust
-            if (signerCertificate.equals(trustedCertificate)) {
-                LOG.debug("Certificate with alias [{}] is direct trust anchor of the certificate [{}]!", alias,
+            if (signedCertificate.equals(trustedCertificate)) {
+                LOG.debug("Certificate with alias [{}] is direct trust anchor of the certificate [{}]!", signerCertificateAlias,
                         certName);
                 return true;
             }
 
-            if (isSignedBy(signerCertificate, x509TrustedCertificate, certName, alias)) {
-                LOG.debug("Certificate with alias [{}] is 'chain' trust anchor of the certificate [{}]!", alias,
+            if (isSignedBy(signedCertificate, x509TrustedCertificate, certName, signerCertificateAlias)) {
+                LOG.debug("Certificate with alias [{}] is 'chain' trust anchor of the certificate [{}]!", signerCertificateAlias,
                         certName);
                 return true;
             }
             // check if trusted certificate is still valid
             x509TrustedCertificate.checkValidity();
         } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException exc) {
-            throw new CertificateException("Truststore exception occurred when  accessing certificate with alias:" + alias
+            throw new CertificateException("Truststore exception occurred when  accessing certificate with alias:" + signerCertificateAlias
                     + ". Error message:" + exc.getMessage(), exc);
         }
-        LOG.debug("Certificate with alias [{}] is not trust anchor of the certificate [{}]!", alias,
+        LOG.debug("Certificate with alias [{}] is not trust anchor of the certificate [{}]!", signerCertificateAlias,
                 certName);
         return false;
 
@@ -151,7 +150,8 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
             return true;
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException |
                  java.security.SignatureException e) {
-            LOG.error("Error occurred while verifying signature of the certificate [" + signedCertificateName
+            //in case there are multiple entries in the truststore, we don't want to log an error if the validation fails
+            LOG.debug("Error occurred while verifying signature of the certificate [" + signedCertificateName
                     + "] with certificate from truststore with alias [" + alias + "].", e);
             return false;
         }

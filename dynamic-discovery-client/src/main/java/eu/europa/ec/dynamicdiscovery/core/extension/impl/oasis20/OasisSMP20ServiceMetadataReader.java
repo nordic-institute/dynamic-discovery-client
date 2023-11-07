@@ -1,9 +1,10 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -17,6 +18,7 @@ import gen.eu.europa.ec.ddc.api.smp20.aggregate.Process;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.ProcessMetadata;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ServiceID;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -134,7 +136,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
         try {
             return (ServiceMetadata) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing ServiceMetadata", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while parsing ServiceMetadata", e);
         }
     }
 
@@ -145,7 +147,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             getMarshaller().marshal(serviceMetadata, document);
             return document;
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing ServiceMetadata object", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while parsing ServiceMetadata object", e);
         }
     }
 
@@ -163,7 +165,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             // to remove xmlDeclaration
             jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 
@@ -175,7 +177,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             Document document = db.parse(inputStream);
             return parseNative(document);
         } catch (SAXException | IOException e) {
-            throw new BindException("Error occurred while parsing ServiceMetadata", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while parsing ServiceMetadata", e);
         }
     }
 
@@ -208,8 +210,8 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             return null;
         }
         ParticipantID identifierType = serviceMetadata.getParticipantID();
-        return new SMPParticipantIdentifier(identifierType.getValue(),
-                identifierType.getSchemeID());
+        return new SMPParticipantIdentifier(StringUtils.trim(identifierType.getValue()),
+                StringUtils.trim(identifierType.getSchemeID()));
     }
 
     /**
@@ -224,7 +226,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
         }
         ServiceID identifierType = serviceMetadata.getServiceID();
 
-        return new SMPDocumentIdentifier(identifierType.getValue(), identifierType.getSchemeID());
+        return new SMPDocumentIdentifier(StringUtils.trim(identifierType.getValue()), StringUtils.trim(identifierType.getSchemeID()));
     }
 
     /**

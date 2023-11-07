@@ -108,7 +108,7 @@ class OasisSMP10ServiceMetadataIT {
     @Test
    void getServiceMetadataCnameOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
@@ -136,7 +136,7 @@ class OasisSMP10ServiceMetadataIT {
     @Test
    void getSignedServiceMetadataCnameOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
@@ -226,7 +226,7 @@ class OasisSMP10ServiceMetadataIT {
     @Test
    void getServiceMetadataCnameOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_9915_123456789, "signed_service_metadata_signed_valid_iso6523", "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_9915_123456789, "signed_service_metadata_signed_valid_iso6523", "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
@@ -254,7 +254,7 @@ class OasisSMP10ServiceMetadataIT {
     @Test
    void getSignedServiceMetadataCnameOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME,
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME,
                 TestCaseConstants.SERVICE_METADATA_URL_9915_123456789,
                 "signed_service_metadata_signed_valid_iso6523",
                 "b-ce8f928e3ad220c389fb2d3790e76119.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
@@ -323,7 +323,7 @@ class OasisSMP10ServiceMetadataIT {
     @Test
    void getServiceMetadataCnameNotOk() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb", "b-123456.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb", "b-123456.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
@@ -379,7 +379,7 @@ class OasisSMP10ServiceMetadataIT {
 
     private Object getSignedServiceMetada(String filename, String participantId, boolean deprecateServiceMetadata) throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, filename, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, filename, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier(participantId, "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");

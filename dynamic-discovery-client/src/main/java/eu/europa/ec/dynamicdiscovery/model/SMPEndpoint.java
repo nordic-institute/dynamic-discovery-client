@@ -45,6 +45,11 @@ public class SMPEndpoint {
     private OffsetDateTime activationDate;
     private OffsetDateTime expirationDate;
 
+    private String serviceDescription;
+
+    private String technicalContactUrl;
+    private String technicalInformationUrl;
+
     private SMPEndpoint(Builder builder) {
         this.processIdentifiers = builder.processIdentifiers;
         this.transportProfile = builder.transportProfile;
@@ -52,6 +57,9 @@ public class SMPEndpoint {
         this.mapCertificates = builder.mapCertificates;
         this.activationDate = builder.activationDate;
         this.expirationDate = builder.expirationDate;
+        this.serviceDescription = builder.serviceDescription;
+        this.technicalContactUrl = builder.technicalContactUrl;
+        this.technicalInformationUrl = builder.technicalInformationUrl;
     }
 
     /**
@@ -91,6 +99,18 @@ public class SMPEndpoint {
 
     public Map<String, X509Certificate> getCertificates() {
         return mapCertificates;
+    }
+
+    public String getServiceDescription() {
+        return serviceDescription;
+    }
+
+    public String getTechnicalContactUrl() {
+        return technicalContactUrl;
+    }
+
+    public String getTechnicalInformationUrl() {
+        return technicalInformationUrl;
     }
 
     @Override
@@ -137,6 +157,26 @@ public class SMPEndpoint {
         private Map<String, X509Certificate> mapCertificates = new HashMap<>();
         private OffsetDateTime activationDate;
         private OffsetDateTime expirationDate;
+
+        private String serviceDescription;
+
+        private String technicalContactUrl;
+        private String technicalInformationUrl;
+
+        public Builder serviceDescription(String serviceDescription) {
+            this.serviceDescription = serviceDescription;
+            return this;
+        }
+
+        public Builder technicalInformationUrl(String technicalInformationUrl) {
+            this.technicalInformationUrl = technicalInformationUrl;
+            return this;
+        }
+
+        public Builder technicalContactUrl(String technicalContactUrl) {
+            this.technicalContactUrl = technicalContactUrl;
+            return this;
+        }
 
         public Builder addProcessIdentifier(SMPProcessIdentifier processIdentifier) {
             this.processIdentifiers.add(processIdentifier);

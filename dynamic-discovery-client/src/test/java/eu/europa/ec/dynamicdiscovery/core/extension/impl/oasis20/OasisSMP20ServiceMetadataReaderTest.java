@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20;
 
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.platform.commons.util.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.Unmarshaller;

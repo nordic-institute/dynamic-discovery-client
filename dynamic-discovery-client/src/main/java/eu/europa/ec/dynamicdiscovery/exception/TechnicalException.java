@@ -22,11 +22,31 @@ package eu.europa.ec.dynamicdiscovery.exception;
  */
 public abstract class TechnicalException extends Exception {
 
+    protected SMPExceptionCode smpExceptionCode;
+
     protected TechnicalException(String message) {
         super(message);
     }
 
+    protected TechnicalException(SMPExceptionCode smpExceptionCode, String message) {
+        super(message);
+        this.smpExceptionCode = smpExceptionCode;
+    }
+
     protected TechnicalException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    protected TechnicalException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+        super(message, cause);
+        this.smpExceptionCode = smpExceptionCode;
+    }
+
+    public SMPExceptionCode getSmpExceptionCode() {
+        return smpExceptionCode;
+    }
+
+    public void setSmpExceptionCode(SMPExceptionCode smpExceptionCode) {
+        this.smpExceptionCode = smpExceptionCode;
     }
 }

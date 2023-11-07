@@ -20,11 +20,19 @@ package eu.europa.ec.dynamicdiscovery.model.identifiers;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.net.URI;
+
 /**
  * @author Flávio W. R. Santos
+ * @author Cosmin Baciu
  * @since 1.0
  */
 public class SMPDocumentIdentifier extends IdentifierType {
+
+    /**
+     * The URI of this document identifier. Filled in case the DocumentIdentifier was retrieved from the ServiceGroup
+     */
+    protected URI documentIdentifierSmpURI;
 
     public SMPDocumentIdentifier(String documentIdentifier, String scheme) {
         super(documentIdentifier, scheme);
@@ -34,11 +42,25 @@ public class SMPDocumentIdentifier extends IdentifierType {
         this(documentIdentifier, null);
     }
 
+    public SMPDocumentIdentifier(String documentIdentifier, String scheme, URI documentIdentifierSmpURI) {
+        this(documentIdentifier, scheme);
+        this.documentIdentifierSmpURI = documentIdentifierSmpURI;
+    }
+
+    public URI getDocumentIdentifierSmpURI() {
+        return documentIdentifierSmpURI;
+    }
+
+    public void setDocumentIdentifierSmpURI(URI documentIdentifierSmpURI) {
+        this.documentIdentifierSmpURI = documentIdentifierSmpURI;
+    }
+
     @Override
     public String toString() {
         return "DocumentIdentifier{" +
                 "identifier='" + identifier + '\'' +
                 ", scheme='" + scheme + '\'' +
+                ", documentIdentifierSmpURI='" + documentIdentifierSmpURI + '\'' +
                 '}';
     }
 

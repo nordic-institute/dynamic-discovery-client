@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
@@ -61,10 +62,10 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         this.dnsLookupTypeList = new ArrayList<>(builder.dnsLookupTypeList);
         this.dnsLookup = builder.dnsLookup;
 
-        if (builder.schemeMandatory!=null) {
+        if (builder.schemeMandatory != null) {
             this.participantIdentifierFormatter.setSchemeMandatory(builder.schemeMandatory);
         }
-        if (builder.schemeValidationPattern!=null) {
+        if (builder.schemeValidationPattern != null) {
             this.participantIdentifierFormatter.setSchemeValidationPattern(builder.schemeValidationPattern);
         }
         if (!builder.caseSensitiveSchemas.isEmpty()) {
@@ -73,7 +74,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         if (!builder.formatterTypes.isEmpty()) {
             this.participantIdentifierFormatter.setFormatterTypes(builder.formatterTypes);
         }
-        if (builder.wildcardEnabled!=null) {
+        if (builder.wildcardEnabled != null) {
             this.participantIdentifierFormatter.setWildcardEnabled(builder.wildcardEnabled);
         }
     }
@@ -131,14 +132,25 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         }
 
     }
+
     @Override
     public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
-        return this.lookupPrivate(participantIdentifierFormatter.normalize(participantIdentifier));
+        try {
+            return this.lookupPrivate(participantIdentifierFormatter.normalize(participantIdentifier));
+        } catch (TechnicalException e) {
+            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            throw e;
+        }
     }
 
     @Override
     public URI lookup(String participantIdentifier, String participantScheme) throws TechnicalException {
-        return this.lookupPrivate(participantIdentifierFormatter.normalize(participantScheme, participantIdentifier));
+        try {
+            return this.lookupPrivate(participantIdentifierFormatter.normalize(participantScheme, participantIdentifier));
+        } catch (TechnicalException e) {
+            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            throw e;
+        }
     }
 
     protected URI cnameLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
@@ -255,6 +267,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
             }
             return this;
         }
+
         public Builder addCaseSensitiveSchemas(List<String> schemes) {
             this.caseSensitiveSchemas.addAll(schemes);
             return this;
@@ -264,6 +277,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
             this.formatterTypes.add(formatter);
             return this;
         }
+
         public Builder addFormatterTypes(List<FormatterType> formatters) {
             this.formatterTypes.addAll(formatters);
             return this;

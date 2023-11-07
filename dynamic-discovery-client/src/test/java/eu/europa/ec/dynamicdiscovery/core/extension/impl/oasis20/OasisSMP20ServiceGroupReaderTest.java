@@ -1,33 +1,32 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20;
 
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import gen.eu.europa.ec.ddc.api.smp10.ParticipantIdentifierType;
-import gen.eu.europa.ec.ddc.api.smp10.ServiceGroup;
-import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadataReferenceCollectionType;
-import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadataReferenceType;
+import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
+import gen.eu.europa.ec.ddc.api.smp20.aggregate.ServiceReference;
+import gen.eu.europa.ec.ddc.api.smp20.basic.ID;
+import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import java.util.Arrays;
 import java.util.List;
 
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author  Joze Rihtarsic
+ * @author Joze Rihtarsic
  * @since 2.0
  */
-class OasisSMP10ServiceGroupReaderTest {
+class OasisSMP20ServiceGroupReaderTest {
 
-    OasisSMP10ServiceGroupReader testInstance = new OasisSMP10ServiceGroupReader();
+    OasisSMP20ServiceGroupReader testInstance = new OasisSMP20ServiceGroupReader();
 
     @Test
     void testDestroyUnmarshaller() {
@@ -39,10 +38,11 @@ class OasisSMP10ServiceGroupReaderTest {
         Unmarshaller unmarshaller3 = testInstance.getUnmarshaller();
         assertNotEquals(unmarshaller, unmarshaller3);
     }
+
     @Test
     void testHandlesTrue() {
         // given
-        QName qName = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2016/05", "ServiceGroup");
+        QName qName = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup", "ServiceGroup");
         Class targetClass = SMPServiceGroup.class;
         // when
         boolean result = testInstance.handles(qName, targetClass);
@@ -64,7 +64,7 @@ class OasisSMP10ServiceGroupReaderTest {
     @Test
     void testParseOK() throws Exception {
         // given
-        Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("service_group_valid_iso6523");
+        Document doc = CommonUtil.getOasisSMP20DocumentFromXmlFile("service_group_unsigned_valid_iso6523");
         // when
         SMPServiceGroup result = testInstance.parse(doc);
         // then
@@ -80,7 +80,7 @@ class OasisSMP10ServiceGroupReaderTest {
 
     @Test
     void testParseAndValidateSignature() throws Exception {
-        Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("service_group_valid_iso6523");
+        Document doc = CommonUtil.getOasisSMP20DocumentFromXmlFile("service_group_unsigned_valid_iso6523");
         // when (the ISignatureValidator is ignored because service group is not signed)
         SMPServiceGroup result = testInstance.parseAndValidateSignature(doc, Mockito.mock(ISignatureValidator.class));
         // then
@@ -96,36 +96,36 @@ class OasisSMP10ServiceGroupReaderTest {
 
     @Test
     void testGetParticipantIdentifier() {
+
         // given
         ServiceGroup serviceGroup = new ServiceGroup();
-        ParticipantIdentifierType identifier = new ParticipantIdentifierType();
-        identifier.setScheme("test-scheme-001");
+        ParticipantID identifier = new ParticipantID();
+        identifier.setSchemeID("test-scheme-001");
         identifier.setValue("test-value-001");
-        serviceGroup.setParticipantIdentifier(identifier);
+        serviceGroup.setParticipantID(identifier);
         // when
         SMPParticipantIdentifier result = testInstance.getParticipantIdentifier(serviceGroup);
         // then
         assertNotNull(result);
         assertEquals(identifier.getValue(), result.getIdentifier());
-        assertEquals(identifier.getScheme(), result.getScheme());
+        assertEquals(identifier.getSchemeID(), result.getScheme());
     }
 
     @Test
     void testGetDocumentIdentifiers() {
         // given
         ServiceGroup serviceGroup = new ServiceGroup();
-        ServiceMetadataReferenceType reference1 = new ServiceMetadataReferenceType();
-        reference1.setHref(SMP_DOMAIN_ALIAS + SERVICE_METADATA_URL_URN_POLAND_NCPB);
-        ServiceMetadataReferenceType reference2 = new ServiceMetadataReferenceType();
-        reference2.setHref(SMP_DOMAIN_ALIAS + SERVICE_METADATA_URL_URN_POLAND_NCPB + "%3A%3Aversion-002");
-        ServiceMetadataReferenceCollectionType sct = new ServiceMetadataReferenceCollectionType();
-        sct.getServiceMetadataReferences().addAll(Arrays.asList(reference1, reference2));
-        serviceGroup.setServiceMetadataReferenceCollection(sct);
+        serviceGroup.getServiceReferences().add(getServiceReference("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"));
+        serviceGroup.getServiceReferences().add(getServiceReference("urn::epsos##services:extended:epsos::107::version-002", "ehealth-resid-qns"));
+
         // when
         List<SMPDocumentIdentifier> result = testInstance.getDocumentIdentifiers(serviceGroup);
+
         assertEquals(2, result.size());
         assertEquals(new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns"), result.get(0));
         assertEquals(new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107::version-002", "ehealth-resid-qns"), result.get(1));
+
+
     }
 
     @Test
@@ -137,16 +137,17 @@ class OasisSMP10ServiceGroupReaderTest {
         assertTrue(result.isEmpty());
     }
 
-    @Test
-    void gestGetDocumentIdentifierFromReference() {
-        // given
-        ServiceMetadataReferenceType reference = new ServiceMetadataReferenceType();
-        reference.setHref(SMP_DOMAIN_ALIAS + SERVICE_METADATA_URL_URN_POLAND_NCPB);
-        // when
-        SMPDocumentIdentifier result = testInstance.getDocumentIdentifierFromReference(reference);
-        // then
-        assertNotNull(result);
-        assertEquals("urn::epsos##services:extended:epsos::107", result.getIdentifier());
-        assertEquals("ehealth-resid-qns", result.getScheme());
+    protected ServiceReference getServiceReference(String identifier, String schema) {
+        ServiceReference serviceReference = new ServiceReference();
+        serviceReference.setID(getId(identifier, schema));
+        return serviceReference;
     }
+
+    protected ID getId(String identifier, String schema) {
+        ID id = new ID();
+        id.setValue(identifier);
+        id.setSchemeID(schema);
+        return id;
+    }
+
 }

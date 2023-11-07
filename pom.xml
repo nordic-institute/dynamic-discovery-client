@@ -91,6 +91,8 @@
         <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
         <!-- latest version compatible with SonarQube 5.6 -->
         <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
+        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
     </properties>
 
     <profiles>
@@ -430,6 +432,19 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${maven-shade-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

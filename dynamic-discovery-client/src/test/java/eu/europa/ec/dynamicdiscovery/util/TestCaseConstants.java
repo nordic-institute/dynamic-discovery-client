@@ -17,14 +17,10 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
-import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
-
-import java.util.Arrays;
 
 /**
  * @author Flávio W. R. Santos
@@ -60,6 +56,12 @@ public class TestCaseConstants {
     public static final SMPProcessIdentifier PROCESS_IDENTIFIER_02 = new SMPProcessIdentifier("urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-qns");
     public static final SMPTransportProfile TRANSPORT_PROFILE_01 = new SMPTransportProfile("bdxr-transport-ebms3-as4-v1p0");
     public static final SMPTransportProfile TRANSPORT_PROFILE_02 = new SMPTransportProfile("urn:ihe:iti:2013:xcpd");
+
+    public static final String WILDCARD_SCHEME = "bdx-docid-wildcard";
+
+    public static final String PEPPOL_DOCTYPE_WILDCARD = "peppol-doctype-wildcard";
+    public static final String BUSDOX_DOCID_QNS = "busdox-docid-qns";
+    public static final String WILDCARD_CHARACTER = "*";
 
 
 

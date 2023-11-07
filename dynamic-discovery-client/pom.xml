@@ -48,11 +48,13 @@
                                 <xjbSource>${project.basedir}/src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
                                 <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP10Binding.xjb</xjbSource>
                                 <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP20Binding.xjb</xjbSource>
+                                <xjbSource>${project.basedir}/src/main/resources/xjb/peppolSMPBinding.xjb</xjbSource>
                             </xjbSources>
                             <sources>
                                 <source>${project.basedir}/src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
                                 <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceGroup-2.0.xsd</source>
                                 <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceMetadata-2.0.xsd</source>
+                                <source>${project.basedir}/src/main/resources/xsd/peppol/peppol-smp-types-v1.xsd</source>
                             </sources>
                             <clearOutputDir>false</clearOutputDir>
                         </configuration>
@@ -150,7 +152,7 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -160,14 +162,10 @@
             <groupId>dnsjava</groupId>
             <artifactId>dnsjava</artifactId>
         </dependency>
-        <!-- dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency-->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
+            <version>${jakarta.xml.bind-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>

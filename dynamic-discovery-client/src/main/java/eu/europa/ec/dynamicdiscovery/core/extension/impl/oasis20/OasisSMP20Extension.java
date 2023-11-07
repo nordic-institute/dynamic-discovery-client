@@ -1,4 +1,4 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl;
+package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
