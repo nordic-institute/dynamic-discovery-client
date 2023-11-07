@@ -20,10 +20,7 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
-import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
-import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.exception.*;
 import eu.europa.ec.dynamicdiscovery.util.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hc.client5.http.UnsupportedSchemeException;
@@ -136,7 +133,12 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         HttpGet httpGet = new HttpGet(participantUnderSmpURI);
         httpGet.setConfig(requestConfigBuilder.build());
 
-        return connect(httpClientBuilder.build(), httpGet);
+        try {
+            return connect(httpClientBuilder.build(), httpGet);
+        } catch (TechnicalException e) {
+            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            throw e;
+        }
     }
 
     public FetcherResponse connect(CloseableHttpClient httpClient, HttpGet httpGet) throws TechnicalException {

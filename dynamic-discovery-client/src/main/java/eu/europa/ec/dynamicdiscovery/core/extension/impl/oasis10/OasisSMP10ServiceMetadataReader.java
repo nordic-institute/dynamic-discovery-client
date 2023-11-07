@@ -4,6 +4,7 @@ import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -11,6 +12,7 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import gen.eu.europa.ec.ddc.api.smp10.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -134,7 +136,7 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
             Document document = db.parse(inputStream);
             return parseNative(document);
         } catch (SAXException | IOException e) {
-            throw new BindException("Error occurred while SignedServiceMetadata serviceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while SignedServiceMetadata serviceGroup", e);
         }
     }
 
@@ -152,7 +154,7 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
             // to remove xmlDeclaration
             jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 
@@ -184,8 +186,8 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
 
 
         ParticipantIdentifierType identifierType = serviceMetadata.getServiceMetadata().getServiceInformation().getParticipantIdentifier();
-        return new SMPParticipantIdentifier(identifierType.getValue(),
-                identifierType.getScheme());
+        return new SMPParticipantIdentifier(StringUtils.trim(identifierType.getValue()),
+                StringUtils.trim(identifierType.getScheme()));
     }
 
     protected SMPDocumentIdentifier readDocumentIdentifier(SignedServiceMetadata serviceMetadata) {
@@ -197,7 +199,7 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
         }
         DocumentIdentifier identifierType = serviceMetadata.getServiceMetadata().getServiceInformation().getDocumentIdentifier();
 
-        return new SMPDocumentIdentifier(identifierType.getValue(), identifierType.getScheme());
+        return new SMPDocumentIdentifier(StringUtils.trim(identifierType.getValue()), StringUtils.trim(identifierType.getScheme()));
     }
 
 

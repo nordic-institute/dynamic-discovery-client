@@ -1,0 +1,13 @@
+<ServiceGroup xmlns="http://docs.oasis-open.org/bdxr/ns/SMP/2016/05">
+    <ParticipantIdentifier scheme="iso6523-actorid-upis">9925:0367302178</ParticipantIdentifier>
+    <ServiceMetadataReferenceCollection>
+        <ServiceMetadataReference href="http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%2A%3A%3A2.1"/>
+        <ServiceMetadataReference href="http://cipa-smp-full-webapp/iso6523-actorid-upis%3A%3A9915%3A0367302178/services/bdx-docid-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%2A%3A%3A2.1"/>
+    </ServiceMetadataReferenceCollection>
+</ServiceGroup>
+
+<!--
+Decoded values
+http://cipa-smp-full-webapp/iso6523-actorid-upis::9915:0367302178/services/bdx-docid-wildcard::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1
+http://cipa-smp-full-webapp/iso6523-actorid-upis::9915:0367302178/services/bdx-docid-wildcard::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu*::2.1
+-->

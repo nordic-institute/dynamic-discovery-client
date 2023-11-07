@@ -69,6 +69,9 @@ public class DynamicDiscoveryBuilder {
         if (this.service.getMetadataReader() == null) {
             throw new IllegalStateException("MetadataReader not defined.");
         }
+        if (this.service.getMetadataProvider() == null) {
+            throw new IllegalStateException("MetadataProvider not defined.");
+        }
 
         return new DynamicDiscovery(this.service);
     }

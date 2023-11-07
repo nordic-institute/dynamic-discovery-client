@@ -4,6 +4,7 @@ import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
@@ -43,7 +44,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" + ex, ex);
         }
         return null;
     });
@@ -54,7 +55,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" + ex, ex);
         }
         return null;
     });
@@ -98,7 +99,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
         try {
             return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
         }
     }
 
@@ -109,7 +110,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             getMarshaller().marshal(serviceGroup, document);
             return document;
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
         }
     }
 
@@ -121,7 +122,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             Document document = db.parse(inputStream);
             return parseNative(document);
         } catch (SAXException | IOException e) {
-            throw new BindException("Error occurred while parsing serviceGroup: [{}]" , e);
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup: [{}]", e);
         }
     }
 
@@ -139,7 +140,7 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
             // to remove xmlDeclaration
             jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 

@@ -5,6 +5,7 @@ import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
@@ -109,7 +110,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
             return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
             LOG.error("Error  type: [{}], to string [{}]", e.getCause().getClass(), ExceptionUtils.getRootCauseMessage(e));
-            throw new BindException("Error occurred while parsing document serviceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing document serviceGroup", e);
         }
     }
 
@@ -123,7 +124,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
             return parseNative(document);
         } catch (SAXException | IOException e) {
             LOG.error("Error  type: [{}], to string [{}]", e.getClass(), e);
-            throw new BindException("Error occurred while parsing serviceGroup from input stream", e);
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup from input stream", e);
         }
     }
 
@@ -141,7 +142,7 @@ public class PeppolSMPServiceGroupReader implements IObjectReader<SMPServiceGrou
             // to remove xmlDeclaration
             marshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 

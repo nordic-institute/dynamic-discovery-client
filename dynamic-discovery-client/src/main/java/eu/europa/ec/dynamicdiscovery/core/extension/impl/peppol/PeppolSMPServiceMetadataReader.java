@@ -4,19 +4,21 @@ import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import gen.eu.europa.ec.ddc.api.addressing.AttributedURIType;
+import gen.eu.europa.ec.ddc.api.addressing.EndpointReferenceType;
 import gen.eu.europa.ec.ddc.api.peppol.EndpointType;
 import gen.eu.europa.ec.ddc.api.peppol.ProcessType;
 import gen.eu.europa.ec.ddc.api.peppol.ServiceMetadata;
 import gen.eu.europa.ec.ddc.api.peppol.SignedServiceMetadata;
 import gen.eu.europa.ec.ddc.api.peppol.identifiers.transport.DocumentIdentifier;
 import gen.eu.europa.ec.ddc.api.peppol.identifiers.transport.ParticipantIdentifierType;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,7 @@ import java.io.OutputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +55,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
             JAXBContext jaxbContext = JAXBContext.newInstance(SignedServiceMetadata.class, ServiceMetadata.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" + ex, ex);
         }
         return null;
     });
@@ -63,7 +66,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
             JAXBContext jaxbContext = JAXBContext.newInstance(SignedServiceMetadata.class, ServiceMetadata.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" + ex, ex);
         }
         return null;
     });
@@ -97,6 +100,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
     public void destroyUnmarshaller() {
         jaxbUnmarshaller.remove();
     }
+
     public void destroyMarshaller() {
         jaxbMarshaller.remove();
     }
@@ -126,9 +130,9 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
     @Override
     public Object parseNative(Document document) throws TechnicalException {
         try {
-            return  jaxbUnmarshaller.get().unmarshal(document);
+            return jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while parsing serviceGroup", e);
         }
     }
 
@@ -140,7 +144,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
             Document document = db.parse(inputStream);
             return parseNative(document);
         } catch (SAXException | IOException e) {
-            throw new BindException("Error occurred while SignedServiceMetadata", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while SignedServiceMetadata", e);
         }
     }
 
@@ -158,14 +162,14 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
             // to remove xmlDeclaration
             jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 
     @Override
     public SMPServiceMetadata parseAndValidateSignature(Document document, ISignatureValidator signatureValidator) throws TechnicalException {
 
-        SignedServiceMetadata serviceMetadata  = (SignedServiceMetadata)parseNative(document);
+        SignedServiceMetadata serviceMetadata = (SignedServiceMetadata) parseNative(document);
         X509Certificate certificate = signatureValidator != null ? signatureValidator.verify(document) : null;
 
         SMPParticipantIdentifier participantIdentifierType = readParticipantIdentifier(serviceMetadata);
@@ -231,7 +235,15 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
     }
 
     private String getEndpointUrl(EndpointType endpointType) {
-        return endpointType.getEndpointReference().getAddress().getValue();
+        final EndpointReferenceType endpointReference = endpointType.getEndpointReference();
+        if (endpointReference == null) {
+            return null;
+        }
+        final AttributedURIType address = endpointReference.getAddress();
+        if (address == null) {
+            return null;
+        }
+        return address.getValue();
     }
 
     /**
@@ -293,7 +305,7 @@ public class PeppolSMPServiceMetadataReader implements IObjectReader<SMPServiceM
             LOG.debug("Null endpoint type or certificate. Return null certificate");
             return null;
         }
-        final byte[] certificateBytes = Base64.decodeBase64(certificateBase64);
+        final byte[] certificateBytes = Base64.getMimeDecoder().decode(certificateBase64);
         try (InputStream is = new ByteArrayInputStream(certificateBytes)) {
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         } catch (Exception e) {

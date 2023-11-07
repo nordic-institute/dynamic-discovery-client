@@ -28,7 +28,15 @@ public class BindException extends TechnicalException {
         super(message);
     }
 
+    public BindException(SMPExceptionCode smpExceptionCode, String message) {
+        super(smpExceptionCode, message);
+    }
+
     public BindException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public BindException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+        super(smpExceptionCode, message, cause);
     }
 }

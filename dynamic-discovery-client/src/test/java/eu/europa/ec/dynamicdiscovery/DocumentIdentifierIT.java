@@ -17,13 +17,19 @@
  */
 package eu.europa.ec.dynamicdiscovery;
 
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
@@ -33,18 +39,22 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.w3c.dom.Document;
 
 import java.net.URI;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.WILDCARD_SCHEME;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Flávio W. R. Santos
  */
 class DocumentIdentifierIT {
+
 
     @Test
     void getDocumentIdentifierByNaptrOK1() throws Exception {
@@ -90,7 +100,7 @@ class DocumentIdentifierIT {
     @Test
     void getDocumentIdentifierByCNAMEOK() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
@@ -148,7 +158,7 @@ class DocumentIdentifierIT {
     @Test
     void getDocumentIdentifierByCNAMENotOK() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-12345678910.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-12345678910.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
@@ -184,7 +194,7 @@ class DocumentIdentifierIT {
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
-                "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
+                        "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
                 .thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
@@ -193,5 +203,113 @@ class DocumentIdentifierIT {
                 .fetcher(urlFetcherURL)
                 .build();
         return smpClient.getServiceGroup(participantIdentifier).unwrap(ServiceGroup.class);
+    }
+
+    @Test
+    void getOasis10DocumentIdentifierWithWildcardSchemeWithNoMatch() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10,
+                URLFetcherMock.LookupType.CNAME,
+                "iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdx-docid-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%2A%3A%3A2.1",
+                "service_metadata_valid_iso6523_wildcard",
+                "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.addParameters(CommonUtil.OASIS_SMP_10, "service_group_valid_iso6523_wildcard", TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178);
+
+        //provide a document which is not matching
+        final SMPDocumentIdentifier smpDocumentIdentifierToCheck = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1",
+                WILDCARD_SCHEME);
+
+        final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
+
+        SMPServiceMetadataException result = assertThrows(SMPServiceMetadataException.class, () -> getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier));
+
+    }
+
+    @Test
+    void getOasis10DocumentIdentifierWithWildcardSchemeBasedOnDocumentIdentifierValuedWhichMatchesSMPWildcardDocument() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10,
+                URLFetcherMock.LookupType.CNAME,
+                "iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdx-docid-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%2A%3A%3A2.1",
+                "service_metadata_valid_iso6523_wildcard",
+                "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.addParameters(CommonUtil.OASIS_SMP_10, "service_group_valid_iso6523_wildcard", TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178);
+
+        final SMPDocumentIdentifier smpDocumentIdentifierToCheck = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:invoice::2.1",
+                WILDCARD_SCHEME);
+
+        final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
+
+        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier);
+    }
+
+    @Test
+    void getOasis10DocumentIdentifierWithWildcardSchemeBasedOnDocumentIdentifierValuedWhichMatchesExactSMPWildcardDocument() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10,
+                URLFetcherMock.LookupType.CNAME,
+                "iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdx-docid-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%2A%3A%3A2.1",
+                "service_metadata_valid_iso6523_wildcard",
+                "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.addParameters(CommonUtil.OASIS_SMP_10, "service_group_valid_iso6523_wildcard", TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178);
+
+        final SMPDocumentIdentifier smpDocumentIdentifierToCheck = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1",
+                WILDCARD_SCHEME);
+
+        final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
+
+        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier);
+    }
+
+    private void getDocumentWithWildcardSchemeAndAssert(URLFetcherMock urlFetcherMock, SMPDocumentIdentifier smpDocumentIdentifierToCheck, String expectedDiscoveredDocumentIdentifier) throws Exception {
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+
+        DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+
+        final ISignatureValidator emptyValidator = new ISignatureValidator() {
+            @Override
+            public X509Certificate verify(Document document) throws TechnicalException {
+                return null;
+            }
+        };
+
+        final DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .dnsLookup(defaultDNSLookup)
+                .build();
+        final DefaultBDXRReader bdxReader = new DefaultBDXRReader.Builder()
+                .addExtension(new OasisSMP10Extension())
+                .signatureValidator(emptyValidator)
+                .build();
+        final DefaultProvider defaultProvider = new DefaultProvider.Builder()
+                .metadataFetcher(urlFetcherMock)
+                .metadataReader(bdxReader)
+                .wildcardSchemes(Arrays.asList(WILDCARD_SCHEME))
+                .build();
+
+
+        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
+                .locator(defaultBDXRLocator)
+                .reader(bdxReader)
+                .fetcher(urlFetcherMock)
+                .provider(defaultProvider)
+                .build();
+
+        final SMPServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, smpDocumentIdentifierToCheck);
+        assertNotNull(serviceMetadata);
+        final SMPDocumentIdentifier documentIdentifier = serviceMetadata.getDocumentIdentifier();
+        assertNotNull(documentIdentifier);
+
+        assertEquals(expectedDiscoveredDocumentIdentifier, documentIdentifier.getIdentifier());
+        assertEquals(WILDCARD_SCHEME, documentIdentifier.getScheme());
     }
 }

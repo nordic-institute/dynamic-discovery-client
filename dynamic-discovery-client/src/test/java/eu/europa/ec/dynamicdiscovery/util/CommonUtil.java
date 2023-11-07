@@ -41,8 +41,9 @@ public class CommonUtil {
     private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> AbstractXMLResponseReader.createDocumentBuilder());
     static final Logger LOG = LoggerFactory.getLogger(CommonUtil.class);
     static final String ROOT_RESPONSE = "/response";
-    static final String OASIS_SMP_10 = "/oasis-smp-1.0";
-    static final String OASIS_SMP_20 = "/oasis-smp-2.0";
+    public static final String OASIS_SMP_10 = "/oasis-smp-1.0";
+    public static final String OASIS_SMP_20 = "/oasis-smp-2.0";
+    public static final String PEPPOL = "/peppol";
 
     public static String getResourcePath(String name, String standard) {
         return ROOT_RESPONSE + standard + "/" + name + ".xml";
@@ -57,6 +58,18 @@ public class CommonUtil {
 
     public static byte[] getContentFromOasisSMP10XmlResource(String fileName) throws Exception {
         try (InputStream is = getInputStreamFromOasisSMP10XmlResource(fileName)) {
+            return readAllBytes(is);
+        }
+    }
+
+    public static byte[] getContentFromOasisSMP20XmlResource(String fileName) throws Exception {
+        try (InputStream is = getInputStreamFromOasisSMP20XmlResource(fileName)) {
+            return readAllBytes(is);
+        }
+    }
+
+    public static byte[] getContentFromPeppolXmlResource(String fileName) throws Exception {
+        try (InputStream is = getInputStreamFromPeppolResource(fileName)) {
             return readAllBytes(is);
         }
     }
@@ -87,6 +100,10 @@ public class CommonUtil {
 
     public static InputStream getInputStreamFromOasisSMP20XmlResource(String fileName) throws Exception {
         return getISForName(fileName, OASIS_SMP_20);
+    }
+
+    public static InputStream getInputStreamFromPeppolResource(String fileName) throws Exception {
+        return getISForName(fileName, PEPPOL);
     }
 
     public static KeyStore loadTrustStore(String fileName) throws Exception {

@@ -4,6 +4,7 @@ import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -134,7 +135,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
         try {
             return (ServiceMetadata) jaxbUnmarshaller.get().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing ServiceMetadata", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while parsing ServiceMetadata", e);
         }
     }
 
@@ -145,7 +146,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             getMarshaller().marshal(serviceMetadata, document);
             return document;
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing ServiceMetadata object", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while parsing ServiceMetadata object", e);
         }
     }
 
@@ -163,7 +164,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             // to remove xmlDeclaration
             jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException("Error occurred while serializing the ServiceGroup", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 
@@ -175,7 +176,7 @@ public class OasisSMP20ServiceMetadataReader implements IObjectReader<SMPService
             Document document = db.parse(inputStream);
             return parseNative(document);
         } catch (SAXException | IOException e) {
-            throw new BindException("Error occurred while parsing ServiceMetadata", e);
+            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while parsing ServiceMetadata", e);
         }
     }
 

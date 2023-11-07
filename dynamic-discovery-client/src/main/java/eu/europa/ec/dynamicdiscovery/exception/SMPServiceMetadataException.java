@@ -23,19 +23,12 @@ package eu.europa.ec.dynamicdiscovery.exception;
  */
 public class SMPServiceMetadataException extends TechnicalException {
 
-    protected SMPExceptionCode smpExceptionCode;
-
     public SMPServiceMetadataException(SMPExceptionCode smpExceptionCode, String message) {
-        super(message);
-        this.smpExceptionCode = smpExceptionCode;
+        super(smpExceptionCode, message);
     }
 
     public SMPServiceMetadataException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
-        super(message, cause);
-        this.smpExceptionCode = smpExceptionCode;
+        super(smpExceptionCode, message, cause);
     }
 
-    public SMPExceptionCode getSmpExceptionCode() {
-        return smpExceptionCode;
-    }
 }

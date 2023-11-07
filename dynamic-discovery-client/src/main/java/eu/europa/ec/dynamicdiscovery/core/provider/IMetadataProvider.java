@@ -17,10 +17,12 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.provider;
 
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * @author Flávio W. R. Santos
@@ -29,5 +31,9 @@ public interface IMetadataProvider {
 
     URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier);
 
-    URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier);
+    URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException;
+
+    void setWildcardSchemes(List<String> wildcardSchemes);
+
+    List<String> getWildcardSchemes();
 }
