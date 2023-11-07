@@ -1,5 +1,6 @@
-package eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol;
+package eu.europa.ec.dynamicdiscovery.util;
 
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolSMPExtension;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import org.junit.jupiter.api.Test;
