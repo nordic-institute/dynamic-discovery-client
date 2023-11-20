@@ -482,10 +482,7 @@ https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
 
 ==  Contact information
 
-CEF Support Team
+Contact the eDelivery support team by email: EC-EDELIVERY-SUPPORT@ec.europa.eu
 
-By email: CEF-EDELIVERY-SUPPORT@ec.europa.eu
 Standard Service: 8am to 6pm (Normal EC working Days)
-Standby Service**: 6pm to 8am (Commission and Public Holidays, Weekends)
 
-** Only for critical and urgent incidents and only by phone
