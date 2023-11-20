@@ -473,19 +473,11 @@ SMP XML schema - http://docs.oasis-open.org/bdxr/bdx-smp/v1.0/cs03/schemas/bdx-s
 
 == License
 
-Dynamic Discovery Client is under license LGPL-2.1.
-
-More Information:
-
-https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+eDelivery SMP is licensed under European Union Public Licence (EUPL) version 1.2.
 
 
 ==  Contact information
+Concat eDelivery Support Team https://ec.europa.eu/digital-building-blocks/tracker/plugins/servlet/desk/portal/6[portal] or by email: EC-EDELIVERY-SUPPORT@ec.europa.eu
 
-CEF Support Team
-
-By email: CEF-EDELIVERY-SUPPORT@ec.europa.eu
 Standard Service: 8am to 6pm (Normal EC working Days)
-Standby Service**: 6pm to 8am (Commission and Public Holidays, Weekends)
 
-** Only for critical and urgent incidents and only by phone

@@ -1,19 +1,14 @@
 /*
- * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
+ * Copyright 2017-2023 European Commission | CEF eDelivery
  *
- * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
  *
- * Licensed under the LGPL, Version 2.1 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You may obtain a copy of the Licence attached in file: LICENCE-EUPL-v1.2.pdf
  *
- *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * Unless required by applicable law or agreed to in writing, software distributed under the Licence is distributed on an "AS IS" basis,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * See the Licence for the specific language governing permissions and limitations under the Licence.
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 
