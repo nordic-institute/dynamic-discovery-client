@@ -26,7 +26,15 @@ public class DNSLookupException extends TechnicalException {
         super(message);
     }
 
+    public DNSLookupException(SMPExceptionCode smpExceptionCode, String message) {
+        super(smpExceptionCode, message);
+    }
+
     public DNSLookupException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public DNSLookupException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+        super(smpExceptionCode, message, cause);
     }
 }

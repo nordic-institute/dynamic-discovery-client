@@ -41,7 +41,7 @@ class ResponseParserTest {
     @Test
     void parseServiceMetadataTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_urn_poland_ncpb"));
-        KeyStore keyStore = CommonUtil.loadTrustStore("/truststore/truststoreForTrustedCertificate.ts");
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
 
         DefaultBDXRReader testInstance = new DefaultBDXRReader(new DefaultSignatureValidator(keyStore));
 
@@ -75,7 +75,7 @@ class ResponseParserTest {
     void parseServiceMetadataWithEmptyCertificateTest() throws Exception {
         //given
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_empty_certificate"));
-        KeyStore keyStore = CommonUtil.loadTrustStore("/truststore/truststoreForTrustedCertificate.ts");
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         DefaultBDXRReader testInstance = new DefaultBDXRReader(new DefaultSignatureValidator(keyStore));
 
         //when
@@ -91,7 +91,7 @@ class ResponseParserTest {
     void parseServiceMetadataWithInvalidCertificateTest() throws Exception {
         //given
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_invalid_certificate"));
-        KeyStore keyStore = CommonUtil.loadTrustStore("/truststore/truststoreForTrustedCertificate.ts");
+        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
         DefaultBDXRReader testInstance = new DefaultBDXRReader(new DefaultSignatureValidator(keyStore));
 
         //when

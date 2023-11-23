@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jaxb:bindings version="2.0"
+               xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://busdox.org/serviceMetadata/publishing/1.0/" >
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.peppol"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+    <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://busdox.org/transport/identifiers/1.0/" >
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.peppol.identifiers.transport"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+     <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://www.w3.org/2005/08/addressing" >
+        <jaxb:schemaBindings>
+            <jaxb:package name="gen.eu.europa.ec.ddc.api.addressing"/>
+        </jaxb:schemaBindings>
+    </jaxb:bindings>
+
+
+
+</jaxb:bindings>

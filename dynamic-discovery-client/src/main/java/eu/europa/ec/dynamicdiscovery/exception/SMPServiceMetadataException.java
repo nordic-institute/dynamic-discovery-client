@@ -15,25 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.europa.ec.dynamicdiscovery.core.provider;
-
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
-
-import java.net.URI;
-import java.util.List;
+package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
- * @author Flávio W. R. Santos
+ * @author Cosmin Baciu
+ * @since 2.1
  */
-public interface IMetadataProvider {
+public class SMPServiceMetadataException extends TechnicalException {
 
-    URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier);
+    public SMPServiceMetadataException(SMPExceptionCode smpExceptionCode, String message) {
+        super(smpExceptionCode, message);
+    }
 
-    URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException;
+    public SMPServiceMetadataException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+        super(smpExceptionCode, message, cause);
+    }
 
-    void setWildcardSchemes(List<String> wildcardSchemes);
-
-    List<String> getWildcardSchemes();
 }

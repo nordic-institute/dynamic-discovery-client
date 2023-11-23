@@ -25,6 +25,7 @@ import eu.europa.ec.dynamicdiscovery.util.SMPEqualsBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -33,6 +34,9 @@ import java.util.List;
 public class SMPServiceGroup implements DataWrapper {
 
     private final Object serviceGroupType;
+
+    private URI serviceGroupSmpURI;
+
     private final List<SMPDocumentIdentifier> documentIdentifiers;
     private final SMPParticipantIdentifier participantIdentifier;
 
@@ -43,6 +47,14 @@ public class SMPServiceGroup implements DataWrapper {
         this.serviceGroupType = serviceGroupType;
     }
 
+    public URI getServiceGroupSmpURI() {
+        return serviceGroupSmpURI;
+    }
+
+    public void setServiceGroupSmpURI(URI serviceGroupSmpURI) {
+        this.serviceGroupSmpURI = serviceGroupSmpURI;
+    }
+
     public SMPParticipantIdentifier getParticipantIdentifier() {
         return participantIdentifier;
     }
@@ -50,6 +62,7 @@ public class SMPServiceGroup implements DataWrapper {
     public List<SMPDocumentIdentifier> getDocumentIdentifiers() {
         return documentIdentifiers;
     }
+
 
     @Override
     public <T> T unwrap(Class<T> iface){
