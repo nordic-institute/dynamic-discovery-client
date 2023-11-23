@@ -27,8 +27,8 @@ public class WildcardUtil {
                             final String discoveredSmpDocumentScheme = smpDocumentIdentifier.getScheme();
                             final String discoveredSmpDocumentIdentifierIdentifier = smpDocumentIdentifier.getIdentifier();
                             if (documentIdentifierToCheck.getScheme().equals(discoveredSmpDocumentScheme)) {
-                                final String documentIdentifierWilcardPrefix = getValueUntilWildcardCharacter(discoveredSmpDocumentIdentifierIdentifier);
-                                if (documentIdentifierToCheck.getIdentifier().contains(documentIdentifierWilcardPrefix)) {
+                                final String documentIdentifierWildcardPrefix = getValueUntilWildcardCharacter(discoveredSmpDocumentIdentifierIdentifier);
+                                if (StringUtils.containsIgnoreCase(documentIdentifierToCheck.getIdentifier(), documentIdentifierWildcardPrefix)) {
                                     return true;
                                 }
                             }
