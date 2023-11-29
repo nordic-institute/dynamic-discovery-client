@@ -270,6 +270,27 @@ class DocumentIdentifierIT {
     }
 
     @Test
+    void getOasis10DocumentIdentifierWithWildcardSchemeBasedOnDocumentIdentifierValuedWhichMatchesExactSMPWildcardDocumentCaseInsensitive() throws Exception {
+        URLFetcherMock urlFetcherURL = new URLFetcherMock();
+
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10,
+                URLFetcherMock.LookupType.CNAME,
+                "iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdx-docid-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%2A%3A%3A2.1",
+                "service_metadata_valid_iso6523_wildcard",
+                "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.addParameters(CommonUtil.OASIS_SMP_10, "service_group_valid_iso6523_wildcard", TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178);
+
+        //document identifier is all in lower case and different from the one from the SMP which has a different case sensitivity
+        final SMPDocumentIdentifier smpDocumentIdentifierToCheck = new SMPDocumentIdentifier(
+                "urn:oasis:names:specification:ubl:schema:xsd:creditNote-2::creditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1",
+                WILDCARD_SCHEME);
+
+        final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
+
+        getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier, WILDCARD_SCHEME);
+    }
+
+    @Test
     void getPeppolDocumentIdentifierWithWildcardSchemeBasedOnDocumentIdentifierValuedWhichMatchesSMPWildcardDocument() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
 
