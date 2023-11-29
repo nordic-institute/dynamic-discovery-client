@@ -1,5 +1,18 @@
+/*
+ * Copyright 2017-2023 European Commission | eDelivery Dynamic Discovery Client
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ *
+ * You may obtain a copy of the Licence attached in file: LICENSE-EUPL-v1.2-EN.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and limitations under the Licence.
+ */
 package eu.europa.ec.ddc;
-
 
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
@@ -21,7 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
@@ -120,7 +132,7 @@ public class DdcMain {
 
         // lookup and download data
         URI uri = smpClient.getService().getMetadataLocator().lookup(identifier, scheme);
-        if (uri ==null) {
+        if (uri == null) {
             throw new DDCRuntimeException("Can not resolve party identifier");
         }
         uri = smpClient.getService().getMetadataProvider().resolveForParticipantIdentifier(uri, participantIdentifier);

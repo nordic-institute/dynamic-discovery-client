@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2017-2023 European Commission | eDelivery Dynamic Discovery Client
+
+  Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+  the European Commission - subsequent versions of the EUPL (the "Licence");
+  You may not use this work except in compliance with the Licence.
+
+  You may obtain a copy of the Licence attached in file: LICENSE-EUPL-v1.2-EN.txt
+
+  Unless required by applicable law or agreed to in writing, software distributed
+  under the Licence is distributed on an "AS IS" basis,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the Licence for the specific language governing permissions and limitations under the Licence.
+  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -12,8 +26,8 @@
 
     <licenses>
         <license>
-            <name>LGPL-2.1</name>
-            <url>https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt</url>
+            <name>EUPL-1.2</name>
+            <url>https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
