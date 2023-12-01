@@ -1,7 +1,7 @@
 /*
- * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
+ * (C) Copyright 2016-2023 - European Commission | Dynamic Discovery Client
  *
- * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ * https://ec.europa.eu/digital-building-blocks/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package eu.europa.ec.dynamicdiscovery.core.reader.parser.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
+import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import org.junit.jupiter.api.Test;
@@ -41,14 +42,10 @@ class SignedServiceMetadataResponseParserImplTest {
         DefaultBDXRReader testInstance = new DefaultBDXRReader(new DefaultSignatureValidator(keyStore));
         InputStream serviceMetadataStream = CommonUtil.getInputStreamFromOasisSMP10XmlResource("service_metadata_with_doctype_multiplying_entities_out_of_memory");
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
-        //when then
-        try {
-            testInstance.getServiceMetadata(fetcherResponse);
-        } catch (Exception e) {
-            assertTrue(e.getMessage().contains("DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true."));
-            return;
-        }
-        fail("DOCTYPE declaration must be blocked to prevent from XXE attacks");
+
+        BindException result = assertThrows(BindException.class, () -> testInstance.getServiceMetadata(fetcherResponse));
+        assertTrue(result.getMessage().contains("DOCTYPE is disallowed when the feature \"http://apache.org/xml/features/disallow-doctype-decl\" set to true."));
+
     }
 
     @Test

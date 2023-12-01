@@ -1,7 +1,7 @@
 /*
- * Copyright 2016-2021 - European Commission | Dynamic Discovery Client
+ * Copyright 2016-2023 - European Commission | Dynamic Discovery Client
  *
- * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
+ * https://ec.europa.eu/digital-building-blocks/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
  *
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
