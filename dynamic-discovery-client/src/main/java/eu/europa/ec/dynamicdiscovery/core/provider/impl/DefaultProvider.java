@@ -98,7 +98,7 @@ public class DefaultProvider implements IMetadataProvider {
 
         final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = wildcardUtil.getWildcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifier);
         if (wildcardDocumentIdentifierWithLongestMatch != null) {
-            LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
+            LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", wildcardDocumentIdentifierWithLongestMatch, participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
             return getDocumentIdentifierWithExactMatch(smpURI, participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
         }
         throw new SMPServiceMetadataException(SMPExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifier + "]");
