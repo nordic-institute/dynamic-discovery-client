@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +31,6 @@ import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
@@ -42,11 +41,9 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.w3c.dom.Document;
 
 import java.net.URI;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.PEPPOL_DOCTYPE_WILDCARD;
@@ -145,13 +142,11 @@ class DocumentIdentifierIT {
     @Test
     void getDocumentIdentifierNAPTRNotOK() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
+                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu.local", defaultDNSLookup))
                 .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
                 .fetcher(urlFetcherURL)
                 .build();
@@ -184,7 +179,7 @@ class DocumentIdentifierIT {
     }
 
     @Test
-    void testGetServiceGroupTypeParticipantNotOk() throws Exception {
+    void testGetServiceGroupTypeParticipantNotOk() {
         DNSLookupException result = assertThrows(DNSLookupException.class, () -> testGetServiceGroupType("9925:036730217815"));
         MatcherAssert.assertThat(result.getMessage(), CoreMatchers.startsWith("Not supported"));
     }
@@ -227,7 +222,7 @@ class DocumentIdentifierIT {
 
         final String expectedDiscoveredDocumentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a*::2.1";
 
-        SMPServiceMetadataException result = assertThrows(SMPServiceMetadataException.class, () -> getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier, WILDCARD_SCHEME));
+        assertThrows(SMPServiceMetadataException.class, () -> getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, expectedDiscoveredDocumentIdentifier, WILDCARD_SCHEME));
 
     }
 
@@ -323,12 +318,7 @@ class DocumentIdentifierIT {
                         "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
                 .thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
-        final ISignatureValidator emptyValidator = new ISignatureValidator() {
-            @Override
-            public X509Certificate verify(Document document) throws TechnicalException {
-                return null;
-            }
-        };
+        final ISignatureValidator emptyValidator = document -> null;
 
         final DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
@@ -342,7 +332,7 @@ class DocumentIdentifierIT {
         final DefaultProvider defaultProvider = new DefaultProvider.Builder()
                 .metadataFetcher(urlFetcherMock)
                 .metadataReader(bdxReader)
-                .wildcardSchemes(Arrays.asList(expectedDiscoveredDocumentScheme))
+                .wildcardSchemes(Collections.singletonList(expectedDiscoveredDocumentScheme))
                 .build();
 
 
