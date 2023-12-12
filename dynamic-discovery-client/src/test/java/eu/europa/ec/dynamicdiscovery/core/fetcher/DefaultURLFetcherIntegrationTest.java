@@ -23,7 +23,6 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.servlet.DefaultServlet;

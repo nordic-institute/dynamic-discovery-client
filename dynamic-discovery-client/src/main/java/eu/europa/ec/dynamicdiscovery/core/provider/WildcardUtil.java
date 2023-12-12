@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -81,7 +81,9 @@ public class WildcardUtil {
         for (SMPDocumentIdentifier documentIdentifierCandidate : documentIdentifierCandidates) {
             result = getIdentifierWithLongestWildcardValue(result, documentIdentifierCandidate);
         }
-        LOG.debug("Found document identifier with the longest identifier match [{}]", result.getIdentifier());
+        if (result != null) {
+            LOG.debug("Found document identifier with the longest identifier match [{}]", result.getIdentifier());
+        }
         return result;
     }
 
