@@ -296,7 +296,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          * @param enableHttpScheme
          * @return this builder
          */
-        public Builder setHttpSchemeEnabled(final boolean enableHttpScheme) {
+        public Builder httpSchemeEnabled(final boolean enableHttpScheme) {
             this.httpSchemeEnabled = enableHttpScheme;
             return this;
         }
@@ -307,7 +307,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          * @param httpsSchemeEnabled
          * @return this builder
          */
-        public Builder setHttpsSchemeEnabled(final boolean httpsSchemeEnabled) {
+        public Builder httpsSchemeEnabled(final boolean httpsSchemeEnabled) {
             this.httpsSchemeEnabled = httpsSchemeEnabled;
             return this;
         }

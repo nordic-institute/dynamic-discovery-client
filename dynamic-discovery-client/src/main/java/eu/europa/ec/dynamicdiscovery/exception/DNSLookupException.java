@@ -25,7 +25,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
 public class DNSLookupException extends TechnicalException {
 
     public DNSLookupException(String message) {
-        super(message);
+        this(SMPExceptionCode.DNS_QUERY_ERROR, message);
     }
 
     public DNSLookupException(SMPExceptionCode smpExceptionCode, String message) {
