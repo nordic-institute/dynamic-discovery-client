@@ -29,6 +29,7 @@ import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.AccessTokenCredentialProvider;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
@@ -160,7 +161,7 @@ public class DdcMain {
         String domain = cmd.getOptionValue("domain");
         List<String> naptrServices = getNaptrServices(cmd);
         List<DNSLookupType> dnsLookupTypes = getDNSLookupTypes(cmd);
-
+        AccessTokenCredentialProvider accessTokenCredentialProvider = getAccessToken(cmd);
         String srIdentifier = StringUtils.trim(cmd.getOptionValue("subresource-identifier"));
         String srScheme = StringUtils.trim(cmd.getOptionValue("subresource-scheme"));
 
@@ -178,14 +179,15 @@ public class DdcMain {
         DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
                 .addRequiredNaptrServices(naptrServices)
                 .build();
-
+        // configure BDXR locator
         DefaultBDXRLocator testBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain(domain)
                 .addDnsLookupTypes(dnsLookupTypes)
                 .dnsLookup(testDNSLookup).build();
 
+        // configure URL fetcher
         DefaultURLFetcher.Builder testURLFetcherBuilder = new DefaultURLFetcher.Builder()
-                .httpSchemeEnabled(false)
+                .credentialProvider(accessTokenCredentialProvider)
                 .tlsTruststore(truststore);
 
         if (keyStore != null) {
@@ -297,6 +299,16 @@ public class DdcMain {
         return Collections.singletonList(DNSLookupType.NAPTR);
     }
 
+    private AccessTokenCredentialProvider getAccessToken(CommandLine cmd) {
+        Option optionATN = OPTION_ACCESS_TOKEN_NAME.getOption();
+        Option optionATV = OPTION_ACCESS_TOKEN_VALUE.getOption();
+        if (cmd.hasOption(optionATN) && cmd.hasOption(optionATV)) {
+            return new AccessTokenCredentialProvider(cmd.getOptionValue(optionATN),
+                    cmd.getOptionValue(optionATV).toCharArray());
+        }
+        return null;
+    }
+
     // Return list of naptr services from command line. If not option is defined then default Meta:SMP and Meta:SMP2 are used
     private List<String> getNaptrServices(CommandLine cmd) {
         Option option = OPTION_NAPTR_SERVICE.getOption();
@@ -342,7 +354,7 @@ public class DdcMain {
             return null;
         }
         if (StringUtils.isBlank(cmd.getOptionValue(OPTION_TRUSTSTORE_PASSWORD.getOption()))) {
-            throw new IllegalArgumentException("Keystore password is not defined");
+            throw new IllegalArgumentException("Truststore password is not defined");
         }
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -350,7 +362,7 @@ public class DdcMain {
                     cmd.getOptionValue(OPTION_TRUSTSTORE_PASSWORD.getOption()).toCharArray());
             return keyStore;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error loading keystore", e);
+            throw new IllegalArgumentException("Error loading truststore", e);
         }
     }
 }

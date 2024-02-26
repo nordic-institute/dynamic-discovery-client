@@ -25,6 +25,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -69,7 +70,7 @@ class DefaultURLFetcherTest {
 
     private HttpEntity httpEntity  = Mockito.mock(HttpEntity.class);
 
-    private CredentialsProvider credentialsProvider  = Mockito.mock(CredentialsProvider.class);
+    private Credentials credentials  = Mockito.mock(Credentials.class);
 
     private IProxyConfiguration proxyConfiguration = Mockito.mock(IProxyConfiguration.class);
 
@@ -174,7 +175,7 @@ class DefaultURLFetcherTest {
         givenTargetHost("ec.europa.eu");
         givenIgnoringConnect();
         givenTargetHostNotIgnoredByProxy(targetHost);
-        givenCredentialsProvider();
+        givenCredentials();
         givenProxyHost();
 
         // WHEN
@@ -228,8 +229,8 @@ class DefaultURLFetcherTest {
         Mockito.when(proxyConfiguration.getProxyHost(targetHost)).thenReturn(proxyHost);
     }
 
-    private void givenCredentialsProvider() {
-        Mockito.when(proxyConfiguration.getProxyCredentials(targetHost)).thenReturn(credentialsProvider);
+    private void givenCredentials() {
+        Mockito.when(proxyConfiguration.getProxyCredentials()).thenReturn(credentials);
     }
 
     private void whenFetchingFromTheTarget() throws TechnicalException, URISyntaxException {
@@ -242,7 +243,8 @@ class DefaultURLFetcherTest {
     }
 
     private void thenProxyConfigurationConfigured() {
-        Mockito.verify(proxyConfiguration).getProxyCredentials(targetHost);
+        Mockito.verify(proxyConfiguration).getProxyCredentials();
+        Mockito.verify(proxyConfiguration).isNonProxyHost(targetHost);
         Mockito.verify(proxyConfiguration).getProxyHost(targetHost);
     }
 
@@ -257,6 +259,6 @@ class DefaultURLFetcherTest {
 
         assertSame(routePlanner, actualRoutePlanner);
         assertSame(proxyHost, actualProxyHost);
-        assertSame(credentialsProvider, actualCredentialsProvider);
+        assertNotNull(actualCredentialsProvider);
     }
 }
