@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,13 +21,18 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.*;
 import eu.europa.ec.dynamicdiscovery.util.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hc.client5.http.UnsupportedSchemeException;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -41,6 +46,7 @@ import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
@@ -68,6 +74,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
 
     private final IProxyConfiguration proxyConfiguration;
+    private final ICredentialProvider credentialProvider;
 
     private final HttpRoutePlanner routePlanner;
 
@@ -78,7 +85,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
      */
     @Deprecated
     public DefaultURLFetcher() {
-        this(null, null, null);
+        this(null, null, null, null);
     }
 
     /**
@@ -87,7 +94,8 @@ public class DefaultURLFetcher implements IMetadataFetcher {
      */
     @Deprecated
     public DefaultURLFetcher(IProxyConfiguration proxyConfiguration) {
-        this(null, null, proxyConfiguration);
+
+        this(null, null, null, proxyConfiguration);
     }
 
     /**
@@ -96,7 +104,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
      */
     @Deprecated
     public DefaultURLFetcher(HttpRoutePlanner routePlanner) {
-        this(null, routePlanner, null);
+        this(null, routePlanner, null, null);
     }
 
     /**
@@ -105,13 +113,23 @@ public class DefaultURLFetcher implements IMetadataFetcher {
      */
     @Deprecated
     public DefaultURLFetcher(HttpRoutePlanner routePlanner, IProxyConfiguration proxyConfiguration) {
-        this(null, routePlanner, proxyConfiguration);
+        this(null, routePlanner, null, proxyConfiguration);
     }
 
-    private DefaultURLFetcher(HttpClientConnectionManager connectionManager, HttpRoutePlanner routePlanner, IProxyConfiguration proxyConfiguration) {
+    private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
+                              HttpRoutePlanner routePlanner,
+                              IProxyConfiguration proxyConfiguration) {
+        this(connectionManager, routePlanner, null, proxyConfiguration);
+    }
+
+    private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
+                              HttpRoutePlanner routePlanner,
+                              ICredentialProvider credentialProvider,
+                              IProxyConfiguration proxyConfiguration) {
         this.routePlanner = routePlanner;
         this.proxyConfiguration = proxyConfiguration;
         this.connectionManager = connectionManager;
+        this.credentialProvider = credentialProvider;
     }
 
     @Override
@@ -123,13 +141,23 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 .setRoutePlanner(routePlanner);
         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 
-
+        // set authentication for target uri
+        BasicCredentialsProvider credentialsProvider = buildAuthenticationForTarget(participantUnderSmpURI, null);
+        // set proxy
         String participantUnderSmpURIHost = participantUnderSmpURI.getHost();
         if (proxyConfiguration != null && !proxyConfiguration.isNonProxyHost(participantUnderSmpURIHost)) {
             LOG.debug("Fetch data using proxy");
-            httpClientBuilder.setDefaultCredentialsProvider(
-                    proxyConfiguration.getProxyCredentials(participantUnderSmpURIHost));
-            requestConfigBuilder.setProxy(proxyConfiguration.getProxyHost(participantUnderSmpURIHost));
+            HttpHost proxyHost = proxyConfiguration.getProxyHost(participantUnderSmpURIHost);
+            // set proxy authentication
+            credentialsProvider = buildAuthenticationForTarget(
+                    proxyHost,
+                    proxyConfiguration.getProxyCredentials(),
+                    credentialsProvider);
+            requestConfigBuilder.setProxy(proxyHost);
+        }
+
+        if (credentialProvider != null) {
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
 
         HttpGet httpGet = new HttpGet(participantUnderSmpURI);
@@ -143,6 +171,45 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         }
     }
 
+    private BasicCredentialsProvider buildAuthenticationForTarget(URI targetUri, BasicCredentialsProvider provider) {
+        if (credentialProvider == null) {
+            LOG.debug("No credential provider set for target url [{}].", targetUri);
+            return provider;
+        }
+
+        return buildAuthenticationForTarget(
+                new HttpHost(targetUri.getScheme(), targetUri.getHost(), targetUri.getPort()),
+                credentialProvider.getCredentials(), provider);
+    }
+
+    private BasicCredentialsProvider buildAuthenticationForTarget(HttpHost targetHost,
+                                                                  Credentials credentials,
+                                                                  BasicCredentialsProvider provider) {
+        if (credentials == null) {
+            LOG.debug("No credential provided for target url [{}].", targetHost);
+            return provider;
+        }
+
+        if (StringUtils.equalsIgnoreCase(targetHost.getSchemeName(), "http")) {
+            LOG.warn("Unsafe use of credentials for uri [{}].", targetHost);
+        }
+        if (provider == null) {
+            provider = new BasicCredentialsProvider();
+        }
+
+        AuthScope authScope = new AuthScope(targetHost);
+        provider.setCredentials(authScope, credentials);
+        return provider;
+    }
+
+    /**
+     * Connect to the SMP server and retrieve the data.
+     *
+     * @param httpClient the http client to connect to the SMP server
+     * @param httpGet    the http get request configuration
+     * @return the fetcher response containing the data
+     * @throws TechnicalException the technical exception
+     */
     public FetcherResponse connect(CloseableHttpClient httpClient, HttpGet httpGet) throws TechnicalException {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             switch (response.getCode()) {
@@ -171,6 +238,13 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         }
     }
 
+    /**
+     * Convert input stream to in-memory fetcher response.
+     *
+     * @param inputStream input stream from the document source
+     * @return in-memory fetcher response
+     * @throws IOException if an I/O error occurs
+     */
     public FetcherResponse toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             IOUtils.copy(inputStream, baos);
@@ -202,7 +276,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         private boolean httpsSchemeEnabled = true;
 
         private IProxyConfiguration proxyConfiguration;
-
+        private ICredentialProvider credentialProvider;
         private HttpRoutePlanner routePlanner;
 
 
@@ -280,6 +354,17 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         }
 
         /**
+         * Set credential provider for target url authentication
+         *
+         * @param credentialProvider
+         * @return this builder
+         */
+        public Builder credentialProvider(final ICredentialProvider credentialProvider) {
+            this.credentialProvider = credentialProvider;
+            return this;
+        }
+
+        /**
          * Enhanced proxy settings
          *
          * @param routePlanner
@@ -296,7 +381,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          * @param enableHttpScheme
          * @return this builder
          */
-        public Builder setHttpSchemeEnabled(final boolean enableHttpScheme) {
+        public Builder httpSchemeEnabled(final boolean enableHttpScheme) {
             this.httpSchemeEnabled = enableHttpScheme;
             return this;
         }
@@ -307,7 +392,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          * @param httpsSchemeEnabled
          * @return this builder
          */
-        public Builder setHttpsSchemeEnabled(final boolean httpsSchemeEnabled) {
+        public Builder httpsSchemeEnabled(final boolean httpsSchemeEnabled) {
             this.httpsSchemeEnabled = httpsSchemeEnabled;
             return this;
         }
@@ -328,7 +413,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             }
 
             final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(registryBuilder.build());
-            return new DefaultURLFetcher(connectionManager, routePlanner, proxyConfiguration);
+            return new DefaultURLFetcher(connectionManager, routePlanner, credentialProvider, proxyConfiguration);
         }
 
         private SSLConnectionSocketFactory buildSSLConnectionSocketFactory() {

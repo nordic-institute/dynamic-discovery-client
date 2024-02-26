@@ -9,7 +9,7 @@
  * You may obtain a copy of the License at
  * 
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.security;
 
+import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.core5.http.HttpHost;
 
@@ -57,5 +58,14 @@ public interface IProxyConfiguration {
      * @see #isNonProxyHost(String)
      */
     CredentialsProvider getProxyCredentials(String target);
+
+    /**
+     * Returns the credentials of the proxy.
+     *
+     * @return the credentials used to identify against the proxy; {@code null} otherwise, when the user is not provided
+     * or when the target host is a non-proxy one
+     * @see #isNonProxyHost(String)
+     */
+    Credentials getProxyCredentials();
 
 }

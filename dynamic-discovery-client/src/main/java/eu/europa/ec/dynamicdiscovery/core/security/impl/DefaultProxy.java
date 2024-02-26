@@ -23,6 +23,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
@@ -117,9 +118,24 @@ public class DefaultProxy implements IProxyConfiguration {
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(
                 new AuthScope(this.serverAddress, this.serverPort),
-                new UsernamePasswordCredentials(this.user, this.password.toCharArray()));
+                getProxyCredentials());
 
         LOG.info("Configured proxy credentials");
         return credentialsProvider;
+    }
+
+    /**
+     * Returns the credentials of the proxy.
+     *
+     * @return the Username/password credentials used to identify against the proxy; {@code null} otherwise, when the user is not provided
+     */
+    @Override
+    public Credentials getProxyCredentials() {
+
+        if (StringUtils.isEmpty(user)|| StringUtils.isEmpty(password)) {
+            LOG.debug("Incomplete credentials, no credentials to be returned");
+            return null;
+        }
+        return new UsernamePasswordCredentials(this.user, this.password.toCharArray());
     }
 }
