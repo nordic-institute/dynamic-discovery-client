@@ -1,19 +1,21 @@
 /*
- * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
- *
- * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
- *
+ * #%L
+ * dynamic-discovery-cli
+ * %%
+ * Copyright (C) 2016 - 2023 European Commission | eDelivery | Dynamic Discovery Client
+ * %%
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- *
+ * 
+ * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  *
  */
 package eu.europa.ec.dynamicdiscovery.core.fetcher;
@@ -23,6 +25,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -67,7 +70,7 @@ class DefaultURLFetcherTest {
 
     private HttpEntity httpEntity  = Mockito.mock(HttpEntity.class);
 
-    private CredentialsProvider credentialsProvider  = Mockito.mock(CredentialsProvider.class);
+    private Credentials credentials  = Mockito.mock(Credentials.class);
 
     private IProxyConfiguration proxyConfiguration = Mockito.mock(IProxyConfiguration.class);
 
@@ -172,7 +175,7 @@ class DefaultURLFetcherTest {
         givenTargetHost("ec.europa.eu");
         givenIgnoringConnect();
         givenTargetHostNotIgnoredByProxy(targetHost);
-        givenCredentialsProvider();
+        givenCredentials();
         givenProxyHost();
 
         // WHEN
@@ -226,8 +229,8 @@ class DefaultURLFetcherTest {
         Mockito.when(proxyConfiguration.getProxyHost(targetHost)).thenReturn(proxyHost);
     }
 
-    private void givenCredentialsProvider() {
-        Mockito.when(proxyConfiguration.getProxyCredentials(targetHost)).thenReturn(credentialsProvider);
+    private void givenCredentials() {
+        Mockito.when(proxyConfiguration.getProxyCredentials()).thenReturn(credentials);
     }
 
     private void whenFetchingFromTheTarget() throws TechnicalException, URISyntaxException {
@@ -240,7 +243,8 @@ class DefaultURLFetcherTest {
     }
 
     private void thenProxyConfigurationConfigured() {
-        Mockito.verify(proxyConfiguration).getProxyCredentials(targetHost);
+        Mockito.verify(proxyConfiguration).getProxyCredentials();
+        Mockito.verify(proxyConfiguration).isNonProxyHost(targetHost);
         Mockito.verify(proxyConfiguration).getProxyHost(targetHost);
     }
 
@@ -255,6 +259,6 @@ class DefaultURLFetcherTest {
 
         assertSame(routePlanner, actualRoutePlanner);
         assertSame(proxyHost, actualProxyHost);
-        assertSame(credentialsProvider, actualCredentialsProvider);
+        assertNotNull(actualCredentialsProvider);
     }
 }

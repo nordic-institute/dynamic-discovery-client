@@ -1,19 +1,21 @@
 /*
- * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
- *
- * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
- *
+ * #%L
+ * dynamic-discovery-cli
+ * %%
+ * Copyright (C) 2016 - 2023 European Commission | eDelivery | Dynamic Discovery Client
+ * %%
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- *
+ * 
+ * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
@@ -21,6 +23,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
@@ -115,9 +118,24 @@ public class DefaultProxy implements IProxyConfiguration {
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(
                 new AuthScope(this.serverAddress, this.serverPort),
-                new UsernamePasswordCredentials(this.user, this.password.toCharArray()));
+                getProxyCredentials());
 
         LOG.info("Configured proxy credentials");
         return credentialsProvider;
+    }
+
+    /**
+     * Returns the credentials of the proxy.
+     *
+     * @return the Username/password credentials used to identify against the proxy; {@code null} otherwise, when the user is not provided
+     */
+    @Override
+    public Credentials getProxyCredentials() {
+
+        if (StringUtils.isEmpty(user)|| StringUtils.isEmpty(password)) {
+            LOG.debug("Incomplete credentials, no credentials to be returned");
+            return null;
+        }
+        return new UsernamePasswordCredentials(this.user, this.password.toCharArray());
     }
 }

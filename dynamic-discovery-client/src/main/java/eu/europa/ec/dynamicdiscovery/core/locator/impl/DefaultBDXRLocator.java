@@ -1,19 +1,21 @@
 /*
- * (C) Copyright 2016-2021 - European Commission | Dynamic Discovery Client
- *
- * https://ec.europa.eu/cefdigital/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
- *
+ * #%L
+ * dynamic-discovery-cli
+ * %%
+ * Copyright (C) 2016 - 2023 European Commission | eDelivery | Dynamic Discovery Client
+ * %%
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     dynamic-discovery\License_LGPL-2.1.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- *
+ * 
+ * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
@@ -154,13 +156,13 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     }
 
     protected URI cnameLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
-        String dnsDomain = buildCNameDNSDomain(participantIdentifier, topDomain);
-        if (getDnsLookup().dnsRecordNotExists(participantIdentifier, dnsDomain, DNSLookupType.CNAME)) {
+        String dnsQuery = buildCNameDNSQuery(participantIdentifier, topDomain);
+        if (getDnsLookup().dnsRecordNotExists(participantIdentifier, dnsQuery, DNSLookupType.CNAME)) {
             return null;
         }
 
         try {
-            return new URI(PEPPOL_URL_SCHEME + buildCNameDNSDomain(participantIdentifier, topDomain));
+            return new URI(PEPPOL_URL_SCHEME + buildCNameDNSQuery(participantIdentifier, topDomain));
         } catch (URISyntaxException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
@@ -169,7 +171,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     private URI naptrLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
         try {
             LOG.debug("Start naptr search for participant [{}].", participantIdentifier);
-            String naptrURI = buildNaptrDNSDomain(participantIdentifier, topDomain);
+            String naptrURI = buildNaptrDNSQuery(participantIdentifier, topDomain);
             String smpURI = naptrLookupFetcher(participantIdentifier, naptrURI);
             LOG.debug("Got URL: [{}] for participant [{}] with naptr query url: [{}].", smpURI, participantIdentifier, naptrURI);
             return new URI(smpURI);
@@ -182,7 +184,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         }
     }
 
-    protected String buildCNameDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain) {
+    public String buildCNameDNSQuery(SMPParticipantIdentifier participantIdentifier, String topDomain) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.MD5_HEX));
@@ -191,7 +193,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         return sb.toString();
     }
 
-    protected String buildNaptrDNSDomain(SMPParticipantIdentifier participantIdentifier, String topDomain) {
+    public String buildNaptrDNSQuery(SMPParticipantIdentifier participantIdentifier, String topDomain) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.SHA256_BASE32));
