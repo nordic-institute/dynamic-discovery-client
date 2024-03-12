@@ -29,12 +29,12 @@ public enum CliOptions {
     COMMAND_GET("get", false, "Command discovers and fetch metadata from SMP"),
     COMMAND_DNS("dns", false, "Command discovers SMP location"),
 
-    OPTION_RESOURCE_IDENTIFIER("ri", "resource-identifier", true, true, "party identifier: ex: 0088:98765digit"),
-    OPTION_RESOURCE_SCHEME("rs", "resource-scheme", true, false, "party identifier: iso6523-actorid-upis"),
+    OPTION_RESOURCE_IDENTIFIER("ri", "resource-identifier", true, true, "resource (party) identifier, example: 0088:98765digit"),
+    OPTION_RESOURCE_SCHEME("rs", "resource-scheme", true, false, "resource (party) scheme, example: iso6523-actorid-upis"),
     OPTION_HELP("h", "help", false, false, "Prints help"),
     OPTION_SUBRESOURCE_IDENTIFIER("si", "subresource-identifier", true, false, "Subresource identifier: ex: Invoice"),
-    OPTION_SUBRESOURCE_SCHEME("ss", "subresource-scheme", true, false, "Subresource identifier:org:xml"),
-    OPTION_DNS_DOMAIN("d", "domain", true, true, "Network DNS domain: eq.: acc.edelivery.tech.ec.europa.eu"),
+    OPTION_SUBRESOURCE_SCHEME("ss", "subresource-scheme", true, false, "Subresource scheme :org:xml"),
+    OPTION_DNS_DOMAIN("d", "domain", true, false, "Network DNS domain: eq.: acc.edelivery.tech.ec.europa.eu"),
     OPTION_NAPTR_SERVICE("s", "services", true, false, "Comma separated NAPTR service value as: Meta:SMP,meta:cppa"),
     OPTION_OUTPUT("o", "output", true, false, "Output filename. If file already exists it is overwritten." +
             " If not provided, output is printed to console"),
@@ -47,7 +47,8 @@ public enum CliOptions {
     OPTION_KEYSTORE_FILEPATH("kf", "keystore-filepath", true, false, "Client TLS keystore file path"),
     OPTION_KEYSTORE_PASSWORD("kp", "keystore-password", true, false, "Client TLS keystore password"),
     OPTION_KEYSTORE_TYPE("kt", "keystore-type", true, false, "Client TLS keystore type: Default PKCS12"),
-    OPTIONS_KEYSTORE_KEY_PASSWORD("kkp", "keystore-key-password", true, false, "Client TLS keystore alias password");
+    OPTIONS_KEYSTORE_KEY_PASSWORD("kkp", "keystore-key-password", true, false, "Client TLS keystore alias password"),
+    OPTIONS_SMP_URL("smp", "smp-url", true, false, "If provided, SMP URL is used instead of DNS discovery"),;
     private final Option option;
 
     CliOptions(String name, boolean hasArg, String desc) {
@@ -92,7 +93,6 @@ public enum CliOptions {
         return options;
     }
 
-
     public static Options getCommandDnsOptions() {
         Options options = new Options();
         // add command
@@ -102,11 +102,9 @@ public enum CliOptions {
         options.addOption(OPTION_RESOURCE_IDENTIFIER.getOption());
         options.addOption(OPTION_RESOURCE_SCHEME.getOption());
 
-
         options.addOption(OPTION_DNS_DOMAIN.getOption());
         options.addOption(OPTION_RECORD_TYPE.getOption());
         options.addOption(OPTION_NAPTR_SERVICE.getOption());
-        options.addOption(OPTION_OUTPUT.getOption());
         return options;
     }
 
@@ -136,7 +134,7 @@ public enum CliOptions {
         options.addOption(OPTION_KEYSTORE_TYPE.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_NAME.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_VALUE.getOption());
-
+        options.addOption(OPTIONS_SMP_URL.getOption());
         return options;
     }
 }

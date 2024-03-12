@@ -24,8 +24,10 @@ import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
@@ -44,6 +46,7 @@ import org.xbill.DNS.Record;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -109,7 +112,7 @@ public class DdcMain {
             try {
                 ddc.runGet(cmd);
             } catch (TechnicalException | IOException | UnrecoverableKeyException | NoSuchAlgorithmException |
-                     KeyStoreException e) {
+                     KeyStoreException | URISyntaxException e) {
                 System.out.println("ERROR: " + e.getMessage() + "\n\n");
             }
         } else {
@@ -155,15 +158,16 @@ public class DdcMain {
         System.exit(1);
     }
 
-    protected void runGet(CommandLine cmd) throws TechnicalException, IOException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException {
+    protected void runGet(CommandLine cmd) throws TechnicalException, IOException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, URISyntaxException {
         // read parameters
         SMPParticipantIdentifier participantIdentifier = getResourceIdentifier(cmd);
-        String domain = cmd.getOptionValue("domain");
+        String domain = cmd.getOptionValue(OPTION_DNS_DOMAIN.getOption());
+        String smpurl = cmd.getOptionValue(OPTIONS_SMP_URL.getOption());
         List<String> naptrServices = getNaptrServices(cmd);
         List<DNSLookupType> dnsLookupTypes = getDNSLookupTypes(cmd);
         AccessTokenCredentialProvider accessTokenCredentialProvider = getAccessToken(cmd);
-        String srIdentifier = StringUtils.trim(cmd.getOptionValue("subresource-identifier"));
-        String srScheme = StringUtils.trim(cmd.getOptionValue("subresource-scheme"));
+        String srIdentifier = cmd.getOptionValue(OPTION_SUBRESOURCE_IDENTIFIER.getOption());;
+        String srScheme = cmd.getOptionValue(OPTION_SUBRESOURCE_SCHEME.getOption());;
 
         SMPDocumentIdentifier subresourceIdentifier = null;
         if (StringUtils.isNotBlank(srIdentifier)) {
@@ -175,15 +179,21 @@ public class DdcMain {
         KeyStore truststore = getTruststore(cmd);
         KeyStore keyStore = getKeystore(cmd);
 
-        // configure ddc client
-        DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
-                .addRequiredNaptrServices(naptrServices)
-                .build();
-        // configure BDXR locator
-        DefaultBDXRLocator testBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain(domain)
-                .addDnsLookupTypes(dnsLookupTypes)
-                .dnsLookup(testDNSLookup).build();
+        IMetadataLocator testBDXRLocator;
+        if (StringUtils.isBlank(smpurl)){
+            // configure DNS lookup client if SMP URL is not provided
+            DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
+                    .addRequiredNaptrServices(naptrServices)
+                    .build();
+            // configure BDXR locator
+            testBDXRLocator = new DefaultBDXRLocator.Builder()
+                    .addTopDnsDomain(domain)
+                    .addDnsLookupTypes(dnsLookupTypes)
+                    .dnsLookup(testDNSLookup).build();
+        } else {
+            // configure static BDXR locator
+            testBDXRLocator = new StaticMapMetadataLocator(new URI(smpurl));
+        }
 
         // configure URL fetcher
         DefaultURLFetcher.Builder testURLFetcherBuilder = new DefaultURLFetcher.Builder()
