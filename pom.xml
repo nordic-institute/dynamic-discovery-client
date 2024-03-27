@@ -50,7 +50,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <plugin.dependency-check-maven.version>8.3.1</plugin.dependency-check-maven.version>
 
         <release.arguments>-Dmaven.javadoc.skip=true -Dmaven.test.skipTests=true -Dmaven.test.skip=true</release.arguments>
 
@@ -69,7 +68,7 @@
         <commons-cli.version>1.6.0</commons-cli.version>
         <dnsjava.version>3.5.3</dnsjava.version>
         <httpclient.version>5.3.1</httpclient.version>
-        <jacoco.version>0.8.8</jacoco.version>
+
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <org.glassfish.jaxb.jaxb-runtime.version>2.3.8</org.glassfish.jaxb.jaxb-runtime.version>
         <org.eclipse.jetty.version>9.4.54.v20240208</org.eclipse.jetty.version>
@@ -79,22 +78,23 @@
         <hamcrest.version>2.2</hamcrest.version>
         <slf4j.version>2.0.12</slf4j.version>
         <mockito.version>4.11.0</mockito.version>
-        <spring-test.version>5.3.32</spring-test.version>
+        <spring-test.version>5.3.33</spring-test.version>
         <!-- plugins -->
-        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-        <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
-        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <dependency-check-maven.version>9.0.9</dependency-check-maven.version>
-        <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
-        <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
-        <jaxb2-maven-plugin.version>2.5.0</jaxb2-maven-plugin.version>
-        <build-helper-maven-plugin.version>1.12</build-helper-maven-plugin.version>
-        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
-        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+        <plugin.jacoco-maven-plugin.version>0.8.11</plugin.jacoco-maven-plugin.version>
+        <plugin.maven-jar-plugin.version.version>3.3.0</plugin.maven-jar-plugin.version.version>
+        <plugin.maven-assembly-plugin.version> 3.6.0</plugin.maven-assembly-plugin.version>
+        <plugin.maven-release-plugin.version>3.0.1</plugin.maven-release-plugin.version>
+        <plugin.dependency-check-maven.version>9.0.10</plugin.dependency-check-maven.version>
+        <plugin.license-maven-plugin.version>2.3.0</plugin.license-maven-plugin.version>
+        <plugin.maven-compiler-plugin.version>3.12.1</plugin.maven-compiler-plugin.version>
+        <plugin.jaxb2-maven-plugin.version>2.5.0</plugin.jaxb2-maven-plugin.version>
+        <plugin.jbuild-helper-maven-plugin.version>1.12</plugin.jbuild-helper-maven-plugin.version>
+        <plugin.maven-surefire-plugin.version>3.2.5</plugin.maven-surefire-plugin.version>
+        <plugin.maven-failsafe-plugin.version>3.1.2</plugin.maven-failsafe-plugin.version>
+        <plugin.maven-shade-plugin.version>3.5.1</plugin.maven-shade-plugin.version>
         <!-- latest version compatible with SonarQube 5.6 -->
         <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
-        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <plugin.maven-source-plugin.version>3.3.0</plugin.maven-source-plugin.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
     </properties>
 
@@ -399,22 +399,22 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
+                    <version>${plugin.maven-jar-plugin.version.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${maven-assembly-plugin.version}</version>
+                    <version>${plugin.maven-assembly-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>${maven-release-plugin.version}</version>
+                    <version>${plugin.maven-release-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin.version}</version>
+                    <version>${plugin.maven-surefire-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
@@ -424,17 +424,17 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>${license-maven-plugin.version}</version>
+                    <version>${plugin.license-maven-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
+                    <version>${plugin.maven-compiler-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>${jaxb2-maven-plugin.version}</version>
+                    <version>${plugin.jaxb2-maven-plugin.version}</version>
                     <!--add for building it with jdk9+ -->
                     <dependencies>
                         <!-- dependency>
@@ -462,12 +462,12 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${build-helper-maven-plugin.version}</version>
+                    <version>${plugin.jbuild-helper-maven-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
+                    <version>${plugin.jacoco-maven-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
@@ -477,17 +477,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven-failsafe-plugin.version}</version>
+                    <version>${plugin.maven-failsafe-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>${maven-shade-plugin.version}</version>
+                    <version>${plugin.maven-shade-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
+                    <version>${plugin.maven-source-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
