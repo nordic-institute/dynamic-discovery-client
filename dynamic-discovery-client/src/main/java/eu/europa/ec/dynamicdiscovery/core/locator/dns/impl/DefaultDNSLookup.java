@@ -181,8 +181,12 @@ public class DefaultDNSLookup implements IDNSLookup {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
 
-
-        if (lookupClient.getResult() == Lookup.HOST_NOT_FOUND) {
+        if (lookupClient.getResult() == Lookup.HOST_NOT_FOUND){
+            LOG.debug("The DNS domain [{}] for participant [{}] was not found.", uri, participantIdentifier);
+            return Collections.emptyList();
+        } else if (lookupClient.getResult() == Lookup.TYPE_NOT_FOUND) {
+            LOG.debug("The DNS domain [{}] for participant [{}] exists, but not for required type [{}].",
+                    uri, participantIdentifier, recordType);
             return Collections.emptyList();
         }
         if (lookupClient.getResult() != Lookup.SUCCESSFUL) {
