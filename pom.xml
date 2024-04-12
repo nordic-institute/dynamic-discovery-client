@@ -63,7 +63,7 @@
         <surefire.argLine>-Xmx1G</surefire.argLine>
 
         <!-- dependencies -->
-        <bouncycastle.version>1.77</bouncycastle.version>
+        <bouncycastle.version>1.78</bouncycastle.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <commons-cli.version>1.6.0</commons-cli.version>
         <dnsjava.version>3.5.3</dnsjava.version>
