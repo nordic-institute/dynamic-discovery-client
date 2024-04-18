@@ -18,7 +18,18 @@
   limitations under the License.
   #L%
   -->
-<!DOCTYPE externaladdress SYSTEM "any_external_file_address.dtd">
+<!DOCTYPE xxeAttack [
+        <!ENTITY a "1234567890" >
+        <!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;" >
+        <!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;" >
+        <!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;" >
+        <!ENTITY e "&d;&d;&d;&d;&d;&d;&d;&d;&d;&d;" >
+        <!ENTITY f "&e;&e;&e;&e;&e;&e;&e;&e;&e;&e;" >
+        <!ENTITY g "&f;&f;&f;&f;&f;&f;&f;&f;&f;&f;" >
+        <!ENTITY h "&g;&g;&g;&g;&g;&g;&g;&g;&g;&g;" >
+        <!ENTITY i "&h;&h;&h;&h;&h;&h;&h;&h;&h;&h;" >
+        <!ENTITY j "&i;&i;&i;&i;&i;&i;&i;&i;&i;&i;" >
+        ]>
 <ServiceMetadata xmlns:smb="http://docs.oasis-open.org/bdxr/ns/SMP/2/BasicComponents"  xmlns:sma="http://docs.oasis-open.org/bdxr/ns/SMP/2/AggregateComponents" xmlns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceMetadata">
     <smb:SMPVersionID>2.0</smb:SMPVersionID>
     <smb:ParticipantID schemeID="iso6523-actorid-upis">9915:123456789</smb:ParticipantID>
@@ -33,7 +44,7 @@
             <smb:Contact>Access point for testing</smb:Contact>
             <smb:AddressURI>https://ap.example.com/as4</smb:AddressURI>
             <smb:ActivationDate>2018-04-12</smb:ActivationDate>
-            <smb:ExpirationDate>2020-04-12</smb:ExpirationDate>
+            <smb:ExpirationDate>2099-04-12</smb:ExpirationDate>
             <sma:Certificate>
                 <smb:Subject>CN=EXAMPLE AP,C=NO</smb:Subject>
                 <smb:Issuer>CN=EXAMPLE AP,C=NO</smb:Issuer>

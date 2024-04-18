@@ -21,7 +21,6 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -35,51 +34,63 @@ import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
+ * Utility class for validating XML signatures. To detect the xml signature element, 
+ * and validate the signature using the java JCP XML Signature API.
+ * <p>  
  * @author Flávio W. R. Santos
  * @author Cosmin Baciu
+ * @Author Joze Rihtarsic
+ * @since 2.0
  */
 public class SignatureValidatorUtil {
-
     private static final Logger LOG = LoggerFactory.getLogger(SignatureValidatorUtil.class);
+    private static final QName XMLDSIG_NS = new QName("http://www.w3.org/2000/09/xmldsig#", "Signature");
+
+    private static final String SIGNATURE_SECURE_VALIDATION_PROPERTY = "org.jcp.xml.dsig.secureValidation";
+    private static final String SIGNATURE_CACHE_REFERENCE_PROPERTY = "javax.xml.crypto.dsig.cacheReference";
+    private static final String XML_SIGNATURE_FACTORY = "DOM";
 
     protected boolean signatureMandatory = false;
 
-    public X509Certificate verifySignature(Document document) throws TechnicalException {
+    /**
+     * Verify the signature of the document and return the certificate used to sign it.
+     * The Certificate must be provided in the signature element.
+     *
+     * @param document the document to verify
+     * @return the certificate used for signing the document
+     * @throws SignatureException if the signature is mandatory and signature is not found,
+     * if more than one signature is found or the signature is not valid or the
+     * certificate is not trusted
+     */
+    public X509Certificate verifySignature(Document document) throws SignatureException {
         try {
             X509KeySelector keySelector = new eu.europa.ec.dynamicdiscovery.core.security.X509KeySelector();
-            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
-            NodeList nl = document.getDocumentElement().getChildNodes();
-            if (nl.getLength() == 0) {
-                throw new SignatureException("Unable to find child nodes on the element");
-            }
+            List<Element> signatureElements = getChildSignatureElement(document.getDocumentElement());
 
-            int size = nl.getLength();
-            Element signatureElement = null;
-            for (int i = 0; i < size; i++) {
-                Node n = nl.item(i);
-                if (n.getNodeType() == Node.ELEMENT_NODE) {
-                    Element el = (Element) n;
-                    if (el.getLocalName().equals("Signature") && el.getNamespaceURI().equals("http://www.w3.org/2000/09/xmldsig#")) {
-                        signatureElement = el;
-                    }
-                }
-            }
-
-            if (signatureElement == null) {
+            if (signatureElements.isEmpty()) {
                 if (signatureMandatory) {
                     throw new SignatureException("Unable to get the signature");
                 }
                 return null;
-
             }
+            if (signatureElements.size() > 1) {
+                throw new SignatureException("Only one signature is expected in the document");
+            }
+            Element signatureElement = signatureElements.get(0);
 
             DOMValidateContext valContext = new DOMValidateContext(keySelector, signatureElement);
-            valContext.setProperty("org.jcp.xml.dsig.secureValidation", Boolean.TRUE);
-            valContext.setProperty("javax.xml.crypto.dsig.cacheReference", Boolean.TRUE);
+            valContext.setProperty(SIGNATURE_SECURE_VALIDATION_PROPERTY, Boolean.TRUE);
+            valContext.setProperty(SIGNATURE_CACHE_REFERENCE_PROPERTY, Boolean.TRUE);
+            XMLSignatureFactory fac = XMLSignatureFactory.getInstance(XML_SIGNATURE_FACTORY);
+
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
             boolean coreValidity = signature.validate(valContext);
 
@@ -94,6 +105,29 @@ public class SignatureValidatorUtil {
         } catch (XMLSignatureException | MarshalException e) {
             throw new SignatureException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Get the signature element from the document. The method searches for the first child element of the
+     * root element, all other signature  elements are ignored, because the document can have other signatures.
+     * which are not relevant for Dynamic Discover data validation!
+
+     * @param signatureHolder the parent element where the signature is located
+     * @return the signature element
+     * @throws SignatureException if the signature element is not found
+     */
+    private static List<Element> getChildSignatureElement(Element signatureHolder) throws SignatureException {
+        NodeList nl = signatureHolder.getChildNodes();
+        if (nl.getLength() == 0) {
+            throw new SignatureException("Unable to find child nodes on the element");
+        }
+        int size = nl.getLength();
+        // get alle signature elements as child of the signatureHolder element
+        return IntStream.range(0, size).mapToObj(nl::item)
+                .filter(n -> n.getNodeType() == Node.ELEMENT_NODE)
+                .map(n -> (Element) n)
+                .filter(el -> XMLDSIG_NS.equals(new QName(el.getNamespaceURI(), el.getLocalName())))
+                .collect(Collectors.toList());
     }
 
     /**

@@ -41,12 +41,14 @@ public class SMPEndpoint {
     public static final String DEFAULT_CERTIFICATE = "DEFAULT";
 
     private List<SMPProcessIdentifier> processIdentifiers;
+    SMPRedirect redirect;
+
+
     private SMPTransportProfile transportProfile;
     private String address;
     private Map<String, X509Certificate> mapCertificates;
     private OffsetDateTime activationDate;
     private OffsetDateTime expirationDate;
-
     private String serviceDescription;
 
     private String technicalContactUrl;
@@ -54,6 +56,9 @@ public class SMPEndpoint {
 
     private SMPEndpoint(Builder builder) {
         this.processIdentifiers = builder.processIdentifiers;
+        // SMP Endpoint redirect
+        this.redirect = builder.redirect;
+        // or AP endpoint
         this.transportProfile = builder.transportProfile;
         this.address = builder.address;
         this.mapCertificates = builder.mapCertificates;
@@ -115,6 +120,10 @@ public class SMPEndpoint {
         return technicalInformationUrl;
     }
 
+    public SMPRedirect getRedirect() {
+        return redirect;
+    }
+
     @Override
     public String toString() {
         return "Endpoint{" +
@@ -134,6 +143,7 @@ public class SMPEndpoint {
                     .append(transportProfile, endpoint.getTransportProfile())
                     .append(address, endpoint.getAddress())
                     .append(mapCertificates, endpoint.getCertificates())
+                    .append(redirect, endpoint.redirect)
                     .isEquals() &&
                     new SMPEqualsBuilder()
                             .append(processIdentifiers, endpoint.processIdentifiers).build();
@@ -148,12 +158,15 @@ public class SMPEndpoint {
                 .append(transportProfile)
                 .append(address)
                 .append(mapCertificates)
+                .append(redirect)
                 .toHashCode();
     }
 
 
     public static class Builder {
         private List<SMPProcessIdentifier> processIdentifiers = new ArrayList<>();
+        private SMPRedirect redirect;
+
         private SMPTransportProfile transportProfile;
         private String address;
         private Map<String, X509Certificate> mapCertificates = new HashMap<>();
@@ -161,9 +174,14 @@ public class SMPEndpoint {
         private OffsetDateTime expirationDate;
 
         private String serviceDescription;
-
         private String technicalContactUrl;
         private String technicalInformationUrl;
+
+
+         public Builder redirect(SMPRedirect redirect) {
+            this.redirect = redirect;
+            return this;
+         }
 
         public Builder serviceDescription(String serviceDescription) {
             this.serviceDescription = serviceDescription;
@@ -200,7 +218,6 @@ public class SMPEndpoint {
 
             return this;
         }
-
 
         public Builder address(String address) {
             this.address = address;

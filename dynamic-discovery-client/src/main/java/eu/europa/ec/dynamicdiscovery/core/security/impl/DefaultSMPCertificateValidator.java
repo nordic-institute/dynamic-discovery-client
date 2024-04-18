@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.security.ISMPCertificateValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,14 +56,66 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
 
     @Override
     public void validateSMPCertificate(X509Certificate certificate) throws CertificateException {
+        validateSMPCertificate(certificate, null);
+    }
+
+    @Override
+    public void validateSMPCertificate(X509Certificate certificate, SignatureValidationContext context) throws CertificateException {
         String certName = certificate.getSubjectX500Principal().getName();
         LOG.debug("Validate Certificate [{}].", certName);
         // check if certificate is valid
         certificate.checkValidity();
         //validate if certificate is trusted
-        verifyTrust(certificate);
-        verifyCertificateSubject(certificate);
+        SignatureValidationContext.CertificateValidationStrategy cvs =
+                Optional.ofNullable(context).map(SignatureValidationContext::getCertificateValidationStrategy)
+                        .orElse(SignatureValidationContext.CertificateValidationStrategy.TRUSTSTORE);
+        // if cvs is null, use default strategy TRUSTSTORE
+
+        switch (cvs) {
+            case TRUSTED_CERTIFICATES:
+                validateCertificateWithTrustedList(certificate, context, certName);
+                break;
+            case TRUSTSTORE:
+                verifyTrust(certificate);
+                verifyCertificateSubject(certificate);
+                break;
+            case CERTIFICATE_SUBJECT_VALIDATION_AND_TRUSTSTORE:
+                verifyTrust(certificate);
+                validateCertificateSubjectMatch(certificate, context);
+            default:
+                throw new CertificateException("Unknown certificate validation strategy: " + context);
+        }
         LOG.debug("Certificate % is valid and trusted [{}].", certName);
+    }
+
+    private void validateCertificateSubjectMatch(X509Certificate certificate, SignatureValidationContext context) throws CertificateException {
+        if (context == null) {
+            throw new CertificateException("SignatureValidationContext is null!");
+        }
+        String certificateUUID = context.getCertificateUID();
+        if (StringUtils.isBlank(certificateUUID)) {
+            throw new CertificateException("Certificate UID is null!");
+        }
+        if (!certificate.getSubjectX500Principal().getName().equals(certificateUUID)) {
+            throw new CertificateException("Certificate UID [" + certificateUUID + "] does not match the certificate subject ["
+                    + certificate.getSubjectX500Principal().getName() + "]");
+        }
+
+        LOG.debug("Certificate subject UID [{}] matches the provided certificate subject",  certificateUUID );
+    }
+
+    private void validateCertificateWithTrustedList(X509Certificate certificate, SignatureValidationContext context, String certName) throws CertificateException {
+        if (context == null) {
+            throw new CertificateException("SignatureValidationContext is null!");
+        }
+        List<X509Certificate> certificateList = context.getTrustedCertificates();
+        if (certificateList == null || certificateList.isEmpty()) {
+            throw new CertificateException("Trusted certificate list is empty!");
+        }
+        if (!certificateList.contains(certificate)) {
+            throw new CertificateException("Provided certificate list does not contain trusted leaf certificate for ["
+                    + certName + "]");
+        }
     }
 
     /**
@@ -152,7 +207,8 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
             }
             // check if trusted certificate is still valid
             x509TrustedCertificate.checkValidity();
-        } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableEntryException exc) {
+        } catch (NoSuchAlgorithmException | KeyStoreException |
+                 UnrecoverableEntryException exc) {
             throw new CertificateException("Truststore exception occurred when  accessing certificate with alias:" + signerCertificateAlias
                     + ". Error message:" + exc.getMessage(), exc);
         }
@@ -167,7 +223,8 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
             signed.verify(signer.getPublicKey());
             LOG.debug("Certificate [{}] is signed by certificate with alias [{}] from truststore.", signedCertificateName, alias);
             return true;
-        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException |
+        } catch (NoSuchAlgorithmException | InvalidKeyException |
+                 NoSuchProviderException |
                  java.security.SignatureException e) {
             //in case there are multiple entries in the truststore, we don't want to log an error if the validation fails
             LOG.debug("Error occurred while verifying signature of the certificate [" + signedCertificateName

@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,18 +27,29 @@ import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
+import eu.europa.ec.dynamicdiscovery.exception.DDCInvalidData;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext.CertificateValidationStrategy.*;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * @author Flávio W. R. Santos
@@ -50,9 +61,22 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     private IMetadataFetcher metadataFetcher;
     private IMetadataReader metadataReader;
 
+    boolean redirectionEnabled = false;
+    boolean defaultEndpointForEmptyProcess = false;
+
     public DynamicDiscoveryService() {
         this.metadataProvider = new DefaultProvider();
         this.metadataFetcher = new DefaultURLFetcher.Builder().build();
+    }
+
+    @Override
+    public void setRedirectionEnabled(boolean redirectionEnabled) {
+        this.redirectionEnabled = redirectionEnabled;
+    }
+
+    @Override
+    public void setDefaultEndpointForEmptyProcess(boolean defaultEndpointForEmptyProcess) {
+        this.defaultEndpointForEmptyProcess = defaultEndpointForEmptyProcess;
     }
 
     @Override
@@ -67,6 +91,46 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     public SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
         final FetcherResponse fetcherResponseForServiceMetadata = getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier);
         return metadataReader.getServiceMetadata(fetcherResponseForServiceMetadata);
+    }
+
+    /**
+     * Method returns endpoint for given participant, document and process identifiers and transport profile.
+     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     *
+     * @param participantIdentifier
+     * @param documentIdentifier
+     * @param processId
+     * @param processIdScheme
+     * @param transportProfile
+     * @return
+     * @throws TechnicalException
+     */
+
+    @Override
+    public SMPEndpoint lookupEndpoint(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier,
+                                      String processId, String processIdScheme, String transportProfile) throws TechnicalException {
+        SMPServiceMetadata serviceMetadata = getServiceMetadata(participantIdentifier, documentIdentifier);
+        SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
+        if (redirectionEnabled && endpoint.getRedirect() != null) {
+            LOG.debug("Endpoint has a redirection to URL[{}].", endpoint.getRedirect().getRedirectUrl());
+            SignatureValidationContext.Builder svcBuilder = new SignatureValidationContext.Builder();
+            Map<String, X509Certificate> redirectCertificateMap = endpoint.getRedirect().getRedirectCertificate();
+            List<X509Certificate> listOfTrustedCertificates = redirectCertificateMap.values().stream().collect(Collectors.toList());
+            if (!listOfTrustedCertificates.isEmpty()) {
+                svcBuilder.certificateValidationStrategy(TRUSTED_CERTIFICATES)
+                        .trustedCertificates(listOfTrustedCertificates);
+            } else if (StringUtils.isNotBlank(endpoint.getRedirect().getCertificateUID())) {
+                svcBuilder.certificateValidationStrategy(CERTIFICATE_SUBJECT_VALIDATION_AND_TRUSTSTORE)
+                        .certificateUID(endpoint.getRedirect().getCertificateUID());
+            } else {
+                // signature certificate must be validated against truststore
+                svcBuilder.certificateValidationStrategy(TRUSTSTORE);
+            }
+            serviceMetadata = processRedirection(endpoint.getRedirect(), svcBuilder.build());
+            endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
+        }
+
+        return endpoint;
     }
 
     private FetcherResponse getFetcherResponseForServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
@@ -85,8 +149,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
         URI smpURI = lookupParticipantSMPUri(participantIdentifier);
         LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
-        URI resolvedDocumentIdentifierSmpURI = metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
-        return resolvedDocumentIdentifierSmpURI;
+        return metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
     }
 
     public SMPParticipantIdentifierLookupResult lookupParticipantInSMP(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
@@ -104,6 +167,126 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
         }
         LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
         return smpURI;
+    }
+
+
+    /**
+     * Method filters all SMPEndpoints by processId, processIdScheme and transportProfile.
+     * If no endpoint is found, Empty collection is returned.
+     *
+     * @param smpEndpoints     - list of all processes
+     * @param processId        target process identifier
+     * @param processIdScheme  target process identifier scheme
+     * @param transportProfile list of targeted transport profiles
+     * @return valid endpoint
+     * @throws TechnicalException if filter values are null or empty
+     */
+    private SMPEndpoint getEndpoint(List<SMPEndpoint> smpEndpoints, String processId, String processIdScheme, String transportProfile) throws DDCInvalidData {
+
+        if (StringUtils.isBlank(transportProfile)) {
+            throw new DDCInvalidData("Null or empty transport profile");
+        }
+
+        if (StringUtils.isBlank(processId)) {
+            throw new DDCInvalidData("Null or empty process Id");
+        }
+
+        LOG.debug("Search for a Endpoint with process  id: [{}], process scheme [{}] and transportProfile: [{}]]!",
+                processId, processIdScheme, transportProfile);
+        List<SMPEndpoint> endpoints = smpEndpoints.stream()
+                .filter(processType -> smpEndpointMatchesProcessValues(processType, processId, processIdScheme))
+                .filter(endpointType -> matchesEndpointTransport(endpointType, transportProfile))
+                .collect(Collectors.toList());
+
+        if (endpoints.isEmpty()) {
+            LOG.warn("No Endpoints found for process id [{}] with scheme [{}] and transport [{}].",
+                    processId, processIdScheme, transportProfile);
+        }
+
+        if (endpoints.size() == 1) {
+            return endpoints.get(0);
+        }
+        // if more than one endpoint is found, return first with defined process identifiers
+        // or the first endpoint in the list
+        return endpoints.stream().filter(this::hasNotEmptyProcessList)
+                .findFirst()
+                .orElse(endpoints.get(0));
+    }
+
+    /**
+     * Method returns true if one of endpoint's process  (value and scheme)  matches filter parameters.
+     * If the endpoint has no process identifiers the defaultEndpointForEmptyProcess value is returned.
+     *
+     * @param smpEndpoint
+     * @param filterProcessId
+     * @param filterProcessIdScheme
+     * @return true if endpoint's is valid
+     */
+    protected boolean smpEndpointMatchesProcessValues(SMPEndpoint smpEndpoint, String filterProcessId, String filterProcessIdScheme) {
+
+        if (hasEmptyProcessList(smpEndpoint)) {
+            return defaultEndpointForEmptyProcess;
+        }
+
+        Optional<SMPProcessIdentifier> result = smpEndpoint.getProcessIdentifiers().stream().filter(smpProcessIdentifier -> {
+            boolean match = StringUtils.equals(smpProcessIdentifier.getIdentifier(), filterProcessId)
+                    && StringUtils.equals(smpProcessIdentifier.getScheme(), filterProcessIdScheme);
+
+            LOG.debug("Search for process id [{}] with scheme [{}], found: [{}] with scheme [{}] which match [{}] to the search parameters!",
+                    filterProcessId,
+                    filterProcessIdScheme,
+                    smpProcessIdentifier.getIdentifier(),
+                    smpProcessIdentifier.getScheme(),
+                    match);
+
+            return match;
+        }).findFirst();
+
+        return result.isPresent();
+    }
+
+
+    /**
+     * Method returns true if endpoint has no process identifiers.
+     *
+     * @param smpEndpoint
+     * @return true if endpoint's process list is empty
+     */
+    protected boolean hasEmptyProcessList(SMPEndpoint smpEndpoint) {
+        return smpEndpoint.getProcessIdentifiers() == null || smpEndpoint.getProcessIdentifiers().isEmpty();
+    }
+
+    protected boolean hasNotEmptyProcessList(SMPEndpoint smpEndpoint) {
+        return !hasEmptyProcessList(smpEndpoint);
+    }
+
+    /**
+     * This method exists to be used to filter list of endpointType for particular transportProfile.
+     *
+     * @param endpointType
+     * @param transportProfileValue
+     * @return true if endpoint's transport equals to search transport identifier
+     */
+    protected boolean matchesEndpointTransport(SMPEndpoint endpointType, String transportProfileValue) {
+        final SMPTransportProfile transportProfile = endpointType.getTransportProfile();
+        if (transportProfile == null) {
+            return false;
+        }
+
+        boolean isValidTransport = StringUtils.equals(trim(transportProfile.getIdentifier()), trim(transportProfileValue));
+        if (!isValidTransport) {
+            LOG.debug("Search for endpoint with transport [{}], but found [{}]", transportProfileValue, transportProfile);
+        }
+        return isValidTransport;
+    }
+
+
+    private SMPServiceMetadata processRedirection(SMPRedirect redirect, SignatureValidationContext context) throws TechnicalException {
+        URI redirectURI = URI.create(redirect.getRedirectUrl());
+        LOG.info("Fetch document from redirection [{}].", redirectURI);
+        final FetcherResponse fetcherResponseForServiceMetadata = metadataFetcher.fetch(redirectURI);
+
+        return metadataReader.getServiceMetadata(fetcherResponseForServiceMetadata, context);
     }
 
     @Override

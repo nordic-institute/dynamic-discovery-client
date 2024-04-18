@@ -22,33 +22,17 @@ package eu.europa.ec.dynamicdiscovery.exception;
 /**
  * @author Flávio W. R. Santos
  */
-public class TechnicalException extends Exception {
+public class DDCInvalidData extends TechnicalException {
 
-    protected SMPExceptionCode smpExceptionCode;
-
-    protected TechnicalException(String message) {
-        super(message);
+    public DDCInvalidData(String message) {
+        super(SMPExceptionCode.INVALID_DATA, message);
     }
 
-    protected TechnicalException(SMPExceptionCode smpExceptionCode, String message) {
-        super(message);
-        this.smpExceptionCode = smpExceptionCode;
-    }
-
-    protected TechnicalException(String message, Throwable cause) {
+    public DDCInvalidData(String message, Throwable cause) {
         super(message, cause);
     }
 
-    protected TechnicalException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
-        super(message, cause);
-        this.smpExceptionCode = smpExceptionCode;
-    }
-
-    public SMPExceptionCode getSmpExceptionCode() {
-        return smpExceptionCode;
-    }
-
-    public void setSmpExceptionCode(SMPExceptionCode smpExceptionCode) {
-        this.smpExceptionCode = smpExceptionCode;
+    public DDCInvalidData(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+        super(smpExceptionCode, message, cause);
     }
 }

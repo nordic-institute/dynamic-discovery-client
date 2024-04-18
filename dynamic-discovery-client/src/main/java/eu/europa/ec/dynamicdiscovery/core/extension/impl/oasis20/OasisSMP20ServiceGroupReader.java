@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,9 +19,10 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20;
 
-import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.AbstractServiceGroupReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -31,6 +32,7 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.ServiceReference;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -56,47 +58,52 @@ import java.util.stream.Collectors;
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGroup> {
+public class OasisSMP20ServiceGroupReader extends AbstractServiceGroupReader<ServiceGroup> {
     static final Logger LOG = LoggerFactory.getLogger(OasisSMP20ServiceGroupReader.class);
     private static final ThreadLocal<Unmarshaller> jaxbUnmarshaller = ThreadLocal.withInitial(() -> {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" + ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message: ["
+                    + ExceptionUtils.getRootCauseMessage(ex) + "]", ex);
         }
         return null;
     });
 
     private static final ThreadLocal<Marshaller> jaxbMarshaller = ThreadLocal.withInitial(() -> {
         try {
-
             JAXBContext jaxbContext = JAXBContext.newInstance(ServiceGroup.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message:" + ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for ServiceGroup. Cause message: ["
+                    + ExceptionUtils.getRootCauseMessage(ex) + "]", ex);
         }
         return null;
     });
 
+    private static final QName PARSE_ELEMENT = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup", "ServiceGroup");
+
+    @Override
     public Marshaller getMarshaller() {
         return jaxbMarshaller.get();
     }
-
+    @Override
     public Unmarshaller getUnmarshaller() {
         return jaxbUnmarshaller.get();
     }
 
-    private static final QName PARSE_ELEMENT = new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup", "ServiceGroup");
+
 
     /**
      * Removes the current thread's ServiceGroup Unmarshaller for this thread-local variable. If this thread-local variable
      * is subsequently read by the current thread, its value will be reinitialized by invoking its initialValue method.
      */
+    @Override
     public void destroyUnmarshaller() {
         jaxbUnmarshaller.remove();
     }
-
+    @Override
     public void destroyMarshaller() {
         jaxbMarshaller.remove();
     }
@@ -146,25 +153,23 @@ public class OasisSMP20ServiceGroupReader implements IObjectReader<SMPServiceGro
     }
 
     @Override
-    public void serializeNative(Object jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
+    public void serializeNative(ServiceGroup jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
         if (jaxbObject == null) {
             return;
         }
-        Marshaller jaxbMarshaller = getMarshaller();
+        Marshaller marshaller = getMarshaller();
         // Pretty Print XML
         try {
-            if (prettyPrint) {
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
-            }
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
             // to remove xmlDeclaration
-            jaxbMarshaller.marshal(jaxbObject, outputStream);
+            marshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
             throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 
     @Override
-    public SMPServiceGroup parseAndValidateSignature(Document document, ISignatureValidator signatureValidator) throws TechnicalException {
+    public SMPServiceGroup parseAndValidateSignature(Document document, ISignatureValidator signatureValidator, SignatureValidationContext context) throws TechnicalException {
         // the SMP service group is not singed. Ignore signatureValidator
         return parse(document);
     }
