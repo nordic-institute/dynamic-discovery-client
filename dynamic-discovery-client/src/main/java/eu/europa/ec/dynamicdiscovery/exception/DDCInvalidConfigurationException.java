@@ -19,21 +19,21 @@
  */
 package eu.europa.ec.dynamicdiscovery.exception;
 
-public enum SMPExceptionCode {
-    DNS_QUERY_ERROR("DNS query error"),
-    INVALID_DNS_TYPE("DNS Type is invalid"),
-    SERVICE_GROUP("Service group error"),
-    SERVICE_METADATA("Service metadata error"),
-    INVALID_DATA("Invalid query data"),
-    INVALID_CONFIGURATION("Invalid configuration data");
+/**
+ * DDCInvalidConfigurationException is thrown when an invalid DDC configuration is detected.
+ *
+ * @author Joze Rihtarsic
+ * @since 2.2
+ */
+public class DDCInvalidConfigurationException extends DDCRuntimeException {
 
-    final String message;
-
-    SMPExceptionCode(String message) {
-        this.message = message;
+    public DDCInvalidConfigurationException(String message) {
+        this(message, null);
     }
 
-    public String getMessage() {
-        return message;
+    public DDCInvalidConfigurationException(String message, Throwable cause) {
+        super(message, cause);
     }
+
+
 }

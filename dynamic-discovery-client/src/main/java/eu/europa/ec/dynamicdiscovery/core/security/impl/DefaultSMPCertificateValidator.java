@@ -66,10 +66,10 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
         // check if certificate is valid
         certificate.checkValidity();
         //validate if certificate is trusted
+        // if cvs is null, use default strategy TRUSTSTORE
         SignatureValidationContext.CertificateValidationStrategy cvs =
                 Optional.ofNullable(context).map(SignatureValidationContext::getCertificateValidationStrategy)
                         .orElse(SignatureValidationContext.CertificateValidationStrategy.TRUSTSTORE);
-        // if cvs is null, use default strategy TRUSTSTORE
 
         switch (cvs) {
             case TRUSTED_CERTIFICATES:
@@ -82,6 +82,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
             case CERTIFICATE_SUBJECT_VALIDATION_AND_TRUSTSTORE:
                 verifyTrust(certificate);
                 validateCertificateSubjectMatch(certificate, context);
+                break;
             default:
                 throw new CertificateException("Unknown certificate validation strategy: " + context);
         }

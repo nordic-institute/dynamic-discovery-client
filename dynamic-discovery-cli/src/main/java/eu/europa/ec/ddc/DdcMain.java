@@ -210,7 +210,7 @@ public class DdcMain {
         DefaultURLFetcher testURLFetcher = testURLFetcherBuilder.build();
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .provider(new DefaultProvider())
+                .provider(new DefaultProvider.Builder().build())
                 .reader(new DefaultBDXRReader.Builder().build())
                 .fetcher(testURLFetcher)
                 .locator(testBDXRLocator)

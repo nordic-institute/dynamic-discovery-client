@@ -42,9 +42,12 @@ public interface IDynamicDiscoveryService {
 
     SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException;
 
-    SMPEndpoint lookupEndpoint(SMPParticipantIdentifier participantIdentifier,
-                               SMPDocumentIdentifier documentIdentifier,
-                               String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+    SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier,
+                                 SMPDocumentIdentifier documentIdentifier,
+                                 String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+
+    SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
+                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException;
 
 
 

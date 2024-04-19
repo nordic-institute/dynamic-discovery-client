@@ -52,7 +52,18 @@ import static eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationCon
 import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
+ * Implementation of the Dynamic Discovery Service. This class is responsible for the lookup of the service metadata
+ * and the service endpoint. It uses the {@link IMetadataLocator} to find the SMP URI for a given participant identifier,
+ * the {@link IMetadataProvider} to resolve the service metadata URI and the {@link IMetadataFetcher} to fetch the metadata.
+ * The service metadata is then parsed by the {@link IMetadataReader} to retrieve {@link SMPServiceGroup},
+ * {@link SMPServiceMetadata} and {@link SMPEndpoint} .
+ *
+ * The method lookupEndpoint is used to find the endpoint for a given participant, document and process identifiers and
+ * transport profile. If redirection is enabled and the endpoint contains a redirect, the redirection is resolved.
+ *
  * @author Flávio W. R. Santos
+ * @author Joze Rihtarsic
+ * @since 1.0
  */
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     static final Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryService.class);
@@ -65,7 +76,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     boolean defaultEndpointForEmptyProcess = false;
 
     public DynamicDiscoveryService() {
-        this.metadataProvider = new DefaultProvider();
+        this.metadataProvider = new DefaultProvider.Builder().build();
         this.metadataFetcher = new DefaultURLFetcher.Builder().build();
     }
 
@@ -94,22 +105,38 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     /**
-     * Method returns endpoint for given participant, document and process identifiers and transport profile.
+     * Method returns endpoint for given participant, document, process identifiers and transport profile.
      * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
      *
-     * @param participantIdentifier
-     * @param documentIdentifier
-     * @param processId
-     * @param processIdScheme
-     * @param transportProfile
-     * @return
-     * @throws TechnicalException
+     * @param participantIdentifier participant identifier to discover endpoint
+     * @param documentIdentifier the target document identifier (or action identifier for AS4)
+     * @param processId process identifier (or service identifier for AS4)
+     * @param processIdScheme process identifier scheme
+     * @param transportProfile transport profile to define the transport protocol
+     * @return endpoint for given parameters or null if no endpoint is found.
+     * @throws TechnicalException if any error occurs during the lookup
      */
-
     @Override
-    public SMPEndpoint lookupEndpoint(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier,
-                                      String processId, String processIdScheme, String transportProfile) throws TechnicalException {
+    public SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier,
+                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException {
         SMPServiceMetadata serviceMetadata = getServiceMetadata(participantIdentifier, documentIdentifier);
+        return discoverEndpoint(serviceMetadata, processId, processIdScheme, transportProfile);
+    }
+
+    /**
+     * Method returns endpoint for given serviceMetadata with process identifiers and transport profile.
+     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     *
+     * @param serviceMetadata serviceMetadata
+     * @param processId process identifier (or service identifier for AS4)
+     * @param processIdScheme process identifier scheme
+     * @param transportProfile transport profile to define the transport protocol
+     * @return endpoint for given parameters or null if no endpoint is found.
+     * @throws TechnicalException if any error occurs during the lookup
+     */
+    @Override
+    public SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
+                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException {
         SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
         if (redirectionEnabled && endpoint.getRedirect() != null) {
             LOG.debug("Endpoint has a redirection to URL[{}].", endpoint.getRedirect().getRedirectUrl());
@@ -129,7 +156,6 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
             serviceMetadata = processRedirection(endpoint.getRedirect(), svcBuilder.build());
             endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
         }
-
         return endpoint;
     }
 
@@ -174,8 +200,8 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
      * Method filters all SMPEndpoints by processId, processIdScheme and transportProfile.
      * If no endpoint is found, Empty collection is returned.
      *
-     * @param smpEndpoints     - list of all processes
-     * @param processId        target process identifier
+     * @param smpEndpoints  list of all processes
+     * @param processId     target process identifier
      * @param processIdScheme  target process identifier scheme
      * @param transportProfile list of targeted transport profiles
      * @return valid endpoint
