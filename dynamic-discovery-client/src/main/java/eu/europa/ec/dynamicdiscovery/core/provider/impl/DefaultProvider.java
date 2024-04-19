@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.WildcardUtil;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.exception.DDCInvalidConfigurationException;
 import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -39,6 +40,9 @@ import java.net.URI;
 import java.util.List;
 
 /**
+ * Default implementation of the {@link IMetadataProvider} interface. This implementation is responsible for resolving
+ * the SMP query URIs for a given identifiers.
+ *
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  * @since 1.0
@@ -55,6 +59,12 @@ public class DefaultProvider implements IMetadataProvider {
     protected IMetadataFetcher metadataFetcher;
     protected IMetadataReader metadataReader;
     protected List<String> wildcardSchemes;
+
+    protected DefaultProvider(Builder builder) {
+        this.metadataFetcher = builder.metadataFetcher;
+        this.metadataReader = builder.metadataReader;
+        this.wildcardSchemes = builder.wildcardSchemes;
+    }
 
     @Override
     public URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier) {
@@ -124,10 +134,6 @@ public class DefaultProvider implements IMetadataProvider {
         return metadataFetcher;
     }
 
-    public void setMetadataFetcher(IMetadataFetcher iMetadataFetcher) {
-        this.metadataFetcher = iMetadataFetcher;
-    }
-
     public List<String> getWildcardSchemes() {
         return wildcardSchemes;
     }
@@ -140,17 +146,12 @@ public class DefaultProvider implements IMetadataProvider {
         return metadataReader;
     }
 
-    public void setMetadataReader(IMetadataReader metadataReader) {
-        this.metadataReader = metadataReader;
-    }
 
     public static class Builder {
 
         protected IMetadataFetcher metadataFetcher;
         protected IMetadataReader metadataReader;
         protected List<String> wildcardSchemes;
-
-        private IMetadataProvider metadataProvider;
 
         public DefaultProvider.Builder metadataFetcher(IMetadataFetcher metadataFetcher) {
             this.metadataFetcher = metadataFetcher;
@@ -168,18 +169,15 @@ public class DefaultProvider implements IMetadataProvider {
         }
 
         public DefaultProvider build() {
-            if (this.metadataReader == null) {
-                throw new IllegalStateException("MetadataReader not defined.");
+            if (this.wildcardSchemes != null && !this.wildcardSchemes.isEmpty()){
+                if (this.metadataReader == null) {
+                    throw new DDCInvalidConfigurationException("IMetadataReader is mandatory with use of the wildcardSchemes!");
+                }
+                if (this.metadataFetcher == null) {
+                    throw new DDCInvalidConfigurationException("IMetadataFetcher is mandatory with use of the wildcardSchemes");
+                }
             }
-            if (this.metadataFetcher == null) {
-                throw new IllegalStateException("MetadataFetcher not defined.");
-            }
-
-            final DefaultProvider defaultProvider = new DefaultProvider();
-            defaultProvider.setMetadataReader(metadataReader);
-            defaultProvider.setMetadataFetcher(metadataFetcher);
-            defaultProvider.setWildcardSchemes(wildcardSchemes);
-            return defaultProvider;
+            return new DefaultProvider(this);
         }
 
     }

@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -69,7 +70,6 @@ class DefaultSignatureValidatorTest {
     }
 
     @Disabled
-//fails with  <TrustStore does not contain trusted direct Issuer or the Certificate.> but was: <TrustStore does not contain trusted direct Issuer or the leaf certificate for [CN=SMP Mock Services, OU=DIGIT, O=European Commision, C=BE]>
     @Test
     void testVerifyNotTrustedSignerCertificate() throws Exception {
         KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForNotTrustedCertificate.ts");
@@ -78,7 +78,8 @@ class DefaultSignatureValidatorTest {
 
         SignatureException result = assertThrows(SignatureException.class, () -> signatureValidator.verify(document));
 
-        assertEquals("TrustStore does not contain trusted direct Issuer or the Certificate.", result.getMessage());
+        MatcherAssert.assertThat(result.getMessage(),
+                org.hamcrest.Matchers.containsString("TrustStore does not contain trusted direct Issuer or the leaf certificate"));
     }
 
     @Test

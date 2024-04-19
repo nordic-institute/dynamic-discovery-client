@@ -40,7 +40,9 @@ class DynamicDiscoveryBuilderTest {
         DynamicDiscoveryBuilder builder = DynamicDiscoveryBuilder.newInstance();
         DynamicDiscovery smpClient = builder
                 .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
         assertNotNull(smpClient);
         assertNotNull(builder.getService());

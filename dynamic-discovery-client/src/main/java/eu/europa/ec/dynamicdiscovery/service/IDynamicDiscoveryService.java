@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
@@ -34,9 +35,21 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
  */
 public interface IDynamicDiscoveryService {
 
+    void setRedirectionEnabled(boolean redirectionEnabled);
+    void setDefaultEndpointForEmptyProcess(boolean defaultEndpointForEmptyProcess);
+
     SMPServiceGroup getServiceGroup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException;
 
     SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException;
+
+    SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier,
+                                 SMPDocumentIdentifier documentIdentifier,
+                                 String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+
+    SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
+                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+
+
 
     void setMetadataLocator(IMetadataLocator metadataLocator);
 

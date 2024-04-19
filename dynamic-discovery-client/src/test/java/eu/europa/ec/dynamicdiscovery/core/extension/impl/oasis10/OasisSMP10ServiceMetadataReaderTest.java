@@ -20,7 +20,8 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10;
 
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
+import eu.europa.ec.dynamicdiscovery.exception.SignatureException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
@@ -133,9 +134,10 @@ class OasisSMP10ServiceMetadataReaderTest {
         Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("signed_service_metadata_signed_valid_iso6523");
         ISignatureValidator signatureValidator = Mockito.mock(ISignatureValidator.class);
         X509Certificate cert = Mockito.mock(X509Certificate.class);
-        Mockito.doReturn(cert).when(signatureValidator).verify(Mockito.any(Document.class));
+        SignatureValidationContext context = Mockito.mock(SignatureValidationContext.class);;
+        Mockito.doReturn(cert).when(signatureValidator).verify(Mockito.any(Document.class), Mockito.eq(context));
         // when
-        SMPServiceMetadata result = testInstance.parseAndValidateSignature(doc, signatureValidator);
+        SMPServiceMetadata result = testInstance.parseAndValidateSignature(doc, signatureValidator, context);
         // then
         assertNotNull(result);
         assertNotNull(result.getParticipantIdentifier());
@@ -155,7 +157,7 @@ class OasisSMP10ServiceMetadataReaderTest {
         assertEquals(endpoint.getCertificate(), endpoint.getCertificates().get(SMPEndpoint.DEFAULT_CERTIFICATE));
 
         assertEquals(cert, result.getSignerCertificate());
-        Mockito.verify(signatureValidator).verify(Mockito.any(Document.class));
+        Mockito.verify(signatureValidator).verify(Mockito.any(Document.class),Mockito.eq(context));
 
     }
 
@@ -164,10 +166,12 @@ class OasisSMP10ServiceMetadataReaderTest {
         // given
         Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("signed_service_metadata_signed_valid_iso6523");
         ISignatureValidator signatureValidator = Mockito.mock(ISignatureValidator.class);
-        TechnicalException signatureException = Mockito.mock(TechnicalException.class);
-        Mockito.doThrow(signatureException).when(signatureValidator).verify(Mockito.any(Document.class));
+        SignatureException signatureException = Mockito.mock(SignatureException.class);
+        SignatureValidationContext context = Mockito.mock(SignatureValidationContext.class);;
+        Mockito.doThrow(signatureException).when(signatureValidator).verify(Mockito.any(Document.class), Mockito.eq(context));
         // when
-        TechnicalException technicalException = assertThrows(TechnicalException.class, () -> testInstance.parseAndValidateSignature(doc, signatureValidator));
+        SignatureException technicalException = assertThrows(SignatureException.class,
+                () -> testInstance.parseAndValidateSignature(doc, signatureValidator, context));
 
         // then
         assertEquals(technicalException, signatureException);

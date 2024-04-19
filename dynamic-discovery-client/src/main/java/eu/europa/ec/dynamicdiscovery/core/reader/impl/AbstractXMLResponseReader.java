@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -42,6 +43,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * Abstract  class with common methods for reading XML responses.
+ *
  * @author Joze Rihtarsic
  * @since 2.0
  */
@@ -51,7 +54,7 @@ public abstract class AbstractXMLResponseReader {
     private static final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
     private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> createDocumentBuilder());
 
-        public static DocumentBuilder createDocumentBuilder() {
+    public static DocumentBuilder createDocumentBuilder() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         try {
@@ -83,18 +86,22 @@ public abstract class AbstractXMLResponseReader {
     }
 
     public <T> T readObject(FetcherResponse fetcherResponse, Class<T> clazz, ISignatureValidator iSignatureValidator) throws TechnicalException {
+        return readObject(fetcherResponse, clazz, iSignatureValidator, null);
+    }
+
+    public <T, C> T readObject(FetcherResponse fetcherResponse, Class<T> clazz, ISignatureValidator iSignatureValidator, SignatureValidationContext context) throws TechnicalException {
 
         Document document = parse(fetcherResponse);
         QName rootQName = getRootElementQName(document);
 
-        IObjectReader<T> parser = getParser(rootQName, clazz);
+        IObjectReader<T, C> parser = getParser(rootQName, clazz);
         if (parser == null) {
             throw new BindException("No parser registered for the document [" + rootQName + "]");
         }
-        return parser.parseAndValidateSignature(document, iSignatureValidator);
+        return parser.parseAndValidateSignature(document, iSignatureValidator, context);
     }
 
-    public abstract <T> IObjectReader<T> getParser(QName qName, Class<T> clazz);
+    public abstract <T, C> IObjectReader<T, C> getParser(QName qName, Class<T> clazz);
 
     protected DocumentBuilder getDocumentBuilder() {
         return threadLocalDocumentBuilder.get();

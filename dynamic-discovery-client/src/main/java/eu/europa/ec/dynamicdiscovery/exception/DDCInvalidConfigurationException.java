@@ -17,18 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package eu.europa.ec.dynamicdiscovery.core.extension;
-
-import javax.xml.namespace.QName;
+package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
- * Extension interface - to discovery the right parser implementation for XML element (QName) and
- * target clazz.
+ * DDCInvalidConfigurationException is thrown when an invalid DDC configuration is detected.
  *
  * @author Joze Rihtarsic
- * @since 2.0
+ * @since 2.2
  */
-public interface IExtension {
-    boolean handles(QName qName, Class<?> clazz);
-    <T, C> IObjectReader<T, C> getParser(QName qName, Class<T> clazz);
+public class DDCInvalidConfigurationException extends DDCRuntimeException {
+
+    public DDCInvalidConfigurationException(String message) {
+        this(message, null);
+    }
+
+    public DDCInvalidConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+
 }

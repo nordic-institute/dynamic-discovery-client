@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  #%L
+  dynamic-discovery-client
+  %%
+  Copyright (C) 2016 - 2023 European Commission | eDelivery | Dynamic Discovery Client
+  %%
+  Licensed under the LGPL, Version 2.1 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+  [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+<ServiceMetadata xmlns:smb="http://docs.oasis-open.org/bdxr/ns/SMP/2/BasicComponents"
+                 xmlns:sma="http://docs.oasis-open.org/bdxr/ns/SMP/2/AggregateComponents"
+                 xmlns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceMetadata">
+    <smb:SMPVersionID>2.0</smb:SMPVersionID>
+    <smb:ParticipantID schemeID="iso6523-actorid-upis">9915:123456789</smb:ParticipantID>
+    <smb:ServiceID schemeID="bdx-docid-qns">Invoice:ver2.0</smb:ServiceID>
+    <sma:ProcessMetadata>
+        <sma:Process>
+            <smb:ID schemeID="cenbii-procid-ubl">urn:www.cenbii.eu:profile:bii05:ver2.0</smb:ID>
+        </sma:Process>
+        <sma:Redirect>
+            <smb:PublisherURI>https://ap.example.com/iso6523-actorid-upis::9915:123456789/services/bdx-docid-qns::Invoice:ver2.0</smb:PublisherURI>
+            <sma:Certificate>
+                <smb:Subject>CN=EXAMPLE AP,C=NO</smb:Subject>
+                <smb:Issuer>CN=EXAMPLE AP,C=NO</smb:Issuer>
+                <smb:ActivationDate>2018-04-12</smb:ActivationDate>
+                <smb:ExpirationDate>2020-04-12</smb:ExpirationDate>
+                <smb:ContentBinaryObject mimeCode="application/base64">
+                    MIICwDCCAaigAwIBAgIEWs7kiDANBgkqhkiG9w0BAQsFADAiMQswCQYDVQQGEwJO
+                    TzETMBEGA1UEAwwKRVhBTVBMRSBBUDAeFw0xODA0MTIwNDQ2MDBaFw0yMDA0MTIw
+                    NDQ2MDBaMCIxCzAJBgNVBAYTAk5PMRMwEQYDVQQDDApFWEFNUExFIEFQMIIBIjAN
+                    BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtuG5qwA2sNvC9dj4purG8hkSVB9p
+                    CWVHyO9buRrSCC+r2UxSF7Lnmr8Hjii0uIdJeFyYv0Vj9d4CjpYyEeYU2QG96wi+
+                    w2KdE28HMZFNMwy0iV9vIkbq0esJCcAXQ4C3rPQ4e9F1Tw4oKnS6rEWCw8i8lsKE
+                    iS/dzIFUa/BVtgjqHvs3siON4k1Y7BU93rZViz8ZM6LB4eA7rYU4le6a8rGKbHa6
+                    BMSIoKgBuKr8XY9lKb2OVg65+LWTESpPkKiKRikzZhAw+mEVYmljvFwBLSp0IEKW
+                    3qogVYGA0jz+kWWGOChk58SKsnqhbANoIucz+axxoJOLl0A5328qM7aRTwIDAQAB
+                    MA0GCSqGSIb3DQEBCwUAA4IBAQBW7VCYhUmRR7xW+QOhUxI//ISjupDdcQ/Jl7hH
+                    CrUghjL7FmNnJKNqBAwrxcAfdwXwRltWzNT9E1btekfyw4+QL34w20kZ7SNLioZU
+                    lxVviaoLsf0f70TMPOBGGv/uyV26l5VMBK40FXvcFwDQ5VNiJOYrsxpF//Hh/t76
+                    QMij6glyLUmYA1aS9Am0zAB5ld+U7HtJAEL6SXinPrPDR1ofcRgx3FzY5pq0PCn9
+                    EA005L6X4eGkI3HqwpcDzYwDC29pPSfnNP50khfFJMCnT6kKhCkPJYQhcZexGJ2U
+                    Ad5OU7Gui/WnmjM80x9qHBv2RIIQggpMy838WjPbw11gMOo+
+                </smb:ContentBinaryObject>
+            </sma:Certificate>
+        </sma:Redirect>
+    </sma:ProcessMetadata>
+</ServiceMetadata>

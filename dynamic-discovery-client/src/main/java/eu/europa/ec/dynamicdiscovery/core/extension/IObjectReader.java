@@ -20,6 +20,7 @@
 package eu.europa.ec.dynamicdiscovery.core.extension;
 
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
+import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.w3c.dom.Document;
 
@@ -30,21 +31,21 @@ import java.io.OutputStream;
 /**
  * Object implementing this class can read the Document and produces the object <T>
  *
- * @param <T>
+ * @param <T, C>
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public interface IObjectReader<T> {
+public interface IObjectReader<T, C> {
 
     boolean handles(QName qName, Class<?> clazz);
 
     T parse(Document document) throws TechnicalException;
 
-    Object parseNative(Document document) throws TechnicalException;
+    C parseNative(Document document) throws TechnicalException;
 
-    Object parseNative(InputStream document) throws TechnicalException;
+    C parseNative(InputStream document) throws TechnicalException;
 
-    public void serializeNative(Object jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException;
+    public void serializeNative(C jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException;
 
-    T parseAndValidateSignature(Document document, ISignatureValidator signatureValidator) throws TechnicalException;
+    T parseAndValidateSignature(Document document, ISignatureValidator signatureValidator, SignatureValidationContext context) throws TechnicalException;
 }

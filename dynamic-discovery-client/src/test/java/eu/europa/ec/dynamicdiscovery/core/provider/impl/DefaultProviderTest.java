@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class DefaultProviderTest {
     private static final String TEST_URI = "http://b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu";
-    DefaultProvider testInstance = new DefaultProvider();
+    DefaultProvider testInstance = new DefaultProvider.Builder().build();
 
 
     @Test
@@ -63,26 +63,25 @@ class DefaultProviderTest {
     void resolveDocumentIdentifiersForSmpUnderNonRootContextTest() throws Exception {
         //given
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DefaultProvider defaultProvider = new DefaultProvider();
+
 
         //when
-        String url = defaultProvider.resolveForParticipantIdentifier(new URI("http://host:666/smp_context"), participantIdentifier).toString();
+        String url = testInstance.resolveForParticipantIdentifier(new URI("http://example.local:1234/smp_context"), participantIdentifier).toString();
 
         //then
-        assertEquals("http://host:666/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
+        assertEquals("http://example.local:1234/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
     }
 
     @Test
     void resolveDocumentIdentifiersForSmpUnderRootContextWithExtraSlashTest() throws Exception {
         //given
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
-        String url = defaultProvider.resolveForParticipantIdentifier(new URI("http://host:666/"), participantIdentifier).toString();
+        String url = testInstance.resolveForParticipantIdentifier(new URI("http://example.local:1234/"), participantIdentifier).toString();
 
         //then
-        assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
+        assertEquals("http://example.local:1234/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
     }
 
     @Test
@@ -90,13 +89,13 @@ class DefaultProviderTest {
         //given
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("doc_id", "ehealth-resid-qns");
-        DefaultProvider defaultProvider = new DefaultProvider();
+
 
         //when
-        String url = defaultProvider.resolveServiceMetadata(new URI("http://host:666"), participantIdentifier, documentIdentifier).toString();
+        String url = testInstance.resolveServiceMetadata(new URI("http://example.local:1234"), participantIdentifier, documentIdentifier).toString();
 
         //then
-        assertEquals("http://host:666/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
+        assertEquals("http://example.local:1234/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
     }
 
     @Test
@@ -104,13 +103,12 @@ class DefaultProviderTest {
         //given
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("doc_id", "ehealth-resid-qns");
-        DefaultProvider defaultProvider = new DefaultProvider();
 
         //when
-        String url = defaultProvider.resolveServiceMetadata(new URI("http://host:666/smp_context"), participantIdentifier, documentIdentifier).toString();
+        String url = testInstance.resolveServiceMetadata(new URI("http://example.local:1234/smp_context"), participantIdentifier, documentIdentifier).toString();
 
         //then
-        assertEquals("http://host:666/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
+        assertEquals("http://example.local:1234/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
     }
 
 }
