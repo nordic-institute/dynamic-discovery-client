@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -59,7 +60,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
 
     protected abstract Marshaller getMarshaller();
 
-    public void serializeNative(C jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
+    public void serializeNativeAny(Object jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
         if (jaxbObject == null) {
             return;
         }
@@ -82,23 +83,34 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
     }
 
     @Override
-    public C parseNative(Document document) throws TechnicalException {
+    public Object parseNativeAny(Document document) throws TechnicalException {
         try {
-            return (C) getUnmarshaller().unmarshal(document);
+            return getUnmarshaller().unmarshal(document);
         } catch (JAXBException e) {
             throw new BindException(smpExceptionCode, "Error occurred while parsing the document", e);
         }
     }
 
     @Override
-    public C parseNative(InputStream inputStream) throws TechnicalException {
+    public Object parseNativeAny(InputStream inputStream) throws TechnicalException {
         try {
             DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
             // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
             Document document = db.parse(inputStream);
-            return parseNative(document);
+            return parseNativeAny(document);
         } catch (SAXException | IOException e) {
             throw new BindException(smpExceptionCode, "Error occurred while SignedServiceMetadata serviceGroup", e);
+        }
+    }
+
+    public Document objectToDocument(C sourceObject) throws TechnicalException {
+        try {
+            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
+            Document document = db.newDocument();
+            getMarshaller().marshal(sourceObject, document);
+            return document;
+        } catch (JAXBException e) {
+            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
         }
     }
 }

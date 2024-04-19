@@ -23,8 +23,6 @@ import eu.europa.ec.dynamicdiscovery.core.extension.impl.AbstractServiceGroupRea
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
@@ -36,17 +34,12 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -88,11 +81,11 @@ public class OasisSMP20ServiceGroupReader extends AbstractServiceGroupReader<Ser
     public Marshaller getMarshaller() {
         return jaxbMarshaller.get();
     }
+
     @Override
     public Unmarshaller getUnmarshaller() {
         return jaxbUnmarshaller.get();
     }
-
 
 
     /**
@@ -103,6 +96,7 @@ public class OasisSMP20ServiceGroupReader extends AbstractServiceGroupReader<Ser
     public void destroyUnmarshaller() {
         jaxbUnmarshaller.remove();
     }
+
     @Override
     public void destroyMarshaller() {
         jaxbMarshaller.remove();
@@ -118,54 +112,6 @@ public class OasisSMP20ServiceGroupReader extends AbstractServiceGroupReader<Ser
         ServiceGroup serviceGroup = parseNative(document);
         return new SMPServiceGroup(getParticipantIdentifier(serviceGroup),
                 getDocumentIdentifiers(serviceGroup), serviceGroup);
-    }
-
-    @Override
-    public ServiceGroup parseNative(Document document) throws TechnicalException {
-        try {
-            return (ServiceGroup) jaxbUnmarshaller.get().unmarshal(document);
-        } catch (JAXBException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
-        }
-    }
-
-    public Document objectToDocument(ServiceGroup serviceGroup) throws TechnicalException {
-        try {
-            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
-            Document document = db.newDocument();
-            getMarshaller().marshal(serviceGroup, document);
-            return document;
-        } catch (JAXBException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
-        }
-    }
-
-    @Override
-    public ServiceGroup parseNative(InputStream inputStream) throws TechnicalException {
-        try {
-            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
-            // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
-            Document document = db.parse(inputStream);
-            return parseNative(document);
-        } catch (SAXException | IOException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup: [{}]", e);
-        }
-    }
-
-    @Override
-    public void serializeNative(ServiceGroup jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
-        if (jaxbObject == null) {
-            return;
-        }
-        Marshaller marshaller = getMarshaller();
-        // Pretty Print XML
-        try {
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
-            // to remove xmlDeclaration
-            marshaller.marshal(jaxbObject, outputStream);
-        } catch (JAXBException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while serializing the ServiceGroup", e);
-        }
     }
 
     @Override

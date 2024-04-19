@@ -37,15 +37,28 @@ import java.io.OutputStream;
  */
 public interface IObjectReader<T, C> {
 
+    default void serializeNative(C jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException{
+        serializeNativeAny(jaxbObject, outputStream, prettyPrint);
+    }
+    default  C parseNative(Document document) throws TechnicalException{
+        return (C) parseNativeAny(document);
+    }
+
+    default C parseNative(InputStream document) throws TechnicalException{
+        return (C) parseNativeAny(document);
+    };
+
+    Document objectToDocument(C sourceObject) throws TechnicalException;
+
     boolean handles(QName qName, Class<?> clazz);
 
     T parse(Document document) throws TechnicalException;
 
-    C parseNative(Document document) throws TechnicalException;
+    Object parseNativeAny(Document document) throws TechnicalException;
 
-    C parseNative(InputStream document) throws TechnicalException;
+    Object parseNativeAny(InputStream document) throws TechnicalException;
 
-    public void serializeNative(C jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException;
+    void serializeNativeAny(Object jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException;
 
     T parseAndValidateSignature(Document document, ISignatureValidator signatureValidator, SignatureValidationContext context) throws TechnicalException;
 }
