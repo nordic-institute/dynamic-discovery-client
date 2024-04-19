@@ -28,10 +28,7 @@ import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
-import eu.europa.ec.dynamicdiscovery.exception.DDCInvalidData;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.exception.*;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
@@ -43,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * the {@link IMetadataProvider} to resolve the service metadata URI and the {@link IMetadataFetcher} to fetch the metadata.
  * The service metadata is then parsed by the {@link IMetadataReader} to retrieve {@link SMPServiceGroup},
  * {@link SMPServiceMetadata} and {@link SMPEndpoint} .
- *
+ * <p>
  * The method lookupEndpoint is used to find the endpoint for a given participant, document and process identifiers and
  * transport profile. If redirection is enabled and the endpoint contains a redirect, the redirection is resolved.
  *
@@ -75,6 +73,18 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     boolean redirectionEnabled = false;
     boolean defaultEndpointForEmptyProcess = false;
 
+    protected DynamicDiscoveryService(DynamicDiscoveryService.Builder builder) {
+        this.metadataLocator = builder.metadataLocator;
+        this.metadataProvider = builder.metadataProvider;
+        this.metadataFetcher = builder.metadataFetcher;
+        this.metadataReader = builder.metadataReader;
+    }
+
+    /**
+     * @deprecated (In the future the builder is preferred way to create service
+     * because it validated if DDC is correctly configured ..)
+     */
+    @Deprecated
     public DynamicDiscoveryService() {
         this.metadataProvider = new DefaultProvider.Builder().build();
         this.metadataFetcher = new DefaultURLFetcher.Builder().build();
@@ -138,11 +148,16 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     public SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
                                         String processId, String processIdScheme, String transportProfile) throws TechnicalException {
         SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
+        if (endpoint == null) {
+            LOG.debug("No Endpoint found for process id [{}] with scheme [{}] and transport [{}].",
+                    processId, processIdScheme, transportProfile);
+            return null;
+        }
         if (redirectionEnabled && endpoint.getRedirect() != null) {
-            LOG.debug("Endpoint has a redirection to URL[{}].", endpoint.getRedirect().getRedirectUrl());
+            LOG.debug("Endpoint has a redirection to URL [{}].", endpoint.getRedirect().getRedirectUrl());
             SignatureValidationContext.Builder svcBuilder = new SignatureValidationContext.Builder();
             Map<String, X509Certificate> redirectCertificateMap = endpoint.getRedirect().getRedirectCertificate();
-            List<X509Certificate> listOfTrustedCertificates = redirectCertificateMap.values().stream().collect(Collectors.toList());
+            List<X509Certificate> listOfTrustedCertificates = new ArrayList<>(redirectCertificateMap.values());
             if (!listOfTrustedCertificates.isEmpty()) {
                 svcBuilder.certificateValidationStrategy(TRUSTED_CERTIFICATES)
                         .trustedCertificates(listOfTrustedCertificates);
@@ -205,28 +220,32 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
      * @param processIdScheme  target process identifier scheme
      * @param transportProfile list of targeted transport profiles
      * @return valid endpoint
-     * @throws TechnicalException if filter values are null or empty
+     * @throws DDCInvalidDataException if filter values are null or empty
      */
-    private SMPEndpoint getEndpoint(List<SMPEndpoint> smpEndpoints, String processId, String processIdScheme, String transportProfile) throws DDCInvalidData {
+    private SMPEndpoint getEndpoint(List<SMPEndpoint> smpEndpoints, String processId,
+                                    String processIdScheme, String transportProfile) throws DDCInvalidDataException {
 
         if (StringUtils.isBlank(transportProfile)) {
-            throw new DDCInvalidData("Null or empty transport profile");
+            throw new DDCInvalidDataException("Null or empty transport profile");
         }
 
         if (StringUtils.isBlank(processId)) {
-            throw new DDCInvalidData("Null or empty process Id");
+            throw new DDCInvalidDataException("Null or empty process Id");
         }
+        String trimProcessIdScheme = trim(processIdScheme);
+        String trimProcessId = trim(processId);
+        String trimTransportProfile = trim(transportProfile);
 
         LOG.debug("Search for a Endpoint with process  id: [{}], process scheme [{}] and transportProfile: [{}]]!",
                 processId, processIdScheme, transportProfile);
         List<SMPEndpoint> endpoints = smpEndpoints.stream()
-                .filter(processType -> smpEndpointMatchesProcessValues(processType, processId, processIdScheme))
-                .filter(endpointType -> matchesEndpointTransport(endpointType, transportProfile))
+                .filter(processType -> smpEndpointMatchesOrRedirect(processType, trimProcessId, trimProcessIdScheme, trimTransportProfile))
                 .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {
             LOG.warn("No Endpoints found for process id [{}] with scheme [{}] and transport [{}].",
                     processId, processIdScheme, transportProfile);
+            return null;
         }
 
         if (endpoints.size() == 1) {
@@ -240,31 +259,55 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     /**
+     * Method returns validates  endpoint match for given processId, processIdScheme and transportProfile or
+     * if the endpoint is redirection.
+     * @param smpEndpoint endpoint to validate
+     * @param filterProcessId filter process identifier value
+     * @param filterProcessIdScheme  filter process identifier scheme
+     * @param filterTransportId filter transport profile value
+     * @return true if endpoint matches the filter values or is redirection else false
+     */
+    protected boolean smpEndpointMatchesOrRedirect(SMPEndpoint smpEndpoint,
+                                                   String filterProcessId, String filterProcessIdScheme,
+                                                   String filterTransportId) {
+        if (smpEndpointMatchesProcessValues(smpEndpoint, filterProcessId, filterProcessIdScheme)
+                && matchesEndpointTransport(smpEndpoint, filterTransportId)) {
+            LOG.debug("Found matching Endpoint with process id: [{}] scheme [{}] and transport profile [{}]",
+                    filterProcessId, filterProcessIdScheme, filterTransportId);
+            return true;
+        }
+
+        if (smpEndpoint.getRedirect() != null) {
+            LOG.debug("Found redirection Endpoint for process id: [{}] scheme [{}] and transport profile [{}]",
+                    filterProcessId, filterProcessIdScheme, filterTransportId);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Method returns true if one of endpoint's process  (value and scheme)  matches filter parameters.
      * If the endpoint has no process identifiers the defaultEndpointForEmptyProcess value is returned.
      *
-     * @param smpEndpoint
-     * @param filterProcessId
-     * @param filterProcessIdScheme
-     * @return true if endpoint's is valid
+     * @param smpEndpoint endpoint to validate
+     * @param filterProcessId target process identifier value
+     * @param filterProcessIdScheme target process identifier scheme
+     * @return true if endpoint's is matching to the filter parameters
      */
     protected boolean smpEndpointMatchesProcessValues(SMPEndpoint smpEndpoint, String filterProcessId, String filterProcessIdScheme) {
 
         if (hasEmptyProcessList(smpEndpoint)) {
             return defaultEndpointForEmptyProcess;
         }
-
         Optional<SMPProcessIdentifier> result = smpEndpoint.getProcessIdentifiers().stream().filter(smpProcessIdentifier -> {
-            boolean match = StringUtils.equals(smpProcessIdentifier.getIdentifier(), filterProcessId)
-                    && StringUtils.equals(smpProcessIdentifier.getScheme(), filterProcessIdScheme);
-
+            boolean match = StringUtils.equals(trim(smpProcessIdentifier.getIdentifier()), filterProcessId)
+                    && StringUtils.equals(trim(smpProcessIdentifier.getScheme()), filterProcessIdScheme);
             LOG.debug("Search for process id [{}] with scheme [{}], found: [{}] with scheme [{}] which match [{}] to the search parameters!",
                     filterProcessId,
                     filterProcessIdScheme,
                     smpProcessIdentifier.getIdentifier(),
                     smpProcessIdentifier.getScheme(),
                     match);
-
             return match;
         }).findFirst();
 
@@ -275,7 +318,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     /**
      * Method returns true if endpoint has no process identifiers.
      *
-     * @param smpEndpoint
+     * @param smpEndpoint endpoint to validate
      * @return true if endpoint's process list is empty
      */
     protected boolean hasEmptyProcessList(SMPEndpoint smpEndpoint) {
@@ -289,8 +332,8 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     /**
      * This method exists to be used to filter list of endpointType for particular transportProfile.
      *
-     * @param endpointType
-     * @param transportProfileValue
+     * @param endpointType endpoint to validate
+     * @param transportProfileValue target transport profile value
      * @return true if endpoint's transport equals to search transport identifier
      */
     protected boolean matchesEndpointTransport(SMPEndpoint endpointType, String transportProfileValue) {
@@ -353,5 +396,55 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     @Override
     public IMetadataReader getMetadataReader() {
         return metadataReader;
+    }
+
+    public static class Builder {
+
+            private IMetadataLocator metadataLocator;
+            private IMetadataProvider metadataProvider;
+            private IMetadataFetcher metadataFetcher;
+            private IMetadataReader metadataReader;
+
+            public Builder metadataLocator(IMetadataLocator metadataLocator) {
+                this.metadataLocator = metadataLocator;
+                return this;
+            }
+
+            public Builder metadataProvider(IMetadataProvider metadataProvider) {
+                this.metadataProvider = metadataProvider;
+                return this;
+            }
+
+            public Builder metadataFetcher(IMetadataFetcher metadataFetcher) {
+                this.metadataFetcher = metadataFetcher;
+                return this;
+            }
+
+            public Builder metadataReader(IMetadataReader metadataReader) {
+                this.metadataReader = metadataReader;
+                return this;
+            }
+
+            public DynamicDiscoveryService build() {
+                validate();
+                return new DynamicDiscoveryService(this);
+            }
+
+            private void validate() {
+                if (metadataLocator == null) {
+                    throw new DDCInvalidConfigurationException("metadataLocator is required");
+                }
+                if (metadataProvider == null) {
+                    // legacy behaviour
+                    metadataProvider =  new DefaultProvider.Builder().build();
+                }
+                if (metadataFetcher == null) {
+                    // legacy behaviour
+                    metadataFetcher =  new DefaultURLFetcher.Builder().build();
+                }
+                if (metadataReader == null) {
+                    throw new DDCInvalidConfigurationException("metadataReader is required");
+                }
+            }
     }
 }

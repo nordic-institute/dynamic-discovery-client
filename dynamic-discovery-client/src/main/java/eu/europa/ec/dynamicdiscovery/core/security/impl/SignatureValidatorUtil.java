@@ -36,7 +36,6 @@ import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -47,7 +46,7 @@ import java.util.stream.IntStream;
  * <p>  
  * @author Flávio W. R. Santos
  * @author Cosmin Baciu
- * @Author Joze Rihtarsic
+ * @author Joze Rihtarsic
  * @since 2.0
  */
 public class SignatureValidatorUtil {
@@ -122,7 +121,7 @@ public class SignatureValidatorUtil {
             throw new SignatureException("Unable to find child nodes on the element");
         }
         int size = nl.getLength();
-        // get alle signature elements as child of the signatureHolder element
+        // get all signature elements as child of the signatureHolder element
         return IntStream.range(0, size).mapToObj(nl::item)
                 .filter(n -> n.getNodeType() == Node.ELEMENT_NODE)
                 .map(n -> (Element) n)
@@ -139,9 +138,7 @@ public class SignatureValidatorUtil {
      */
     protected void logSignatureErrors(XMLSignature signature, DOMValidateContext valContext) throws XMLSignatureException {
         // Check the validation status of each Reference.
-        Iterator<Reference> i1 = signature.getSignedInfo().getReferences().iterator();
-        while (i1.hasNext()) {
-            Reference reference = i1.next();
+        for (Reference reference : (Iterable<Reference>) signature.getSignedInfo().getReferences()) {
             boolean refValid = reference.validate(valContext);
             if (!refValid) {
                 LOG.error("Signature [{}] has invalid reference [{}]!", signature.getId(), reference.getId());

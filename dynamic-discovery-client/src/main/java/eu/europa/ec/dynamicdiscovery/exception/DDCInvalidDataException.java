@@ -20,19 +20,21 @@
 package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
- * @author Flávio W. R. Santos
+ * Exception is thrown when invalid lookup data are provided to the method.
+ * @author Joze Rihtarsic
+ * @since 2.0
  */
-public class DDCInvalidData extends TechnicalException {
+public class DDCInvalidDataException extends TechnicalException {
 
-    public DDCInvalidData(String message) {
+    public DDCInvalidDataException(String message) {
         super(SMPExceptionCode.INVALID_DATA, message);
     }
 
-    public DDCInvalidData(String message, Throwable cause) {
+    public DDCInvalidDataException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DDCInvalidData(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+    public DDCInvalidDataException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
         super(smpExceptionCode, message, cause);
     }
 }
