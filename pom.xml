@@ -84,7 +84,7 @@
         <plugin.maven-jar-plugin.version.version>3.3.0</plugin.maven-jar-plugin.version.version>
         <plugin.maven-assembly-plugin.version> 3.6.0</plugin.maven-assembly-plugin.version>
         <plugin.maven-release-plugin.version>3.0.1</plugin.maven-release-plugin.version>
-        <plugin.dependency-check-maven.version>9.1.0</plugin.dependency-check-maven.version>
+        <plugin.dependency-check-maven.version>10.0.1</plugin.dependency-check-maven.version>
         <plugin.license-maven-plugin.version>2.3.0</plugin.license-maven-plugin.version>
         <plugin.maven-compiler-plugin.version>3.12.1</plugin.maven-compiler-plugin.version>
         <plugin.jaxb2-maven-plugin.version>2.5.0</plugin.jaxb2-maven-plugin.version>
@@ -108,7 +108,7 @@
                         <artifactId>dependency-check-maven</artifactId>
                         <version>${plugin.dependency-check-maven.version}</version>
                         <configuration>
-                            <nvdApiKey>${nvdApiKey}</nvdApiKey>
+                            <nvdApiServerId>edelivery-owasp</nvdApiServerId>
                             <!-- Disable .Net Assembly Analyzer -->
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                         </configuration>
