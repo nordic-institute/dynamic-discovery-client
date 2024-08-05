@@ -66,7 +66,7 @@
         <bouncycastle.version>1.78</bouncycastle.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
         <commons-cli.version>1.6.0</commons-cli.version>
-        <dnsjava.version>3.5.3</dnsjava.version>
+        <dnsjava.version>3.6.0</dnsjava.version>
         <httpclient.version>5.3.1</httpclient.version>
 
         <jaxb-api.version>2.3.1</jaxb-api.version>
