@@ -69,7 +69,9 @@ class DocumentIdentifierIT {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .fetcher(urlFetcherURL)
                 .build();
         List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
@@ -89,7 +91,9 @@ class DocumentIdentifierIT {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("ehealth.acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .fetcher(urlFetcherURL)
                 .build();
         List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getDocumentIdentifiers(participantIdentifier);
@@ -110,7 +114,9 @@ class DocumentIdentifierIT {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .fetcher(urlFetcherURL)
                 .build();
 
@@ -129,7 +135,9 @@ class DocumentIdentifierIT {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new StaticMapMetadataLocator(new URI(TestCaseConstants.SMP_STATIC_DOMAIN)))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .fetcher(urlFetcherURL)
                 .build();
 
@@ -147,7 +155,9 @@ class DocumentIdentifierIT {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu.local", defaultDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .fetcher(urlFetcherURL)
                 .build();
 
@@ -161,7 +171,9 @@ class DocumentIdentifierIT {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .fetcher(urlFetcherURL)
                 .build();
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
@@ -198,7 +210,9 @@ class DocumentIdentifierIT {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", defaultDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .fetcher(urlFetcherURL)
                 .build();
         return smpClient.getServiceGroup(participantIdentifier).unwrap(ServiceGroup.class);
@@ -294,7 +308,7 @@ class DocumentIdentifierIT {
         urlFetcherURL.setParameters(CommonUtil.PEPPOL,
                 URLFetcherMock.LookupType.CNAME,
                 "/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/peppol-doctype-wildcard%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3AInvoice-2%3A%3AInvoice%23%23urn%3Apeppol%3Apint%3Abilling-3.0%40jp%3Apeppol-1%2A%3A%3A2.1",
-                "peppol_service_metadata_valid_iso6523_wildcard",
+                "signed_service_metadata_valid_iso6523_wildcard",
                 "b-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
         urlFetcherURL.addParameters(CommonUtil.PEPPOL, "peppol_service_group_valid_iso6523_wildcard", TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178);
 
@@ -318,7 +332,7 @@ class DocumentIdentifierIT {
                         "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
                 .thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
-        final ISignatureValidator emptyValidator = document -> null;
+        final ISignatureValidator emptyValidator = (document, trustedList) -> null;
 
         final DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")

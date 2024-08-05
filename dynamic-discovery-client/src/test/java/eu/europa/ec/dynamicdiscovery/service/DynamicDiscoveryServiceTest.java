@@ -58,7 +58,9 @@ class DynamicDiscoveryServiceTest {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
 
         assertEquals("http://B-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu",
@@ -74,7 +76,9 @@ class DynamicDiscoveryServiceTest {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
 
         assertEquals("http://smp-mock-1.ehealth.eu:8888",
@@ -89,7 +93,9 @@ class DynamicDiscoveryServiceTest {
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178",
@@ -105,7 +111,9 @@ class DynamicDiscoveryServiceTest {
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1",
@@ -122,7 +130,9 @@ class DynamicDiscoveryServiceTest {
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/%3A%3Ahttp%3A%2F%2Fdocs.oasis-open.org%2Febxml-msg%2Febms%2Fv3.0%2Fns%2Fcore%2F200704%2Ftest", smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
@@ -138,7 +148,9 @@ class DynamicDiscoveryServiceTest {
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", testDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/%3A%3Ahttp%3A%2F%2Fdocs.oasis-open.org%2Febxml-msg%2Febms%2Fv3.0%2Fns%2Fcore%2F200704%2Ftest",
@@ -155,7 +167,9 @@ class DynamicDiscoveryServiceTest {
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
                 .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", testDNSLookup))
-                .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+                .reader(new DefaultBDXRReader.Builder()
+                        .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                        .build())
                 .build();
         URI provider = smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp123456.ec.europa.eu/"), participantIdentifier, documentIdentifier);
         assertEquals("http://smp123456.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", provider.toString());

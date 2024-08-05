@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,14 +38,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Flávio W. R. Santos
  */
 class ResponseParserTest {
-
+    private static final String TRUSTSTORE_PATH = "truststore/truststoreForTrustedCertificate.ts";
 
     @Test
     void parseServiceMetadataTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_urn_poland_ncpb"));
-        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-
-        DefaultBDXRReader testInstance = new DefaultBDXRReader(new DefaultSignatureValidator(keyStore));
+        KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
+        DefaultBDXRReader testInstance = new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(keyStore))
+                .build();
 
         SMPServiceMetadata serviceMetadata = testInstance.getServiceMetadata(fetcherResponse);
         assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
@@ -62,7 +63,7 @@ class ResponseParserTest {
     @Test
     void parseDocumentIdentifierTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("service_group_urn_poland_ncpb"));
-        DefaultBDXRReader responseParser = new DefaultBDXRReader(null);
+        DefaultBDXRReader responseParser = new DefaultBDXRReader.Builder().build();
         SMPServiceGroup serviceGroup = responseParser.getServiceGroup(fetcherResponse);
         List<SMPDocumentIdentifier> documentIdentifiers = serviceGroup.getDocumentIdentifiers();
         assertEquals(2, documentIdentifiers.size());
@@ -77,8 +78,10 @@ class ResponseParserTest {
     void parseServiceMetadataWithEmptyCertificateTest() throws Exception {
         //given
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_empty_certificate"));
-        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        DefaultBDXRReader testInstance = new DefaultBDXRReader(new DefaultSignatureValidator(keyStore));
+        KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
+        DefaultBDXRReader testInstance = new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(keyStore))
+                .build();
 
         //when
         SMPServiceMetadata serviceMetadata = testInstance.getServiceMetadata(fetcherResponse);
@@ -93,8 +96,10 @@ class ResponseParserTest {
     void parseServiceMetadataWithInvalidCertificateTest() throws Exception {
         //given
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_invalid_certificate"));
-        KeyStore keyStore = CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts");
-        DefaultBDXRReader testInstance = new DefaultBDXRReader(new DefaultSignatureValidator(keyStore));
+        KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
+        DefaultBDXRReader testInstance = new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(keyStore))
+                .build();
 
         //when
         SMPServiceMetadata serviceMetadata = testInstance.getServiceMetadata(fetcherResponse);

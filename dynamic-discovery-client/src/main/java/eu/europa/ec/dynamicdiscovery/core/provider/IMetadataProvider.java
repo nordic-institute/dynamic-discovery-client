@@ -27,15 +27,18 @@ import java.net.URI;
 import java.util.List;
 
 /**
+ * Interface for the metadata provider.The implementation of the IMetadataProvider
+ * is responsible for resolving the SMP query URIs for a given participant identifier.
+ * In case of a wildcard scheme, the implementation should return a list of URIs.
+ *
  * @author Flávio W. R. Santos
+ * @since 1.0
  */
 public interface IMetadataProvider {
 
     URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier);
 
     URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException;
-
-    void setWildcardSchemes(List<String> wildcardSchemes);
 
     List<String> getWildcardSchemes();
 }

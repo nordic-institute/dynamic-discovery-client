@@ -20,18 +20,35 @@
 package eu.europa.ec.dynamicdiscovery.core.reader;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 
 /**
+ *  The implementation of this interface should be able to read the data from the FetcherResponse
+ *  and return the SMPServiceGroup or SMPServiceMetadata object. It should also be able to validate the
+ *  signature of the response if data is signed. When the list of trusted certificates is provided, the
+ *  implementation must validate the signature certificate against the trusted list. The list
+ *  is provided for the redirection cases.
+ *
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
+ * @author Joze Rihtarsic
+ * @since 1.0
  */
 public interface IMetadataReader {
 
-    SMPServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException;
+    default SMPServiceGroup getServiceGroup(FetcherResponse fetcherResponse) throws TechnicalException {
+        return getServiceGroup(fetcherResponse, null);
+    }
 
-    SMPServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException;
+    SMPServiceGroup getServiceGroup(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException;
+
+    default SMPServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse) throws TechnicalException {
+        return getServiceMetadata(fetcherResponse, null);
+    }
+
+    SMPServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException;
 }
 

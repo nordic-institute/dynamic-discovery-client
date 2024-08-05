@@ -166,8 +166,8 @@ public class DdcMain {
         List<String> naptrServices = getNaptrServices(cmd);
         List<DNSLookupType> dnsLookupTypes = getDNSLookupTypes(cmd);
         AccessTokenCredentialProvider accessTokenCredentialProvider = getAccessToken(cmd);
-        String srIdentifier = cmd.getOptionValue(OPTION_SUBRESOURCE_IDENTIFIER.getOption());;
-        String srScheme = cmd.getOptionValue(OPTION_SUBRESOURCE_SCHEME.getOption());;
+        String srIdentifier = cmd.getOptionValue(OPTION_SUBRESOURCE_IDENTIFIER.getOption());
+        String srScheme = cmd.getOptionValue(OPTION_SUBRESOURCE_SCHEME.getOption());
 
         SMPDocumentIdentifier subresourceIdentifier = null;
         if (StringUtils.isNotBlank(srIdentifier)) {
@@ -210,8 +210,8 @@ public class DdcMain {
         DefaultURLFetcher testURLFetcher = testURLFetcherBuilder.build();
 
         DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .provider(new DefaultProvider())
-                .reader(new DefaultBDXRReader(null))
+                .provider(new DefaultProvider.Builder().build())
+                .reader(new DefaultBDXRReader.Builder().build())
                 .fetcher(testURLFetcher)
                 .locator(testBDXRLocator)
                 .build();

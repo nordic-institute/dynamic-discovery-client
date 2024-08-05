@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class OasisSMP20ServiceMetadataReaderTest {
 
+
     private static Stream<Arguments> testActivationArguments() {
         return Stream.of(
                 Arguments.of(createActivationDate(now().minusDays(1)), createExpirationDate(now().plusDays(1)), true),
@@ -65,7 +66,7 @@ class OasisSMP20ServiceMetadataReaderTest {
                 Arguments.of(createActivationDate(now().plusDays(1)), createExpirationDate(now().plusDays(2)), false),
                 Arguments.of(createActivationDate(null), createExpirationDate(now().plusDays(1)), true),
                 Arguments.of(createActivationDate(null), createExpirationDate(now().minusDays(1)), false),
-                Arguments.of(createActivationDate(now().minusDays(1)),null, true),
+                Arguments.of(createActivationDate(now().minusDays(1)), null, true),
                 Arguments.of(createActivationDate(now().plusDays(1)), null, false)
         );
     }
@@ -135,6 +136,7 @@ class OasisSMP20ServiceMetadataReaderTest {
         assertNull(result.getSignerCertificate());
     }
 
+
     @Test
     void testIsIgnoreInvalidServices() {
         boolean result = testInstance.isIgnoreInvalidServices();
@@ -154,12 +156,12 @@ class OasisSMP20ServiceMetadataReaderTest {
 
 
     @Test
-    void testGetX509CertificatesSingleNoCode(){
-        List<Certificate> list = Collections.singletonList(createCertificate(null, "eDelivery_SMP_TEST_1" ));
+    void testGetX509CertificatesFromEndpointSingleNoCode() {
+        List<Certificate> list = Collections.singletonList(createCertificate(null, "eDelivery_SMP_TEST_1"));
         Endpoint endpoint = new Endpoint();
         endpoint.getCertificates().addAll(list);
 
-        Map<String, X509Certificate> result = testInstance.getX509Certificates(endpoint);
+        Map<String, X509Certificate> result = testInstance.getX509CertificatesFromEndpoint(endpoint);
 
         assertEquals(1, result.size());
 
@@ -168,16 +170,16 @@ class OasisSMP20ServiceMetadataReaderTest {
     }
 
     @Test
-    void testGetX509CertificatesMultiple(){
-        String code1= "sign";
-        String code2= "encrypt";
+    void testGetX509CertificatesFromEndpointMultiple() {
+        String code1 = "sign";
+        String code2 = "encrypt";
 
-        List<Certificate> list = Arrays.asList(createCertificate(code1, "eDelivery_SMP_TEST_1" ),
-                createCertificate(code2, "eDelivery_SMP_TEST_1" ));
+        List<Certificate> list = Arrays.asList(createCertificate(code1, "eDelivery_SMP_TEST_1"),
+                createCertificate(code2, "eDelivery_SMP_TEST_1"));
         Endpoint endpoint = new Endpoint();
         endpoint.getCertificates().addAll(list);
 
-        Map<String, X509Certificate> result = testInstance.getX509Certificates(endpoint);
+        Map<String, X509Certificate> result = testInstance.getX509CertificatesFromEndpoint(endpoint);
 
         assertEquals(2, result.size());
 
@@ -186,29 +188,30 @@ class OasisSMP20ServiceMetadataReaderTest {
         assertNotNull(result.get(code1));
         assertNotNull(result.get(code2));
     }
-    @Test
-    void testGetX509CertificatesNull(){
 
-        List<Certificate> list = Collections.singletonList(createCertificate(null, null ));
+    @Test
+    void testGetX509CertificatesFromEndpointNull() {
+
+        List<Certificate> list = Collections.singletonList(createCertificate(null, null));
         Endpoint endpoint = new Endpoint();
         endpoint.getCertificates().addAll(list);
 
-        Map<String, X509Certificate> result = testInstance.getX509Certificates(endpoint);
+        Map<String, X509Certificate> result = testInstance.getX509CertificatesFromEndpoint(endpoint);
 
         assertEquals(0, result.size());
 
     }
 
     @Test
-    void testGetX509CertificatesDuplicate(){
-        String code1= "sign";
+    void testGetX509CertificatesFromEndpointDuplicate() {
+        String code1 = "sign";
 
-        List<Certificate> list = Arrays.asList(createCertificate(code1, "eDelivery_SMP_TEST_1" ),
-                createCertificate(code1, "eDelivery_SMP_TEST_1" ));
+        List<Certificate> list = Arrays.asList(createCertificate(code1, "eDelivery_SMP_TEST_1"),
+                createCertificate(code1, "eDelivery_SMP_TEST_1"));
         Endpoint endpoint = new Endpoint();
         endpoint.getCertificates().addAll(list);
 
-        Map<String, X509Certificate> result = testInstance.getX509Certificates(endpoint);
+        Map<String, X509Certificate> result = testInstance.getX509CertificatesFromEndpoint(endpoint);
 
         assertEquals(1, result.size());
 
@@ -219,22 +222,21 @@ class OasisSMP20ServiceMetadataReaderTest {
     public static Certificate createCertificate(String code, String certName) {
 
         Certificate cert = new Certificate();
-        if (code!=null){
+        if (code != null) {
             TypeCode tc = new TypeCode();
             tc.setValue(code);
             cert.setTypeCode(tc);
         }
         ContentBinaryObject binaryObject = new ContentBinaryObject();
-        if (certName!=null) {
+        if (certName != null) {
             try {
-                binaryObject.setValue(CommonUtil.readAllBytesForResource("/certificate/"+certName+".cer"));
+                binaryObject.setValue(CommonUtil.readAllBytesForResource("/certificate/" + certName + ".cer"));
             } catch (IOException e) {
                 // test as invalid
                 binaryObject.setValue("invalid cert data".getBytes());
             }
         }
         cert.setContentBinaryObject(binaryObject);
-
 
 
         return cert;

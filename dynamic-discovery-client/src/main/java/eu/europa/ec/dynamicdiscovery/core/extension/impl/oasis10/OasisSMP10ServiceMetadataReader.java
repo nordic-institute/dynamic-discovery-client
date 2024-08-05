@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,37 +19,25 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10;
 
-import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
-import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
-import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.AbstractServiceMetadataReader;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
+import eu.europa.ec.dynamicdiscovery.model.SMPRedirect;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import gen.eu.europa.ec.ddc.api.smp10.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -57,17 +45,24 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ * Reader for Oasis SMP 1.0 Service Metadata XML. This class is responsible for validating and
+ * reading the XML and creating the corresponding SMPServiceMetadata object.
+ *
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPServiceMetadata> {
-    static final Logger LOG = LoggerFactory.getLogger(OasisSMP10ServiceMetadataReader.class);
+public class OasisSMP10ServiceMetadataReader extends AbstractServiceMetadataReader<SignedServiceMetadata> {
+    private static final QName PARSE_ELEMENT = new QName(OasisSMP10Extension.NAMESPACE, "SignedServiceMetadata");
+    private static final Logger LOG = LoggerFactory.getLogger(OasisSMP10ServiceMetadataReader.class);
+
+
     private static final ThreadLocal<Unmarshaller> jaxbUnmarshaller = ThreadLocal.withInitial(() -> {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(SignedServiceMetadata.class, ServiceMetadata.class);
             return jaxbContext.createUnmarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message: ["
+                    + ExceptionUtils.getRootCauseMessage(ex) + "]", ex);
         }
         return null;
     });
@@ -78,121 +73,46 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
             JAXBContext jaxbContext = JAXBContext.newInstance(SignedServiceMetadata.class, ServiceMetadata.class);
             return jaxbContext.createMarshaller();
         } catch (JAXBException ex) {
-            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:" +  ex, ex);
+            LOG.error("Error occurred while initializing JAXBContext for SignedServiceMetadata. Cause message:["
+                    + ExceptionUtils.getRootCauseMessage(ex) + "]", ex);
         }
         return null;
     });
-
-    private static Marshaller getMarshaller() {
-        return jaxbMarshaller.get();
-    }
-
-    private static final QName PARSE_ELEMENT = new QName(OasisSMP10Extension.NAMESPACE, "SignedServiceMetadata");
-
-    /**
-     * Skip out-dated services
-     * If the current system date is not in the interval - skip the service
-     * <ServiceActivationDate>2016-06-06T11:06:02.000+02:00</ServiceActivationDate>
-     * <ServiceExpirationDate>2026-06-06T11:06:02+02:00</ServiceExpirationDate>
-     */
-
-    boolean ignoreInvalidServices = false;
 
     public OasisSMP10ServiceMetadataReader() {
     }
 
     public OasisSMP10ServiceMetadataReader(boolean ignoreInvalidServices) {
-        this.ignoreInvalidServices = ignoreInvalidServices;
+        super(ignoreInvalidServices);
     }
 
     /**
      * Removes the current thread's ServiceMetadata Unmarshaller for this thread-local variable. If this thread-local variable
      * is subsequently read by the current thread, its value will be reinitialized by invoking its initialValue method.
      */
+    @Override
     public void destroyUnmarshaller() {
         jaxbUnmarshaller.remove();
     }
+
+    @Override
     public void destroyMarshaller() {
         jaxbMarshaller.remove();
     }
 
+    @Override
     public Unmarshaller getUnmarshaller() {
         return jaxbUnmarshaller.get();
     }
 
-    public boolean isIgnoreInvalidServices() {
-        return ignoreInvalidServices;
-    }
-
-    public void setIgnoreInvalidServices(boolean ignoreInvalidServices) {
-        this.ignoreInvalidServices = ignoreInvalidServices;
+    @Override
+    public Marshaller getMarshaller() {
+        return jaxbMarshaller.get();
     }
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
         return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceMetadata.class;
-    }
-
-    @Override
-    public SMPServiceMetadata parse(Document document) throws TechnicalException {
-        return parseAndValidateSignature(document, null);
-    }
-
-    @Override
-    public Object parseNative(Document document) throws TechnicalException {
-        try {
-            return  jaxbUnmarshaller.get().unmarshal(document);
-        } catch (JAXBException e) {
-            throw new BindException("Error occurred while parsing serviceGroup", e);
-        }
-    }
-
-    @Override
-    public Object parseNative(InputStream inputStream) throws TechnicalException {
-        try {
-            DocumentBuilder db = AbstractXMLResponseReader.createDocumentBuilder();
-            // just to validate DISALLOW_DOCTYPE_FEATURE parse to Document
-            Document document = db.parse(inputStream);
-            return parseNative(document);
-        } catch (SAXException | IOException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while SignedServiceMetadata serviceGroup", e);
-        }
-    }
-
-    @Override
-    public void serializeNative(Object jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException {
-        if (jaxbObject == null) {
-            return;
-        }
-        Marshaller jaxbMarshaller = getMarshaller();
-        // Pretty Print XML
-        try {
-            if (prettyPrint) {
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
-            }
-            // to remove xmlDeclaration
-            jaxbMarshaller.marshal(jaxbObject, outputStream);
-        } catch (JAXBException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_METADATA, "Error occurred while serializing the ServiceGroup", e);
-        }
-    }
-
-    @Override
-    public SMPServiceMetadata parseAndValidateSignature(Document document, ISignatureValidator signatureValidator) throws TechnicalException {
-
-        SignedServiceMetadata serviceMetadata  = (SignedServiceMetadata)parseNative(document);
-        X509Certificate certificate = signatureValidator != null ? signatureValidator.verify(document) : null;
-
-        SMPParticipantIdentifier participantIdentifierType = readParticipantIdentifier(serviceMetadata);
-        SMPDocumentIdentifier documentIdentifier = readDocumentIdentifier(serviceMetadata);
-        List<SMPEndpoint> endpoints = readEndpoints(serviceMetadata);
-
-        return new SMPServiceMetadata.Builder()
-                .participantIdentifier(participantIdentifierType)
-                .documentIdentifier(documentIdentifier)
-                .addEndpoints(endpoints)
-                .object(serviceMetadata)
-                .signerCertificate(certificate).build();
     }
 
     protected SMPParticipantIdentifier readParticipantIdentifier(SignedServiceMetadata serviceMetadata) {
@@ -221,13 +141,48 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
         return new SMPDocumentIdentifier(StringUtils.trim(identifierType.getValue()), StringUtils.trim(identifierType.getScheme()));
     }
 
+    protected List<SMPEndpoint> readEndpoints(SignedServiceMetadata serviceMetadata) {
+
+        if (serviceMetadata.getServiceMetadata() == null) {
+            LOG.debug("No ServiceMetadata defined for the SignedServiceMetadata.");
+            return Collections.emptyList();
+        }
+        ServiceMetadata smd = serviceMetadata.getServiceMetadata();
+        if (smd.getServiceInformation() == null) {
+            if (smd.getRedirect() != null) {
+                LOG.debug("Parse redirect defined for the SignedServiceMetadata.");
+                SMPEndpoint redirect = new SMPEndpoint.Builder()
+                        .redirect(readRedirect(smd.getRedirect())).build();
+                return Collections.singletonList(redirect);
+            }
+            LOG.debug("No ServiceInformation defined for the SignedServiceMetadata.");
+            return Collections.emptyList();
+        }
+
+        if (smd.getServiceInformation().getProcessList() == null ||
+                smd.getServiceInformation().getProcessList().getProcesses().isEmpty()) {
+            LOG.debug("No endpoint defined for the SignedServiceMetadata.");
+            return Collections.emptyList();
+        }
+
+        List<ProcessType> processTypes = serviceMetadata.getServiceMetadata().getServiceInformation().getProcessList().getProcesses();
+        return processTypes.stream().map(this::readEndpointsForProcess)
+                .filter(smpEndpoints -> !smpEndpoints.isEmpty())
+                .flatMap(Collection::stream).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
     protected SMPEndpoint readEndpointForProcess(EndpointType endpointType, SMPProcessIdentifier processIdentifier) {
-        if (!(isIgnoreInvalidServices() || isServiceValid(endpointType))) {
-            LOG.debug("Ignore not-active/expired service for process [{}], transport [{}], url [{}]", processIdentifier.getIdentifier(), endpointType.getTransportProfile(), endpointType.getEndpointURI());
+        if (endpointType == null) {
+            LOG.debug("Null endpoint type for process [{}]", processIdentifier);
             return null;
         }
 
+        if (!(isIgnoreInvalidServices() || isServiceValid(endpointType))) {
+            LOG.debug("Ignore not-active/expired service for process [{}], transport [{}], url [{}]", processIdentifier,
+                    endpointType.getTransportProfile(), endpointType.getEndpointURI());
+            return null;
+        }
         X509Certificate certificate = getX509Certificate(endpointType);
         LOG.debug("Found transport for process: [{}], transport [{}], url [{}]", processIdentifier.getIdentifier(), endpointType.getTransportProfile(), endpointType.getEndpointURI());
 
@@ -242,22 +197,34 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
     }
 
     /**
+     * Method reads the redirect from Oasis SMP 2.0 ServiceMetadata and return
+     * the SMPRedirect
+     *
+     * @param redirect
+     * @return
+     */
+    public SMPRedirect readRedirect(RedirectType redirect) {
+        if (redirect == null) {
+            return null;
+        }
+        String redirectUrl = redirect.getHref();
+        String certificateUID = redirect.getCertificateUID();
+
+        return new SMPRedirect.Builder()
+                .redirectUrl(redirectUrl)
+                .certificateUID(certificateUID)
+                .build();
+    }
+
+
+    /**
      * Method validates if service is valid!
      *
      * @param endpointType the endpoint to validate its data
      * @return true if endpoint is valid.
      */
     public boolean isServiceValid(EndpointType endpointType) {
-        OffsetDateTime currentDateTime = OffsetDateTime.now();
-        if (endpointType.getServiceActivationDate() != null && currentDateTime.isBefore(endpointType.getServiceActivationDate())) {
-            LOG.debug("Service is not yet active. Start datetime [{}], current dateTime [{}]", endpointType.getServiceActivationDate(), currentDateTime);
-            return false;
-        }
-        if (endpointType.getServiceExpirationDate() != null && currentDateTime.isAfter(endpointType.getServiceExpirationDate())) {
-            LOG.debug("Service is expired. Expire datetime [{}], current datetime [{}]", endpointType.getServiceExpirationDate(), currentDateTime);
-            return false;
-        }
-        return true;
+        return isServiceValid(endpointType.getServiceActivationDate(), endpointType.getServiceExpirationDate());
     }
 
     protected List<SMPEndpoint> readEndpointsForProcess(ProcessType processType) {
@@ -269,7 +236,6 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
             return Collections.emptyList();
         }
 
-
         final SMPProcessIdentifier processIdentifier = processType.getProcessIdentifier() != null ?
                 new SMPProcessIdentifier(processType.getProcessIdentifier().getValue(), processType.getProcessIdentifier().getScheme()) : null;
 
@@ -277,33 +243,12 @@ public class OasisSMP10ServiceMetadataReader implements IObjectReader<SMPService
         return endpointTypes.stream().map(endpointType -> readEndpointForProcess(endpointType, processIdentifier)).collect(Collectors.toList());
     }
 
-    protected List<SMPEndpoint> readEndpoints(SignedServiceMetadata serviceMetadata) {
-
-        if (serviceMetadata.getServiceMetadata() == null ||
-                serviceMetadata.getServiceMetadata().getServiceInformation() == null ||
-                serviceMetadata.getServiceMetadata().getServiceInformation().getProcessList() == null ||
-                serviceMetadata.getServiceMetadata().getServiceInformation().getProcessList().getProcesses().isEmpty()) {
-            LOG.debug("No endpoint defined for the SignedServiceMetadata.");
-            return Collections.emptyList();
-        }
-        List<ProcessType> processTypes = serviceMetadata.getServiceMetadata().getServiceInformation().getProcessList().getProcesses();
-        return processTypes.stream().map(this::readEndpointsForProcess)
-                .filter(smpEndpoints -> !smpEndpoints.isEmpty())
-                .flatMap(Collection::stream).filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-    }
-
     protected X509Certificate getX509Certificate(EndpointType endpointType) {
         if (endpointType == null || endpointType.getCertificate() == null) {
             LOG.debug("Null endpoint type or certificate. Return null certificate");
             return null;
         }
-        try (InputStream is = new ByteArrayInputStream(endpointType.getCertificate())) {
-            return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
-        } catch (Exception e) {
-            LOG.error("Can not parse Certificate for endpoint [{}]!", endpointType.getEndpointURI(), e);
-            return null;
-        }
+        return getX509CertificateFromByteArray(endpointType.getCertificate(), endpointType.getEndpointURI());
     }
+
 }

@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,12 +43,12 @@ public class CommonUtil {
     private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> AbstractXMLResponseReader.createDocumentBuilder());
     static final Logger LOG = LoggerFactory.getLogger(CommonUtil.class);
     static final String ROOT_RESPONSE = "/response";
-    public static final String OASIS_SMP_10 = "/oasis-smp-1.0";
-    public static final String OASIS_SMP_20 = "/oasis-smp-2.0";
-    public static final String PEPPOL = "/peppol";
+    public static final String OASIS_SMP_10 = "oasis-smp-1.0";
+    public static final String OASIS_SMP_20 = "oasis-smp-2.0";
+    public static final String PEPPOL = "peppol";
 
     public static String getResourcePath(String name, String standard) {
-        return ROOT_RESPONSE + standard + "/" + name + ".xml";
+        return ROOT_RESPONSE + "/" + standard + "/" + name + ".xml";
     }
 
     public static InputStream getISForName(String name, String standard) {
@@ -117,7 +117,7 @@ public class CommonUtil {
 
     public static KeyStore loadKeystore(String fileName, String type, String password) throws Exception {
         KeyStore keyStore = KeyStore.getInstance(type);
-        keyStore.load(CommonUtil.class.getResourceAsStream(fileName), StringUtils.isBlank(password)?null: password.toCharArray());
+        keyStore.load(CommonUtil.class.getResourceAsStream(fileName), StringUtils.isBlank(password) ? null : password.toCharArray());
         return keyStore;
     }
 

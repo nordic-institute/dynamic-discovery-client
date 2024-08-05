@@ -23,7 +23,9 @@ public enum SMPExceptionCode {
     DNS_QUERY_ERROR("DNS query error"),
     INVALID_DNS_TYPE("DNS Type is invalid"),
     SERVICE_GROUP("Service group error"),
-    SERVICE_METADATA("Service metadata error");
+    SERVICE_METADATA("Service metadata error"),
+    INVALID_DATA("Invalid query data"),
+    INVALID_CONFIGURATION("Invalid configuration data");
 
     final String message;
 
