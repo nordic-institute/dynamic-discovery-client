@@ -456,9 +456,12 @@ SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9
 
 == Trustability model
 
-The certificates are validated against the truststore as follows.
+A crucial step in the dynamic discovery process is verifying the trustworthiness (authenticity and non-repudiation) of the retrieved metadata. The dynamic discovery client offers a very simple/basic signature and trust validation mechanism utilizing XML signature validation with the provided truststore.
 
-![enter image description here](https://ec.europa.eu/digital-building-blocks/wiki/download/attachments/37749134/trustabilitymodel.PNG?version=1&modificationDate=1501168419400&api=v2)
+**NOTE: To ensure maximum security, please implement your own ISignatureValidator in accordance with your network security policy.**
+
+You can find as example the default implementation signature validation in the class **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator** and the certificate validation in the class  **eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSMPCertificateValidator**.
+
 
 == References
 
