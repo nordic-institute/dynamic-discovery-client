@@ -9,7 +9,6 @@ include:
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - template: Jobs/License-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
 
 variables:
@@ -42,12 +41,6 @@ dependency_scanning:
   tags:
     - cq-sans-dind
 ".secret-analyzer":
-  stage: security-scanning
-  needs:
-    - build-maven-job
-  tags:
-    - cq-sans-dind
-license_scanning:
   stage: security-scanning
   needs:
     - build-maven-job
