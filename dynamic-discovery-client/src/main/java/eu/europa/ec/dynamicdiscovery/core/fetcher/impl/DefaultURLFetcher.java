@@ -317,7 +317,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
 
         public Builder tlsTruststore(final KeyStore truststore) throws NoSuchAlgorithmException, KeyStoreException {
             if (this.sslContextBuilder == null) {
-                throw new IllegalStateException("A truststore cannot be added if a SSLContext is set in constructor");
+                throw new IllegalStateException("A truststore cannot be added if a SSLContext is set in Builder constructor");
             }
             this.sslContextBuilder.loadTrustMaterial(truststore, null);
             return this;
@@ -335,7 +335,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          */
         public Builder tlsKeystore(final KeyStore keystore, final char[] password) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
             if (this.sslContextBuilder == null) {
-                throw new IllegalStateException("A keystore cannot be added if a SSLContext is set in constructor");
+                throw new IllegalStateException("A keystore cannot be added if a SSLContext is set in the Builder constructor");
             }
             this.sslContextBuilder.loadKeyMaterial(keystore, password);
             return this;
