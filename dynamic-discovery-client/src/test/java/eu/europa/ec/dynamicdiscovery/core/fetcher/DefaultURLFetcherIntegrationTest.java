@@ -33,8 +33,9 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.security.KeyStore;
@@ -43,8 +44,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DefaultURLFetcherIntegrationTest {
-    private static String PASSWD = "test1234";
-    private static String KEYSTORE_TYPE = "PKCS12";
+    static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcherIntegrationTest.class);
+    private static final String PASSWD = "test1234";
+    private static final String KEYSTORE_TYPE = "PKCS12";
 
 
     private static Server serverHTTP;
@@ -54,6 +56,7 @@ public class DefaultURLFetcherIntegrationTest {
     @BeforeAll
     public static void startHTTPJetty() throws Exception {
         // Create Server
+        LOG.info("Start integration test jetty server with HTTP and HTTPS enabled on random ports");
         serverHTTP = new Server();
         // configure http
         ServerConnector httpConnector = new ServerConnector(serverHTTP);
@@ -115,6 +118,8 @@ public class DefaultURLFetcherIntegrationTest {
         if (host == null) {
             host = "localhost";
         }
+        LOG.info("Jetty server started on host: [{}], http port: [{}], https port: [{}]",
+                host, httpConnector.getLocalPort(), sslConnector.getLocalPort());
         serverHTTPUri = new URI(String.format("http://%s:%d/", host, httpConnector.getLocalPort()));
         serverHTTPSUri = new URI(String.format("https://%s:%d/", host, sslConnector.getLocalPort()));
     }
@@ -125,7 +130,7 @@ public class DefaultURLFetcherIntegrationTest {
         try {
             serverHTTP.stop();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Error occurred while stopping jetty server", e);
         }
     }
 
@@ -140,11 +145,10 @@ public class DefaultURLFetcherIntegrationTest {
         assertNotNull(response);
     }
 
-    @Disabled//fails with eu.europa.ec.dynamicdiscovery.exception.ConnectionException: Error occurred while retrieving [/oasis-smp-1.0/extension.xml]: Error: [InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty]
     @Test
     void testSimpleHTTPSFetchOK() throws Exception {
-        KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
-        KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
