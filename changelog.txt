@@ -1,3 +1,8 @@
+Dynamic Discovery 3.0
+- Update to Java 11
+- Update to jakarta EE 10
+
+
 Dynamic Discovery 1.4
  - update libraries
    - org.apache.httpcomponents to org.apache.httpcomponents.client5 see the: https://hc.apache.org/httpcomponents-client-5.2.x/migration-guide/migration-to-classic.html (https changes!)
