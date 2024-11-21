@@ -40,7 +40,6 @@
             <url>https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
-
     <properties>
         <!-- misc properties -->
         <!-- the root/main folder of the project used by aggregation plugins (license). Alternative ${session.executionRootDirectory} -->
