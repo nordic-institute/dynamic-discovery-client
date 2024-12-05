@@ -1,7 +1,69 @@
 Dynamic Discovery 3.0
-- Update to Java 11
-- Update to jakarta EE 10
+ - Upgrade to Jakarta EE 10
+ - Set the build target Java 11
+ - Add feature to register  custom TLS context
 
+Dynamic Discovery 2.4
+ - Add feature to register  custom TLS context
+
+Dynamic Discovery 2.2 and 2.3
+ - Update libraries
+ - Update license headers
+ - Implement support for SMP redirection document
+
+Dynamic Discovery 2.1.1
+ - Update license headers
+ - Add new CLI parameters to configure TLS, naptr type, DNS lookup or fetch documenet from SMP
+
+Dynamic Discovery 2.1
+ - Update libraries
+ - Add support for PEPPOL SMP technical specifications
+ - Add support wildcard document type sheme as defined in the PINT specification
+
+Dynamic Discovery 2.0
+ - Update libraries
+ - Add CLI module to run the DDC process from the command line
+ - Implement extensions to support parsing of various document types (e.g.Oasis SMP 1.0,Oasis SMP 2.0, Oasis CPPA-CPP3, ...)
+ - Fix build to be able to build with jdk 9 and above
+ - Added support for mutual TLS authentication when connecting to the SMP
+ - Added XSD validation of the retrieved SMP document
+ - Added support for the new SMP 2.0 specification
+ - Added support for static configuration of SMPs to skip the DNS lookup
+ - Added option to provide list of top level domains
+ - Add new configuration options: Define resoultion type, Naptr services,...
+
+Dynamic Discovery 1.14
+ - Update libraries
+ - Add support for discoveru pf the  ebCore PartyId Types
+
+Dynamic Discovery 1.13
+ - Update libraries
+ - Implement feature to offload the TLS traffic to a proxy server
+
+Dynamic Discovery 1.12
+ - Update libraries
+ - Enable to register custom SMP certificate validation implementing  ISMPCertificateValidator.java interface
+
+Dynamic Discovery 1.11
+ - Update libraries
+ - Fix process (AS4 Service) and Document (AS4 action) to work without scheme. The fix allows use DDC process with ebMS3.0 test service and action
+
+Dynamic Discovery 1.10
+ - Update libraries
+ - Remove log4j and use slf4j API with logback instead (sync with Domibus)
+
+Dynamic Discovery 1.6, 1.7, 1.8, 1.9
+ - Automate release process using maven release and bamboo (Multiple (test) releases)
+ - Update libraries
+ - Improve logging for easier reconstruction of the DDC process in AP
+ - Add implement no-proxy property to skip proxy for internal network
+
+Dynamic Discovery 1.5
+ - Update libraries
+ - Set the build target Java 8
+
+Dynamic Discovery 1.5
+ - update libraries
 
 Dynamic Discovery 1.4
  - update libraries
