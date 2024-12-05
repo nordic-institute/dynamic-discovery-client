@@ -24,13 +24,12 @@ import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
 import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.io.InputStream;

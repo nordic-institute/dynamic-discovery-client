@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.util.List;
 

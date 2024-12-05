@@ -1,6 +1,6 @@
 = Getting started with the Dynamic Discovery Client for SMP
 eDelivery Support Team <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
-2.0, 8/2/2022:
+
 :toc:
 :sectnums:
 :icons: font
@@ -8,7 +8,10 @@ eDelivery Support Team <CEF-EDELIVERY-SUPPORT@ec.europa.eu>
 
 == Introduction
 
-This Dynamic Discovery Client is a web service client designed to retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the SMP profile based on the OASIS SMP 1.0 and  OASIS SMP 2.0 specifications.
+This Dynamic Discovery Client is a web service client designed to lookup and retrieve metadata of Participants hosted under any compliant Service Metadata Publishers (SMP). This web service client can be used with SMPs that implement the SMP profile based on the OASIS SMP 1.0 and  OASIS SMP 2.0 specifications.
+
+NOTE: Since 3+ version, the client is based on Jakarta EE 10+ XML binding API and is build with target java level 11.
+
 
 === Purpose of this document
 

@@ -433,7 +433,8 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 registryBuilder.register("https", buildSSLConnectionSocketFactory());
             }
 
-            final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(registryBuilder.build());
+            final HttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(registryBuilder.build());
+
             return new DefaultURLFetcher(connectionManager, routePlanner, credentialProvider, proxyConfiguration);
         }
 
