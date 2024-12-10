@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>eu.europa.ec.dynamic-discovery</groupId>
@@ -12,7 +14,9 @@
     <packaging>jar</packaging>
 
     <name>dynamic-discovery-client</name>
-    <description>Library for discovering data dynamically based on e-SENS BDXL specification</description>
+    <description>Library for discovering data dynamically based on e-SENS BDXL
+        specification
+    </description>
 
     <!-- Used licenses -->
     <licenses>
@@ -45,16 +49,32 @@
                         </goals>
                         <configuration>
                             <xjbSources>
-                                <xjbSource>${project.basedir}/src/main/resources/xjb/commonServiceBinding.xjb</xjbSource>
-                                <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP10Binding.xjb</xjbSource>
-                                <xjbSource>${project.basedir}/src/main/resources/xjb/oasisSMP20Binding.xjb</xjbSource>
-                                <xjbSource>${project.basedir}/src/main/resources/xjb/peppolSMPBinding.xjb</xjbSource>
+                                <xjbSource>
+                                    ${project.basedir}/src/main/resources/xjb/commonServiceBinding.xjb
+                                </xjbSource>
+                                <xjbSource>
+                                    ${project.basedir}/src/main/resources/xjb/oasisSMP10Binding.xjb
+                                </xjbSource>
+                                <xjbSource>
+                                    ${project.basedir}/src/main/resources/xjb/oasisSMP20Binding.xjb
+                                </xjbSource>
+                                <xjbSource>
+                                    ${project.basedir}/src/main/resources/xjb/peppolSMPBinding.xjb
+                                </xjbSource>
                             </xjbSources>
                             <sources>
-                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd</source>
-                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceGroup-2.0.xsd</source>
-                                <source>${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceMetadata-2.0.xsd</source>
-                                <source>${project.basedir}/src/main/resources/xsd/peppol/peppol-smp-types-v1.xsd</source>
+                                <source>
+                                    ${project.basedir}/src/main/resources/xsd/bdx-smp-1.0/bdx-smp-201605.xsd
+                                </source>
+                                <source>
+                                    ${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceGroup-2.0.xsd
+                                </source>
+                                <source>
+                                    ${project.basedir}/src/main/resources/xsd/bdx-smp-2.0/ServiceMetadata-2.0.xsd
+                                </source>
+                                <source>
+                                    ${project.basedir}/src/main/resources/xsd/peppol/peppol-smp-types-v1.xsd
+                                </source>
                             </sources>
                             <clearOutputDir>false</clearOutputDir>
                         </configuration>
@@ -73,7 +93,9 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${basedir}/target/generated/src/main/java</source>
+                                <source>
+                                    ${basedir}/target/generated/src/main/java
+                                </source>
                             </sources>
                         </configuration>
                     </execution>
@@ -83,72 +105,6 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <argLine>${surefireArgLine}</argLine>
-                        </configuration>
-                    </execution>
-                </executions>
-
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>pre-unit-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</destFile>
-                            <propertyName>surefireArgLine</propertyName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>pre-integration-test</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Sets the path to the file which contains the execution data. -->
-                            <destFile>${sonar.jacoco.itReportPath}</destFile>
-                            <propertyName>failsafeArgLine</propertyName>
-                            <append>true</append>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>integration-tests</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Sets the VM argument line used when integration tests are run. -->
-                            <argLine>-server -ea -Xms512m -Xmx1024m
-                                -Duser.language=en
-                                ${failsafeArgLine}
-                            </argLine>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
