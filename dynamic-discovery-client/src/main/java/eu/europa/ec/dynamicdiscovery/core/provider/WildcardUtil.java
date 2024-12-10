@@ -38,9 +38,30 @@ public class WildcardUtil {
     public static final String WILDCARD_CHARACTER = "*";
 
     /**
+     * Gets the document identifier using a wildcard match(peppol-doctype-wildcard scheme) and exact match
+     */
+    public SMPDocumentIdentifier getWildcardDocumentIdentifierWithExactMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
+                                                                             SMPDocumentIdentifier documentIdentifierToCheck) {
+        return discoveredDocumentIdentifiers.stream()
+                .filter(smpDocumentIdentifier -> {
+                            final String discoveredSmpDocumentScheme = smpDocumentIdentifier.getScheme();
+                            final String discoveredSmpDocumentIdentifierIdentifier = smpDocumentIdentifier.getIdentifier();
+                            if (documentIdentifierToCheck.getScheme().equals(discoveredSmpDocumentScheme)) {
+                                if (StringUtils.equalsIgnoreCase(documentIdentifierToCheck.getIdentifier(), discoveredSmpDocumentIdentifierIdentifier)) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                ).findFirst()
+                .orElse(null);
+    }
+
+    /**
      * Gets the document identifier using a wildcard match(peppol-doctype-wildcard scheme)
      */
-    public SMPDocumentIdentifier getWildcardDocumentIdentifierWithLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers, SMPDocumentIdentifier documentIdentifierToCheck) {
+    public SMPDocumentIdentifier getWildcardDocumentIdentifierWithLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
+                                                                               SMPDocumentIdentifier documentIdentifierToCheck) {
         final List<SMPDocumentIdentifier> wildcardDocumentIdentifierCandidates = discoveredDocumentIdentifiers.stream()
                 .filter(smpDocumentIdentifier -> {
                             final String discoveredSmpDocumentScheme = smpDocumentIdentifier.getScheme();
@@ -108,4 +129,6 @@ public class WildcardUtil {
         }
         return false;
     }
+
+
 }

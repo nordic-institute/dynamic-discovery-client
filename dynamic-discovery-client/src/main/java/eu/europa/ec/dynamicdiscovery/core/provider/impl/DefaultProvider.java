@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -106,12 +106,29 @@ public class DefaultProvider implements IMetadataProvider {
         //the document identifiers supported by the participant
         final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = serviceGroup.getDocumentIdentifiers();
 
-        final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = wildcardUtil.getWildcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifier);
-        if (wildcardDocumentIdentifierWithLongestMatch != null) {
-            LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", wildcardDocumentIdentifierWithLongestMatch, participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
-            return getDocumentIdentifierWithExactMatch(smpURI, participantIdentifier, wildcardDocumentIdentifierWithLongestMatch);
+        final SMPDocumentIdentifier discoveredWildcardDocumentIdentifier = getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(discoveredDocumentIdentifiers, participantIdentifier, documentIdentifier);
+        if (discoveredWildcardDocumentIdentifier != null) {
+            LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", discoveredWildcardDocumentIdentifier, participantIdentifier, documentIdentifier);
+            return getDocumentIdentifierWithExactMatch(smpURI, participantIdentifier, discoveredWildcardDocumentIdentifier);
         }
         throw new SMPServiceMetadataException(SMPExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifier + "]");
+    }
+
+    protected SMPDocumentIdentifier getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
+                                                                                                       SMPParticipantIdentifier participantIdentifier,
+                                                                                                       SMPDocumentIdentifier documentIdentifierToCheck) {
+        final SMPDocumentIdentifier wildcardDocumentIdentifierWithExactMatch = wildcardUtil.getWildcardDocumentIdentifierWithExactMatch(discoveredDocumentIdentifiers, documentIdentifierToCheck);
+        if (wildcardDocumentIdentifierWithExactMatch != null) {
+            LOG.debug("Found SMPDocumentIdentifier wildcard scheme with exact match [{}] for participant [{}] and document identifier [{}].", wildcardDocumentIdentifierWithExactMatch, participantIdentifier, documentIdentifierToCheck);
+            return wildcardDocumentIdentifierWithExactMatch;
+        }
+
+        final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = wildcardUtil.getWildcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifierToCheck);
+        if (wildcardDocumentIdentifierWithLongestMatch != null) {
+            LOG.debug("Found SMPDocumentIdentifier wildcard scheme with wildcard match [{}] for participant [{}] and document identifier [{}].", wildcardDocumentIdentifierWithLongestMatch, participantIdentifier, documentIdentifierToCheck);
+            return wildcardDocumentIdentifierWithLongestMatch;
+        }
+        return null;
     }
 
     public String format(SMPParticipantIdentifier identifier) {
@@ -169,7 +186,7 @@ public class DefaultProvider implements IMetadataProvider {
         }
 
         public DefaultProvider build() {
-            if (this.wildcardSchemes != null && !this.wildcardSchemes.isEmpty()){
+            if (this.wildcardSchemes != null && !this.wildcardSchemes.isEmpty()) {
                 if (this.metadataReader == null) {
                     throw new DDCInvalidConfigurationException("IMetadataReader is mandatory with use of the wildcardSchemes!");
                 }
