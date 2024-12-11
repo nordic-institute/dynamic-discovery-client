@@ -43,16 +43,8 @@ public class WildcardUtil {
     public SMPDocumentIdentifier getWildcardDocumentIdentifierWithExactMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
                                                                              SMPDocumentIdentifier documentIdentifierToCheck) {
         return discoveredDocumentIdentifiers.stream()
-                .filter(smpDocumentIdentifier -> {
-                            final String discoveredSmpDocumentScheme = smpDocumentIdentifier.getScheme();
-                            final String discoveredSmpDocumentIdentifierIdentifier = smpDocumentIdentifier.getIdentifier();
-                            if (documentIdentifierToCheck.getScheme().equals(discoveredSmpDocumentScheme)) {
-                                if (StringUtils.equalsIgnoreCase(documentIdentifierToCheck.getIdentifier(), discoveredSmpDocumentIdentifierIdentifier)) {
-                                    return true;
-                                }
-                            }
-                            return false;
-                        }
+                .filter(smpDocumentIdentifier -> StringUtils.equalsIgnoreCase(documentIdentifierToCheck.getScheme(), smpDocumentIdentifier.getScheme())
+                        && StringUtils.equalsIgnoreCase(documentIdentifierToCheck.getIdentifier(), smpDocumentIdentifier.getIdentifier())
                 ).findFirst()
                 .orElse(null);
     }
@@ -129,6 +121,4 @@ public class WildcardUtil {
         }
         return false;
     }
-
-
 }
