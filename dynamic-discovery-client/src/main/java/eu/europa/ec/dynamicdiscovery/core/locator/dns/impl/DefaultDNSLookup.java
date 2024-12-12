@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,10 +33,7 @@ import org.xbill.DNS.NAPTRRecord;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
@@ -49,41 +46,83 @@ public class DefaultDNSLookup implements IDNSLookup {
     final List<String> requiredURLSchemas;
     final List<String> requiredNaptrServices;
     final List<String> requiredNaptrFlagsList;
-
+    final Map<String, String> httpBindingForNaptrServices = new HashMap<>();
 
 
     protected DefaultDNSLookup(Builder builder) {
         this.requiredURLSchemas = new ArrayList<>(builder.requiredURLSchemas);
         this.requiredNaptrServices = new ArrayList<>(builder.requiredNaptrServices);
         this.requiredNaptrFlagsList = new ArrayList<>(builder.requiredNaptrFlagsList);
+        this.httpBindingForNaptrServices.putAll(builder.httpBindingForNaptrServices);
     }
 
 
     public String getURLFromNaptrRecord(List<Record> records,
                                         List<String> services,
                                         List<String> schemas,
-                                        List<String> flagsList){
+                                        List<String> flagsList) {
 
-        for (Record dnsRecord : records) {
-            NAPTRRecord naptrRecord = (NAPTRRecord) dnsRecord;
-            String recordDescription = naptrRecord.rdataToString();
-
-            if (!validNaptrService(naptrRecord.getService(), services)) {
-                LOG.debug("NAPTR Record: [{}] does not have any of required services [{}].", recordDescription, services);
+        // respect the order of the services
+        for (String service : services) {
+            NAPTRRecord naptrRecord = (NAPTRRecord) records.stream()
+                    .filter(r -> StringUtils.equalsIgnoreCase(((NAPTRRecord) r).getService(), service))
+                    .findFirst()
+                    .orElse(null);
+            if (naptrRecord == null) {
                 continue;
             }
-
+            String recordDescription = naptrRecord.rdataToString();
             if (!validNaptrFlags(naptrRecord.getFlags(), flagsList)) {
                 LOG.debug("NAPTR Record: [{}] does not have any of required flag [{}].", recordDescription, flagsList);
                 continue;
             }
-
-            String smpAddress = resolveNaptrValue(naptrRecord.getRegexp(), StringUtils.removeEnd(naptrRecord.getName().toString(),"."));
+            String smpAddress = resolveNaptrValue(naptrRecord.getRegexp(), StringUtils.removeEnd(naptrRecord.getName().toString(), "."));
             if (validURLSchema(smpAddress, schemas)) {
-                return smpAddress;
+                return updateURLWithHttpBinding(smpAddress, service);
             }
+
         }
+        LOG.warn("No NAPTR Record found for services: [{}], schemas: [{}], flags: [{}].",
+                services, schemas, flagsList);
         return null;
+    }
+
+    /**
+     * Updates the URL with the HTTP Binding if defined in httpBindingForNaptrServices
+     *
+     * @param url     the URL string address
+     * @param service the service name to be used as key to find the HTTP Binding
+     * @return the updated URL
+     */
+    private String updateURLWithHttpBinding(String url, String service) {
+        if (!httpBindingForNaptrServices.containsKey(service)) {
+            LOG.debug("No HTTP Binding found for service: [{}].", service);
+            return url;
+        }
+
+        String httpBinding = httpBindingForNaptrServices.get(service);
+        if (StringUtils.isNotBlank(httpBinding) && !url.endsWith(httpBinding)) {
+            return concatenatePathSegment(url, httpBinding);
+        }
+        return url;
+    }
+
+    /**
+     * Concatenates the URL with the HTTP Binding if necessary.
+     *
+     * @param url         the URL
+     * @param httpBinding the HTTP Binding
+     * @return the concatenated URL
+     */
+    private String concatenatePathSegment(String url, String httpBinding) {
+
+        if (StringUtils.endsWithIgnoreCase(url, "/")) {
+            return url + StringUtils.removeStart(httpBinding, "/");
+        }
+        if (!StringUtils.startsWithIgnoreCase(httpBinding, "/")) {
+            return url + "/" + httpBinding;
+        }
+        return url + httpBinding;
     }
 
     public String resolveNaptrValue(String recordValue, String hostname) {
@@ -95,7 +134,7 @@ public class DefaultDNSLookup implements IDNSLookup {
         String regExp = split[0];
         String value = split[1];
         // Fast parse (used for U-NAPTR and the legacy '^.*$'
-        if (StringUtils.equalsAny(regExp, ".*","^.*$"))
+        if (StringUtils.equalsAny(regExp, ".*", "^.*$"))
             return value;
         // Using regex
         return hostname.replaceAll(regExp, value);
@@ -181,7 +220,7 @@ public class DefaultDNSLookup implements IDNSLookup {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
 
-        if (lookupClient.getResult() == Lookup.HOST_NOT_FOUND){
+        if (lookupClient.getResult() == Lookup.HOST_NOT_FOUND) {
             LOG.debug("The DNS domain [{}] for participant [{}] was not found.", uri, participantIdentifier);
             return Collections.emptyList();
         } else if (lookupClient.getResult() == Lookup.TYPE_NOT_FOUND) {
@@ -207,6 +246,7 @@ public class DefaultDNSLookup implements IDNSLookup {
         List<String> requiredURLSchemas = new ArrayList<>();
         List<String> requiredNaptrServices = new ArrayList<>();
         List<String> requiredNaptrFlagsList = new ArrayList<>();
+        final Map<String, String> httpBindingForNaptrServices = new HashMap<>();
 
         public DefaultDNSLookup.Builder addRequiredNaptrURLSchema(String schema) {
             this.requiredURLSchemas.add(schema);
@@ -220,6 +260,11 @@ public class DefaultDNSLookup implements IDNSLookup {
 
         public DefaultDNSLookup.Builder addRequiredNaptrService(String service) {
             this.requiredNaptrServices.add(service);
+            return this;
+        }
+
+        public DefaultDNSLookup.Builder addRequiredNaptrServiceHttpBinding(String service, String httpBinding) {
+            httpBindingForNaptrServices.put(service, httpBinding);
             return this;
         }
 
