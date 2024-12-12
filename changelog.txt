@@ -1,7 +1,8 @@
 Dynamic Discovery 3.0
  - Upgrade to Jakarta EE 10
- - Set the build target Java 11
+ - set default build with Java 21 and target Java 11
  - Add feature to register  custom TLS context
+ - Fix parsing Oasis Documents with root element having namespace prefix
 
 Dynamic Discovery 2.4
  - Add feature to register  custom TLS context
