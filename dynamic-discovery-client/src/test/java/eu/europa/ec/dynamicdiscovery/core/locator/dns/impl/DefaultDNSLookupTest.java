@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.util.DNSUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.xbill.DNS.DClass;
@@ -64,7 +65,7 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("Meta:SMP"),
                         Arrays.asList("http:", "https:"),
-                        Arrays.asList("U","A","P"),
+                        Arrays.asList("U", "A", "P"),
                         "Meta:SMP",
                         "http://test:8080/smp",
                         "http://test:8080/smp"),
@@ -112,7 +113,7 @@ class DefaultDNSLookupTest {
                         testParticipantIdentifier,
                         Collections.singletonList("Meta:SMP"),
                         Arrays.asList("http:", "https:"),
-                        Arrays.asList("S"),
+                        List.of("S"),
                         "Meta:SMP",
                         "http://test:8080/smp",
                         "http://test:8080/smp")
@@ -171,11 +172,11 @@ class DefaultDNSLookupTest {
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("naptrValueExamplesArguments")
-    void testResolveNaptrValue(String name, String regularExpression, String hostname, String expectedResult) throws Exception {
+    void testResolveNaptrValue(String name, String regularExpression, String hostname, String expectedResult){
         DefaultDNSLookup testInstance = Mockito.spy(new DefaultDNSLookup.
                 Builder().build());
 
-        String result = testInstance.resolveNaptrValue( regularExpression, hostname);
+        String result = testInstance.resolveNaptrValue(regularExpression, hostname);
         assertEquals(expectedResult, result);
     }
 
@@ -213,6 +214,38 @@ class DefaultDNSLookupTest {
         assertEquals(result, defaultDNSLookup.getURLFromNaptrRecord(records,
                 Collections.singletonList("Meta:SMP"), Arrays.asList("http:", "https:"), Collections.singletonList("U")));
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "http://example.com, service1, /binding, http://example.com/binding",
+            "http://example.com/, service1, binding, http://example.com/binding",
+            "http://example.com/, service1, /binding, http://example.com/binding",
+            "http://example.com, service2, , http://example.com",
+            "http://example.com, service3, /binding, http://example.com"
+    })
+    void testUpdateURLWithHttpBindingForService1(String url, String service, String httpBinding, String expected) {
+        String naptrServiceLookup = "service1";
+        DefaultDNSLookup lookup = new DefaultDNSLookup.Builder()
+                .addRequiredNaptrServiceHttpBinding(naptrServiceLookup, httpBinding)
+                .build();
+        String result = lookup.updateURLWithHttpBinding(url, service);
+        assertEquals(expected, result);
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "http://example.com/, /path, http://example.com/path",
+            "http://example.com, path, http://example.com/path",
+            "http://example.com, /path, http://example.com/path",
+            "http://example.com/, path, http://example.com/path"
+    })
+    void testConcatenatePathSegment(String url, String httpBinding, String expected) {
+        DefaultDNSLookup lookup = new DefaultDNSLookup.Builder().build();
+        String result = lookup.concatenatePathSegment(url, httpBinding);
+        assertEquals(expected, result);
+    }
+
 
     @Test
     void lookupFetcherTest2() throws Exception {

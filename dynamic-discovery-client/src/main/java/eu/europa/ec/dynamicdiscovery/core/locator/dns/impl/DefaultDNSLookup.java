@@ -94,7 +94,7 @@ public class DefaultDNSLookup implements IDNSLookup {
      * @param service the service name to be used as key to find the HTTP Binding
      * @return the updated URL
      */
-    private String updateURLWithHttpBinding(String url, String service) {
+    protected String updateURLWithHttpBinding(String url, String service) {
         if (!httpBindingForNaptrServices.containsKey(service)) {
             LOG.debug("No HTTP Binding found for service: [{}].", service);
             return url;
@@ -114,7 +114,7 @@ public class DefaultDNSLookup implements IDNSLookup {
      * @param httpBinding the HTTP Binding
      * @return the concatenated URL
      */
-    private String concatenatePathSegment(String url, String httpBinding) {
+    protected String concatenatePathSegment(String url, String httpBinding) {
 
         if (StringUtils.endsWithIgnoreCase(url, "/")) {
             return url + StringUtils.removeStart(httpBinding, "/");
