@@ -26,6 +26,7 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.ServiceReference;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
@@ -103,7 +104,7 @@ public class OasisSMP20ServiceGroupReader extends AbstractServiceGroupReader<Ser
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceGroup.class;
+        return NamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceGroup.class, qName, clazz);
     }
 
     @Override

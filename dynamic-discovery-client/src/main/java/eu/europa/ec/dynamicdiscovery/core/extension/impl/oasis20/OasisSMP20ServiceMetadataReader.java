@@ -26,20 +26,21 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceMetadata;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.Process;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.*;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ServiceID;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
@@ -118,7 +119,7 @@ public class OasisSMP20ServiceMetadataReader extends AbstractServiceMetadataRead
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceMetadata.class;
+        return NamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceMetadata.class, qName, clazz);
     }
 
 

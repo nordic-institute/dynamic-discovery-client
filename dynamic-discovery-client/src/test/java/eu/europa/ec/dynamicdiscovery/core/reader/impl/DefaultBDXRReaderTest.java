@@ -125,9 +125,36 @@ class DefaultBDXRReaderTest {
     }
 
     @ParameterizedTest
+    @CsvSource({"oasis-smp-1.0, service_group_valid_iso6523, 2",
+            "oasis-smp-1.0, service_group_valid_iso6523_namespace, 2",
+            "oasis-smp-2.0, service_group_unsigned_valid_iso6523, 2",
+            "oasis-smp-2.0, service_group_unsigned_valid_iso6523_namespace, 2",
+    })
+    void testGetServiceGroupOk(String standard, String filename, int serviceMetadataCount) throws Exception {
+
+        DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader.Builder()
+                .signatureValidator(signatureValidatorMock)
+                .addExtension(new OasisSMP10Extension())
+                .addExtension(new OasisSMP20Extension())
+                .addExtension(new PeppolSMPExtension())
+                .build();
+
+        InputStream serviceMetadataStream = CommonUtil.getISForName(filename, standard);
+        FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
+        SMPServiceGroup serviceGroup = defaultBDXRReader.getServiceGroup(fetcherResponse);
+
+        assertNotNull(serviceGroup);
+        assertEquals(serviceMetadataCount, serviceGroup.getDocumentIdentifiers().size());
+    }
+
+    @ParameterizedTest
     @CsvSource({"oasis-smp-1.0, signed_service_metadata_signed_valid_iso6523, false, false",
+            "oasis-smp-1.0, signed_service_metadata_not-signed_valid_iso6523, false, false",
+            "oasis-smp-1.0, signed_service_metadata_not-signed_valid_iso6523_namespace, false, false",
             "oasis-smp-1.0, signed_service_metadata_redirection, true, true",
+            "oasis-smp-1.0, signed_service_metadata_redirection_namespace, true, true",
             "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523, false, false",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_namespace, false, false",
             "oasis-smp-2.0, service_metadata_unsigned_redirection, true, false",
             "peppol, signed_service_metadata_valid_iso6523_wildcard, false, false",
             "peppol, signed_service_metadata_redirection, true, true"})

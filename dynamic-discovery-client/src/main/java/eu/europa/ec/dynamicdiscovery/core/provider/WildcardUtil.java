@@ -38,9 +38,22 @@ public class WildcardUtil {
     public static final String WILDCARD_CHARACTER = "*";
 
     /**
+     * Gets the document identifier using a wildcard match(peppol-doctype-wildcard scheme) and exact match
+     */
+    public SMPDocumentIdentifier getWildcardDocumentIdentifierWithExactMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
+                                                                             SMPDocumentIdentifier documentIdentifierToCheck) {
+        return discoveredDocumentIdentifiers.stream()
+                .filter(smpDocumentIdentifier -> StringUtils.equalsIgnoreCase(documentIdentifierToCheck.getScheme(), smpDocumentIdentifier.getScheme())
+                        && StringUtils.equalsIgnoreCase(documentIdentifierToCheck.getIdentifier(), smpDocumentIdentifier.getIdentifier())
+                ).findFirst()
+                .orElse(null);
+    }
+
+    /**
      * Gets the document identifier using a wildcard match(peppol-doctype-wildcard scheme)
      */
-    public SMPDocumentIdentifier getWildcardDocumentIdentifierWithLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers, SMPDocumentIdentifier documentIdentifierToCheck) {
+    public SMPDocumentIdentifier getWildcardDocumentIdentifierWithLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
+                                                                               SMPDocumentIdentifier documentIdentifierToCheck) {
         final List<SMPDocumentIdentifier> wildcardDocumentIdentifierCandidates = discoveredDocumentIdentifiers.stream()
                 .filter(smpDocumentIdentifier -> {
                             final String discoveredSmpDocumentScheme = smpDocumentIdentifier.getScheme();
