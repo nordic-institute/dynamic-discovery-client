@@ -27,10 +27,17 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
+import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+
+import java.security.cert.X509Certificate;
 
 /**
+ * Main interface for the Dynamic Discovery Service. The implementation of the
+ * interface  is responsible for discovering the endpoints of a given participant, document and process.
+ *
  * @author Flávio W. R. Santos
  */
 public interface IDynamicDiscoveryService {
@@ -50,6 +57,10 @@ public interface IDynamicDiscoveryService {
                                         String processId, String processIdScheme, String transportProfile) throws TechnicalException;
 
 
+    void certificateExists(X509Certificate certificate, String certificateCode,
+            SMPParticipantIdentifier participantIdentifier,
+                             SMPDocumentIdentifier documentIdentifier,
+                             SMPProcessIdentifier processIdentifier, SMPTransportProfile transportProfile) throws TechnicalException;
 
     void setMetadataLocator(IMetadataLocator metadataLocator);
 
