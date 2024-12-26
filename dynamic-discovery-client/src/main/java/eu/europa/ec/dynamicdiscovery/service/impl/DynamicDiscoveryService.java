@@ -134,6 +134,44 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     /**
+     * Method validates if the certificate can be discovered for given parameters .
+     * If the certificate can not be discovered, the method throws TechnicalException.
+     *
+     * @param certificate certificate to validate
+     * @param certificateCode certificate code. If the certificate code is null/empty/blank, then any certificate is accepted.
+     * @param participantIdentifier participant identifier
+     * @param documentIdentifier document identifier
+     * @param processIdentifier process identifier
+     * @param transportProfile transport profile
+     * @throws TechnicalException if the certificate is not valid
+     */
+    @Override
+    public void certificateExists(X509Certificate certificate,
+                                  String certificateCode,
+                                  SMPParticipantIdentifier participantIdentifier,
+                                  SMPDocumentIdentifier documentIdentifier,
+                                  SMPProcessIdentifier processIdentifier,
+                                  SMPTransportProfile transportProfile) throws TechnicalException {
+        
+        final SMPEndpoint endpoint = discoverEndpoint(participantIdentifier, documentIdentifier,
+                processIdentifier.getIdentifier(), processIdentifier.getScheme(),
+                transportProfile.getIdentifier());
+        if (endpoint == null) {
+            throw new DDCCertificateNotFoundException("No endpoint found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
+        }
+        // check if the certificate is in the endpoint
+        if ( endpoint.getCertificates().entrySet().stream().noneMatch(
+                entry -> (StringUtils.isBlank(certificateCode) || StringUtils.endsWithIgnoreCase(certificateCode, entry.getKey()))
+                        && entry.getValue().equals(certificate))
+        ) {
+            throw new DDCCertificateNotFoundException("No certificate found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
+        }
+        // log success
+        LOG.info("Certificate match for participant [{}], document [{}], process [{}] and transport [{}].",
+                participantIdentifier, documentIdentifier, processIdentifier, transportProfile);
+    }
+
+    /**
      * Method returns endpoint for given serviceMetadata with process identifiers and transport profile.
      * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
      *

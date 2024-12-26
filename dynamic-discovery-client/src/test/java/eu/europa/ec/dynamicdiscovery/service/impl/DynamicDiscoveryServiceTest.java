@@ -10,15 +10,21 @@ import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
+import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -168,5 +174,59 @@ class DynamicDiscoveryServiceTest {
     private static InputStream getResourceAsStream(String standard, String resourceName) {
         return DynamicDiscoveryServiceTest.class
                 .getResourceAsStream("/response/" + standard + "/" + resourceName + ".xml");
+    }
+
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "oasis-smp-1.0, signed_service_metadata_signed_valid_iso6523, " +
+                    "eDelivery_SMP_TEST_4.cer,," +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl," +
+                    " bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://test.erechnung.gv.at/as4/msh/",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523, " +
+                    "eDelivery_SMP_TEST_2.cer,," +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "peppol, signed_service_metadata_valid_iso6523_wildcard, " +
+                    "eDelivery_SMP_TEST_3.cer,," +
+                    "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0, cenbii-procid-ubl, " +
+                    "peppol-transport-as4-v2_0, " +
+                    "https://localhost:8080/as4"})
+    void testCertificateExists(String standard, String resourceName,
+                               String certificateName, String certificateCode,
+                               String processIdentifierValue, String processIdentifierScheme, String transportProfileID, String result) throws TechnicalException, URISyntaxException, IOException, CertificateException {
+        // load certificate from string
+        X509Certificate certificate =  readCertificate(certificateName);
+
+        URI smpURI = new URI("http://example.local:1234/");
+        FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
+        SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
+        SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
+        SMPProcessIdentifier processIdentifierId = new SMPProcessIdentifier(processIdentifierValue, processIdentifierScheme);
+        SMPTransportProfile transportProfile = new SMPTransportProfile(transportProfileID);
+        InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
+        assertNotNull(serviceMetadataStream);
+        // given
+        Mockito.doReturn(smpURI).when(metadataLocator).lookup(Mockito.any());
+        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(Mockito.any());
+        Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
+
+        // when
+        testInstance.certificateExists(certificate, null,
+                resourceId, subresourceId,
+                processIdentifierId, transportProfile);
+    }
+
+
+
+    public static X509Certificate readCertificate(String certName) throws CertificateException, IOException {
+        String certificateResource = "/certificate/" + certName;
+        InputStream certificateStream = DynamicDiscoveryServiceTest.class.getResource
+                (certificateResource).openStream();
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        return (X509Certificate) factory.generateCertificate(certificateStream);
     }
 }

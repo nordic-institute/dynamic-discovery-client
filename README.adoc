@@ -439,6 +439,30 @@ SMPServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIde
 SMPEndpoint endpoint = serviceMetadata.getEndpoints().get(0);
 ----
 
+
+=== Certificate Pinning/Whitelisting: A Security Technique for Validating Digital Certificates
+
+A SMP Certificate Pinning/whitelisting is a security mechanism that integrates into dynamic discovery infrastructure,
+validating expected digital certificates against predetermined service parameters (e.g., participant identifiers,
+document identifiers). This service enables dynamic receiver to whitelist/pinned certificates, ensuring that only registered
+certificates can participate in secure message exchange.
+
+[source,java]
+----
+
+   X509Certificate certificateToValidate = ... ;
+   String expecteDertificateCode = null;
+   try {
+        smpClient.certificateExists(certificateToValidate, expecteDertificateCode,
+                resourceIdentifier, subresourceIdentifier,
+                processIdentifierIdentifier, transportProfile);
+    } catch (DDCCertificateNotFoundException e) {
+        LOG.error("Certificate in not trusted for given parameters!", e);
+    } catch (TechnicalException e) {
+        LOG.error("The certificate can not be validated!", e);
+    }
+----
+
 == Customized implementation example
 
 Please replace classes starting with **"Customized"** by implementations extended from the aforementioned interfaces.It is not mandatory to have implementations for all the components (Locator, Reader, DNSLookup, Provider, Fetcher)
