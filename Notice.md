@@ -13,7 +13,7 @@ See the Licence for the specific language governing permissions and limitations 
 This product includes dynamically linked software developed by third parties which is provided under their respective licences:
 
 
-***commons-cli:commons-cli:1.6.0*** 
+***commons-cli:commons-cli:1.9.0*** 
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
@@ -28,13 +28,27 @@ This product includes dynamically linked software developed by third parties whi
   - Copyright (c) 2024
 
 ***jakarta.xml.bind:jakarta.xml.bind-api:2.3.3*** 
-- License: Eclipse Distribution License - v 1.0
+- License: BSD-3-Clause
 - Url: http://www.eclipse.org/org/documents/edl-v10.php
-- File: license/third-party-licenses/Eclipse Distribution License - v 1.0.txt
+- File: license/third-party-licenses/BSD-3-Clause.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.apache.commons:commons-lang3:3.14.0*** 
+***jakarta.xml.bind:jakarta.xml.bind-api:4.0.2*** 
+- License: BSD-3-Clause
+- Url: http://www.eclipse.org/org/documents/edl-v10.php
+- File: license/third-party-licenses/BSD-3-Clause.txt
+- Copyright:
+  - Copyright (c) 2024
+
+***net.bytebuddy:byte-buddy:1.15.11*** 
+- License: Apache-2.0
+- Url: https://www.apache.org/licenses/LICENSE-2.0.txt
+- File: license/third-party-licenses/Apache-2.0.txt
+- Copyright:
+  - Copyright (c) 2024
+
+***org.apache.commons:commons-lang3:3.17.0*** 
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
@@ -42,37 +56,37 @@ This product includes dynamically linked software developed by third parties whi
   - Copyright (c) 2024
 
 ***org.apache.httpcomponents.client5:httpclient5:5.3.1*** 
-- License: Apache License, Version 2.0
+- License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
-- File: license/third-party-licenses/Apache License, Version 2.0.txt
+- File: license/third-party-licenses/Apache-2.0.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.bouncycastle:bcpkix-jdk18on:1.78.1*** 
+***org.bouncycastle:bcpkix-jdk18on:1.79*** 
 - License: Bouncy Castle Licence
 - Url: https://www.bouncycastle.org/licence.html
 - File: license/third-party-licenses/Bouncy Castle Licence.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.glassfish.jaxb:jaxb-runtime:2.3.9*** 
-- License: Eclipse Distribution License - v 1.0
+***org.glassfish.jaxb:jaxb-runtime:4.0.5*** 
+- License: BSD-3-Clause
 - Url: http://www.eclipse.org/org/documents/edl-v10.php
-- File: license/third-party-licenses/Eclipse Distribution License - v 1.0.txt
+- File: license/third-party-licenses/BSD-3-Clause.txt
 - Copyright:
   - Copyright (c) 2024
 
 ***org.slf4j:slf4j-api:2.0.16*** 
-- License: MIT License
+- License: MIT
 - Url: http://www.opensource.org/licenses/mit-license.php
-- File: license/third-party-licenses/MIT License.txt
+- File: license/third-party-licenses/MIT.txt
 - Copyright:
   - Copyright (c) 2024
 
 ***org.slf4j:slf4j-simple:2.0.16*** 
-- License: MIT License
+- License: MIT
 - Url: http://www.opensource.org/licenses/mit-license.php
-- File: license/third-party-licenses/MIT License.txt
+- File: license/third-party-licenses/MIT.txt
 - Copyright:
   - Copyright (c) 2024
 
