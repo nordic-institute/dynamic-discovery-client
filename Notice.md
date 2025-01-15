@@ -34,6 +34,13 @@ This product includes dynamically linked software developed by third parties whi
 - Copyright:
   - Copyright (c) 2024
 
+***net.bytebuddy:byte-buddy:1.15.11*** 
+- License: Apache License, Version 2.0
+- Url: https://www.apache.org/licenses/LICENSE-2.0.txt
+- File: license/third-party-licenses/Apache License, Version 2.0.txt
+- Copyright:
+  - Copyright (c) 2024
+
 ***org.apache.commons:commons-lang3:3.14.0*** 
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
