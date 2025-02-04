@@ -196,7 +196,9 @@ public class DefaultURLFetcherIntegrationTest {
                 -> testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml")));
 
         assertNotNull(result);
-        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("SSLHandshakeException: No appropriate protocol"));
+        MatcherAssert.assertThat(result.getMessage(),  CoreMatchers.anyOf(CoreMatchers.containsString("SSLHandshakeException: No appropriate protocol"),
+                CoreMatchers.containsString("SSLHandshakeException: Received fatal alert: protocol_version"))
+        );
 
     }
 
