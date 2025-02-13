@@ -52,7 +52,19 @@ public class EBCorePartyIdFormatterType extends AbstractFormatterType {
     public static final String EBCORE_IDENTIFIER_UNREGISTERED_SCHEME = "unregistered";
     private static final String EBCORE_SEPARATOR = ":";
     private static final String OASIS_SMP_SEPARATOR = "::";
+    private final String separator;
 
+    public EBCorePartyIdFormatterType() {
+        this(false);
+    }
+
+    public EBCorePartyIdFormatterType(boolean useOasisSmpSeparator) {
+        if (useOasisSmpSeparator) {
+            separator = OASIS_SMP_SEPARATOR;
+        } else {
+            separator = EBCORE_SEPARATOR;
+        }
+    }
 
     @Override
     public boolean isSchemeValid(final String scheme) {
@@ -74,7 +86,7 @@ public class EBCorePartyIdFormatterType extends AbstractFormatterType {
 
     @Override
     public String format(String scheme, String identifier, boolean noDelimiterOnEmptyScheme) {
-        return (isBlank(scheme) && noDelimiterOnEmptyScheme ? "" : trimToEmpty(scheme) + EBCORE_SEPARATOR) + trimToEmpty(identifier);
+        return (isBlank(scheme) && noDelimiterOnEmptyScheme ? "" : trimToEmpty(scheme) + separator) + trimToEmpty(identifier);
     }
 
     @Override

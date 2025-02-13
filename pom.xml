@@ -3,12 +3,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>eu.europa.ec.dynamic-discovery</groupId>
+    <groupId>org.niis.dynamic-discovery</groupId>
     <artifactId>dynamic-discovery-parent</artifactId>
     <version>2.3</version>
     <packaging>pom</packaging>
 
-    <name>dynamic-discovery-parent</name>
+    <name>Harmony dynamic-discovery-parent</name>
     <description>Library for discovering data dynamically based on e-SENS BDXL specification</description>
 
     <licenses>
@@ -24,20 +24,14 @@
         <module>dynamic-discovery-cli</module>
     </modules>
 
-    <scm>
-        <developerConnection>scm:git:https://ec.europa.eu/digital-building-blocks/code/scm/edelivery/dynamic-discovery-client.git
-        </developerConnection>
-        <tag>2.3</tag>
-    </scm>
-
     <distributionManagement>
         <repository>
-            <id>cefdigital-releases</id>
-            <url>https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery/</url>
+            <id>harmony-release</id>
+            <url>https://artifactory.niis.org/artifactory/harmony-release-maven/</url>
         </repository>
         <snapshotRepository>
-            <id>cefdigital-snapshots</id>
-            <url>https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/eDelivery-snapshots/</url>
+            <id>harmony-snapshot</id>
+            <url>https://artifactory.niis.org/artifactory/harmony-snapshot-maven/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -55,7 +49,7 @@
 
         <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
-        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar</sonar.host.url>
+        <sonar.host.url>http://localhost:9000/sonar/</sonar.host.url>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.jacoco.reportPath>${project.basedir}/target/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
         <sonar.scm.disabled>true</sonar.scm.disabled>
@@ -96,6 +90,7 @@
         <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
         <plugin.maven-source-plugin.version>3.3.0</plugin.maven-source-plugin.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
+        <owasp.nvd-api-key></owasp.nvd-api-key>
     </properties>
 
     <profiles>
@@ -108,7 +103,7 @@
                         <artifactId>dependency-check-maven</artifactId>
                         <version>${plugin.dependency-check-maven.version}</version>
                         <configuration>
-                            <nvdApiServerId>edelivery-owasp</nvdApiServerId>
+                            <nvdApiKey>${owasp.nvd-api-key}</nvdApiKey>
                             <!-- Disable .Net Assembly Analyzer -->
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                         </configuration>
@@ -218,54 +213,6 @@
                                 Bouncy Castle Licence|
                             </includedLicenses>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>update-license-headers</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>update-license</id>
-                                <goals>
-                                    <goal>update-file-header</goal>
-                                </goals>
-                                <phase>process-sources</phase>
-                                <configuration>
-                                    <licenseResolver>file://${project.root.baseUri}/license</licenseResolver>
-                                    <licenseName>lgpl-2.1</licenseName>
-                                    <inceptionYear>2016</inceptionYear>
-                                    <organizationName>European Commission | eDelivery | Dynamic Discovery Client</organizationName>
-                                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-                                    <processStartTag>#%L</processStartTag>
-                                    <processEndTag>#L%</processEndTag>
-                                    <sectionDelimiter>%%</sectionDelimiter>
-                                    <extraExtensions>
-                                        <xjb>xml</xjb>
-                                    </extraExtensions>
-                                    <includes>
-                                        <include>**/*.java</include>
-                                        <include>**/*.xml</include>
-                                        <include>**/*.xsd</include>
-                                        <include>**/*.xjb</include>
-                                        <include>**/*.properties</include>
-                                        <include>**/*.txt</include>
-                                    </includes>
-                                    <excludes>
-                                        <exclude>**/src/main/resources/xsd/**</exclude>
-                                    </excludes>
-                                    <roots>
-                                        <root>src/main</root>
-                                        <root>src/test</root>
-                                    </roots>
-                                </configuration>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
