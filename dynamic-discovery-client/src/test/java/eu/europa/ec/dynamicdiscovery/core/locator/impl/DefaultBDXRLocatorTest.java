@@ -40,9 +40,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.xbill.DNS.NAPTRRecord;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.TextParseException;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -335,7 +341,7 @@ class DefaultBDXRLocatorTest {
     }
 
     @Test
-    void testMandatoryScheme() throws TechnicalException {
+    void testMandatoryScheme() {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
                 .schemeMandatory(true)
@@ -433,7 +439,6 @@ class DefaultBDXRLocatorTest {
 
     @Test
     void testConfigurationAddList() {
-        IDNSLookup mockLookup = Mockito.mock(IDNSLookup.class);
         DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomains(Collections.singletonList("test.top.local"))
                 .addDnsLookupTypes(Collections.singletonList(DNSLookupType.NAPTR))
@@ -443,5 +448,110 @@ class DefaultBDXRLocatorTest {
         assertEquals(1, testInstance.getDnsLookupTypeList().size());
         assertEquals("test.top.local", testInstance.getTopDnsDomains().get(0));
         assertEquals(DNSLookupType.NAPTR, testInstance.getDnsLookupTypeList().get(0));
+    }
+
+    @Test
+    void testAddRequiredNaptrServiceHttpBindingWithSMP20Service() throws TextParseException, TechnicalException {
+
+        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier("test-id", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        String topDomain = "test.acc.edelivery.tech.ec.europa.eu";
+        Name dnsDomain = Name.fromString("NX2X2AQZGOQ6F7V5CDQZO4AH4UXBFG6POIF6TGE6RUGZM4Z3TCUQ."+topDomain+".");
+
+
+        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder()
+                .addRequiredNaptrService("oasis-bdxr-smp-2")
+                .addRequiredNaptrService("meta:smp")
+                .addRequiredNaptrServiceHttpBinding("oasis-bdxr-smp-2","bdxr-smp-2")
+                .addRequiredNaptrServiceHttpBinding("meta:smp","bdxr-smp-2")
+                .build());
+
+        DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain(topDomain)
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(idnsLookup)
+                .build();
+
+        List<Record> records = new ArrayList<>();
+
+        records.add(new NAPTRRecord(
+                dnsDomain,
+                0, 0L, 10, 10, "U", "oasis-bdxr-smp-2","!^.*$!http://smp-mock-1.ehealth.eu:8888!",dnsDomain));
+        Mockito.doReturn(records).when(idnsLookup).getAllNaptrRecords(
+                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+
+        URI uriResult = testInstance.lookup(identifier);
+
+        assertEquals("http://smp-mock-1.ehealth.eu:8888/bdxr-smp-2", uriResult.toString());
+    }
+
+    @Test
+    void testAddRequiredNaptrServiceHttpBindingWithSMP10Service() throws TextParseException, TechnicalException {
+
+        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier("test-id", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        String topDomain = "test.acc.edelivery.tech.ec.europa.eu";
+        Name dnsDomain = Name.fromString("NX2X2AQZGOQ6F7V5CDQZO4AH4UXBFG6POIF6TGE6RUGZM4Z3TCUQ."+topDomain+".");
+
+
+        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder()
+                .addRequiredNaptrService("oasis-bdxr-smp-2")
+                .addRequiredNaptrService("meta:smp")
+                .addRequiredNaptrServiceHttpBinding("oasis-bdxr-smp-2","bdxr-smp-2")
+                .addRequiredNaptrServiceHttpBinding("meta:smp","bdxr-smp-2")
+                .build());
+
+        DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain(topDomain)
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(idnsLookup)
+                .build();
+
+        List<Record> records = new ArrayList<>();
+
+        records.add(new NAPTRRecord(
+                dnsDomain,
+                0, 0L, 10, 10, "U", "Meta:SMP","!^.*$!http://smp-mock-1.ehealth.eu:8888!",dnsDomain));
+        Mockito.doReturn(records).when(idnsLookup).getAllNaptrRecords(
+                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+
+        URI uriResult = testInstance.lookup(identifier);
+
+        assertEquals("http://smp-mock-1.ehealth.eu:8888/bdxr-smp-2", uriResult.toString());
+    }
+
+    @Test
+    void testAddRequiredNaptrServiceHttpBindingWithSMP20Priority() throws TextParseException, TechnicalException {
+
+        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier("test-id", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        String topDomain = "test.acc.edelivery.tech.ec.europa.eu";
+        Name dnsDomain = Name.fromString("NX2X2AQZGOQ6F7V5CDQZO4AH4UXBFG6POIF6TGE6RUGZM4Z3TCUQ."+topDomain+".");
+
+
+        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder()
+                .addRequiredNaptrService("oasis-bdxr-smp-2")
+                .addRequiredNaptrService("meta:smp")
+                .addRequiredNaptrServiceHttpBinding("oasis-bdxr-smp-2","bdxr-smp-2")
+                .addRequiredNaptrServiceHttpBinding("meta:smp","bdxr-smp-2")
+                .build());
+
+        DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain(topDomain)
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(idnsLookup)
+                .build();
+
+        List<Record> records = new ArrayList<>();
+
+        records.add(new NAPTRRecord(
+                dnsDomain,
+                0, 0L, 10, 10, "U", "Meta:SMP","!^.*$!http://smp-1.edelivery.eu:8888!",dnsDomain));
+        records.add(new NAPTRRecord(
+                dnsDomain,
+                0, 0L, 10, 10, "U", "oasis-bdxr-smp-2","!^.*$!http://smp-2.edelivery.eu:8888!",dnsDomain));
+        Mockito.doReturn(records).when(idnsLookup).getAllNaptrRecords(
+                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+
+        URI uriResult = testInstance.lookup(identifier);
+
+        assertEquals("http://smp-2.edelivery.eu:8888/bdxr-smp-2", uriResult.toString());
     }
 }
