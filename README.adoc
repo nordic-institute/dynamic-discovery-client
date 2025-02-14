@@ -280,6 +280,26 @@ DynamicDiscovery smpClient = builder
         .build();
 ----
 
+==== Example: DNS Lookup configuration for eDelivery SMP 2.0 (DefaultBDXRLocator)
+
+The following example shows how to configure the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with DNSLookupType NAPTR using required services "oasis-bdxr-smp-2" and as a fallback "meta:smp".
+According to the eDelivery BDXL SMP 2.0 specification, the bdxr-smp-2 url context path must be appended to the resolved URL. For that addRequiredNaptrServiceHttpBinding method is used which defines the mapping between the NATPR service and the context sub-path which must be appended
+to discovered publisher URL.
+
+[source,java]
+----
+ DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("test.acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(new DefaultDNSLookup.Builder()
+                                .addRequiredNaptrService("oasis-bdxr-smp-2")
+                                .addRequiredNaptrService("meta:smp")
+                                .addRequiredNaptrServiceHttpBinding("oasis-bdxr-smp-2","bdxr-smp-2")
+                                .addRequiredNaptrServiceHttpBinding("meta:smp","bdxr-smp-2")
+                                .build()
+        ).build();
+----
+
 ===== Example: Static Metadata Locator with single SMP url
 Example of how to configure with StaticMapMetadataLocator. The DDC will always fetch the party identifier's service metadata data from the give URI: " http://localhost:8090/cipa-smp-full-webapp/"
 [source,java]
