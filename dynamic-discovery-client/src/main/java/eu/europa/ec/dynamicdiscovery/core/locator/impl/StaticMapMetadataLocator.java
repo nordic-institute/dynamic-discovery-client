@@ -19,7 +19,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
@@ -42,7 +42,7 @@ import java.util.Map;
  * @author Joze RIHTARSIC
  * @since 1.14
  */
-public class StaticMapMetadataLocator implements IMetadataLocator {
+public class StaticMapMetadataLocator implements IPublisherLocator {
     private static final Logger LOG = LoggerFactory.getLogger(StaticMapMetadataLocator.class);
     final URI defaultURI;
     Map<SMPParticipantIdentifier, URI> mapExceptionsUri;

@@ -17,22 +17,30 @@
  * limitations under the License.
  * #L%
  */
-package eu.europa.ec.dynamicdiscovery.core.locator;
+package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 
 import java.net.URI;
 
 /**
+ * This interface is responsible for fetching the document from the URI address.
+ * The implementation takes care of URI scheme specific handling (e.g. HTTP, HTTPS, etc.),
+ * proxy settings, authentication, and other network related settings.
+ *
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
+ * @since 1.0
  */
-public interface IMetadataLocator {
-    URI lookup(String participantId, String participantScheme) throws TechnicalException;
+public interface IDocumentFetcher {
 
-    URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException;
-
-    IDNSLookup getDnsLookup();
+    /**
+     * Fetches the metadata from the SMP server. The response is returned as a {@link FetcherResponse}.
+     * which contains input stream of the response.
+     *
+     * @param documentURI the URI of the document to fetch.
+     * @return the response {@link FetcherResponse} from the SMP server
+     * @throws TechnicalException if any error occurs during the fetch
+     */
+    FetcherResponse fetch(URI documentURI) throws TechnicalException;
 }

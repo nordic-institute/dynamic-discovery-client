@@ -1,72 +1,33 @@
-/*
- * #%L
- * dynamic-discovery-cli
- * %%
- * Copyright (C) 2016 - 2023 European Commission | eDelivery | Dynamic Discovery Client
- * %%
- * Licensed under the LGPL, Version 2.1 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 package eu.europa.ec.dynamicdiscovery.service;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
-import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 
-import java.security.cert.X509Certificate;
 
 /**
  * Main interface for the Dynamic Discovery Service. The implementation of the
- * interface  is responsible for discovering the endpoints of a given participant, document and process.
+ * interface  is responsible for discovering the resource and subresource based on identifiers.
  *
- * @author Flávio W. R. Santos
+ *
+ * @author Flávio W. R. SANTOS
+ * @author Joze RIHTARSIC
+ * @since 1.0
  */
-public interface IDynamicDiscoveryService {
+public interface IDynamicDiscoveryService<R, S> {
+    R getResource(SMPParticipantIdentifier resourceIdentifier) throws TechnicalException;
 
-    void setRedirectionEnabled(boolean redirectionEnabled);
-    void setDefaultEndpointForEmptyProcess(boolean defaultEndpointForEmptyProcess);
+    S getSubresource(SMPParticipantIdentifier resourceIdentifier, SMPDocumentIdentifier subresourceIdentifier) throws TechnicalException;
 
-    SMPServiceGroup getServiceGroup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException;
+    IPublisherLocator getPublisherLocator();
 
-    SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException;
+    IDocumentRequestProvider getDocumentRequestProvider();
 
-    SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier,
-                                 SMPDocumentIdentifier documentIdentifier,
-                                 String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+    IDocumentFetcher getDocumentFetcher();
 
-    SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
-                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException;
-
-
-    void certificateExists(X509Certificate certificate, String certificateCode,
-            SMPParticipantIdentifier participantIdentifier,
-                             SMPDocumentIdentifier documentIdentifier,
-                             SMPProcessIdentifier processIdentifier, SMPTransportProfile transportProfile) throws TechnicalException;
-
-    IMetadataLocator getMetadataLocator();
-
-    IMetadataProvider getMetadataProvider();
-
-    IMetadataFetcher getMetadataFetcher();
-
-    IMetadataReader getMetadataReader();
+    ISMPDocumentReader getDocumentReader();
 }

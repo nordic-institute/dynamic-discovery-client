@@ -20,7 +20,7 @@
 package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.*;
@@ -71,51 +71,15 @@ import static org.apache.commons.lang3.StringUtils.startsWithAny;
  * @author Sebastian-Ion TINCU
  * @since 1.13
  */
-public class DefaultURLFetcher implements IMetadataFetcher {
+public class DefaultURLFetcher implements IDocumentFetcher {
     static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
 
     private final IProxyConfiguration proxyConfiguration;
     private final ICredentialProvider credentialProvider;
-
+    // HTTP client components for URL connection management
     private final HttpRoutePlanner routePlanner;
-
     private final HttpClientConnectionManager connectionManager;
 
-    /**
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher() {
-        this(null, null, null, null);
-    }
-
-    /**
-     * @param proxyConfiguration
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(IProxyConfiguration proxyConfiguration) {
-
-        this(null, null, null, proxyConfiguration);
-    }
-
-    /**
-     * @param routePlanner
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(HttpRoutePlanner routePlanner) {
-        this(null, routePlanner, null, null);
-    }
-
-    /**
-     * @param proxyConfiguration
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(HttpRoutePlanner routePlanner, IProxyConfiguration proxyConfiguration) {
-        this(null, routePlanner, null, proxyConfiguration);
-    }
 
     private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
                               HttpRoutePlanner routePlanner,
@@ -134,8 +98,8 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     }
 
     @Override
-    public FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException {
-        LOG.debug("Fetch data for participantURI [{}]", participantUnderSmpURI);
+    public FetcherResponse fetch(URI documentURI) throws TechnicalException {
+        LOG.debug("Fetch data for participantURI [{}]", documentURI);
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .setConnectionManager(connectionManager)
@@ -143,9 +107,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 
         // set authentication for target uri
-        BasicCredentialsProvider credentialsProvider = buildAuthenticationForTarget(participantUnderSmpURI, null);
+        BasicCredentialsProvider credentialsProvider = buildAuthenticationForTarget(documentURI, null);
         // set proxy
-        String participantUnderSmpURIHost = participantUnderSmpURI.getHost();
+        String participantUnderSmpURIHost = documentURI.getHost();
         if (proxyConfiguration != null && !proxyConfiguration.isNonProxyHost(participantUnderSmpURIHost)) {
             LOG.debug("Fetch data using proxy");
             HttpHost proxyHost = proxyConfiguration.getProxyHost(participantUnderSmpURIHost);
@@ -161,13 +125,13 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
 
-        HttpGet httpGet = new HttpGet(participantUnderSmpURI);
+        HttpGet httpGet = new HttpGet(documentURI);
         httpGet.setConfig(requestConfigBuilder.build());
 
         try {
             return connect(httpClientBuilder.build(), httpGet);
         } catch (TechnicalException e) {
-            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            e.setSmpExceptionCode(DDCExceptionCode.SERVICE_GROUP);
             throw e;
         }
     }
@@ -240,7 +204,11 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     }
 
     /**
-     * Convert input stream to in-memory fetcher response.
+     * Convert input stream to in-memory bytearray response. This is used to avoid the need to keep the connection open
+     * while processing the data. The input stream is closed after the data is read.
+     * <p>
+     * The SMP documents are expected to be small, so loading the entire response in memory is acceptable, but
+     * future versions may consider using a different approach to avoid loading the entire response in memory.
      *
      * @param inputStream input stream from the document source
      * @return in-memory fetcher response

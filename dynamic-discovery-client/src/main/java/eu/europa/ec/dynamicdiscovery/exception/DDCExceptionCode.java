@@ -19,7 +19,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.exception;
 
-public enum SMPExceptionCode {
+public enum DDCExceptionCode {
     DNS_QUERY_ERROR("DNS query error"),
     INVALID_DNS_TYPE("DNS Type is invalid"),
     SERVICE_GROUP("Service group error"),
@@ -29,7 +29,7 @@ public enum SMPExceptionCode {
 
     final String message;
 
-    SMPExceptionCode(String message) {
+    DDCExceptionCode(String message) {
         this.message = message;
     }
 

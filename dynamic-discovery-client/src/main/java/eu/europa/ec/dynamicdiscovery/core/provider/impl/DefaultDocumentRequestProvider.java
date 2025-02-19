@@ -20,12 +20,12 @@
 package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
+import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.WildcardUtil;
-import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
 import eu.europa.ec.dynamicdiscovery.exception.DDCInvalidConfigurationException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
@@ -40,40 +40,45 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Default implementation of the {@link IMetadataProvider} interface. This implementation is responsible for resolving
- * the SMP query URIs for a given identifiers.
+ * Default implementation of the {@link IDocumentRequestProvider} interface. This implementation is responsible
+ * for building document request e.g:  SMP HTTP get query (URI) for a given publisher lookup result.
+ * The default request builder is compliant with the eDelivery SMP 1.x/2.x profile.
+ * It additionally supports wildcard subresource (e.g. ServiceMetadata) schemes
+ * as defined in PEPPOL technical specification.
  *
- * @author Flávio W. R. Santos
- * @author Erlend Klakegg Bergheim
+ * @author Flávio W. R. SANTOS
+ * @author Erlend KLAKEGG BERGHEIM
+ * @author Cosmin BACIU
+ * @author Joze RIHTARSIC
  * @since 1.0
  */
-public class DefaultProvider implements IMetadataProvider {
+public class DefaultDocumentRequestProvider implements IDocumentRequestProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultDocumentRequestProvider.class);
 
-    ParticipantIdentifierFormatter participantIdentifierFormatter = new ParticipantIdentifierFormatter();
-    DocumentIdentifierFormatter documentIdentifierFormatter = new DocumentIdentifierFormatter();
+    ParticipantIdentifierFormatter resourceIdentifierFormatter = new ParticipantIdentifierFormatter();
+    DocumentIdentifierFormatter subresourceIdentifierFormatter = new DocumentIdentifierFormatter();
 
     WildcardUtil wildcardUtil = new WildcardUtil();
 
-    protected IMetadataFetcher metadataFetcher;
-    protected IMetadataReader metadataReader;
+    protected IDocumentFetcher documentFetcher;
+    protected ISMPDocumentReader documentReader;
     protected List<String> wildcardSchemes;
 
-    protected DefaultProvider(Builder builder) {
-        this.metadataFetcher = builder.metadataFetcher;
-        this.metadataReader = builder.metadataReader;
+    protected DefaultDocumentRequestProvider(Builder builder) {
+        this.documentFetcher = builder.documentFetcher;
+        this.documentReader = builder.documentReader;
         this.wildcardSchemes = builder.wildcardSchemes;
     }
 
     @Override
-    public URI resolveForParticipantIdentifier(URI smpURI, SMPParticipantIdentifier participantIdentifier) {
-        String participantPathParameter = participantIdentifierFormatter.urlEncodedFormat(participantIdentifier);
+    public URI createRequestForResource(URI smpURI, SMPParticipantIdentifier participantIdentifier) {
+        String participantPathParameter = resourceIdentifierFormatter.urlEncodedFormat(participantIdentifier);
         return URI.create(smpURI.toString() + String.format("/%s", participantPathParameter)).normalize();
     }
 
     @Override
-    public URI resolveServiceMetadata(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
+    public URI createRequestForSubresource(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
         if (wildcardUtil.isWildcardScheme(wildcardSchemes, documentIdentifier.getScheme())) {
             //get with wildcard match
             return getDocumentIdentifierWithWildcardMatch(smpURI, participantIdentifier, documentIdentifier);
@@ -87,8 +92,8 @@ public class DefaultProvider implements IMetadataProvider {
     protected URI getDocumentIdentifierWithExactMatch(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) {
         LOG.debug("Getting document identifier URI with exact match");
 
-        String participantPathParameter = participantIdentifierFormatter.urlEncodedFormat(participantIdentifier);
-        String documentPathParameter = documentIdentifierFormatter.urlEncodedFormat(documentIdentifier);
+        String participantPathParameter = resourceIdentifierFormatter.urlEncodedFormat(participantIdentifier);
+        String documentPathParameter = subresourceIdentifierFormatter.urlEncodedFormat(documentIdentifier);
         final URI uriNormalized = URI.create(smpURI.toString() + String.format("/%s/services/%s", participantPathParameter, documentPathParameter)).normalize();
 
         LOG.debug("Retrieved document identifier URI with exact match [{}]", uriNormalized);
@@ -98,10 +103,10 @@ public class DefaultProvider implements IMetadataProvider {
     protected URI getDocumentIdentifierWithWildcardMatch(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
         LOG.debug("Getting document identifier URI with wildcard match");
 
-        URI participantUnderSmpURI = resolveForParticipantIdentifier(smpURI, participantIdentifier);
+        URI participantUnderSmpURI = createRequestForResource(smpURI, participantIdentifier);
         LOG.info("Get participant data / documents for URI: [{}].", participantUnderSmpURI);
-        final FetcherResponse fetcherResponse = metadataFetcher.fetch(participantUnderSmpURI);
-        final SMPServiceGroup serviceGroup = metadataReader.getServiceGroup(fetcherResponse);
+        final FetcherResponse fetcherResponse = documentFetcher.fetch(participantUnderSmpURI);
+        final SMPServiceGroup serviceGroup = documentReader.getResource(fetcherResponse);
 
         //the document identifiers supported by the participant
         final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = serviceGroup.getDocumentIdentifiers();
@@ -111,7 +116,7 @@ public class DefaultProvider implements IMetadataProvider {
             LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", discoveredWildcardDocumentIdentifier, participantIdentifier, documentIdentifier);
             return getDocumentIdentifierWithExactMatch(smpURI, participantIdentifier, discoveredWildcardDocumentIdentifier);
         }
-        throw new SMPServiceMetadataException(SMPExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifier + "]");
+        throw new SMPServiceMetadataException(DDCExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifier + "]");
     }
 
     protected SMPDocumentIdentifier getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
@@ -132,23 +137,23 @@ public class DefaultProvider implements IMetadataProvider {
     }
 
     public String format(SMPParticipantIdentifier identifier) {
-        return participantIdentifierFormatter.format(identifier);
+        return resourceIdentifierFormatter.format(identifier);
     }
 
     public String urlEncodedFormat(SMPParticipantIdentifier identifier) {
-        return participantIdentifierFormatter.urlEncodedFormat(identifier);
+        return resourceIdentifierFormatter.urlEncodedFormat(identifier);
     }
 
     public String format(SMPDocumentIdentifier identifier) {
-        return documentIdentifierFormatter.format(identifier);
+        return subresourceIdentifierFormatter.format(identifier);
     }
 
     public String urlEncodedFormat(SMPDocumentIdentifier identifier) {
-        return documentIdentifierFormatter.urlEncodedFormat(identifier);
+        return subresourceIdentifierFormatter.urlEncodedFormat(identifier);
     }
 
-    public IMetadataFetcher getMetadataFetcher() {
-        return metadataFetcher;
+    public IDocumentFetcher getDocumentFetcher() {
+        return documentFetcher;
     }
 
     public List<String> getWildcardSchemes() {
@@ -159,42 +164,42 @@ public class DefaultProvider implements IMetadataProvider {
         this.wildcardSchemes = wildcardSchemes;
     }
 
-    public IMetadataReader getMetadataReader() {
-        return metadataReader;
+    public ISMPDocumentReader getDocumentReader() {
+        return documentReader;
     }
 
 
     public static class Builder {
 
-        protected IMetadataFetcher metadataFetcher;
-        protected IMetadataReader metadataReader;
+        protected IDocumentFetcher documentFetcher;
+        protected ISMPDocumentReader documentReader;
         protected List<String> wildcardSchemes;
 
-        public DefaultProvider.Builder metadataFetcher(IMetadataFetcher metadataFetcher) {
-            this.metadataFetcher = metadataFetcher;
+        public DefaultDocumentRequestProvider.Builder documentFetcher(IDocumentFetcher metadataFetcher) {
+            this.documentFetcher = metadataFetcher;
             return this;
         }
 
-        public DefaultProvider.Builder metadataReader(IMetadataReader metadataReader) {
-            this.metadataReader = metadataReader;
+        public DefaultDocumentRequestProvider.Builder documentReader(ISMPDocumentReader metadataReader) {
+            this.documentReader = metadataReader;
             return this;
         }
 
-        public DefaultProvider.Builder wildcardSchemes(List<String> wildcardSchemes) {
+        public DefaultDocumentRequestProvider.Builder wildcardSchemes(List<String> wildcardSchemes) {
             this.wildcardSchemes = wildcardSchemes;
             return this;
         }
 
-        public DefaultProvider build() {
+        public DefaultDocumentRequestProvider build() {
             if (this.wildcardSchemes != null && !this.wildcardSchemes.isEmpty()) {
-                if (this.metadataReader == null) {
+                if (this.documentReader == null) {
                     throw new DDCInvalidConfigurationException("IMetadataReader is mandatory with use of the wildcardSchemes!");
                 }
-                if (this.metadataFetcher == null) {
+                if (this.documentFetcher == null) {
                     throw new DDCInvalidConfigurationException("IMetadataFetcher is mandatory with use of the wildcardSchemes");
                 }
             }
-            return new DefaultProvider(this);
+            return new DefaultDocumentRequestProvider(this);
         }
 
     }

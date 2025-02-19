@@ -25,10 +25,10 @@ package eu.europa.ec.dynamicdiscovery.exception;
 public class DNSLookupException extends TechnicalException {
 
     public DNSLookupException(String message) {
-        this(SMPExceptionCode.DNS_QUERY_ERROR, message);
+        this(DDCExceptionCode.DNS_QUERY_ERROR, message);
     }
 
-    public DNSLookupException(SMPExceptionCode smpExceptionCode, String message) {
+    public DNSLookupException(DDCExceptionCode smpExceptionCode, String message) {
         super(smpExceptionCode, message);
     }
 
@@ -36,7 +36,7 @@ public class DNSLookupException extends TechnicalException {
         super(message, cause);
     }
 
-    public DNSLookupException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+    public DNSLookupException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
         super(smpExceptionCode, message, cause);
     }
 }

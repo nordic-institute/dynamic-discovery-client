@@ -31,9 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.PEPPOL_DOCTYPE_WILDCARD;
@@ -44,10 +42,10 @@ import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.WILDCARD_SCHE
  * @author Flávio W. R. Santos
  * @since 1.0
  */
-public class URLFetcherMock implements IMetadataFetcher {
+public class URLFetcherMock implements IDocumentFetcher {
 
     public enum LookupType {
-        NAPTR, CNAME, STATIC;
+        NAPTR, CNAME, STATIC
     }
 
     private String smpAlias;

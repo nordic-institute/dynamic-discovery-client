@@ -30,7 +30,7 @@ public class BindException extends TechnicalException {
         super(message);
     }
 
-    public BindException(SMPExceptionCode smpExceptionCode, String message) {
+    public BindException(DDCExceptionCode smpExceptionCode, String message) {
         super(smpExceptionCode, message);
     }
 
@@ -38,7 +38,7 @@ public class BindException extends TechnicalException {
         super(message, cause);
     }
 
-    public BindException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+    public BindException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
         super(smpExceptionCode, message, cause);
     }
 }

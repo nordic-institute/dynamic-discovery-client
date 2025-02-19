@@ -27,14 +27,14 @@ package eu.europa.ec.dynamicdiscovery.exception;
 public class DDCInvalidDataException extends TechnicalException {
 
     public DDCInvalidDataException(String message) {
-        super(SMPExceptionCode.INVALID_DATA, message);
+        super(DDCExceptionCode.INVALID_DATA, message);
     }
 
     public DDCInvalidDataException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DDCInvalidDataException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+    public DDCInvalidDataException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
         super(smpExceptionCode, message, cause);
     }
 }

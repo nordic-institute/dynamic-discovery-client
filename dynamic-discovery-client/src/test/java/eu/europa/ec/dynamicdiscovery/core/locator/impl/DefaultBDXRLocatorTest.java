@@ -123,42 +123,42 @@ class DefaultBDXRLocatorTest {
                         "urn:brazil:saopaulo",
                         "country-state-qns",
                         null,
-                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu/"),
                 Arguments.of("testLookupCNameCaseInsentitive",
                         "urn:BRAZIL:saoPaulo",
                         "country-state-qns",
                         null,
-                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu/"),
                 Arguments.of("testLookupCNameCaseSentitive",
                         "urn:BRAZIL:saoPaulo",
                         "country-state-qns",
                         "country-state-qns",
-                        "http://B-66dc923ee75a737cae33562297567763.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-66dc923ee75a737cae33562297567763.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu/"),
                 Arguments.of("testLookupCNAMEOasisPartyType",
                         "urn:brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered",
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu/"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalized",
                         "brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu/"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalizedCaseInsensitive",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu/"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalizedCaseSensitie",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
-                        "http://B-dbb71b7c50103af1f3bb6dc67e3b5781.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "http://B-dbb71b7c50103af1f3bb6dc67e3b5781.ehealth.acc.edelivery.tech.ec.europa.eu/"),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNullScheme",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo",
                         null,
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu")
+                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu/")
         );
     }
 
@@ -251,11 +251,11 @@ class DefaultBDXRLocatorTest {
     private DefaultBDXRLocator lookupNAPTR(String caseSensitiveScheme) throws Exception {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .addCaseSensitiveSchema(caseSensitiveScheme)
-                .wildcardEnabled(true)
+                .addResourceCaseSensitiveSchema(caseSensitiveScheme)
+                .resourceWildcardEnabled(true)
                 .build();
         defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupForDomain(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
 
         return defaultBDXRLocator;
     }
@@ -266,7 +266,7 @@ class DefaultBDXRLocatorTest {
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
                 .addDnsLookupType(DNSLookupType.CNAME)
                 .dnsLookup(idnsLookup)
-                .addCaseSensitiveSchema(caseSensitiveScheme)
+                .addResourceCaseSensitiveSchema(caseSensitiveScheme)
                 .build();
 
         Mockito.doReturn(false).when(idnsLookup).dnsRecordNotExists(
@@ -279,7 +279,7 @@ class DefaultBDXRLocatorTest {
     void testInvalidScheme() {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .schemeValidationPattern(Pattern.compile("just-this-scheme"))
+                .resourceSchemeValidationPattern(Pattern.compile("just-this-scheme"))
                 .build();
 
         MalformedIdentifierException result = assertThrows(MalformedIdentifierException.class,
@@ -293,10 +293,10 @@ class DefaultBDXRLocatorTest {
     void testValidScheme() throws TechnicalException {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .schemeValidationPattern(Pattern.compile("just-this-scheme"))
+                .resourceSchemeValidationPattern(Pattern.compile("just-this-scheme"))
                 .build();
         defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupForDomain(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
         // when
         URI uri = defaultBDXRLocator.lookup("identifier", "just-this-scheme");
         //THEN
@@ -309,7 +309,7 @@ class DefaultBDXRLocatorTest {
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
                 .build();
         defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupForDomain(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
         // when
         URI uri = defaultBDXRLocator.lookup("valid-No-Scheme-Identifier", null);
         //THEN
@@ -322,11 +322,11 @@ class DefaultBDXRLocatorTest {
     void testWildcardEnabled(String name, boolean enable, String schema, String topDomain, String expectedResult) throws TechnicalException {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain(topDomain)
-                .wildcardEnabled(enable)
+                .resourceWildcardEnabled(enable)
                 .build();
         String targetUrl = "http://smp-mock-1.ehealth.eu:8888";
         defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn(targetUrl).when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+        Mockito.doReturn(targetUrl).when(defaultBDXRLocator).naptrLookupForDomain(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
         // when
         URI uri = defaultBDXRLocator.lookup("*", schema);
         //THEN
@@ -338,7 +338,7 @@ class DefaultBDXRLocatorTest {
     void testMandatoryScheme() throws TechnicalException {
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .schemeMandatory(true)
+                .resourceSchemeMandatory(true)
                 .build();
 
         MalformedIdentifierException result = assertThrows(MalformedIdentifierException.class, () -> defaultBDXRLocator.lookup("valid-No-Scheme-Identifier", null));
@@ -358,12 +358,12 @@ class DefaultBDXRLocatorTest {
 
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .addFormatterType(customFormatter)
+                .addResourceFormatterType(customFormatter)
                 .build();
 
         defaultBDXRLocator = spy(defaultBDXRLocator);
         Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator)
-                .naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+                .naptrLookupForDomain(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
         // when
         URI uri = defaultBDXRLocator.lookup("identifier", "mailto");
         //THEN
@@ -382,12 +382,12 @@ class DefaultBDXRLocatorTest {
 
         DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .addFormatterType(customFormatter)
+                .addResourceFormatterType(customFormatter)
                 .build();
 
         defaultBDXRLocator = spy(defaultBDXRLocator);
         Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator)
-                .naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
+                .naptrLookupForDomain(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
         // when
         URI uri = defaultBDXRLocator.lookup("mailto-->identifier", null);
         //THEN

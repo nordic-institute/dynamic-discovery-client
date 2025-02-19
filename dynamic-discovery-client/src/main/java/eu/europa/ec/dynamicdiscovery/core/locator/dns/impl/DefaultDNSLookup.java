@@ -22,7 +22,7 @@ package eu.europa.ec.dynamicdiscovery.core.locator.dns.impl;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import org.apache.commons.lang3.StringUtils;
@@ -229,7 +229,7 @@ public class DefaultDNSLookup implements IDNSLookup {
             return Collections.emptyList();
         }
         if (lookupClient.getResult() != Lookup.SUCCESSFUL) {
-            throw new DNSLookupException(SMPExceptionCode.INVALID_DNS_TYPE, "Lookup [" + recordType + "] for participant [" + participantIdentifier
+            throw new DNSLookupException(DDCExceptionCode.INVALID_DNS_TYPE, "Lookup [" + recordType + "] for participant [" + participantIdentifier
                     + " ] has failed. Lookup result CODE [ " + lookupClient.getResult() + " ]");
         }
         return Arrays.asList(records);

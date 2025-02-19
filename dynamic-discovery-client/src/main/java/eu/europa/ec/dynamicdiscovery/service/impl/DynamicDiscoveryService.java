@@ -20,20 +20,21 @@
 package eu.europa.ec.dynamicdiscovery.service.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.SMPParticipantIdentifierLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
-import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.reader.IDocumentReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.*;
 import eu.europa.ec.dynamicdiscovery.model.*;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
-import eu.europa.ec.dynamicdiscovery.service.IDynamicDiscoveryService;
+import eu.europa.ec.dynamicdiscovery.service.ISMPDynamicDiscoveryService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +52,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * Implementation of the Dynamic Discovery Service. This class is responsible for the lookup of the service metadata
- * and the service endpoint. It uses the {@link IMetadataLocator} to find the SMP URI for a given participant identifier,
- * the {@link IMetadataProvider} to resolve the service metadata URI and the {@link IMetadataFetcher} to fetch the metadata.
- * The service metadata is then parsed by the {@link IMetadataReader} to retrieve {@link SMPServiceGroup},
+ * and the service endpoint. It uses the {@link IPublisherLocator} to find the SMP URI for a given participant identifier,
+ * the {@link IDocumentRequestProvider} to resolve the service metadata URI and the {@link IDocumentFetcher} to fetch the metadata.
+ * The service metadata is then parsed by the {@link IDocumentReader} to retrieve {@link SMPServiceGroup},
  * {@link SMPServiceMetadata} and {@link SMPEndpoint} .
  * <p>
  * The method lookupEndpoint is used to find the endpoint for a given participant, document and process identifiers and
@@ -63,21 +64,21 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * @author Joze Rihtarsic
  * @since 1.0
  */
-public class DynamicDiscoveryService implements IDynamicDiscoveryService {
+public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     static final Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryService.class);
-    private final IMetadataLocator metadataLocator;
-    private final IMetadataProvider metadataProvider;
-    private final IMetadataFetcher metadataFetcher;
-    private final IMetadataReader metadataReader;
+    private final IPublisherLocator publisherLocator;
+    private final IDocumentRequestProvider documentRequestProvider;
+    private final IDocumentFetcher documentFetcher;
+    private final ISMPDocumentReader documentReader;
 
     boolean redirectionEnabled = false;
     boolean defaultEndpointForEmptyProcess = false;
 
     protected DynamicDiscoveryService(DynamicDiscoveryService.Builder builder) {
-        this.metadataLocator = builder.metadataLocator;
-        this.metadataProvider = builder.metadataProvider;
-        this.metadataFetcher = builder.metadataFetcher;
-        this.metadataReader = builder.metadataReader;
+        this.publisherLocator = builder.publisherLocator;
+        this.documentRequestProvider = builder.documentRequestProvider;
+        this.documentFetcher = builder.documentFetcher;
+        this.documentReader = builder.documentReader;
     }
 
     @Override
@@ -91,17 +92,17 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     }
 
     @Override
-    public SMPServiceGroup getServiceGroup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public SMPServiceGroup getResource(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         final SMPParticipantIdentifierLookupResult lookupParticipantInSMP = lookupParticipantInSMP(participantIdentifier);
-        final SMPServiceGroup serviceGroup = metadataReader.getServiceGroup(lookupParticipantInSMP.getFetcherResponse());
+        final SMPServiceGroup serviceGroup = documentReader.getResource(lookupParticipantInSMP.getFetcherResponse());
         serviceGroup.setServiceGroupSmpURI(lookupParticipantInSMP.getParticipantUnderSmpURI());
         return serviceGroup;
     }
 
     @Override
-    public SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
+    public SMPServiceMetadata getSubresource(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
         final FetcherResponse fetcherResponseForServiceMetadata = getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier);
-        return metadataReader.getServiceMetadata(fetcherResponseForServiceMetadata);
+        return documentReader.getSubresource(fetcherResponseForServiceMetadata);
     }
 
     /**
@@ -119,7 +120,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     @Override
     public SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier,
                                         String processId, String processIdScheme, String transportProfile) throws TechnicalException {
-        SMPServiceMetadata serviceMetadata = getServiceMetadata(participantIdentifier, documentIdentifier);
+        SMPServiceMetadata serviceMetadata = getSubresource(participantIdentifier, documentIdentifier);
         return discoverEndpoint(serviceMetadata, processId, processIdScheme, transportProfile);
     }
 
@@ -205,7 +206,7 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     private FetcherResponse getFetcherResponseForServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
         final URI documentURI = getDocumentURI(participantIdentifier, documentIdentifier);
         LOG.info("Fetching service metadata using URI: [{}].", documentURI);
-        return metadataFetcher.fetch(documentURI);
+        return documentFetcher.fetch(documentURI);
     }
 
     protected URI getDocumentURI(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
@@ -218,21 +219,21 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
         URI smpURI = lookupParticipantSMPUri(participantIdentifier);
         LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
-        return metadataProvider.resolveServiceMetadata(smpURI, participantIdentifier, documentIdentifier);
+        return documentRequestProvider.createRequestForSubresource(smpURI, participantIdentifier, documentIdentifier);
     }
 
     public SMPParticipantIdentifierLookupResult lookupParticipantInSMP(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         URI smpURI = lookupParticipantSMPUri(participantIdentifier);
-        URI participantUnderSmpURI = metadataProvider.resolveForParticipantIdentifier(smpURI, participantIdentifier);
+        URI participantUnderSmpURI = documentRequestProvider.createRequestForResource(smpURI, participantIdentifier);
         LOG.info("Get participant data / documents for URI: [{}].", participantUnderSmpURI);
-        final FetcherResponse fetcherResponse = metadataFetcher.fetch(participantUnderSmpURI);
+        final FetcherResponse fetcherResponse = documentFetcher.fetch(participantUnderSmpURI);
         return new SMPParticipantIdentifierLookupResult(smpURI, participantUnderSmpURI, fetcherResponse);
     }
 
     private URI lookupParticipantSMPUri(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI smpURI = metadataLocator.lookup(participantIdentifier);
+        URI smpURI = publisherLocator.lookup(participantIdentifier);
         if (smpURI == null) {
-            throw new DNSLookupException(SMPExceptionCode.SERVICE_GROUP, "DNS record for participant [" + participantIdentifier + "] can not be resolved!");
+            throw new DNSLookupException(DDCExceptionCode.SERVICE_GROUP, "DNS record for participant [" + participantIdentifier + "] can not be resolved!");
         }
         LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
         return smpURI;
@@ -381,56 +382,56 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     private SMPServiceMetadata processRedirection(SMPRedirect redirect, SignatureValidationContext context) throws TechnicalException {
         URI redirectURI = URI.create(redirect.getRedirectUrl());
         LOG.info("Fetch document from redirection [{}].", redirectURI);
-        final FetcherResponse fetcherResponseForServiceMetadata = metadataFetcher.fetch(redirectURI);
+        final FetcherResponse fetcherResponseForServiceMetadata = documentFetcher.fetch(redirectURI);
 
-        return metadataReader.getServiceMetadata(fetcherResponseForServiceMetadata, context);
+        return documentReader.getSubresource(fetcherResponseForServiceMetadata, context);
     }
 
 
     @Override
-    public IMetadataLocator getMetadataLocator() {
-        return metadataLocator;
+    public IPublisherLocator getPublisherLocator() {
+        return publisherLocator;
     }
 
     @Override
-    public IMetadataProvider getMetadataProvider() {
-        return metadataProvider;
+    public IDocumentRequestProvider getDocumentRequestProvider() {
+        return documentRequestProvider;
     }
 
     @Override
-    public IMetadataFetcher getMetadataFetcher() {
-        return metadataFetcher;
+    public IDocumentFetcher getDocumentFetcher() {
+        return documentFetcher;
     }
 
     @Override
-    public IMetadataReader getMetadataReader() {
-        return metadataReader;
+    public ISMPDocumentReader getDocumentReader() {
+        return documentReader;
     }
 
     public static class Builder {
 
-            private IMetadataLocator metadataLocator;
-            private IMetadataProvider metadataProvider;
-            private IMetadataFetcher metadataFetcher;
-            private IMetadataReader metadataReader;
+            private IPublisherLocator publisherLocator;
+            private IDocumentRequestProvider documentRequestProvider;
+            private IDocumentFetcher documentFetcher;
+            private ISMPDocumentReader documentReader;
 
-            public Builder metadataLocator(IMetadataLocator metadataLocator) {
-                this.metadataLocator = metadataLocator;
+            public Builder publisherLocator(IPublisherLocator publisherLocator) {
+                this.publisherLocator = publisherLocator;
                 return this;
             }
 
-            public Builder metadataProvider(IMetadataProvider metadataProvider) {
-                this.metadataProvider = metadataProvider;
+            public Builder documentRequestProvider(IDocumentRequestProvider documentRequestProvider) {
+                this.documentRequestProvider = documentRequestProvider;
                 return this;
             }
 
-            public Builder metadataFetcher(IMetadataFetcher metadataFetcher) {
-                this.metadataFetcher = metadataFetcher;
+            public Builder documentFetcher(IDocumentFetcher documentFetcher) {
+                this.documentFetcher = documentFetcher;
                 return this;
             }
 
-            public Builder metadataReader(IMetadataReader metadataReader) {
-                this.metadataReader = metadataReader;
+            public Builder documentReader(ISMPDocumentReader documentReader) {
+                this.documentReader = documentReader;
                 return this;
             }
 
@@ -440,18 +441,18 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
             }
 
             private void validate() {
-                if (metadataLocator == null) {
+                if (publisherLocator == null) {
                     throw new DDCInvalidConfigurationException("metadataLocator is required");
                 }
-                if (metadataProvider == null) {
+                if (documentRequestProvider == null) {
                     // legacy behaviour
-                    metadataProvider =  new DefaultProvider.Builder().build();
+                    documentRequestProvider =  new DefaultDocumentRequestProvider.Builder().build();
                 }
-                if (metadataFetcher == null) {
+                if (documentFetcher == null) {
                     // legacy behaviour
-                    metadataFetcher =  new DefaultURLFetcher.Builder().build();
+                    documentFetcher =  new DefaultURLFetcher.Builder().build();
                 }
-                if (metadataReader == null) {
+                if (documentReader == null) {
                     throw new DDCInvalidConfigurationException("metadataReader is required");
                 }
             }
