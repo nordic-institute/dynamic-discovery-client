@@ -40,10 +40,15 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * @since 2.0
  */
 public class TemplateFormatterType  extends AbstractFormatterType {
+
     private static final Logger LOG = LoggerFactory.getLogger(TemplateFormatterType.class);
+
     public static final String SPLIT_GROUP_SCHEME_NAME = "scheme";
     public static final String SPLIT_GROUP_IDENTIFIER_NAME = "identifier";
-    protected static final String[] REPLACE_TAGS = new String[]{"${" + SPLIT_GROUP_SCHEME_NAME + "}", "${" + SPLIT_GROUP_IDENTIFIER_NAME + "}"};
+    public static final String SPLIT_GROUP_SCHEME_TAG = "${" + SPLIT_GROUP_SCHEME_NAME + "}";
+    public static final String SPLIT_GROUP_IDENTIFIER_TAG = "${" + SPLIT_GROUP_IDENTIFIER_NAME + "}";
+
+    protected static final String[] REPLACE_TAGS = new String[] { SPLIT_GROUP_SCHEME_TAG, SPLIT_GROUP_IDENTIFIER_TAG };
 
     private final DNSLookupFormatType dnsLookupFormatType;
 
@@ -64,7 +69,6 @@ public class TemplateFormatterType  extends AbstractFormatterType {
         this.splitRegularExpression = splitRegularExpression;
         this.dnsLookupFormatType = dnsLookupFormatType;
     }
-
 
     /**
      * {@inheritDoc}
@@ -102,7 +106,7 @@ public class TemplateFormatterType  extends AbstractFormatterType {
 
     @Override
     public String format(String scheme, String identifier, boolean noDelimiterOnEmptyScheme) {
-        return replaceEach(scheme == null ? formatTemplateNullScheme : formatTemplate, REPLACE_TAGS, new String[]{scheme, identifier});
+        return replaceEach(scheme == null ? formatTemplateNullScheme : formatTemplate, REPLACE_TAGS, new String[] {scheme, identifier});
 
     }
 
@@ -133,7 +137,6 @@ public class TemplateFormatterType  extends AbstractFormatterType {
         }
         return result;
     }
-
 
     @Override
     public DNSLookupFormatType getDNSFormatType() {

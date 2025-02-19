@@ -34,6 +34,8 @@ public abstract class AbstractFormatterType implements  FormatterType {
     Pattern valuePattern;
     Pattern schemePattern;
 
+    public static final String EBCORE_SEPARATOR = ":";
+    public static final String OASIS_SMP_SEPARATOR = "::";
 
     @Override
     public boolean isSchemeMandatory() {
