@@ -62,14 +62,6 @@ public interface IDynamicDiscoveryService {
                              SMPDocumentIdentifier documentIdentifier,
                              SMPProcessIdentifier processIdentifier, SMPTransportProfile transportProfile) throws TechnicalException;
 
-    void setMetadataLocator(IMetadataLocator metadataLocator);
-
-    void setMetadataProvider(IMetadataProvider metadataProvider);
-
-    void setMetadataFetcher(IMetadataFetcher metadataFetcher);
-
-    void setMetadataReader(IMetadataReader metadataReader);
-
     IMetadataLocator getMetadataLocator();
 
     IMetadataProvider getMetadataProvider();
