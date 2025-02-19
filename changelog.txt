@@ -1,4 +1,6 @@
 Dynamic Discovery 3.0
+ - Removed the DynamicDiscoveryService and DefaultBDXRLocator constructor to favour the use of builder.
+ - Removed Class DynamicDiscovery: Use IDynamicDiscoveryService/DynamicDiscoveryService instead.
  - Upgrade to Jakarta EE 10
  - set default build with Java 21 and target Java 11
  - Add feature to register  custom TLS context
@@ -14,12 +16,12 @@ Dynamic Discovery 2.2 and 2.3
 
 Dynamic Discovery 2.1.1
  - Update license headers
- - Add new CLI parameters to configure TLS, naptr type, DNS lookup or fetch documenet from SMP
+ - Add new CLI parameters to configure TLS, naptr type, DNS lookup or fetch document from SMP
 
 Dynamic Discovery 2.1
  - Update libraries
  - Add support for PEPPOL SMP technical specifications
- - Add support wildcard document type sheme as defined in the PINT specification
+ - Add support wildcard document type scheme as defined in the PINT specification
 
 Dynamic Discovery 2.0
  - Update libraries
@@ -31,11 +33,11 @@ Dynamic Discovery 2.0
  - Added support for the new SMP 2.0 specification
  - Added support for static configuration of SMPs to skip the DNS lookup
  - Added option to provide list of top level domains
- - Add new configuration options: Define resoultion type, Naptr services,...
+ - Add new configuration options: Define resolution type, Naptr services,...
 
 Dynamic Discovery 1.14
  - Update libraries
- - Add support for discoveru pf the  ebCore PartyId Types
+ - Add support for discovery pf the  ebCore PartyId Types
 
 Dynamic Discovery 1.13
  - Update libraries

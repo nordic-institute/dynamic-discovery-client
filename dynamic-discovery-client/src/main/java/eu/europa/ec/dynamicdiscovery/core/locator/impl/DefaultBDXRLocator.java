@@ -39,7 +39,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -54,10 +53,10 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     private static final String DOMAIN_SEPARATOR = ".";
 
     static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
-    private List<String> topDnsDomains;
-    private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
+    private final List<String> topDnsDomains;
+    private final List<DNSLookupType> dnsLookupTypeList;
 
-    private IDNSLookup dnsLookup;
+    private final IDNSLookup dnsLookup;
 
     private DefaultBDXRLocator(Builder builder) {
         this.topDnsDomains = new ArrayList<>(builder.topDnsDomains);
@@ -79,19 +78,6 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         if (builder.wildcardEnabled != null) {
             this.participantIdentifierFormatter.setWildcardEnabled(builder.wildcardEnabled);
         }
-    }
-
-    public DefaultBDXRLocator(List<String> domains) {
-        this(domains, new DefaultDNSLookup.Builder().build());
-    }
-
-    public DefaultBDXRLocator(String domain, IDNSLookup dnsLookup) {
-        this(Collections.singletonList(domain), dnsLookup);
-    }
-
-    public DefaultBDXRLocator(List<String> domains, IDNSLookup dnsLookup) {
-        this.topDnsDomains = domains;
-        this.dnsLookup = dnsLookup;
     }
 
     public List<String> getTopDnsDomains() {
@@ -214,8 +200,8 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     public static class Builder {
 
         static final List<DNSLookupType> DEFAULT_LOOKUPS = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
-        private List<String> topDnsDomains = new ArrayList<>();
-        private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
+        private final List<String> topDnsDomains = new ArrayList<>();
+        private final List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
         private IDNSLookup dnsLookup;
         protected Boolean schemeMandatory;
         protected Boolean wildcardEnabled;

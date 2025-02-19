@@ -38,6 +38,7 @@ import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import gen.eu.europa.ec.ddc.api.peppol.SignedServiceMetadata;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.BUSDOX_DOCID_QNS;
@@ -130,10 +132,11 @@ public class LiveDocumentIdentifierIT {
                                                 int expectedDocumentIdentifiers,
                                                 List<SMPDocumentIdentifier> toCheckDocumentIdentifierCapabilities) throws Exception {
         SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
-        final DynamicDiscovery smpClient = createClient();
+        final DynamicDiscoveryService smpClient = createClient();
 
         //discover the participant document identifiers
-        List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = smpClient.getDocumentIdentifiers(toCheckParticipantIdentifier);
+        SMPServiceGroup serviceGroup = smpClient.getServiceGroup(toCheckParticipantIdentifier);
+        List<SMPDocumentIdentifier> discoveredDocumentIdentifiers =serviceGroup!=null?serviceGroup.getDocumentIdentifiers(): Collections.emptyList();
         assertEquals(expectedDocumentIdentifiers, discoveredDocumentIdentifiers.size());
 
 
@@ -151,7 +154,7 @@ public class LiveDocumentIdentifierIT {
         });
     }
 
-    private DynamicDiscovery createClient() throws Exception {
+    private DynamicDiscoveryService createClient() throws Exception {
         DefaultURLFetcher urlFetcher = new DefaultURLFetcher.Builder().build();
 
         final KeyStore trustStore = CommonUtil.loadTrustStore("truststore/peppol-truststore.jks");
@@ -171,20 +174,19 @@ public class LiveDocumentIdentifierIT {
                 .wildcardSchemes(Arrays.asList(PEPPOL_DOCTYPE_WILDCARD))
                 .build();
 
-
         //create the smp client
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(defaultBDXRLocator)
-                .reader(bdxReader)
-                .fetcher(urlFetcher)
-                .provider(defaultProvider)
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .metadataLocator(defaultBDXRLocator)
+                .metadataReader(bdxReader)
+                .metadataFetcher(urlFetcher)
+                .metadataProvider(defaultProvider)
                 .build();
         return smpClient;
     }
 
     private void getAndAssertSMPDocumentIdentifier(SMPDocumentIdentifier toCheckDocumentIdentifier,
                                                    List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
-                                                   DynamicDiscovery smpClient,
+                                                   DynamicDiscoveryService smpClient,
                                                    SMPParticipantIdentifier toCheckParticipantIdentifier) throws TechnicalException {
         //get the document identifier to check from the list of already discovered document identifiers
         final SMPDocumentIdentifier discoveredDocumentIdentifier = discoveredDocumentIdentifiers.stream()
@@ -255,7 +257,7 @@ public class LiveDocumentIdentifierIT {
         //urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1*::2.1
         //urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0*::2.1
 
-        final DynamicDiscovery smpClient = createClient();
+        final DynamicDiscoveryService smpClient = createClient();
         //get the service metadata from SMP for using document identifier which is not supported by the participant
         final SMPDocumentIdentifier documentIdentifierNotRegisteredForParticipantBusdox = new SMPDocumentIdentifier(
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notSupported",
@@ -278,7 +280,7 @@ public class LiveDocumentIdentifierIT {
         //urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1*::2.1
         //urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0*::2.1
 
-        final DynamicDiscovery smpClient = createClient();
+        final DynamicDiscoveryService smpClient = createClient();
         //get the service metadata from SMP for using document identifier which is not supported by the participant
         final SMPDocumentIdentifier documentIdentifierNotRegisteredForParticipantBusdox = new SMPDocumentIdentifier(
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1",
@@ -298,7 +300,7 @@ public class LiveDocumentIdentifierIT {
         //urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1*::2.1
         //urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0*::2.1
 
-        final DynamicDiscovery smpClient = createClient();
+        final DynamicDiscoveryService smpClient = createClient();
 
         //get the service metadata from SMP for using document identifier
         final SMPDocumentIdentifier toCheckDocumentIdentifier = new SMPDocumentIdentifier(
@@ -316,7 +318,7 @@ public class LiveDocumentIdentifierIT {
         final String toCheckParticipantIdentifierScheme = "iso6523-actorid-upis";
         SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
 
-        final DynamicDiscovery smpClient = createClient();
+        final DynamicDiscoveryService smpClient = createClient();
 
         //get the service metadata from SMP for using document identifier which is not supported by the participant
         final SMPDocumentIdentifier toCheckDocumentIdentifier = new SMPDocumentIdentifier(
@@ -337,7 +339,7 @@ public class LiveDocumentIdentifierIT {
         final String toCheckParticipantIdentifierScheme = "iso6523-actorid-upis";
         SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
 
-        final DynamicDiscovery smpClient = createClient();
+        final DynamicDiscoveryService smpClient = createClient();
 
         //get the service metadata from SMP for using document identifier which is not supported by the participant
         final SMPDocumentIdentifier toCheckDocumentIdentifier = new SMPDocumentIdentifier(
@@ -416,7 +418,7 @@ public class LiveDocumentIdentifierIT {
 
     private void doTestGetServiceMetadataAndAssert(SMPDocumentIdentifier toCheckDocumentIdentifier, List<SMPDocumentIdentifier> supportedDocumentIdentifiers, SMPDocumentIdentifier expectedMatch) throws TechnicalException {
         SMPParticipantIdentifier participantIdentifier = Mockito.mock(SMPParticipantIdentifier.class);
-        DynamicDiscovery dynamicDiscovery = Mockito.mock(DynamicDiscovery.class);
+        DynamicDiscoveryService dynamicDiscovery = Mockito.mock(DynamicDiscoveryService.class);
 
         //START record mocks
 
@@ -449,7 +451,7 @@ public class LiveDocumentIdentifierIT {
         final String toCheckParticipantIdentifierValue = "9925:EDELIVERY_TEST3";
         final String toCheckParticipantIdentifierScheme = "iso6523-actorid-upis";
 
-        final DynamicDiscovery client = createClient();
+        final DynamicDiscoveryService client = createClient();
         SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
 
         final long start = System.currentTimeMillis();

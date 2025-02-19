@@ -19,9 +19,6 @@
  */
 package eu.europa.ec.ddc;
 
-
-import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
-import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
@@ -39,6 +36,7 @@ import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.xbill.DNS.CNAMERecord;
@@ -80,10 +78,12 @@ public class DdcMain {
         } catch (ParseException e) {
             System.out.println("ERROR: " + e.getMessage() + "\n\n");
             printCommandHelp(commands);
+            return;
         }
 
-        if (cmd.getOptions() == null || cmd.getOptions().length == 0) {
+        if (cmd == null ||  cmd.getOptions() == null || cmd.getOptions().length == 0) {
             printCommandHelp(commands);
+            return;
         }
 
         if (cmd.hasOption(COMMAND_DNS.getOption())) {
@@ -209,25 +209,25 @@ public class DdcMain {
         }
         DefaultURLFetcher testURLFetcher = testURLFetcherBuilder.build();
 
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .provider(new DefaultProvider.Builder().build())
-                .reader(new DefaultBDXRReader.Builder().build())
-                .fetcher(testURLFetcher)
-                .locator(testBDXRLocator)
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .metadataProvider(new DefaultProvider.Builder().build())
+                .metadataReader(new DefaultBDXRReader.Builder().build())
+                .metadataFetcher(testURLFetcher)
+                .metadataLocator(testBDXRLocator)
                 .build();
 
         // lookup and download data
-        URI uri = smpClient.getService().getMetadataLocator().lookup(participantIdentifier);
+        URI uri = smpClient.getMetadataLocator().lookup(participantIdentifier);
         if (uri == null) {
             throw new DDCRuntimeException("Can not resolve party identifier");
         }
 
-        IMetadataProvider metadataProvider = smpClient.getService().getMetadataProvider();
+        IMetadataProvider metadataProvider = smpClient.getMetadataProvider();
 
         uri = subresourceIdentifier == null ? metadataProvider.resolveForParticipantIdentifier(uri, participantIdentifier) :
                 metadataProvider.resolveServiceMetadata(uri, participantIdentifier, subresourceIdentifier);
 
-        FetcherResponse response = smpClient.getService().getMetadataFetcher().fetch(uri);
+        FetcherResponse response = smpClient.getMetadataFetcher().fetch(uri);
         Files.copy(response.getInputStream(), Paths.get(outputFilePath), StandardCopyOption.REPLACE_EXISTING);
     }
 

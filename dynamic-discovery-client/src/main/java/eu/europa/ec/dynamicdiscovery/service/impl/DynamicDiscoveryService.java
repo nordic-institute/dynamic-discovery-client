@@ -65,10 +65,10 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     static final Logger LOG = LoggerFactory.getLogger(DynamicDiscoveryService.class);
-    private IMetadataLocator metadataLocator;
-    private IMetadataProvider metadataProvider;
-    private IMetadataFetcher metadataFetcher;
-    private IMetadataReader metadataReader;
+    private final IMetadataLocator metadataLocator;
+    private final IMetadataProvider metadataProvider;
+    private final IMetadataFetcher metadataFetcher;
+    private final IMetadataReader metadataReader;
 
     boolean redirectionEnabled = false;
     boolean defaultEndpointForEmptyProcess = false;
@@ -78,16 +78,6 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
         this.metadataProvider = builder.metadataProvider;
         this.metadataFetcher = builder.metadataFetcher;
         this.metadataReader = builder.metadataReader;
-    }
-
-    /**
-     * @deprecated (In the future the builder is preferred way to create service
-     * because it validated if DDC is correctly configured ..)
-     */
-    @Deprecated
-    public DynamicDiscoveryService() {
-        this.metadataProvider = new DefaultProvider.Builder().build();
-        this.metadataFetcher = new DefaultURLFetcher.Builder().build();
     }
 
     @Override
@@ -396,25 +386,6 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
         return metadataReader.getServiceMetadata(fetcherResponseForServiceMetadata, context);
     }
 
-    @Override
-    public void setMetadataLocator(IMetadataLocator metadataLocator) {
-        this.metadataLocator = metadataLocator;
-    }
-
-    @Override
-    public void setMetadataProvider(IMetadataProvider metadataProvider) {
-        this.metadataProvider = metadataProvider;
-    }
-
-    @Override
-    public void setMetadataFetcher(IMetadataFetcher metadataFetcher) {
-        this.metadataFetcher = metadataFetcher;
-    }
-
-    @Override
-    public void setMetadataReader(IMetadataReader metadataReader) {
-        this.metadataReader = metadataReader;
-    }
 
     @Override
     public IMetadataLocator getMetadataLocator() {
