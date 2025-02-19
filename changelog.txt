@@ -1,4 +1,11 @@
 Dynamic Discovery 3.0
+ - Rename interfaces and exception:
+    - SMPExceptionCode -> DDCExceptionCode
+    - IMetadataLocator -> IPublisherLocator
+    - IMetadataProvider -> IDocumentRequestProvider
+    - IMetadataFetcher-> IDocumentFetcher
+    - IMetadataReader -> IDocumentReader
+  and its implementations, builders, setter/getters and accordingly:
  - Removed the DynamicDiscoveryService and DefaultBDXRLocator constructor to favour the use of builder.
  - Removed Class DynamicDiscovery: Use IDynamicDiscoveryService/DynamicDiscoveryService instead.
  - Upgrade to Jakarta EE 10
