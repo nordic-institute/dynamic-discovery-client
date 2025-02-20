@@ -64,6 +64,7 @@ import static org.apache.commons.lang3.StringUtils.split;
  * Main class for the Dynamic Discovery Client (DDC) command line interface
  */
 public class DdcMain {
+    private static final String LOG_ERROR= "[ERROR] ";
 
     public static void main(String[] args) throws RuntimeException {
 
@@ -76,7 +77,7 @@ public class DdcMain {
         try {
             cmd = parser.parse(commands, args, true);
         } catch (ParseException e) {
-            System.out.println("ERROR: " + e.getMessage() + "\n\n");
+            System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
             printCommandHelp(commands);
             return;
         }
@@ -91,7 +92,7 @@ public class DdcMain {
             try {
                 cmd = parser.parse(options, args);
             } catch (ParseException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
                 printHelpOptions(options, COMMAND_DNS.getName());
                 System.exit(1);
             }
@@ -105,7 +106,7 @@ public class DdcMain {
             try {
                 cmd = parser.parse(options, args);
             } catch (ParseException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
                 printHelpOptions(options, COMMAND_GET.getName());
                 System.exit(1);
             }
@@ -113,7 +114,7 @@ public class DdcMain {
                 ddc.runGet(cmd);
             } catch (TechnicalException | IOException | UnrecoverableKeyException | NoSuchAlgorithmException |
                      KeyStoreException | URISyntaxException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
             }
         } else {
             printCommandHelp(commands);
