@@ -21,7 +21,7 @@ package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -61,7 +61,7 @@ public abstract class AbstractServiceMetadataReader<C> extends AbstractObjectRea
     }
 
     protected AbstractServiceMetadataReader(boolean ignoreInvalidServices) {
-        super(SMPExceptionCode.SERVICE_METADATA);
+        super(DDCExceptionCode.SERVICE_METADATA);
         this.ignoreInvalidServices = ignoreInvalidServices;
     }
 

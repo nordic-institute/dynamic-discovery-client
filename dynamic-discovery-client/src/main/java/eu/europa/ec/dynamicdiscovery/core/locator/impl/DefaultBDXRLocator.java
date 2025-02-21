@@ -19,14 +19,14 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
@@ -43,18 +43,26 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * @author Flávio W. R. Santos
+ * The BDXL locator implementation. The locator implementations is based on
+ * the BDXL specification and eDelivery BDXL 2.0 profile. It uses DNS NAPTR (and legacy CNAME)
+ * records to locate the metadata for the given participant identifier.
+ * In case of the CNAME record, the URL is created from.
+ *
+ * @author Flávio W. R. SANTOS
+ * @author Joze RIHTARSIC
  * @since 1.0
  */
-public class DefaultBDXRLocator implements IMetadataLocator {
+public class DefaultBDXRLocator implements IPublisherLocator {
+    static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
 
-    ParticipantIdentifierFormatter participantIdentifierFormatter = new ParticipantIdentifierFormatter();
-    private static final String PEPPOL_URL_SCHEME = "http://";
+    ParticipantIdentifierFormatter resourceIdentifierFormatter = new ParticipantIdentifierFormatter();
     private static final String DOMAIN_SEPARATOR = ".";
 
-    static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
+
     private final List<String> topDnsDomains;
     private final List<DNSLookupType> dnsLookupTypeList;
+    private String cnameURLScheme = "http";
+    private String cnameURLContext = "/";
 
     private final IDNSLookup dnsLookup;
 
@@ -63,20 +71,32 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         this.dnsLookupTypeList = new ArrayList<>(builder.dnsLookupTypeList);
         this.dnsLookup = builder.dnsLookup;
 
-        if (builder.schemeMandatory != null) {
-            this.participantIdentifierFormatter.setSchemeMandatory(builder.schemeMandatory);
+        if (builder.resourceSchemeMandatory != null) {
+            this.resourceIdentifierFormatter.setSchemeMandatory(builder.resourceSchemeMandatory);
         }
-        if (builder.schemeValidationPattern != null) {
-            this.participantIdentifierFormatter.setSchemeValidationPattern(builder.schemeValidationPattern);
+
+        if (builder.resourceSchemeValidationPattern != null) {
+            this.resourceIdentifierFormatter.setSchemeValidationPattern(builder.resourceSchemeValidationPattern);
         }
-        if (!builder.caseSensitiveSchemas.isEmpty()) {
-            this.participantIdentifierFormatter.setCaseSensitiveSchemas(builder.caseSensitiveSchemas);
+
+        if (!builder.resourceCaseSensitiveSchemas.isEmpty()) {
+            this.resourceIdentifierFormatter.setCaseSensitiveSchemas(builder.resourceCaseSensitiveSchemas);
         }
-        if (!builder.formatterTypes.isEmpty()) {
-            this.participantIdentifierFormatter.setFormatterTypes(builder.formatterTypes);
+
+        if (!builder.resourceFormatterTypes.isEmpty()) {
+            this.resourceIdentifierFormatter.setFormatterTypes(builder.resourceFormatterTypes);
         }
-        if (builder.wildcardEnabled != null) {
-            this.participantIdentifierFormatter.setWildcardEnabled(builder.wildcardEnabled);
+
+        if (builder.resourceWildcardEnabled != null) {
+            this.resourceIdentifierFormatter.setWildcardEnabled(builder.resourceWildcardEnabled);
+        }
+
+        if (StringUtils.isNotEmpty(builder.cnameURLScheme)) {
+            this.cnameURLScheme = builder.cnameURLScheme;
+        }
+
+        if (StringUtils.isNotEmpty(builder.cnameURLContext)) {
+            this.cnameURLContext = builder.cnameURLContext;
         }
     }
 
@@ -108,7 +128,15 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         return null;
     }
 
-
+    /**
+     * This method is used to lookup the DNS record for the given participant identifier and top domain. It generates the DNS query
+     * based on the DNS record type.
+     * @param identifier The target resource/participant identifier to discover the SMP's URL address
+     * @param topDomain The SML DNS top domain to be used for the DNS query
+     * @param lookupType The DNS record type to be used for the DNS query (NAPTR or CNAME)
+     * @return The URL of the publisher
+     * @throws TechnicalException if an error occurs during the DNS lookup
+     */
     private URI getUrlForTopDomain(SMPParticipantIdentifier identifier, String topDomain, DNSLookupType lookupType) throws TechnicalException {
         switch (lookupType) {
             case NAPTR:
@@ -124,9 +152,9 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     @Override
     public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
-            return this.lookupPrivate(participantIdentifierFormatter.normalize(participantIdentifier));
+            return this.lookupPrivate(resourceIdentifierFormatter.normalize(participantIdentifier));
         } catch (TechnicalException e) {
-            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            e.setSmpExceptionCode(DDCExceptionCode.SERVICE_GROUP);
             throw e;
         }
     }
@@ -134,9 +162,9 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     @Override
     public URI lookup(String participantIdentifier, String participantScheme) throws TechnicalException {
         try {
-            return this.lookupPrivate(participantIdentifierFormatter.normalize(participantScheme, participantIdentifier));
+            return this.lookupPrivate(resourceIdentifierFormatter.normalize(participantScheme, participantIdentifier));
         } catch (TechnicalException e) {
-            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            e.setSmpExceptionCode(DDCExceptionCode.SERVICE_GROUP);
             throw e;
         }
     }
@@ -148,7 +176,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         }
 
         try {
-            return new URI(PEPPOL_URL_SCHEME + buildCNameDNSQuery(participantIdentifier, topDomain));
+            return new URI(cnameURLScheme + "://" + dnsQuery + StringUtils.prependIfMissing(cnameURLContext, "/"));
         } catch (URISyntaxException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
@@ -158,7 +186,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
         try {
             LOG.debug("Start naptr search for participant [{}].", participantIdentifier);
             String naptrURI = buildNaptrDNSQuery(participantIdentifier, topDomain);
-            String smpURI = naptrLookupFetcher(participantIdentifier, naptrURI);
+            String smpURI = naptrLookupForDomain(participantIdentifier, naptrURI);
             LOG.debug("Got URL: [{}] for participant [{}] with naptr query url: [{}].", smpURI, participantIdentifier, naptrURI);
             return new URI(smpURI);
         } catch (URISyntaxException exc) {
@@ -173,7 +201,7 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     public String buildCNameDNSQuery(SMPParticipantIdentifier participantIdentifier, String topDomain) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.MD5_HEX));
+        sb.append(resourceIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.MD5_HEX));
         sb.append(DOMAIN_SEPARATOR)
                 .append(topDomain);
         return sb.toString();
@@ -182,95 +210,199 @@ public class DefaultBDXRLocator implements IMetadataLocator {
     public String buildNaptrDNSQuery(SMPParticipantIdentifier participantIdentifier, String topDomain) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(participantIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.SHA256_BASE32));
+        sb.append(resourceIdentifierFormatter.dnsLookupFormat(participantIdentifier, DNSLookupHashType.SHA256_BASE32));
         sb.append(DOMAIN_SEPARATOR)
                 .append(topDomain);
         return sb.toString();
     }
 
-    public String naptrLookupFetcher(SMPParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException {
+    public String naptrLookupForDomain(SMPParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException {
         return getDnsLookup().naptrUrlValueLookup(participantIdentifier, participantURI);
     }
 
-    @Override
     public IDNSLookup getDnsLookup() {
         return dnsLookup;
     }
-
+    /**
+     * Builder class for the BDXR locator.
+     */
     public static class Builder {
 
         static final List<DNSLookupType> DEFAULT_LOOKUPS = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
-        private final List<String> topDnsDomains = new ArrayList<>();
-        private final List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
+        private List<String> topDnsDomains = new ArrayList<>();
+        private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>();
         private IDNSLookup dnsLookup;
-        protected Boolean schemeMandatory;
-        protected Boolean wildcardEnabled;
-        protected Pattern schemeValidationPattern;
-        protected List<String> caseSensitiveSchemas = new ArrayList<>();
-        protected List<FormatterType> formatterTypes = new ArrayList<>();
+        private Boolean resourceSchemeMandatory;
+        private Boolean resourceWildcardEnabled;
+        private Pattern resourceSchemeValidationPattern;
+        private List<String> resourceCaseSensitiveSchemas = new ArrayList<>();
+        private List<FormatterType> resourceFormatterTypes = new ArrayList<>();
+        private String cnameURLScheme = "http";
+        private String cnameURLContext = "/";
 
+        /**
+         * Add a DNS record type which can be used with the BDXR locator.
+         * @param recordType The DNS record type (Currently supported: NAPTR, CNAME)
+         * @return The builder instance
+         */
         public Builder addDnsLookupType(DNSLookupType recordType) {
             this.dnsLookupTypeList.add(recordType);
             return this;
         }
 
+        /**
+         * Add a list of DNS record types which can be used with the BDXR locator.
+         * @param recordTypes The ordered list of DNS record types (Currently supported: NAPTR, CNAME)
+         * @return The builder instance
+         */
         public Builder addDnsLookupTypes(List<DNSLookupType> recordTypes) {
             this.dnsLookupTypeList.addAll(recordTypes);
             return this;
         }
 
+        /**
+         * Adds a top-level domain for use with the BDXR locator, The top-level domain is used to construct the DNS query.
+         * For metadata retrieval, the locator will use the first top-level domain where the DNS record is found.
+         * Therefore, the order in which records are added to the list is crucial.
+         *
+         * @param domain The top level domain.
+         * @return The builder instance
+         */
         public Builder addTopDnsDomain(String domain) {
             this.topDnsDomains.add(domain);
             return this;
         }
 
+        /**
+         * Adds a list of top-level domains for use with the BDXR locator. The top-level domain is used to construct the DNS query.
+         * For metadata retrieval, the locator will use the first top-level domain where the DNS record is found.
+         * Therefore, the order of topdomain in the list is important.
+         *
+         * @param domains The list of top level domains.
+         * @return The builder instance
+         */
         public Builder addTopDnsDomains(List<String> domains) {
             this.topDnsDomains.addAll(domains);
             return this;
         }
 
+        /**
+         * Sets the DNS lookup implementation of the IDNSLookup interface to be used with the BDXR locator.
+         * @param dnsLookup
+         * @return
+         */
         public Builder dnsLookup(IDNSLookup dnsLookup) {
             this.dnsLookup = dnsLookup;
             return this;
         }
 
-        public Builder schemeMandatory(Boolean schemeMandatory) {
-            this.schemeMandatory = schemeMandatory;
+        /**
+         * Sets the resource/participant scheme mandatory flag. If set to true, the locator will only accept resource/participant identifiers
+         * with a scheme.
+         * @param resourceSchemeMandatory The participant scheme mandatory flag
+         * @return The builder instance
+         */
+        public Builder resourceSchemeMandatory(Boolean resourceSchemeMandatory) {
+            this.resourceSchemeMandatory = resourceSchemeMandatory;
             return this;
         }
 
-        public Builder wildcardEnabled(Boolean wildcardEnabled) {
-            this.wildcardEnabled = wildcardEnabled;
+        /**
+         * Sets the wildcard enabled flag. If set to true, the locator will accept participant identifiers with a wildcard.
+         * @param resourceWildcardEnabled The wildcard enabled flag
+         * @return The builder instance
+         */
+        public Builder resourceWildcardEnabled(Boolean resourceWildcardEnabled) {
+            this.resourceWildcardEnabled = resourceWildcardEnabled;
             return this;
         }
 
-        public Builder schemeValidationPattern(Pattern schemeValidationPattern) {
-            this.schemeValidationPattern = schemeValidationPattern;
+
+        /**
+         * Sets the resource/participant scheme validation pattern. The locator will use this pattern to validate the scheme of the participant identifier.
+         * @param resourceSchemeValidationPattern The participant scheme validation pattern
+         * @return The builder instance
+         */
+        public Builder resourceSchemeValidationPattern(Pattern resourceSchemeValidationPattern) {
+            this.resourceSchemeValidationPattern = resourceSchemeValidationPattern;
             return this;
         }
 
-        public Builder addCaseSensitiveSchema(String scheme) {
+        /**
+         * Adds a case-sensitive schema to the list of case-sensitive schemas.
+         * The locator will use this list to validate the scheme of the resource/participant identifier.
+         * If the scheme is not in the list, the locator will set the identifier to lowercase before calling the hash value
+         * for the DNS query.
+         * @param scheme The case-sensitive schema
+         * @return The builder instance
+         */
+        public Builder addResourceCaseSensitiveSchema(String scheme) {
             if (StringUtils.isNotEmpty(scheme)) {
-                this.caseSensitiveSchemas.add(scheme);
+                this.resourceCaseSensitiveSchemas.add(scheme);
             }
             return this;
         }
 
-        public Builder addCaseSensitiveSchemas(List<String> schemes) {
-            this.caseSensitiveSchemas.addAll(schemes);
+        /**
+         * Adds a  list of case-sensitive schemas to the list of case-sensitive schemas.
+         * The locator will use this list to validate the scheme of the resource/participant identifier.
+         * If the scheme is not in the list, the locator will set the identifier to lowercase before calling the hash value
+         * for the DNS query.
+         * @param schemes The case-sensitive schema
+         * @return The builder instance
+         */
+        public Builder addResourceCaseSensitiveSchemas(List<String> schemes) {
+            this.resourceCaseSensitiveSchemas.addAll(schemes);
             return this;
         }
 
-        public Builder addFormatterType(FormatterType formatter) {
-            this.formatterTypes.add(formatter);
+        /**
+         * Adds a list of formatter types to the list of formatter types.
+         * The client will format/normalize the resource/participant identifier before
+         * lookup according to the formatter type. By default, ebCoreParty Identifier
+         * type and Peppol Party identifier types are registered.
+         *
+         * @param resourceFormatterType The list of formatter types
+         * @return The builder instance
+         */
+        public Builder addResourceFormatterType(FormatterType resourceFormatterType) {
+            this.resourceFormatterTypes.add(resourceFormatterType);
             return this;
         }
 
-        public Builder addFormatterTypes(List<FormatterType> formatters) {
-            this.formatterTypes.addAll(formatters);
+        /**
+         * Adds a list of formatter types to the list of formatter types.
+         * The client will format/normalize the resource/participant identifier before
+         * lookup according to the formatter type. By default, ebCoreParty Identifier
+         * type and Peppol Party identifier types are registered.
+         *
+         * @param formatters The list of formatter types
+         * @return The builder instance
+         */
+        public Builder addResourceFormatterTypes(List<FormatterType> formatters) {
+            this.resourceFormatterTypes.addAll(formatters);
             return this;
         }
 
+        /**
+         * Sets the CNAME URL scheme. The locator will use this scheme to create the SMPs URL for the participant identifier.
+         * @param scheme The CNAME URL scheme   (default: http)
+         * @return The builder instance
+         */
+        public Builder cnameURLScheme(String scheme) {
+            this.cnameURLScheme = scheme;
+            return this;
+        }
+
+        /**
+         * Sets the CNAME URL context. The locator will use this context to create the SMPs URL for the participant identifier.
+         * @param context The CNAME URL context (default: /)
+         * @return The builder instance
+         */
+        public Builder cnameURLContext(String context) {
+            this.cnameURLContext = context;
+            return this;
+        }
 
         public DefaultBDXRLocator build() {
             validate();
@@ -288,7 +420,6 @@ public class DefaultBDXRLocator implements IMetadataLocator {
                 dnsLookup = new DefaultDNSLookup.Builder().build();
             }
         }
-
     }
 
 

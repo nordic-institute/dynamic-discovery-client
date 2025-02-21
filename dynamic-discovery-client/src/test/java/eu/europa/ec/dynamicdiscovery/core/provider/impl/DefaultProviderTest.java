@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class DefaultProviderTest {
     private static final String TEST_URI = "http://b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu";
-    DefaultProvider testInstance = new DefaultProvider.Builder().build();
+    DefaultDocumentRequestProvider testInstance = new DefaultDocumentRequestProvider.Builder().build();
 
 
     @Test
@@ -42,7 +42,7 @@ class DefaultProviderTest {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         URI uri = new URI(TEST_URI);
         //when
-        String resolvedURI = testInstance.resolveForParticipantIdentifier(uri, participantIdentifier).toString();
+        String resolvedURI = testInstance.createRequestForResource(uri, participantIdentifier).toString();
         // then
         assertEquals(TEST_URI + "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", resolvedURI);
     }
@@ -54,7 +54,7 @@ class DefaultProviderTest {
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
         URI uri = new URI(TEST_URI);
         // when
-        String resolvedURI = testInstance.resolveServiceMetadata(uri, participantIdentifier, documentIdentifier).toString();
+        String resolvedURI = testInstance.createRequestForSubresource(uri, participantIdentifier, documentIdentifier).toString();
 
         assertEquals(TEST_URI + "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107", resolvedURI);
     }
@@ -66,7 +66,7 @@ class DefaultProviderTest {
 
 
         //when
-        String url = testInstance.resolveForParticipantIdentifier(new URI("http://example.local:1234/smp_context"), participantIdentifier).toString();
+        String url = testInstance.createRequestForResource(new URI("http://example.local:1234/smp_context"), participantIdentifier).toString();
 
         //then
         assertEquals("http://example.local:1234/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
@@ -78,7 +78,7 @@ class DefaultProviderTest {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
 
         //when
-        String url = testInstance.resolveForParticipantIdentifier(new URI("http://example.local:1234/"), participantIdentifier).toString();
+        String url = testInstance.createRequestForResource(new URI("http://example.local:1234/"), participantIdentifier).toString();
 
         //then
         assertEquals("http://example.local:1234/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb", url);
@@ -92,7 +92,7 @@ class DefaultProviderTest {
 
 
         //when
-        String url = testInstance.resolveServiceMetadata(new URI("http://example.local:1234"), participantIdentifier, documentIdentifier).toString();
+        String url = testInstance.createRequestForSubresource(new URI("http://example.local:1234"), participantIdentifier, documentIdentifier).toString();
 
         //then
         assertEquals("http://example.local:1234/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);
@@ -105,7 +105,7 @@ class DefaultProviderTest {
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("doc_id", "ehealth-resid-qns");
 
         //when
-        String url = testInstance.resolveServiceMetadata(new URI("http://example.local:1234/smp_context"), participantIdentifier, documentIdentifier).toString();
+        String url = testInstance.createRequestForSubresource(new URI("http://example.local:1234/smp_context"), participantIdentifier, documentIdentifier).toString();
 
         //then
         assertEquals("http://example.local:1234/smp_context/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Adoc_id", url);

@@ -25,7 +25,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcherMock;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
@@ -69,16 +69,16 @@ class DocumentIdentifierIT {
         Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(new DefaultBDXRLocator.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder()
                         .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
                         .dnsLookup(defaultDNSLookup)
                         .build())
-                .metadataReader(new DefaultBDXRReader.Builder()
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
-                .metadataFetcher(urlFetcherURL)
+                .documentFetcher(urlFetcherURL)
                 .build();
-        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getServiceGroup(participantIdentifier).getDocumentIdentifiers();
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getResource(participantIdentifier).getDocumentIdentifiers();
         assertEquals(2, documentIdentifiers.size());
 
     }
@@ -94,16 +94,16 @@ class DocumentIdentifierIT {
         Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(new DefaultBDXRLocator.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder()
                         .addTopDnsDomain("ehealt.acc.edelivery.tech.ec.europa.eu")
                         .dnsLookup(defaultDNSLookup)
                         .build())
-                .metadataReader(new DefaultBDXRReader.Builder()
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
-                .metadataFetcher(urlFetcherURL)
+                .documentFetcher(urlFetcherURL)
                 .build();
-        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getServiceGroup(participantIdentifier).getDocumentIdentifiers();
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getResource(participantIdentifier).getDocumentIdentifiers();
         assertEquals(2, documentIdentifiers.size());
         assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
         assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
@@ -120,17 +120,17 @@ class DocumentIdentifierIT {
         Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(new DefaultBDXRLocator.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder()
                         .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
                         .dnsLookup(defaultDNSLookup)
                         .build())
-                .metadataReader(new DefaultBDXRReader.Builder()
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
-                .metadataFetcher(urlFetcherURL)
+                .documentFetcher(urlFetcherURL)
                 .build();
 
-        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getServiceGroup(participantIdentifier).getDocumentIdentifiers();
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getResource(participantIdentifier).getDocumentIdentifiers();
         assertEquals(2, documentIdentifiers.size());
         assertEquals("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", documentIdentifiers.get(1).getIdentifier());
         assertEquals("bdx-docid-qns", documentIdentifiers.get(1).getScheme());
@@ -144,14 +144,14 @@ class DocumentIdentifierIT {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(new StaticMapMetadataLocator(new URI(TestCaseConstants.SMP_STATIC_DOMAIN)))
-                .metadataReader(new DefaultBDXRReader.Builder()
+                .publisherLocator(new StaticMapMetadataLocator(new URI(TestCaseConstants.SMP_STATIC_DOMAIN)))
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
-                .metadataFetcher(urlFetcherURL)
+                .documentFetcher(urlFetcherURL)
                 .build();
 
-        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getServiceGroup(participantIdentifier).getDocumentIdentifiers();
+        List<SMPDocumentIdentifier> documentIdentifiers = smpClient.getResource(participantIdentifier).getDocumentIdentifiers();
         assertEquals(2, documentIdentifiers.size());
         assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
         assertEquals("ehealth-resid-qns", documentIdentifiers.get(1).getScheme());
@@ -164,17 +164,17 @@ class DocumentIdentifierIT {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(new DefaultBDXRLocator.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder()
                         .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
                         .dnsLookup(defaultDNSLookup)
                         .build())
-                .metadataReader(new DefaultBDXRReader.Builder()
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
-                .metadataFetcher(urlFetcherURL)
+                .documentFetcher(urlFetcherURL)
                 .build();
 
-        assertThrows(DNSLookupException.class, () -> smpClient.getServiceGroup(participantIdentifier).getDocumentIdentifiers());
+        assertThrows(DNSLookupException.class, () -> smpClient.getResource(participantIdentifier).getDocumentIdentifiers());
     }
 
     @Test
@@ -183,15 +183,15 @@ class DocumentIdentifierIT {
         urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_GROUP_URL_9925_0367302178, "service_group_valid_iso6523", "b-12345678910.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu");
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
-                .metadataReader(new DefaultBDXRReader.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder().addTopDnsDomain("acc.edelivery.tech.ec.europa.eu").build())
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
-                .metadataFetcher(urlFetcherURL)
+                .documentFetcher(urlFetcherURL)
                 .build();
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
 
-        assertThrows(DNSLookupException.class, () -> smpClient.getServiceGroup(participantIdentifier).getDocumentIdentifiers());
+        assertThrows(DNSLookupException.class, () -> smpClient.getResource(participantIdentifier).getDocumentIdentifiers());
 
     }
 
@@ -222,16 +222,16 @@ class DocumentIdentifierIT {
                 .thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(new DefaultBDXRLocator.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder()
                         .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
                         .dnsLookup(defaultDNSLookup)
                         .build())
-                .metadataReader(new DefaultBDXRReader.Builder()
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
-                .metadataFetcher(urlFetcherURL)
+                .documentFetcher(urlFetcherURL)
                 .build();
-        return smpClient.getServiceGroup(participantIdentifier).unwrap(ServiceGroup.class);
+        return smpClient.getResource(participantIdentifier).unwrap(ServiceGroup.class);
     }
 
     @Test
@@ -379,20 +379,20 @@ class DocumentIdentifierIT {
                 .addExtension(new PeppolSMPExtension())
                 .signatureValidator(emptyValidator)
                 .build();
-        final DefaultProvider defaultProvider = new DefaultProvider.Builder()
-                .metadataFetcher(urlFetcherMock)
-                .metadataReader(bdxReader)
+        final DefaultDocumentRequestProvider defaultProvider = new DefaultDocumentRequestProvider.Builder()
+                .documentFetcher(urlFetcherMock)
+                .documentReader(bdxReader)
                 .wildcardSchemes(Collections.singletonList(expectedDiscoveredDocumentScheme))
                 .build();
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(defaultBDXRLocator)
-                .metadataReader(bdxReader)
-                .metadataFetcher(urlFetcherMock)
-                .metadataProvider(defaultProvider)
+                .publisherLocator(defaultBDXRLocator)
+                .documentReader(bdxReader)
+                .documentFetcher(urlFetcherMock)
+                .documentRequestProvider(defaultProvider)
                 .build();
 
-        final SMPServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, smpDocumentIdentifierToCheck);
+        final SMPServiceMetadata serviceMetadata = smpClient.getSubresource(participantIdentifier, smpDocumentIdentifierToCheck);
         assertNotNull(serviceMetadata);
         final SMPDocumentIdentifier documentIdentifier = serviceMetadata.getDocumentIdentifier();
         assertNotNull(documentIdentifier);

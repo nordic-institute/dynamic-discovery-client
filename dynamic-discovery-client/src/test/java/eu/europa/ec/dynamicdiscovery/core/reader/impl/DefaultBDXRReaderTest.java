@@ -77,7 +77,7 @@ class DefaultBDXRReaderTest {
         InputStream xmlStream = CommonUtil.getISForName(filename, standard);
         FetcherResponse fetcherResponse = new FetcherResponse(xmlStream);
 
-        BindException result = assertThrows(BindException.class, () -> testInstance.getServiceMetadata(fetcherResponse));
+        BindException result = assertThrows(BindException.class, () -> testInstance.getSubresource(fetcherResponse));
         MatcherAssert.assertThat(result.getMessage(), org.hamcrest.Matchers.containsString(error));
     }
 
@@ -89,7 +89,7 @@ class DefaultBDXRReaderTest {
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("service_group_urn_poland_ncpb"));
-        SMPServiceGroup serviceGroup = defaultBDXRReader.getServiceGroup(fetcherResponse);
+        SMPServiceGroup serviceGroup = defaultBDXRReader.getResource(fetcherResponse);
 
         assertNotNull(serviceGroup);
         assertNotNull(serviceGroup.getParticipantIdentifier());
@@ -108,7 +108,7 @@ class DefaultBDXRReaderTest {
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(null);
 
-        BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getServiceGroup(fetcherResponse));
+        BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getResource(fetcherResponse));
         assertEquals("Error occurred while retrieving the data!", result.getMessage());
     }
 
@@ -119,7 +119,7 @@ class DefaultBDXRReaderTest {
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_invalid_certificate"));
-        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getServiceMetadata(fetcherResponse);
+        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getSubresource(fetcherResponse);
 
         assertNotNull(serviceMetadata);
     }
@@ -141,7 +141,7 @@ class DefaultBDXRReaderTest {
 
         InputStream serviceMetadataStream = CommonUtil.getISForName(filename, standard);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
-        SMPServiceGroup serviceGroup = defaultBDXRReader.getServiceGroup(fetcherResponse);
+        SMPServiceGroup serviceGroup = defaultBDXRReader.getResource(fetcherResponse);
 
         assertNotNull(serviceGroup);
         assertEquals(serviceMetadataCount, serviceGroup.getDocumentIdentifiers().size());
@@ -169,7 +169,7 @@ class DefaultBDXRReaderTest {
 
         InputStream serviceMetadataStream = CommonUtil.getISForName(filename, standard);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
-        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getServiceMetadata(fetcherResponse);
+        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getSubresource(fetcherResponse);
 
         assertNotNull(serviceMetadata);
         assertEquals(1, serviceMetadata.getEndpoints().size());
@@ -199,7 +199,7 @@ class DefaultBDXRReaderTest {
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(null);
 
-        BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getServiceMetadata(fetcherResponse));
+        BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getSubresource(fetcherResponse));
         assertEquals("Error occurred while retrieving the data!", result.getMessage());
     }
 

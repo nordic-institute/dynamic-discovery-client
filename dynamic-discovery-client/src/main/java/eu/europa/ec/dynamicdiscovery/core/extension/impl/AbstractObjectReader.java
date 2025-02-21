@@ -22,7 +22,7 @@ package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.exception.BindException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -45,9 +45,9 @@ import java.io.OutputStream;
  */
 public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> {
     // The exception code to target action for the exception
-    SMPExceptionCode smpExceptionCode;
+    DDCExceptionCode smpExceptionCode;
 
-    protected AbstractObjectReader(SMPExceptionCode smpExceptionCode) {
+    protected AbstractObjectReader(DDCExceptionCode smpExceptionCode) {
         this.smpExceptionCode = smpExceptionCode;
     }
 
@@ -109,7 +109,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
             getMarshaller().marshal(sourceObject, document);
             return document;
         } catch (JAXBException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
+            throw new BindException(DDCExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
         }
     }
 }

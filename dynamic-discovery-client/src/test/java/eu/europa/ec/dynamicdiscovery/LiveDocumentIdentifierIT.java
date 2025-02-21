@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,12 +23,12 @@ import eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolSMPExtensi
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.WildcardUtil;
-import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,6 +63,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Purpose of this test is to perform live tests against the SMP service. The tests uses
+ * dns domain: acc.edelivery.tech.ec.europa.eu wiith NAPTR and CNAME DNS lookup types.
+ * The test is designed to loookup  Peppol SMP service metadata for a given participant identifier.
+ * <ul<
+ * <li>iso6523-actorid-upis::9925:EDELIVERY_TEST1</li>
+ * <li>iso6523-actorid-upis::9901:pint_c4_jp_sb</li>
+ * <li>iso6523-actorid-upis::9901:eDeliveryNotRegisteredParticipant</li>
+ * <li>iso6523-actorid-upis::9925:EDELIVERY_TEST3</li>
+ * </ul>
+ * Make sure participants exists in live SMP service with the given document identifier.
+ *
  * @author Cosmin Baciu
  * @since 2.1
  */
@@ -71,6 +81,7 @@ import static org.mockito.Mockito.verify;
 public class LiveDocumentIdentifierIT {
 
     static final Logger LOG = LoggerFactory.getLogger(LiveDocumentIdentifierIT.class);
+    private static final String EDELIVERY_TECH_EC_EUROPA_EU = "acc.edelivery.tech.ec.europa.eu";
 
     @Test
     void getAllDocumentIdentifiersForParticipantHavingInvoiceCapability() throws Exception {
@@ -135,12 +146,12 @@ public class LiveDocumentIdentifierIT {
         final DynamicDiscoveryService smpClient = createClient();
 
         //discover the participant document identifiers
-        SMPServiceGroup serviceGroup = smpClient.getServiceGroup(toCheckParticipantIdentifier);
-        List<SMPDocumentIdentifier> discoveredDocumentIdentifiers =serviceGroup!=null?serviceGroup.getDocumentIdentifiers(): Collections.emptyList();
+        SMPServiceGroup serviceGroup = smpClient.getResource(toCheckParticipantIdentifier);
+        List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = serviceGroup != null ? serviceGroup.getDocumentIdentifiers() : Collections.emptyList();
         assertEquals(expectedDocumentIdentifiers, discoveredDocumentIdentifiers.size());
 
 
-        toCheckDocumentIdentifierCapabilities.stream().forEach(smpDocumentIdentifier -> {
+        toCheckDocumentIdentifierCapabilities.forEach(smpDocumentIdentifier -> {
             try {
                 getAndAssertSMPDocumentIdentifier(
                         smpDocumentIdentifier,
@@ -165,23 +176,23 @@ public class LiveDocumentIdentifierIT {
                 .build();
 
         final DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
+                .addDnsLookupType(DNSLookupType.NAPTR)
                 .addDnsLookupType(DNSLookupType.CNAME)
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addTopDnsDomain(EDELIVERY_TECH_EC_EUROPA_EU)
                 .build();
-        final DefaultProvider defaultProvider = new DefaultProvider.Builder()
-                .metadataFetcher(urlFetcher)
-                .metadataReader(bdxReader)
-                .wildcardSchemes(Arrays.asList(PEPPOL_DOCTYPE_WILDCARD))
+        final DefaultDocumentRequestProvider defaultProvider = new DefaultDocumentRequestProvider.Builder()
+                .documentFetcher(urlFetcher)
+                .documentReader(bdxReader)
+                .wildcardSchemes(Collections.singletonList(PEPPOL_DOCTYPE_WILDCARD))
                 .build();
 
         //create the smp client
-        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-                .metadataLocator(defaultBDXRLocator)
-                .metadataReader(bdxReader)
-                .metadataFetcher(urlFetcher)
-                .metadataProvider(defaultProvider)
+        return new DynamicDiscoveryService.Builder()
+                .publisherLocator(defaultBDXRLocator)
+                .documentReader(bdxReader)
+                .documentFetcher(urlFetcher)
+                .documentRequestProvider(defaultProvider)
                 .build();
-        return smpClient;
     }
 
     private void getAndAssertSMPDocumentIdentifier(SMPDocumentIdentifier toCheckDocumentIdentifier,
@@ -197,7 +208,7 @@ public class LiveDocumentIdentifierIT {
         assertNotNull(discoveredDocumentIdentifier);
 
         //get the service metadata from SMP for the document identifier
-        final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(toCheckParticipantIdentifier, discoveredDocumentIdentifier);
+        final SMPServiceMetadata discoveredServiceMetadata = smpClient.getSubresource(toCheckParticipantIdentifier, discoveredDocumentIdentifier);
 
         //assertions
         assertNotNull(discoveredServiceMetadata);
@@ -263,12 +274,10 @@ public class LiveDocumentIdentifierIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notSupported",
                 BUSDOX_DOCID_QNS);
 
-        try {
-            final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(toCheckParticipantIdentifier, documentIdentifierNotRegisteredForParticipantBusdox);
-            fail("Should have thrown an exception");
-        } catch (DNSLookupException e) {
-            LOG.info("Expected: SMPServiceMeta with document identifier [{}] not found for participant [{}]", documentIdentifierNotRegisteredForParticipantBusdox, toCheckParticipantIdentifier);
-        }
+        assertThrows(DNSLookupException.class,
+                () -> smpClient.getSubresource(toCheckParticipantIdentifier, documentIdentifierNotRegisteredForParticipantBusdox),
+                "Expected: SMPServiceMeta with document identifier [" + documentIdentifierNotRegisteredForParticipantBusdox
+                        + "] not found for participant [" + toCheckParticipantIdentifier + "]");
     }
 
     @Test
@@ -286,7 +295,7 @@ public class LiveDocumentIdentifierIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1",
                 BUSDOX_DOCID_QNS);
 
-        final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(toCheckParticipantIdentifier, documentIdentifierNotRegisteredForParticipantBusdox);
+        final SMPServiceMetadata discoveredServiceMetadata = smpClient.getSubresource(toCheckParticipantIdentifier, documentIdentifierNotRegisteredForParticipantBusdox);
         assertNotNull(discoveredServiceMetadata);
     }
 
@@ -307,7 +316,7 @@ public class LiveDocumentIdentifierIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:peppol:pint:billing-3.0@jp:peppol-1",
                 PEPPOL_DOCTYPE_WILDCARD);
 
-        final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(toCheckParticipantIdentifier, toCheckDocumentIdentifier);
+        final SMPServiceMetadata discoveredServiceMetadata = smpClient.getSubresource(toCheckParticipantIdentifier, toCheckDocumentIdentifier);
         assertNotNull(discoveredServiceMetadata);
         assertTrue(StringUtils.containsIgnoreCase(toCheckDocumentIdentifier.getIdentifier(), new WildcardUtil().getValueUntilWildcardCharacter(discoveredServiceMetadata.getDocumentIdentifier().getIdentifier())));
     }
@@ -325,10 +334,9 @@ public class LiveDocumentIdentifierIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notExistent",
                 PEPPOL_DOCTYPE_WILDCARD);
 
-        final SMPServiceMetadataException exception = assertThrows(SMPServiceMetadataException.class, () -> {
-            final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(toCheckParticipantIdentifier, toCheckDocumentIdentifier);
-        });
-        assertEquals(SMPExceptionCode.SERVICE_METADATA, exception.getSmpExceptionCode());
+        final SMPServiceMetadataException exception = assertThrows(SMPServiceMetadataException.class,
+                () -> smpClient.getSubresource(toCheckParticipantIdentifier, toCheckDocumentIdentifier));
+        assertEquals(DDCExceptionCode.SERVICE_METADATA, exception.getSmpExceptionCode());
         assertTrue(exception.getMessage().contains("Could not find SMPServiceMetadata for participant"));
 
     }
@@ -346,11 +354,11 @@ public class LiveDocumentIdentifierIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notExistent",
                 PEPPOL_DOCTYPE_WILDCARD);
 
-        final DNSLookupException exception = assertThrows(DNSLookupException.class, () -> {
-            final SMPServiceMetadata discoveredServiceMetadata = smpClient.getServiceMetadata(toCheckParticipantIdentifier, toCheckDocumentIdentifier);
-        });
+        final DNSLookupException exception = assertThrows(DNSLookupException.class, () ->
+           smpClient.getSubresource(toCheckParticipantIdentifier, toCheckDocumentIdentifier)
+        );
         assertTrue(exception.getMessage().contains("Lookup [CNAME] for participant"));
-        assertEquals(SMPExceptionCode.SERVICE_GROUP, exception.getSmpExceptionCode());
+        assertEquals(DDCExceptionCode.SERVICE_GROUP, exception.getSmpExceptionCode());
 
     }
 
@@ -425,16 +433,16 @@ public class LiveDocumentIdentifierIT {
         final SMPServiceGroup serviceGroup = Mockito.mock(SMPServiceGroup.class);
         //record discovered supported documents
         Mockito.doReturn(supportedDocumentIdentifiers).when(serviceGroup).getDocumentIdentifiers();
-        Mockito.doReturn(serviceGroup).when(dynamicDiscovery).getServiceGroup(participantIdentifier);
+        Mockito.doReturn(serviceGroup).when(dynamicDiscovery).getResource(participantIdentifier);
 
         //END record mocks
 
         //call the method under test
-        dynamicDiscovery.getServiceMetadata(participantIdentifier, toCheckDocumentIdentifier);
+        dynamicDiscovery.getSubresource(participantIdentifier, toCheckDocumentIdentifier);
 
         //record capture
         ArgumentCaptor<SMPDocumentIdentifier> smpDocumentIdentifierArgumentCaptor = ArgumentCaptor.forClass(SMPDocumentIdentifier.class);
-        verify(dynamicDiscovery, times(1)).getServiceMetadata(ArgumentMatchers.any(), smpDocumentIdentifierArgumentCaptor.capture());
+        verify(dynamicDiscovery, times(1)).getSubresource(ArgumentMatchers.any(), smpDocumentIdentifierArgumentCaptor.capture());
 
         //we check the discovered SMPServiceMetadata
         final SMPDocumentIdentifier capturedSmpDocumentIdentifier = smpDocumentIdentifierArgumentCaptor.getValue();
@@ -444,8 +452,8 @@ public class LiveDocumentIdentifierIT {
     }
 
 
-    @Disabled
-    //Enable when testing looking up a participant while it is registered in the DNS. Useful to check if this participant is not cached for a long time in the DNS cache.
+    @Disabled("Enable when testing looking up a participant while it is registered in the DNS. " +
+            "Useful to check if this participant is not cached for a long time in the DNS cache.")
     @Test
     void lookupParticipantWhileItIsRegistered() throws Exception {
         final String toCheckParticipantIdentifierValue = "9925:EDELIVERY_TEST3";
@@ -453,12 +461,12 @@ public class LiveDocumentIdentifierIT {
 
         final DynamicDiscoveryService client = createClient();
         SMPParticipantIdentifier toCheckParticipantIdentifier = new SMPParticipantIdentifier(toCheckParticipantIdentifierValue, toCheckParticipantIdentifierScheme);
-
+        SMPServiceGroup serviceGroup = null;
         final long start = System.currentTimeMillis();
         for (int i = 0; i < 5000; i++) {
             LOG.info("Checking participant");
             try {
-                final SMPServiceGroup serviceGroup = client.getServiceGroup(toCheckParticipantIdentifier);
+                serviceGroup = client.getResource(toCheckParticipantIdentifier);
                 if (serviceGroup != null) {
                     final long duration = System.currentTimeMillis() - start;
                     LOG.info("Found participant [{}] after [{}] sec", serviceGroup, duration / 1000);
@@ -471,5 +479,6 @@ public class LiveDocumentIdentifierIT {
             LOG.info("Sleeping");
             Thread.sleep(5000);
         }
+        assertNotNull(serviceGroup);
     }
 }

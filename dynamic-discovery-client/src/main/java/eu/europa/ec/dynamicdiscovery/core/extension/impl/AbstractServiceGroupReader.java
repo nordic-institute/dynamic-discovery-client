@@ -21,7 +21,7 @@ package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
@@ -41,7 +41,7 @@ public abstract class AbstractServiceGroupReader<C> extends AbstractObjectReader
     static final Logger LOG = LoggerFactory.getLogger(AbstractServiceGroupReader.class);
 
     protected AbstractServiceGroupReader() {
-        super(SMPExceptionCode.SERVICE_GROUP);
+        super(DDCExceptionCode.SERVICE_GROUP);
     }
 
     @Override

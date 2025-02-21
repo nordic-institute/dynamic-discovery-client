@@ -22,12 +22,17 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher;
 import java.io.InputStream;
 
 /**
- * @author Flávio W. R. Santos
- * @author Erlend Klakegg Bergheim
+ * Response entity for the fetcher containing the target input stream,
+ *
+ *
+ * @author Flávio W. R. SANTOS
+ * @author Erlend KLAKEGG BERGHEIM
+ * @author Joze RIHTARSIC
+ * @since 1.0
  */
 public class FetcherResponse {
 
-    private InputStream inputStream;
+    private final InputStream inputStream;
 
     public FetcherResponse(InputStream inputStream) {
         this.inputStream = inputStream;

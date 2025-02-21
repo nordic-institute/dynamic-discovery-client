@@ -24,7 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Default implementation of the {@link IMetadataReader} interface. This class is
+ * Default implementation of the {@link ISMPDocumentReader} interface. This class is
  * responsible for reading the XML data from the response and returning the corresponding
  * object. The various XML types (OasisSMP 1.0, OasisSMP 2.0, etc.) are handled by the
  * extensions that are registered with the reader. The reader will delegate the parsing
@@ -49,11 +49,11 @@ import java.util.Optional;
  * It also validates the signature of the response if it is signed.
  * The list of trusted certificates is provided for the redirection case.
  *
- * @author Flávio W. R. Santos
- * @author Joze Rihtarsic
+ * @author Flávio W. R. SANTOS
+ * @author Joze RIHTARSIC
  * @since 1.0
  */
-public class DefaultBDXRReader extends AbstractXMLResponseReader implements IMetadataReader {
+public class DefaultBDXRReader extends AbstractXMLResponseReader implements ISMPDocumentReader {
     static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRReader.class);
     final ISignatureValidator signatureValidator;
     final List<IExtension> listExtensions = new ArrayList<>();
@@ -79,12 +79,12 @@ public class DefaultBDXRReader extends AbstractXMLResponseReader implements IMet
     }
 
     @Override
-    public SMPServiceGroup getServiceGroup(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException {
+    public SMPServiceGroup getResource(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException {
         return readObject(fetcherResponse, SMPServiceGroup.class, this.signatureValidator, context);
     }
 
     @Override
-    public SMPServiceMetadata getServiceMetadata(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException {
+    public SMPServiceMetadata getSubresource(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException {
         return readObject(fetcherResponse, SMPServiceMetadata.class, this.signatureValidator, context);
     }
 

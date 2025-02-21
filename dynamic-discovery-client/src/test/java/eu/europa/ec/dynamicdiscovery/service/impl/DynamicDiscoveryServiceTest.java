@@ -4,9 +4,9 @@ import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Exten
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolSMPExtension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
@@ -32,18 +32,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class DynamicDiscoveryServiceTest {
 
-    IMetadataFetcher metadataFetcher = Mockito.mock(IMetadataFetcher.class);
-    IMetadataLocator metadataLocator = Mockito.mock(IMetadataLocator.class);
-    IMetadataReader metadataReader = new DefaultBDXRReader.Builder()
+    IDocumentFetcher metadataFetcher = Mockito.mock(IDocumentFetcher.class);
+    IPublisherLocator metadataLocator = Mockito.mock(IPublisherLocator.class);
+    ISMPDocumentReader metadataReader = new DefaultBDXRReader.Builder()
             .addExtension(new OasisSMP10Extension())
             .addExtension(new OasisSMP20Extension())
             .addExtension(new PeppolSMPExtension())
             .build();
 
     DynamicDiscoveryService testInstance = new DynamicDiscoveryService.Builder()
-            .metadataLocator(metadataLocator)
-            .metadataFetcher(metadataFetcher)
-            .metadataReader(metadataReader)
+            .publisherLocator(metadataLocator)
+            .documentFetcher(metadataFetcher)
+            .documentReader(metadataReader)
             .build();
 
 

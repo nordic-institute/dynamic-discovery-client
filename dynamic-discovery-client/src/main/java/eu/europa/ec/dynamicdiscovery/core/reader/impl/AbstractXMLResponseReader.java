@@ -52,7 +52,7 @@ public abstract class AbstractXMLResponseReader {
     static final Logger LOG = LoggerFactory.getLogger(AbstractXMLResponseReader.class);
 
     private static final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
-    private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> createDocumentBuilder());
+    private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(AbstractXMLResponseReader::createDocumentBuilder);
 
     public static DocumentBuilder createDocumentBuilder() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -105,6 +105,13 @@ public abstract class AbstractXMLResponseReader {
 
     protected DocumentBuilder getDocumentBuilder() {
         return threadLocalDocumentBuilder.get();
+    }
+
+    /**\
+     * Method enables unload of the thread local document builder at the end of the thread.
+     */
+    public void unload() {
+        threadLocalDocumentBuilder.remove();
     }
 
 

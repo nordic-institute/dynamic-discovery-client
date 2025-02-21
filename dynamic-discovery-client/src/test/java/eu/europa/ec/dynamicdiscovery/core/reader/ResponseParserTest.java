@@ -48,7 +48,7 @@ class ResponseParserTest {
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
                 .build();
 
-        SMPServiceMetadata serviceMetadata = testInstance.getServiceMetadata(fetcherResponse);
+        SMPServiceMetadata serviceMetadata = testInstance.getSubresource(fetcherResponse);
         assertEquals("urn:poland:ncpb", serviceMetadata.getParticipantIdentifier().getIdentifier());
         assertEquals("ehealth-actorid-qns", serviceMetadata.getParticipantIdentifier().getScheme());
         assertEquals(1, serviceMetadata.getEndpoints().size());
@@ -64,7 +64,7 @@ class ResponseParserTest {
     void parseDocumentIdentifierTest() throws Exception {
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("service_group_urn_poland_ncpb"));
         DefaultBDXRReader responseParser = new DefaultBDXRReader.Builder().build();
-        SMPServiceGroup serviceGroup = responseParser.getServiceGroup(fetcherResponse);
+        SMPServiceGroup serviceGroup = responseParser.getResource(fetcherResponse);
         List<SMPDocumentIdentifier> documentIdentifiers = serviceGroup.getDocumentIdentifiers();
         assertEquals(2, documentIdentifiers.size());
         assertEquals("urn::epsos:services##epsos-21", documentIdentifiers.get(0).getIdentifier());
@@ -84,7 +84,7 @@ class ResponseParserTest {
                 .build();
 
         //when
-        SMPServiceMetadata serviceMetadata = testInstance.getServiceMetadata(fetcherResponse);
+        SMPServiceMetadata serviceMetadata = testInstance.getSubresource(fetcherResponse);
 
         //then
         byte[] certificate = serviceMetadata.unwrap(SignedServiceMetadata.class).getServiceMetadata().getServiceInformation().getProcessList().getProcesses().get(0).getServiceEndpointList().getEndpoints().get(0).getCertificate();
@@ -102,7 +102,7 @@ class ResponseParserTest {
                 .build();
 
         //when
-        SMPServiceMetadata serviceMetadata = testInstance.getServiceMetadata(fetcherResponse);
+        SMPServiceMetadata serviceMetadata = testInstance.getSubresource(fetcherResponse);
 
         //then
         byte[] certificate = serviceMetadata.unwrap(SignedServiceMetadata.class).getServiceMetadata().getServiceInformation().getProcessList().getProcesses().get(0).getServiceEndpointList().getEndpoints().get(0).getCertificate();
