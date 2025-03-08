@@ -92,7 +92,7 @@ class OasisSMP10ServiceGroupReaderTest {
         assertNotNull(result.getParticipantIdentifier());
         assertTrue(result.isWrapperFor(ServiceGroup.class));
         assertNotNull(result.unwrap(ServiceGroup.class));
-        assertEquals(PARTICIPANT_IDENTIFIER_ISO6253_01, result.getParticipantIdentifier());
+        assertEquals(PARTY_9925_0367302178_IDENTIFIER, result.getParticipantIdentifier());
         assertEquals(2, result.getDocumentIdentifiers().size());
         assertEquals(DOCUMENT_IDENTIFIER_001, result.getDocumentIdentifiers().get(0));
         assertEquals(DOCUMENT_IDENTIFIER_002, result.getDocumentIdentifiers().get(1));
@@ -108,7 +108,7 @@ class OasisSMP10ServiceGroupReaderTest {
         assertNotNull(result.getParticipantIdentifier());
         assertTrue(result.isWrapperFor(ServiceGroup.class));
         assertNotNull(result.unwrap(ServiceGroup.class));
-        assertEquals(PARTICIPANT_IDENTIFIER_ISO6253_01, result.getParticipantIdentifier());
+        assertEquals(PARTY_9925_0367302178_IDENTIFIER, result.getParticipantIdentifier());
         assertEquals(2, result.getDocumentIdentifiers().size());
         assertEquals(DOCUMENT_IDENTIFIER_001, result.getDocumentIdentifiers().get(0));
         assertEquals(DOCUMENT_IDENTIFIER_002, result.getDocumentIdentifiers().get(1));
@@ -135,9 +135,9 @@ class OasisSMP10ServiceGroupReaderTest {
         // given
         ServiceGroup serviceGroup = new ServiceGroup();
         ServiceMetadataReferenceType reference1 = new ServiceMetadataReferenceType();
-        reference1.setHref(SMP_DOMAIN_ALIAS + SERVICE_METADATA_URL_URN_POLAND_NCPB);
+        reference1.setHref(PUBLISHER_URL_02 + SERVICE_METADATA_URL_URN_POLAND_NCPB);
         ServiceMetadataReferenceType reference2 = new ServiceMetadataReferenceType();
-        reference2.setHref(SMP_DOMAIN_ALIAS + SERVICE_METADATA_URL_URN_POLAND_NCPB + "%3A%3Aversion-002");
+        reference2.setHref(PUBLISHER_URL_02 + SERVICE_METADATA_URL_URN_POLAND_NCPB + "%3A%3Aversion-002");
         ServiceMetadataReferenceCollectionType sct = new ServiceMetadataReferenceCollectionType();
         sct.getServiceMetadataReferences().addAll(Arrays.asList(reference1, reference2));
         serviceGroup.setServiceMetadataReferenceCollection(sct);
@@ -161,7 +161,7 @@ class OasisSMP10ServiceGroupReaderTest {
     void gestGetDocumentIdentifierFromReference() {
         // given
         ServiceMetadataReferenceType reference = new ServiceMetadataReferenceType();
-        reference.setHref(SMP_DOMAIN_ALIAS + SERVICE_METADATA_URL_URN_POLAND_NCPB);
+        reference.setHref(PUBLISHER_URL_02 + SERVICE_METADATA_URL_URN_POLAND_NCPB);
         // when
         SMPDocumentIdentifier result = testInstance.getDocumentIdentifierFromReference(reference);
         // then

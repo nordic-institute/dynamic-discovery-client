@@ -110,16 +110,27 @@ public class URLFetcherMock implements IDocumentFetcher {
         final Map.Entry<String, byte[]> defaultEntry = responses.entrySet().iterator().next();
 
         //default matching
-        if (StringUtils.startsWithAny(uri.toString(), smpAlias, TestCaseConstants.SMP_DOMAIN_ALIAS, TestCaseConstants.SMP_DOMAIN, TestCaseConstants.SMP_STATIC_DOMAIN)) {
+        if (StringUtils.startsWithAny(uri.toString(), smpAlias, TestCaseConstants.PUBLISHER_URL_02, TestCaseConstants.PUBLISHER_URL_01, TestCaseConstants.SMP_STATIC_DOMAIN)) {
             return new FetcherResponse(new ByteArrayInputStream(defaultEntry.getValue()));
         }
 
         throw new DNSLookupException("Not supported.");
     }
 
+    /**
+     * The matches method checks if a given uriPath matches any of the service URLs stored in the responses map.
+     * It supports both exact matches and wildcard matches. Here's a breakdown of the method:
+     * @param uriPath The uriPath to be checked
+     * @return True if the uriPath matches any of the service URLs stored in the responses map, false otherwise
+     */
     protected boolean matches(String uriPath) {
+
         for (Map.Entry<String, byte[]> response : responses.entrySet()) {
             final String serviceURL = response.getKey();
+
+            if (StringUtils.equals(uriPath, serviceURL)) {
+                return true;
+            }
 
             //wildcard match
             if (uriPath.contains(WILDCARD_SCHEME) || uriPath.contains(PEPPOL_DOCTYPE_WILDCARD)) {
@@ -134,10 +145,6 @@ public class URLFetcherMock implements IDocumentFetcher {
                 WildcardUtil wildcardUtil = new WildcardUtil();
                 final String documentIdentifierWildcardPrefix = wildcardUtil.getValueUntilWildcardCharacter(serviceURLDecoded);
                 if (uriPathDecoded.contains(documentIdentifierWildcardPrefix)) {
-                    return true;
-                }
-            } else {//exact match
-                if (StringUtils.equals(uriPath, serviceURL)) {
                     return true;
                 }
             }

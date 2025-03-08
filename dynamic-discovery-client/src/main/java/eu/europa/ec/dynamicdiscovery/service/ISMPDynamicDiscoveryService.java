@@ -19,6 +19,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.service;
 
+import eu.europa.ec.dynamicdiscovery.exception.DDCCertificateNotFoundException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
@@ -43,17 +44,58 @@ public interface ISMPDynamicDiscoveryService extends IDynamicDiscoveryService<SM
 
     void setDefaultEndpointForEmptyProcess(boolean defaultEndpointForEmptyProcess);
 
+    /**
+     * Method returns endpoint for given participant, document, process identifiers and transport profile.
+     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     *
+     * @param participantIdentifier participant identifier to discover endpoint
+     * @param documentIdentifier the target document identifier (or action identifier for AS4)
+     * @param processId process identifier (or service identifier for AS4)
+     * @param processIdScheme process identifier scheme
+     * @param transportProfile transport profile to define the transport protocol
+     * @return endpoint for given parameters or null if no endpoint is found.
+     * @throws TechnicalException if any error occurs during the lookup
+     */
     SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier,
                                  SMPDocumentIdentifier documentIdentifier,
                                  String processId, String processIdScheme, String transportProfile) throws TechnicalException;
 
+    /**
+     * Method returns endpoint for given serviceMetadata with process identifiers and transport profile.
+     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     *
+     * @param serviceMetadata serviceMetadata
+     * @param processId process identifier (or service identifier for AS4)
+     * @param processIdScheme process identifier scheme
+     * @param transportProfile transport profile to define the transport protocol
+     * @return endpoint for given parameters or null if no endpoint is found.
+     * @throws TechnicalException if any error occurs during the lookup
+     */
     SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
                                  String processId, String processIdScheme, String transportProfile) throws TechnicalException;
 
 
+    /**
+     * Check if the certificate exists in the dynamic discovery infrastructure for
+     * the given participant, document, process and transport profile.
+     * Note: The method does not check the certificate validity and additional
+     * trustability such as "trust-anchor exists in clients truststore.
+     * The method throws TechnicalException in case of technical error or
+     * DDCCertificateNotFoundException if the certificate is not found.
+     *
+     * @param certificate certificate to validate
+     * @param certificateCode certificate code. If the certificate code is null/empty/blank, then any certificate is accepted.
+     * @param participantIdentifier participant identifier
+     * @param documentIdentifier document identifier
+     * @param processIdentifier process identifier
+     * @param transportProfile transport profile
+     * @throws TechnicalException if the certificate is not valid
+     * @throws DDCCertificateNotFoundException if the certificate is not found
+     */
     void certificateExists(X509Certificate certificate, String certificateCode,
                            SMPParticipantIdentifier participantIdentifier,
                            SMPDocumentIdentifier documentIdentifier,
-                           SMPProcessIdentifier processIdentifier, SMPTransportProfile transportProfile) throws TechnicalException;
+                           SMPProcessIdentifier processIdentifier,
+                           SMPTransportProfile transportProfile) throws TechnicalException;
 
 }

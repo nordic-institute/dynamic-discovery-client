@@ -6,6 +6,7 @@ import eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolSMPExtensi
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
@@ -20,27 +21,28 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
+import static eu.europa.ec.dynamicdiscovery.util.DNSUtils.createMockPublisherLookupNaptrResult;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class DynamicDiscoveryServiceTest {
+class DynamicDiscoveryServiceImplTest {
 
     IDocumentFetcher metadataFetcher = Mockito.mock(IDocumentFetcher.class);
     IPublisherLocator metadataLocator = Mockito.mock(IPublisherLocator.class);
     ISMPDocumentReader metadataReader = new DefaultBDXRReader.Builder()
-            .addExtension(new OasisSMP10Extension())
-            .addExtension(new OasisSMP20Extension())
-            .addExtension(new PeppolSMPExtension())
             .build();
 
     DynamicDiscoveryService testInstance = new DynamicDiscoveryService.Builder()
+            .addExtension(new OasisSMP10Extension())
+            .addExtension(new OasisSMP20Extension())
+            .addExtension(new PeppolSMPExtension())
             .publisherLocator(metadataLocator)
             .documentFetcher(metadataFetcher)
             .documentReader(metadataReader)
@@ -63,17 +65,17 @@ class DynamicDiscoveryServiceTest {
                     "https://localhost:8080/as4"})
     void testDiscoverEndpoint(String standard, String resourceName, String processIdentifierValue, String processIdentifierScheme, String transportProfileID, String result) throws TechnicalException, URISyntaxException {
 
-        URI smpURI = new URI("http://example.local:1234/");
+        String smpURI = "http://example.local:1234/";
         FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
         SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
         SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
         InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
         assertNotNull(serviceMetadataStream);
         // given
-        Mockito.doReturn(smpURI).when(metadataLocator).lookup(Mockito.any());
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(new SMPParticipantIdentifier(processIdentifierValue, processIdentifierScheme), smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
         Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(Mockito.any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
-
         // when
         SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
                 processIdentifierValue, processIdentifierScheme, transportProfileID);
@@ -101,14 +103,15 @@ class DynamicDiscoveryServiceTest {
     void testDiscoverEndpointWithRedirectDisabled(String standard, String resourceName, String redirectURL) throws TechnicalException, URISyntaxException {
 
         String anyString = "anyString";
-        URI smpURI = new URI("http://example.local:1234/");
+        String smpURI = "http://example.local:1234/";
         FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
         SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
         SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
         InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
         assertNotNull(serviceMetadataStream);
         // given
-        Mockito.doReturn(smpURI).when(metadataLocator).lookup(Mockito.any());
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
         Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(Mockito.any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
 
@@ -140,7 +143,7 @@ class DynamicDiscoveryServiceTest {
     void testDiscoverEndpointRedirectionEnabled(String standard, String resourceName,
                                                 String redirectedResourceName, String processIdentifierValue, String processIdentifierScheme, String transportProfileID, String result) throws TechnicalException, URISyntaxException {
 
-        URI smpURI = new URI("http://example.local:1234/");
+        String smpURI = "http://example.local:1234/";
         FetcherResponse fetcherResponse1 = Mockito.mock(FetcherResponse.class);
         FetcherResponse fetcherResponse2 = Mockito.mock(FetcherResponse.class);
         SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
@@ -149,7 +152,8 @@ class DynamicDiscoveryServiceTest {
         InputStream serviceMetadataRedirectedStream = getResourceAsStream(standard, redirectedResourceName);
 
         // given
-        Mockito.doReturn(smpURI).when(metadataLocator).lookup(Mockito.any());
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
         // first return serviceMetadataStream and then serviceMetadataRedirectedStream
         Mockito.doReturn(fetcherResponse1, fetcherResponse2).when(metadataFetcher).fetch(Mockito.any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse1).getInputStream();
@@ -170,12 +174,6 @@ class DynamicDiscoveryServiceTest {
         assertEquals(processIdentifierScheme, trim(endpoint.getProcessIdentifier().getScheme()));
         assertNotNull(endpoint.getCertificate());
     }
-
-    private static InputStream getResourceAsStream(String standard, String resourceName) {
-        return DynamicDiscoveryServiceTest.class
-                .getResourceAsStream("/response/" + standard + "/" + resourceName + ".xml");
-    }
-
 
 
     @ParameterizedTest
@@ -199,9 +197,9 @@ class DynamicDiscoveryServiceTest {
                                String certificateName, String certificateCode,
                                String processIdentifierValue, String processIdentifierScheme, String transportProfileID, String result) throws TechnicalException, URISyntaxException, IOException, CertificateException {
         // load certificate from string
-        X509Certificate certificate =  readCertificate(certificateName);
+        X509Certificate certificate = readCertificate(certificateName);
 
-        URI smpURI = new URI("http://example.local:1234/");
+        String smpURI = "http://example.local:1234/";
         FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
         SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
         SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
@@ -210,7 +208,8 @@ class DynamicDiscoveryServiceTest {
         InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
         assertNotNull(serviceMetadataStream);
         // given
-        Mockito.doReturn(smpURI).when(metadataLocator).lookup(Mockito.any());
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
         Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(Mockito.any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
 
@@ -221,10 +220,14 @@ class DynamicDiscoveryServiceTest {
     }
 
 
+    private static InputStream getResourceAsStream(String standard, String resourceName) {
+        return DynamicDiscoveryServiceImplTest.class
+                .getResourceAsStream("/response/" + standard + "/" + resourceName + ".xml");
+    }
 
     public static X509Certificate readCertificate(String certName) throws CertificateException, IOException {
         String certificateResource = "/certificate/" + certName;
-        InputStream certificateStream = DynamicDiscoveryServiceTest.class.getResource
+        InputStream certificateStream = DynamicDiscoveryServiceImplTest.class.getResource
                 (certificateResource).openStream();
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         return (X509Certificate) factory.generateCertificate(certificateStream);

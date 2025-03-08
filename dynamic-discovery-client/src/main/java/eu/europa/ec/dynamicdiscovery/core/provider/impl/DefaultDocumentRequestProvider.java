@@ -19,25 +19,21 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.provider.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
-import eu.europa.ec.dynamicdiscovery.core.provider.WildcardUtil;
-import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
-import eu.europa.ec.dynamicdiscovery.exception.DDCInvalidConfigurationException;
-import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
-import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
+import eu.europa.ec.dynamicdiscovery.core.provider.PublisherRequest;
+import eu.europa.ec.dynamicdiscovery.exception.DDCInvalidDataException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.DocumentIdentifierFormatter;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.prependIfMissing;
 
 /**
  * Default implementation of the {@link IDocumentRequestProvider} interface. This implementation is responsible
@@ -53,155 +49,157 @@ import java.util.List;
  * @since 1.0
  */
 public class DefaultDocumentRequestProvider implements IDocumentRequestProvider {
+    private static final String URL_PATH_SEPARATOR = "/";
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultDocumentRequestProvider.class);
 
-    ParticipantIdentifierFormatter resourceIdentifierFormatter = new ParticipantIdentifierFormatter();
-    DocumentIdentifierFormatter subresourceIdentifierFormatter = new DocumentIdentifierFormatter();
-
-    WildcardUtil wildcardUtil = new WildcardUtil();
-
-    protected IDocumentFetcher documentFetcher;
-    protected ISMPDocumentReader documentReader;
-    protected List<String> wildcardSchemes;
+    ParticipantIdentifierFormatter participantIdentifierFormatter;
+    DocumentIdentifierFormatter documentIdentifierFormatter;
 
     protected DefaultDocumentRequestProvider(Builder builder) {
-        this.documentFetcher = builder.documentFetcher;
-        this.documentReader = builder.documentReader;
-        this.wildcardSchemes = builder.wildcardSchemes;
+        this.participantIdentifierFormatter = builder.resourceIdentifierFormatter;
+        this.documentIdentifierFormatter = builder.subresourceIdentifierFormatter;
+    }
+
+    /**
+     * Method builds publisher URL from provided parameters. If the publisherURI
+     * ends with the contextPath, then the contextPath is not appended.
+     *
+     * @param publisher       - the publisher lookup result.
+     * @param resourceContext - the context path of the resource.
+     * @param identifier      the resource/participant  identifying the document REST resource.
+     * @return URI of the document REST resource.
+     */
+    @Override
+    public PublisherRequest createRequestForResource(PublisherLookupResult publisher, String resourceContext, SMPParticipantIdentifier identifier) {
+        LOG.debug("Creating request for resource with identifier [{}] and context [{}]", identifier, resourceContext);
+        String encodedIdentifier = identifier == null ? "" : participantIdentifierFormatter.urlEncodedFormat(identifier);
+        return createRequest(publisher, resourceContext, encodedIdentifier);
+    }
+
+    /**
+     * Method builds HTTP GET request, where context and identifier are prepend to baseURI.
+     *
+     * @param publisherData     - the publisher lookup result.
+     * @param resourceContext   - the context path of the resource.
+     * @param encodedIdentifier the URL encoded identifier. .
+     * @return URI of the document REST resource.
+     * @throws DDCInvalidDataException if the baseURI is null or the identifier is null or empty.
+     */
+    protected PublisherRequest createRequest(PublisherLookupResult publisherData, String resourceContext, String encodedIdentifier) {
+        if (publisherData == null || publisherData.getUrl() == null) {
+            throw new DDCInvalidDataException("Base URI cannot be null");
+        }
+        URI baseURI = publisherData.getUrl();
+        if (StringUtils.isBlank(encodedIdentifier)) {
+            throw new DDCInvalidDataException("Identifier cannot be null or empty");
+        }
+        URI result = createRequestURI(baseURI, resourceContext, encodedIdentifier);
+        return new PublisherRequest(result, publisherData);
+    }
+
+    /**
+     * Method builds URI with adding  context and identifier to the baseURI.
+     *
+     * @param baseURI           - the base URI
+     * @param resourceContext   - the context path of the resource.
+     * @param encodedIdentifier - the URL encoded identifier.
+     * @return
+     */
+    protected URI createRequestURI(URI baseURI, String resourceContext, String encodedIdentifier) {
+        String contextPath = StringUtils.isBlank(resourceContext) ?
+                URL_PATH_SEPARATOR : prependIfMissing(StringUtils.removeEnd(resourceContext, URL_PATH_SEPARATOR), URL_PATH_SEPARATOR);
+        String baseURIPath = StringUtils.removeEnd(baseURI.getRawPath(), URL_PATH_SEPARATOR);
+        URI result = StringUtils.endsWith(baseURIPath, contextPath) ? baseURI :
+                baseURI.resolve(baseURIPath + contextPath);
+        return result.resolve(result + prependIfMissing(encodedIdentifier, URL_PATH_SEPARATOR)).normalize();
     }
 
     @Override
-    public URI createRequestForResource(URI smpURI, SMPParticipantIdentifier participantIdentifier) {
-        String participantPathParameter = resourceIdentifierFormatter.urlEncodedFormat(participantIdentifier);
-        return URI.create(smpURI.toString() + String.format("/%s", participantPathParameter)).normalize();
-    }
+    public PublisherRequest createRequestForSubresource(PublisherLookupResult publisherData,
+                                                        String resourceContext, SMPParticipantIdentifier participantIdentifier,
+                                                        String subresourceContext, SMPDocumentIdentifier documentIdentifier) {
 
-    @Override
-    public URI createRequestForSubresource(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
-        if (wildcardUtil.isWildcardScheme(wildcardSchemes, documentIdentifier.getScheme())) {
-            //get with wildcard match
-            return getDocumentIdentifierWithWildcardMatch(smpURI, participantIdentifier, documentIdentifier);
+        if (documentIdentifier == null) {
+            throw new DDCInvalidDataException("Can not create publisher request for subresource for null identifier");
         }
 
+        PublisherRequest resourceRequest = createRequestForResource(publisherData, resourceContext, participantIdentifier);
+        return createRequestForSubresource(resourceRequest, subresourceContext, documentIdentifier);
+    }
+
+
+    @Override
+    public PublisherRequest createRequestForSubresource(PublisherRequest resourceRequest,
+                                                        String subresourceContext,
+                                                        SMPDocumentIdentifier documentIdentifier) {
+
+        LOG.debug("Creating request for subresource with identifier [{}] and subresource context [{}]", documentIdentifier, subresourceContext);
+        if (documentIdentifier == null) {
+            throw new DDCInvalidDataException("Can not create publisher request for subresource for null identifier");
+        }
         //get with exact match
-        return getDocumentIdentifierWithExactMatch(smpURI, participantIdentifier, documentIdentifier);
+        String encodedIdentifier = documentIdentifierFormatter.urlEncodedFormat(documentIdentifier);
+        URI result = createRequestURI(resourceRequest.getResourceUri(), subresourceContext, encodedIdentifier);
+        resourceRequest.setSubresourceUri(result);
+        resourceRequest.setSubresourceIdentifier(documentIdentifier);
+        return resourceRequest;
     }
 
-
-    protected URI getDocumentIdentifierWithExactMatch(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) {
-        LOG.debug("Getting document identifier URI with exact match");
-
-        String participantPathParameter = resourceIdentifierFormatter.urlEncodedFormat(participantIdentifier);
-        String documentPathParameter = subresourceIdentifierFormatter.urlEncodedFormat(documentIdentifier);
-        final URI uriNormalized = URI.create(smpURI.toString() + String.format("/%s/services/%s", participantPathParameter, documentPathParameter)).normalize();
-
-        LOG.debug("Retrieved document identifier URI with exact match [{}]", uriNormalized);
-        return uriNormalized;
-    }
-
-    protected URI getDocumentIdentifierWithWildcardMatch(URI smpURI, SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
-        LOG.debug("Getting document identifier URI with wildcard match");
-
-        URI participantUnderSmpURI = createRequestForResource(smpURI, participantIdentifier);
-        LOG.info("Get participant data / documents for URI: [{}].", participantUnderSmpURI);
-        final FetcherResponse fetcherResponse = documentFetcher.fetch(participantUnderSmpURI);
-        final SMPServiceGroup serviceGroup = documentReader.getResource(fetcherResponse);
-
-        //the document identifiers supported by the participant
-        final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = serviceGroup.getDocumentIdentifiers();
-
-        final SMPDocumentIdentifier discoveredWildcardDocumentIdentifier = getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(discoveredDocumentIdentifiers, participantIdentifier, documentIdentifier);
-        if (discoveredWildcardDocumentIdentifier != null) {
-            LOG.debug("Found SMPDocumentIdentifier wildcard match [{}] for participant [{}] and document identifier [{}]. Fetching from SMP", discoveredWildcardDocumentIdentifier, participantIdentifier, documentIdentifier);
-            return getDocumentIdentifierWithExactMatch(smpURI, participantIdentifier, discoveredWildcardDocumentIdentifier);
-        }
-        throw new SMPServiceMetadataException(DDCExceptionCode.SERVICE_METADATA, "Could not find SMPServiceMetadata for participant [" + participantIdentifier + "] and document identifier [" + documentIdentifier + "]");
-    }
-
-    protected SMPDocumentIdentifier getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
-                                                                                                       SMPParticipantIdentifier participantIdentifier,
-                                                                                                       SMPDocumentIdentifier documentIdentifierToCheck) {
-        final SMPDocumentIdentifier wildcardDocumentIdentifierWithExactMatch = wildcardUtil.getWildcardDocumentIdentifierWithExactMatch(discoveredDocumentIdentifiers, documentIdentifierToCheck);
-        if (wildcardDocumentIdentifierWithExactMatch != null) {
-            LOG.debug("Found SMPDocumentIdentifier wildcard scheme with exact match [{}] for participant [{}] and document identifier [{}].", wildcardDocumentIdentifierWithExactMatch, participantIdentifier, documentIdentifierToCheck);
-            return wildcardDocumentIdentifierWithExactMatch;
-        }
-
-        final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = wildcardUtil.getWildcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifierToCheck);
-        if (wildcardDocumentIdentifierWithLongestMatch != null) {
-            LOG.debug("Found SMPDocumentIdentifier wildcard scheme with wildcard match [{}] for participant [{}] and document identifier [{}].", wildcardDocumentIdentifierWithLongestMatch, participantIdentifier, documentIdentifierToCheck);
-            return wildcardDocumentIdentifierWithLongestMatch;
-        }
-        return null;
-    }
 
     public String format(SMPParticipantIdentifier identifier) {
-        return resourceIdentifierFormatter.format(identifier);
+        return participantIdentifierFormatter.format(identifier);
     }
 
     public String urlEncodedFormat(SMPParticipantIdentifier identifier) {
-        return resourceIdentifierFormatter.urlEncodedFormat(identifier);
+        return participantIdentifierFormatter.urlEncodedFormat(identifier);
     }
 
     public String format(SMPDocumentIdentifier identifier) {
-        return subresourceIdentifierFormatter.format(identifier);
+        return documentIdentifierFormatter.format(identifier);
     }
 
     public String urlEncodedFormat(SMPDocumentIdentifier identifier) {
-        return subresourceIdentifierFormatter.urlEncodedFormat(identifier);
-    }
-
-    public IDocumentFetcher getDocumentFetcher() {
-        return documentFetcher;
-    }
-
-    public List<String> getWildcardSchemes() {
-        return wildcardSchemes;
-    }
-
-    public void setWildcardSchemes(List<String> wildcardSchemes) {
-        this.wildcardSchemes = wildcardSchemes;
-    }
-
-    public ISMPDocumentReader getDocumentReader() {
-        return documentReader;
+        return documentIdentifierFormatter.urlEncodedFormat(identifier);
     }
 
 
+    /**
+     * The builder is responsible for creating  the instance of the
+     * {@link DefaultDocumentRequestProvider} with the provided configuration.
+     * If the identifiers formatters are not provided, the default ones will be used.
+     */
     public static class Builder {
 
-        protected IDocumentFetcher documentFetcher;
-        protected ISMPDocumentReader documentReader;
-        protected List<String> wildcardSchemes;
 
-        public DefaultDocumentRequestProvider.Builder documentFetcher(IDocumentFetcher metadataFetcher) {
-            this.documentFetcher = metadataFetcher;
+        protected ParticipantIdentifierFormatter resourceIdentifierFormatter;
+        protected DocumentIdentifierFormatter subresourceIdentifierFormatter;
+
+        public DefaultDocumentRequestProvider.Builder resourceIdentifierFormatter(ParticipantIdentifierFormatter resourceIdentifierFormatter) {
+            this.resourceIdentifierFormatter = resourceIdentifierFormatter;
             return this;
         }
 
-        public DefaultDocumentRequestProvider.Builder documentReader(ISMPDocumentReader metadataReader) {
-            this.documentReader = metadataReader;
-            return this;
-        }
-
-        public DefaultDocumentRequestProvider.Builder wildcardSchemes(List<String> wildcardSchemes) {
-            this.wildcardSchemes = wildcardSchemes;
+        public DefaultDocumentRequestProvider.Builder subresourceIdentifierFormatter(DocumentIdentifierFormatter subresourceIdentifierFormatter) {
+            this.subresourceIdentifierFormatter = subresourceIdentifierFormatter;
             return this;
         }
 
         public DefaultDocumentRequestProvider build() {
-            if (this.wildcardSchemes != null && !this.wildcardSchemes.isEmpty()) {
-                if (this.documentReader == null) {
-                    throw new DDCInvalidConfigurationException("IMetadataReader is mandatory with use of the wildcardSchemes!");
-                }
-                if (this.documentFetcher == null) {
-                    throw new DDCInvalidConfigurationException("IMetadataFetcher is mandatory with use of the wildcardSchemes");
-                }
-            }
+            // validate the configuration
+            validate();
+
             return new DefaultDocumentRequestProvider(this);
         }
 
+        private void validate() {
+            //if no formatters are provided, use the default ones
+            if (this.resourceIdentifierFormatter == null) {
+                this.resourceIdentifierFormatter = new ParticipantIdentifierFormatter();
+            }
+            if (this.subresourceIdentifierFormatter == null) {
+                this.subresourceIdentifierFormatter = new DocumentIdentifierFormatter();
+            }
+        }
     }
-
 }

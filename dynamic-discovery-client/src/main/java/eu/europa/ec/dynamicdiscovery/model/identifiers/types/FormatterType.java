@@ -58,8 +58,9 @@ public interface FormatterType {
 
 
     /**
-     * Method  returns true if identifier is supported by the formatter for parsing and formatting, else it returns false. The mehtod formats the value before checking with
-     * method boolean isType(final String value)
+     * Method  returns true if identifier is supported by the formatter for parsing
+     * and formatting, else it returns false. The method formats the value before
+     * checking with method boolean isType(final String value)
      *
      * @param scheme     identifier scheme part
      * @param identifier identifier value
@@ -69,17 +70,38 @@ public interface FormatterType {
         return isType(format(scheme, identifier));
     }
 
-    boolean isWildcardEnabled();
-
-    void setWildcardEnabled(boolean wildcardEnabled);
-
     boolean isSchemeMandatory();
+    void setSchemeMandatory(boolean schemeMandatory);
 
     Integer getSchemeMaxLength();
+    void setSchemeMaxLength(Integer schemeMaxLength);
 
     Integer getValueMaxLength();
+    void setValueMaxLength(Integer valueMaxLength);
 
     Pattern getValueValidationPattern();
+    void setValueValidationPattern(Pattern valueRegExp);
+
+    Pattern getSchemeValidationPattern();
+    void setSchemeValidationPattern(Pattern valueRegExp);
+
+    /**
+     * It enables/disables wildcard support. If enabled, the formatter
+     * will use wildcard character '* when generating DNS lookup if that
+     * is set in the identifier value, else it will use the actual value.
+     * The feature was specific for Peppol SMP technical specification and is deprecated.
+     * @return true if wildcard is enabled, else false
+     */
+    @Deprecated
+    boolean isWildcardEnabled();
+    /**
+     * Feature which enables/disables wildcard support. If enabled, the formatter will use wildcard character '* when generating DNS lookup if that
+     * is set in the identifier value, else it will use the actual value.
+     * The feature was specific for Peppol SMP technical specification and is deprecated.
+     * @return true if wildcard is enabled, else false
+     */
+    @Deprecated
+    void setWildcardEnabled(boolean wildcardEnabled);
 
     String format(final String scheme, final String identifier);
 
@@ -176,12 +198,12 @@ public interface FormatterType {
         }
         Pattern valueValidationPattern = getValueValidationPattern();
         if (trimmedValue != null && valueValidationPattern != null && !valueValidationPattern.matcher(trimmedValue).matches()) {
-            throw new MalformedIdentifierException(String.format("Identifier value " + trimmedValue + " is illegal."));
+            throw new MalformedIdentifierException(String.format("Identifier value [" + trimmedValue + "] is illegal."));
         }
     }
 
     default String getInvalidSchemeMessage(String scheme, String identifier) {
-        return "Invalid Identifier: [" + identifier + "]. Invalid scheme [" + scheme + "]!";
+        return "Identifier: [" + identifier + "] has invalid scheme [" + scheme + "] (Check the length or scheme pattern)!";
     }
 
 }

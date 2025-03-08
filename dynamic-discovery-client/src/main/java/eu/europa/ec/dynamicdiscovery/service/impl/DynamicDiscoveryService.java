@@ -19,15 +19,22 @@
  */
 package eu.europa.ec.dynamicdiscovery.service.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.SMPParticipantIdentifierLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.PublisherRequest;
+import eu.europa.ec.dynamicdiscovery.core.provider.WildcardUtil;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.IDocumentReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
+import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.*;
 import eu.europa.ec.dynamicdiscovery.model.*;
@@ -36,15 +43,14 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.service.ISMPDynamicDiscoveryService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext.CertificateValidationStrategy.*;
@@ -71,6 +77,11 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     private final IDocumentFetcher documentFetcher;
     private final ISMPDocumentReader documentReader;
 
+    WildcardUtil wildcardUtil = new WildcardUtil();
+    protected List<String> wildcardSubresourceSchemes = new ArrayList<>();
+
+    final List<IExtension> listExtensions = new ArrayList<>();
+
     boolean redirectionEnabled = false;
     boolean defaultEndpointForEmptyProcess = false;
 
@@ -79,6 +90,8 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         this.documentRequestProvider = builder.documentRequestProvider;
         this.documentFetcher = builder.documentFetcher;
         this.documentReader = builder.documentReader;
+        this.listExtensions.addAll(builder.listExtensions);
+        this.wildcardSubresourceSchemes.addAll(builder.wildcardSubresourceSchemes);
     }
 
     @Override
@@ -93,29 +106,211 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
 
     @Override
     public SMPServiceGroup getResource(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
-        final SMPParticipantIdentifierLookupResult lookupParticipantInSMP = lookupParticipantInSMP(participantIdentifier);
-        final SMPServiceGroup serviceGroup = documentReader.getResource(lookupParticipantInSMP.getFetcherResponse());
-        serviceGroup.setServiceGroupSmpURI(lookupParticipantInSMP.getParticipantUnderSmpURI());
-        return serviceGroup;
+        final FetcherResponse fetcherResponse = retrieveResourceForIdentifier(participantIdentifier);
+        if (fetcherResponse == null) {
+            return null;
+        }
+        // if only target extension
+        List<IExtension> filteredExtensions = getExtensions().stream().filter(
+                        extension -> StringUtils.equals(extension.getExtensionIdentifier(),
+                                fetcherResponse.getExtensionIdentifier()))
+                .collect(Collectors.toList());
+
+
+        return documentReader.getResource(fetcherResponse, filteredExtensions);
     }
+
 
     @Override
     public SMPServiceMetadata getSubresource(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
-        final FetcherResponse fetcherResponseForServiceMetadata = getFetcherResponseForServiceMetadata(participantIdentifier, documentIdentifier);
-        return documentReader.getSubresource(fetcherResponseForServiceMetadata);
+        final FetcherResponse fetcherResponse = retrieveSubresourceForIdentifiers(participantIdentifier, documentIdentifier);
+        return documentReader.getSubresource(fetcherResponse, getExtensions());
     }
 
     /**
-     * Method returns endpoint for given participant, document, process identifiers and transport profile.
-     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     * Method retrieves the resource for the (participant) identifier. First it lookup
+     * the publisher address for given resource/participant identifier, and then follows
+     * the list of registered extensions to and tries to fetch the data for the resource.
+     * The method returns first successfully downloaded resource or null.
      *
-     * @param participantIdentifier participant identifier to discover endpoint
-     * @param documentIdentifier the target document identifier (or action identifier for AS4)
-     * @param processId process identifier (or service identifier for AS4)
-     * @param processIdScheme process identifier scheme
-     * @param transportProfile transport profile to define the transport protocol
-     * @return endpoint for given parameters or null if no endpoint is found.
-     * @throws TechnicalException if any error occurs during the lookup
+     * @param identifier the participant identifier
+     * @return the first discovered document from the publisher
+     * @throws TechnicalException in case of any technical error during the lookup process
+     */
+    protected FetcherResponse retrieveResourceForIdentifier(SMPParticipantIdentifier identifier) throws TechnicalException {
+        // lookup the publisher addresses based on the resource identifier
+        List<PublisherLookupResult> lookupResult = lookupPublisherAddresses(identifier);
+        LOG.debug("Got lookup results: [{}] for resource/participant: [{}].", lookupResult, identifier);
+        // get extensions for the resource
+        List<IExtension> filteredExtension = filterExtensions(lookupResult);
+
+        for (IExtension extension : filteredExtension) {
+            // get possible Lookup results for the extension
+            List<PublisherRequest> resultsForExtension = generatePublisherRequestsForResource(extension, lookupResult, identifier);
+            for (PublisherRequest request : resultsForExtension) {
+                try {
+                    FetcherResponse fetcherResponse = documentFetcher.fetch(request.getResourceUri());
+                    if (fetcherResponse != null) {
+                        fetcherResponse.setExtensionIdentifier(extension.getExtensionIdentifier());
+                        return fetcherResponse;
+                    }
+                } catch (TechnicalException | DDCRuntimeException e) {
+                    LOG.info("Error during fetching the extension for request [{}] and extension [{}] with cause error [{}]",
+                            request, extension, ExceptionUtils.getRootCauseMessage(e));
+                }
+            }
+            LOG.debug("No document found for extension [{}]", extension);
+        }
+        throw new DNSLookupException(DDCExceptionCode.SERVICE_GROUP, "Can not fetch Document for participant [" + identifier + "]!");
+    }
+
+    protected FetcherResponse retrieveSubresourceForIdentifiers(SMPParticipantIdentifier resourceIdentifier,
+                                                                SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
+
+        // lookup the publisher addresses based on the resource identifier
+        List<PublisherLookupResult> lookupResult = lookupPublisherAddresses(resourceIdentifier);
+        LOG.info("Got lookup results: [{}] for resource/participant: [{}].", lookupResult, resourceIdentifier);
+        List<IExtension> filteredExtension = filterExtensions(lookupResult);
+
+        for (IExtension extension : filteredExtension) {
+            // get possible Lookup results for the extension
+            List<PublisherRequest> resultsForExtension = generatePublisherRequestsForResource(extension, lookupResult, resourceIdentifier);
+            for (PublisherRequest resourceRequest : resultsForExtension) {
+                FetcherResponse fetcherResponse = getFetcherResponse(resourceRequest, documentIdentifier, extension);
+                if (fetcherResponse != null) {
+                    return fetcherResponse;
+                }
+            }
+            LOG.debug("No document found or can be retrieved for the extension [{}]", extension.getExtensionIdentifier());
+        }
+        throw new DNSFetchException("No document found for resource identifier: [" + resourceIdentifier
+                + "] and document identifier: [" + documentIdentifier + "]");
+    }
+
+    protected List<IExtension> filterExtensions(List<PublisherLookupResult> lookupResults) throws DNSLookupException {
+        List<IExtension> filteredExtension = new ArrayList<>();
+        for (IExtension extension : getExtensions()) {
+            if (lookupResults.stream().anyMatch(lr -> extension.isLookupServiceSupported(lr.getDnsLookupType(), lr.getServiceType()))) {
+                filteredExtension.add(extension);
+            }
+        }
+
+        if (filteredExtension.isEmpty()) {
+            throw new DNSLookupException(DDCExceptionCode.SERVICE_GROUP, "Non of the extensions supports Publisher lookup results (e.g. NAPTR services)!");
+        }
+        return filteredExtension;
+    }
+
+    protected FetcherResponse getFetcherResponse(PublisherRequest resourceRequest, SMPDocumentIdentifier documentIdentifier, IExtension extension) {
+        boolean isWildcardScheme = wildcardUtil.isWildcardScheme(getWildcardSubresourceSchemes(), documentIdentifier.getScheme());
+        SMPDocumentIdentifier targetDocumentIdentifier = documentIdentifier;
+        if (isWildcardScheme) {
+            LOG.debug("Wildcard scheme found for document identifier: [{}]", documentIdentifier);
+            // match identifier.
+            try {
+                targetDocumentIdentifier = getDocumentIdentifierWithWildcardMatch(resourceRequest, documentIdentifier, Collections.singletonList(extension));
+            } catch (DocumentParseException e) {
+                LOG.debug("Can not parse resource document with extension: [{}]  to resolve wildcard identifier: [{}]. Error: ",
+                        documentIdentifier, extension.getExtensionIdentifier(), ExceptionUtils.getRootCauseMessage(e));
+                return null;
+            } catch (Exception e) {
+                throw new DNSFetchException("Can not resolve wildcard identifier [" + documentIdentifier
+                        + "]! Error retrieving document identifiers from URI: [" + resourceRequest.getResourceIdentifier() + "]");
+            }
+            // can parse documetns but can not resolve wildcard identifier
+            if (targetDocumentIdentifier == null) {
+                throw new DNSFetchException("Can not resolve wildcard identifier [" + documentIdentifier
+                        + "]! Error retrieving document identifiers from URI: [" + resourceRequest.getResourceIdentifier() + "]");
+
+            }
+
+        }
+        PublisherRequest subresourceRequest = documentRequestProvider.createRequestForSubresource(resourceRequest,
+                extension.subContextPath(),
+                targetDocumentIdentifier);
+        try {
+
+            FetcherResponse fetcherResponse = documentFetcher.fetch(subresourceRequest.getSubresourceUri());
+            if (fetcherResponse != null) {
+                return fetcherResponse;
+            }
+        } catch (TechnicalException | DDCRuntimeException e) {
+            LOG.info("Error during fetching the extension for request [{}] and extension [{}] with cause error [{}]",
+                    subresourceRequest, extension, ExceptionUtils.getRootCauseMessage(e));
+            // throw error if subresource is not found
+            throw new DNSFetchException("Can not fetch document [" + documentIdentifier + "]! Error retrieving document identifiers from URI: ["
+                    + subresourceRequest.getSubresourceUri() + "]", e);
+        }
+        return null;
+    }
+
+    /**
+     * Method builds resource request and fetches all possible subresource/document Identifiers for the given resource. Then it tries to find
+     * the best match for the given documentIdentifier.
+     *
+     * @param resourceRequest    resource request
+     * @param documentIdentifier document identifier to be matched
+     * @return the document identifier with the best match
+     * @throws DNSFetchException if the document identifiers can not be retrieved from the resource URI.
+     */
+    protected SMPDocumentIdentifier getDocumentIdentifierWithWildcardMatch(PublisherRequest resourceRequest,
+                                                                           SMPDocumentIdentifier documentIdentifier,
+                                                                           List<IExtension> extensions) throws TechnicalException {
+
+        URI resourceURI = resourceRequest.getResourceUri();
+        LOG.debug("Get resource/participant's  documents for resource URI: [{}].", resourceURI);
+        final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = new ArrayList<>();
+        //try {
+            final FetcherResponse fetcherResponse = documentFetcher.fetch(resourceURI);
+            final SMPServiceGroup serviceGroup = documentReader.getResource(fetcherResponse, extensions);
+            discoveredDocumentIdentifiers.addAll(serviceGroup.getDocumentIdentifiers());
+        /*} catch (TechnicalException e) {
+            throw new DNSFetchException("Can not resolve wildcard identifier []! Error retrieving document identifiers from URI: [" + resourceURI + "]", e);
+        }*/
+        //the document identifiers supported by the participant
+        return getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(discoveredDocumentIdentifiers, documentIdentifier);
+    }
+
+    protected SMPDocumentIdentifier getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(List<SMPDocumentIdentifier> discoveredDocumentIdentifiers,
+                                                                                                       SMPDocumentIdentifier documentIdentifierToCheck) {
+        final SMPDocumentIdentifier wildcardDocumentIdentifierWithExactMatch = wildcardUtil.getDocumentIdentifierWithExactCaseInsensitiveMatch(discoveredDocumentIdentifiers, documentIdentifierToCheck);
+        if (wildcardDocumentIdentifierWithExactMatch != null) {
+            LOG.debug("Found SMPDocumentIdentifier wildcard scheme with exact match [{}] and document identifier [{}].",
+                    wildcardDocumentIdentifierWithExactMatch, documentIdentifierToCheck);
+            return wildcardDocumentIdentifierWithExactMatch;
+        }
+
+        final SMPDocumentIdentifier wildcardDocumentIdentifierWithLongestMatch = wildcardUtil.getWildcardDocumentIdentifierWithLongestMatch(discoveredDocumentIdentifiers, documentIdentifierToCheck);
+        if (wildcardDocumentIdentifierWithLongestMatch != null) {
+            LOG.debug("Found SMPDocumentIdentifier wildcard scheme with wildcard match [{}] and document identifier [{}].",
+                    wildcardDocumentIdentifierWithLongestMatch, documentIdentifierToCheck);
+            return wildcardDocumentIdentifierWithLongestMatch;
+        }
+        return null;
+    }
+
+
+    /**
+     * Method generates ordered list of resource requests for the extension. Method follows the order of PublisherLookupResult
+     * and generates requests for the extension services.
+     *
+     * @param extension     extension to generate requests
+     * @param lookupResults list of lookup results
+     * @return list of generated requests
+     */
+    protected List<PublisherRequest> generatePublisherRequestsForResource(IExtension extension,
+                                                                          List<PublisherLookupResult> lookupResults,
+                                                                          SMPParticipantIdentifier participantIdentifier) {
+        // generate resource requests for publisher results and extension
+        return lookupResults.stream()
+                .filter(result -> extension.isLookupServiceSupported(result.getDnsLookupType(), result.getServiceType()))
+                .map(result -> documentRequestProvider.createRequestForResource(result, extension.contextPath(), participantIdentifier))
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * @inheritDoc
      */
     @Override
     public SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier,
@@ -125,63 +320,19 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     }
 
     /**
-     * Method validates if the certificate can be discovered for given parameters .
-     * If the certificate can not be discovered, the method throws TechnicalException.
-     *
-     * @param certificate certificate to validate
-     * @param certificateCode certificate code. If the certificate code is null/empty/blank, then any certificate is accepted.
-     * @param participantIdentifier participant identifier
-     * @param documentIdentifier document identifier
-     * @param processIdentifier process identifier
-     * @param transportProfile transport profile
-     * @throws TechnicalException if the certificate is not valid
-     */
-    @Override
-    public void certificateExists(X509Certificate certificate,
-                                  String certificateCode,
-                                  SMPParticipantIdentifier participantIdentifier,
-                                  SMPDocumentIdentifier documentIdentifier,
-                                  SMPProcessIdentifier processIdentifier,
-                                  SMPTransportProfile transportProfile) throws TechnicalException {
-        
-        final SMPEndpoint endpoint = discoverEndpoint(participantIdentifier, documentIdentifier,
-                processIdentifier.getIdentifier(), processIdentifier.getScheme(),
-                transportProfile.getIdentifier());
-        if (endpoint == null) {
-            throw new DDCCertificateNotFoundException("No endpoint found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
-        }
-        // check if the certificate is in the endpoint
-        if ( endpoint.getCertificates().entrySet().stream().noneMatch(
-                entry -> (StringUtils.isBlank(certificateCode) || StringUtils.endsWithIgnoreCase(certificateCode, entry.getKey()))
-                        && entry.getValue().equals(certificate))
-        ) {
-            throw new DDCCertificateNotFoundException("No certificate found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
-        }
-        // log success
-        LOG.info("Certificate match for participant [{}], document [{}], process [{}] and transport [{}].",
-                participantIdentifier, documentIdentifier, processIdentifier, transportProfile);
-    }
-
-    /**
-     * Method returns endpoint for given serviceMetadata with process identifiers and transport profile.
-     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
-     *
-     * @param serviceMetadata serviceMetadata
-     * @param processId process identifier (or service identifier for AS4)
-     * @param processIdScheme process identifier scheme
-     * @param transportProfile transport profile to define the transport protocol
-     * @return endpoint for given parameters or null if no endpoint is found.
-     * @throws TechnicalException if any error occurs during the lookup
+     * @inheritDoc
      */
     @Override
     public SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
-                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException {
+                                        String processId, String processIdScheme,
+                                        String transportProfile) throws TechnicalException {
         SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
         if (endpoint == null) {
             LOG.debug("No Endpoint found for process id [{}] with scheme [{}] and transport [{}].",
                     processId, processIdScheme, transportProfile);
             return null;
         }
+
         if (redirectionEnabled && endpoint.getRedirect() != null) {
             LOG.debug("Endpoint has a redirection to URL [{}].", endpoint.getRedirect().getRedirectUrl());
             SignatureValidationContext.Builder svcBuilder = new SignatureValidationContext.Builder();
@@ -203,49 +354,65 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         return endpoint;
     }
 
-    private FetcherResponse getFetcherResponseForServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
-        final URI documentURI = getDocumentURI(participantIdentifier, documentIdentifier);
-        LOG.info("Fetching service metadata using URI: [{}].", documentURI);
-        return documentFetcher.fetch(documentURI);
-    }
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void certificateExists(X509Certificate certificate,
+                                  String certificateCode,
+                                  SMPParticipantIdentifier participantIdentifier,
+                                  SMPDocumentIdentifier documentIdentifier,
+                                  SMPProcessIdentifier processIdentifier,
+                                  SMPTransportProfile transportProfile) throws TechnicalException {
 
-    protected URI getDocumentURI(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException {
-        final URI documentIdentifierSmpURI = documentIdentifier.getDocumentIdentifierSmpURI();
-        //in case the document identifier was previously discovered from the ServiceGroup, we skip the DNS lookup and reuse the discovered URL
-        if (documentIdentifierSmpURI != null) {
-            LOG.info("Using service metadata from SMPDocumentIdentifier already discovered");
-            return documentIdentifierSmpURI;
+        final SMPEndpoint endpoint = discoverEndpoint(participantIdentifier, documentIdentifier,
+                processIdentifier.getIdentifier(), processIdentifier.getScheme(),
+                transportProfile.getIdentifier());
+        if (endpoint == null) {
+            throw new DDCCertificateNotFoundException("No endpoint found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
         }
-
-        URI smpURI = lookupParticipantSMPUri(participantIdentifier);
-        LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
-        return documentRequestProvider.createRequestForSubresource(smpURI, participantIdentifier, documentIdentifier);
-    }
-
-    public SMPParticipantIdentifierLookupResult lookupParticipantInSMP(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI smpURI = lookupParticipantSMPUri(participantIdentifier);
-        URI participantUnderSmpURI = documentRequestProvider.createRequestForResource(smpURI, participantIdentifier);
-        LOG.info("Get participant data / documents for URI: [{}].", participantUnderSmpURI);
-        final FetcherResponse fetcherResponse = documentFetcher.fetch(participantUnderSmpURI);
-        return new SMPParticipantIdentifierLookupResult(smpURI, participantUnderSmpURI, fetcherResponse);
-    }
-
-    private URI lookupParticipantSMPUri(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
-        URI smpURI = publisherLocator.lookup(participantIdentifier);
-        if (smpURI == null) {
-            throw new DNSLookupException(DDCExceptionCode.SERVICE_GROUP, "DNS record for participant [" + participantIdentifier + "] can not be resolved!");
+        // check if the certificate is in the endpoint
+        if (endpoint.getCertificates().entrySet().stream().noneMatch(
+                entry -> (StringUtils.isBlank(certificateCode) || StringUtils.endsWithIgnoreCase(certificateCode, entry.getKey()))
+                        && entry.getValue().equals(certificate))
+        ) {
+            throw new DDCCertificateNotFoundException("No certificate found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
         }
-        LOG.debug("Got SMP URI: [{}] for participant: [{}].", smpURI, participantIdentifier);
-        return smpURI;
+        // log success
+        LOG.info("Certificate match for participant [{}], document [{}], process [{}] and transport [{}].",
+                participantIdentifier, documentIdentifier, processIdentifier, transportProfile);
     }
 
+
+    /**
+     * Method uses registered metadataLocator to lookup the participant's SMP addresses.
+     * Multiple addresses can be returned since Oasis SMP 2.0 defines new DNS NAPTR records for the OASIS SMP 2.0 endpoint lookup.
+     *
+     * @param participantIdentifier the participant identifier
+     * @return the URI of the participant's SMP
+     * @throws TechnicalException               in case of any technical error during the lookup
+     * @throws DDCInvalidConfigurationException if DDC is not correctly configured
+     * @throws DNSLookupException               if the participant's SMP address can not be resolved
+     */
+    private List<PublisherLookupResult> lookupPublisherAddresses(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+        if (publisherLocator == null) {
+            throw new DDCInvalidConfigurationException("Missing metadataLocator. The locator is required to lookup the participant's SMP address");
+        }
+        List<PublisherLookupResult> results = publisherLocator.lookup(participantIdentifier);
+        if (results.isEmpty()) {
+            throw new DNSLookupException(DDCExceptionCode.SERVICE_GROUP, "The SMP URL value for participant [" + participantIdentifier + "] can not be resolved!");
+        }
+        //
+        LOG.debug("Got SMP address results: [{}] for participant: [{}].", results, participantIdentifier);
+        return results;
+    }
 
     /**
      * Method filters all SMPEndpoints by processId, processIdScheme and transportProfile.
      * If no endpoint is found, Empty collection is returned.
      *
-     * @param smpEndpoints  list of all processes
-     * @param processId     target process identifier
+     * @param smpEndpoints     list of all processes
+     * @param processId        target process identifier
      * @param processIdScheme  target process identifier scheme
      * @param transportProfile list of targeted transport profiles
      * @return valid endpoint
@@ -290,10 +457,11 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     /**
      * Method returns validates  endpoint match for given processId, processIdScheme and transportProfile or
      * if the endpoint is redirection.
-     * @param smpEndpoint endpoint to validate
-     * @param filterProcessId filter process identifier value
-     * @param filterProcessIdScheme  filter process identifier scheme
-     * @param filterTransportId filter transport profile value
+     *
+     * @param smpEndpoint           endpoint to validate
+     * @param filterProcessId       filter process identifier value
+     * @param filterProcessIdScheme filter process identifier scheme
+     * @param filterTransportId     filter transport profile value
      * @return true if endpoint matches the filter values or is redirection else false
      */
     protected boolean smpEndpointMatchesOrRedirect(SMPEndpoint smpEndpoint,
@@ -318,8 +486,8 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * Method returns true if one of endpoint's process  (value and scheme)  matches filter parameters.
      * If the endpoint has no process identifiers the defaultEndpointForEmptyProcess value is returned.
      *
-     * @param smpEndpoint endpoint to validate
-     * @param filterProcessId target process identifier value
+     * @param smpEndpoint           endpoint to validate
+     * @param filterProcessId       target process identifier value
      * @param filterProcessIdScheme target process identifier scheme
      * @return true if endpoint's is matching to the filter parameters
      */
@@ -361,7 +529,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     /**
      * This method exists to be used to filter list of endpointType for particular transportProfile.
      *
-     * @param endpointType endpoint to validate
+     * @param endpointType          endpoint to validate
      * @param transportProfileValue target transport profile value
      * @return true if endpoint's transport equals to search transport identifier
      */
@@ -384,7 +552,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         LOG.info("Fetch document from redirection [{}].", redirectURI);
         final FetcherResponse fetcherResponseForServiceMetadata = documentFetcher.fetch(redirectURI);
 
-        return documentReader.getSubresource(fetcherResponseForServiceMetadata, context);
+        return documentReader.getSubresource(fetcherResponseForServiceMetadata, getExtensions(), context);
     }
 
 
@@ -404,57 +572,120 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     }
 
     @Override
-    public ISMPDocumentReader getDocumentReader() {
+    public IDocumentReader getDocumentReader() {
         return documentReader;
+    }
+
+    public List<IExtension> getExtensions() {
+        return listExtensions;
+    }
+
+    public List<String> getWildcardSubresourceSchemes() {
+        return wildcardSubresourceSchemes;
     }
 
     public static class Builder {
 
-            private IPublisherLocator publisherLocator;
-            private IDocumentRequestProvider documentRequestProvider;
-            private IDocumentFetcher documentFetcher;
-            private ISMPDocumentReader documentReader;
+        private IPublisherLocator publisherLocator;
+        private IDocumentRequestProvider documentRequestProvider;
+        private IDocumentFetcher documentFetcher;
+        private ISMPDocumentReader documentReader;
+        protected List<String> wildcardSubresourceSchemes = new ArrayList<>();
+        private final List<IExtension> listExtensions = new ArrayList<>();
+        private ISignatureValidator signatureValidator;
 
-            public Builder publisherLocator(IPublisherLocator publisherLocator) {
-                this.publisherLocator = publisherLocator;
-                return this;
-            }
+        public Builder addExtension(IExtension extension) {
+            this.listExtensions.add(extension);
+            return this;
+        }
 
-            public Builder documentRequestProvider(IDocumentRequestProvider documentRequestProvider) {
-                this.documentRequestProvider = documentRequestProvider;
-                return this;
-            }
-
-            public Builder documentFetcher(IDocumentFetcher documentFetcher) {
-                this.documentFetcher = documentFetcher;
-                return this;
-            }
-
-            public Builder documentReader(ISMPDocumentReader documentReader) {
-                this.documentReader = documentReader;
-                return this;
-            }
-
-            public DynamicDiscoveryService build() {
-                validate();
-                return new DynamicDiscoveryService(this);
-            }
-
-            private void validate() {
-                if (publisherLocator == null) {
-                    throw new DDCInvalidConfigurationException("metadataLocator is required");
-                }
-                if (documentRequestProvider == null) {
-                    // legacy behaviour
-                    documentRequestProvider =  new DefaultDocumentRequestProvider.Builder().build();
-                }
-                if (documentFetcher == null) {
-                    // legacy behaviour
-                    documentFetcher =  new DefaultURLFetcher.Builder().build();
-                }
-                if (documentReader == null) {
-                    throw new DDCInvalidConfigurationException("metadataReader is required");
+        public Builder addExtensionsForClassNames(String... extensionClassNames) {
+            for (String className : extensionClassNames) {
+                try {
+                    Class<?> extensionClass = Class.forName(className);
+                    IExtension extension = (IExtension) extensionClass.getDeclaredConstructor(new Class[0]).newInstance();
+                    this.listExtensions.add(extension);
+                } catch (ClassNotFoundException | InstantiationException |
+                         IllegalAccessException | NoSuchMethodException |
+                         InvocationTargetException e) {
+                    throw new DDCInvalidConfigurationException("Extension class [" + className + "] not found or can not be instantiated.", e);
                 }
             }
+
+            return this;
+        }
+
+        public Builder addExtensions(List<IExtension> extensions) {
+            this.listExtensions.addAll(extensions);
+            return this;
+        }
+
+        public Builder wildcardSubresourceSchemes(String... wildcardSchemes) {
+            if (wildcardSchemes != null && wildcardSchemes.length > 0) {
+                this.wildcardSubresourceSchemes.addAll(Arrays.asList(wildcardSchemes));
+            }
+            return this;
+        }
+
+
+        public Builder publisherLocator(IPublisherLocator publisherLocator) {
+            this.publisherLocator = publisherLocator;
+            return this;
+        }
+
+        public Builder documentRequestProvider(IDocumentRequestProvider requestProvider) {
+            this.documentRequestProvider = requestProvider;
+            return this;
+        }
+
+        public Builder signatureValidator(ISignatureValidator signatureValidator) {
+            this.signatureValidator = signatureValidator;
+            return this;
+        }
+
+        public Builder documentFetcher(IDocumentFetcher documentFetcher) {
+            this.documentFetcher = documentFetcher;
+            return this;
+        }
+
+        public Builder documentReader(ISMPDocumentReader documentReader) {
+            this.documentReader = documentReader;
+            return this;
+        }
+
+        public DynamicDiscoveryService build() {
+            validate();
+            return new DynamicDiscoveryService(this);
+        }
+
+        /**
+         * Validate the configuration and create default locator, request provider, fetcher and reader if not set.
+         */
+        private void validate() {
+            if (publisherLocator == null) {
+                throw new DDCInvalidConfigurationException("publisherLocator is required");
+            }
+            if (documentFetcher == null) {
+                documentFetcher = new DefaultURLFetcher.Builder().build();
+            }
+
+            if (documentReader == null) {
+                documentReader = new DefaultBDXRReader.Builder()
+                        .signatureValidator(signatureValidator)
+                        .build();
+            }
+
+            if (documentRequestProvider == null) {
+                documentRequestProvider = new DefaultDocumentRequestProvider
+                        .Builder()
+                        .build();
+            }
+
+            if (listExtensions.isEmpty()) {
+                LOG.info("No extensions are registered. Registering default extensions OasisSMP10Extension and OasisSMP20Extension");
+                listExtensions.add(new OasisSMP10Extension());
+                listExtensions.add(new OasisSMP20Extension());
+            }
+        }
     }
 }

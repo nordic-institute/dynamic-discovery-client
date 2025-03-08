@@ -66,9 +66,13 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithAny;
 
 /**
+ * The default implementation of the {@link IDocumentFetcher} interface. This class is responsible for fetching the
+ * metadata from the SMP server using the provided URI. It also handles the authentication and proxy settings.
+ *
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  * @author Sebastian-Ion TINCU
+ * @author Joze RIHTARSIC
  * @since 1.13
  */
 public class DefaultURLFetcher implements IDocumentFetcher {
@@ -80,12 +84,6 @@ public class DefaultURLFetcher implements IDocumentFetcher {
     private final HttpRoutePlanner routePlanner;
     private final HttpClientConnectionManager connectionManager;
 
-
-    private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
-                              HttpRoutePlanner routePlanner,
-                              IProxyConfiguration proxyConfiguration) {
-        this(connectionManager, routePlanner, null, proxyConfiguration);
-    }
 
     private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
                               HttpRoutePlanner routePlanner,
@@ -129,7 +127,8 @@ public class DefaultURLFetcher implements IDocumentFetcher {
         httpGet.setConfig(requestConfigBuilder.build());
 
         try {
-            return connect(httpClientBuilder.build(), httpGet);
+            InputStream inputStream =  connect(httpClientBuilder.build(), httpGet);
+            return new FetcherResponse(inputStream, documentURI);
         } catch (TechnicalException e) {
             e.setSmpExceptionCode(DDCExceptionCode.SERVICE_GROUP);
             throw e;
@@ -175,7 +174,7 @@ public class DefaultURLFetcher implements IDocumentFetcher {
      * @return the fetcher response containing the data
      * @throws TechnicalException the technical exception
      */
-    public FetcherResponse connect(CloseableHttpClient httpClient, HttpGet httpGet) throws TechnicalException {
+    protected InputStream connect(CloseableHttpClient httpClient, HttpGet httpGet) throws TechnicalException {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             switch (response.getCode()) {
                 case 200:
@@ -214,10 +213,10 @@ public class DefaultURLFetcher implements IDocumentFetcher {
      * @return in-memory fetcher response
      * @throws IOException if an I/O error occurs
      */
-    public FetcherResponse toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
+    protected InputStream toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             IOUtils.copy(inputStream, baos);
-            return new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
+            return new ByteArrayInputStream(baos.toByteArray());
         }
     }
 

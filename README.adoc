@@ -44,11 +44,9 @@ Please find the GIT repository on https://ec.europa.eu/digital-building-blocks/c
 
 Source code: https://ec.europa.eu/digital-building-blocks/code/projects/EDELIVERY/repos/dynamic-discovery-client/browse
 
-
 == Setting up parameters
 
 The DynamicDiscoveryBuilder class provides 6 interfaces and theirs default implementations, however, the user is free to use customized implementations to fit other needs.
-
 
 === Interfaces and implementations
 
@@ -74,7 +72,7 @@ This interface is responsible for building the REST URL for fetching the target 
 As input, it uses the resource/participant identifier and the SMP results from the locator. The builder builds the URL for fetching the resource/subresource (e.g. SMP  ServiceGroup/ServiceMetadata) document from the located SMP.
 The DDC library is shipped with the default it provides the implementation supporting the eDelivery SMP 1.0 and eDelivery SMP 2.0 standards for building the request URL.
 
-**eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestBuilder.**
+**eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider.**
 
 **IDocumentReader**
 
@@ -358,7 +356,7 @@ DynamicDiscovery smpClient = builder
 
 ===== Example: Basic discovery with one top domain with only NAPTR and meta:cppa3 service and only urls with https: schema
 Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier one top dns domain.
-The client will use only NAPTR DNS records with service "meta:cppa3" (Default is Meta:SMP) and will return only results with URL schema: "https:".
+The client will use only NAPTR DNS records with service "meta:cppa3" (Default is Meta:SMP) and will return only results with URL schema:  "https".
 [source,java]
 ----
 DynamicDiscovery smpClient = builder
@@ -367,7 +365,7 @@ DynamicDiscovery smpClient = builder
                 .addDnsLookupType(DNSLookupType.NAPTR)
                 .dnsLookup(new DefaultDNSLookup.Builder()
                         .addRequiredNaptrService("meta:cppa3")
-                        .addRequiredNaptrURLSchema("https:")
+                        .addRequiredNaptrURLSchema( "https")
                         .build())
                 .build())
         .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
@@ -394,7 +392,7 @@ DynamicDiscovery smpClient = builder
                 .addFormatterType(customFormatter)
                 .dnsLookup(new DefaultDNSLookup.Builder()
                         .addRequiredNaptrService("meta:cppa3")
-                        .addRequiredNaptrURLSchema("https:")
+                        .addRequiredNaptrURLSchema( "https")
                         .build())
                 .build())
         .reader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
@@ -424,6 +422,110 @@ DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
     .locator(new StaticMapMetadataLocator(defaultURI, mapExceptions))
     .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore)))
     .build();
+----
+
+=== eDelivery SMP 1.0 and 2.0 document discovery configuration
+
+The new eDelivery SMP 2.0 profile identifies the NAPTR record using the service "oasis-bdxr-smp-2" and provides support for the legacy service "Meta:SMP" as a fallback. The DDC can be configured to support eDelivery SMP 1.0 and eDelivery SMP 2.0 profiles at the same time.
+By utilizing the OasisSMP10Extension and OasisSMP20Extension, the DDC allows configuration of the following options:
+
+* **eDelivery SMP 1.0 Only**: The client uses NAPTR DNS records with the service "Meta:SMP" and accepts only Oasis SMP 1.0 documents.
+* **eDelivery SMP 2.0 Only**: The client uses NAPTR DNS records with the service "oasis-bdxr-smp-2" and accepts only Oasis SMP 2.0 documents.
+* **eDelivery SMP 2.0 with "eDelivery SMP 2 MAY"**: The client accepts only Oasis SMP 2.0 documents and primarily uses NAPTR DNS records with the service "oasis-bdxr-smp-2." If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+* **eDelivery SMP 2.0 with 1.0 Fallback**: The client accepts Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If these documents are unavailable, it will fall back to the "Meta:SMP" service and Oasis SMP 1.0 documents.
+* **eDelivery SMP 2.0 with "eDelivery SMP 2 MAY" and 1.0 Fallback**: The client first attempts to retrieve Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If this attempt fails, it falls back to the "Meta:SMP" service. Should both approaches be unsuccessful, the client will make a final attempt by using the Oasis SMP 1.0 profile process to retrieve the documents.
+
+==== Example: eDelivery SMP 1.0 Only
+
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains and only NAPTR DNS records with service "Meta:SMP" The NAPTR service is "Meta:SMP" and is defined by the OasisSMP10Extension.
+
+[source,java]
+----
+DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+        .addExtension(new OasisSMP10Extension())
+        .publisherLocator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(defaultDNSLookup)
+                .build())
+        .documentReader(new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                .build())
+        .documentFetcher(urlFetcherURL)
+        .build();
+----
+
+==== Example: eDelivery SMP 2.0 Only
+
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains and only NAPTR DNS records with service "oasis-bdxr-smp-2". The NAPTR service is "oasis-bdxr-smp-2" and is defined by the OasisSMP20Extension.
+
+[source,java]
+----
+DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+        .addExtension(new OasisSMP20Extension())
+        .publisherLocator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(defaultDNSLookup)
+                .build())
+        .documentReader(new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                .build())
+        .documentFetcher(urlFetcherURL)
+        .build();
+----
+
+==== Example: eDelivery SMP 2.0 with "eDelivery SMP 2 MAY"
+
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+
+[source,java]
+----
+// configure extension to use 'Meta:SMP' as fallback
+OasisSMP20Extension extensionSMP20 = new OasisSMP20Extension();
+extensionSMP20.setSMP10LookupNaptrServiceEnabled(true);
+
+DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+        .addExtension(extensionSMP20)
+        .publisherLocator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(defaultDNSLookup)
+                .build())
+        .documentReader(new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                .build())
+        .documentFetcher(urlFetcherURL)
+        .build();
+----
+
+==== Example: eDelivery SMP 2.0 with "eDelivery SMP 2 MAY"
+
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+
+[source,java]
+----
+// configure extension to use 'Meta:SMP' as fallback
+OasisSMP20Extension extensionSMP20 = new OasisSMP20Extension();
+extensionSMP20.setSMP10LookupNaptrServiceEnabled(true);
+OasisSMP10Extension extensionSMP10 = new OasisSMP10Extension();
+
+// Note the order of the extensions is important and defines the fallback order
+List<IExtensions> extensions = List.of(extensionSMP20, extensionSMP10 );
+
+
+DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+        .addExtensions(extensions)
+        .publisherLocator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(defaultDNSLookup)
+                .build())
+        .documentReader(new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                .build())
+        .documentFetcher(urlFetcherURL)
+        .build();
 ----
 
 === Proxy configuration
@@ -604,6 +706,92 @@ SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9
 The certificates are validated against the truststore as follows.
 
 ![enter image description here](https://ec.europa.eu/digital-building-blocks/wiki/download/attachments/37749134/trustabilitymodel.PNG?version=1&modificationDate=1501168419400&api=v2)
+
+
+==  Default implementations
+
+The eDelivery Dynamic Discovery Client provides basic implementations supporting eDelivery profiles. Below are descriptions of the default implementations.
+
+=== DefaultBDXRLocator
+
+The DefaultBDXRLocator is implementation of the IPublisherLocator interface. The implementation is responsible for DNS look-up the publisher address based on the resource/participant identifier.
+The essential part of the implementation is the resource identifier formatter lists which are used to correctly format the resource identifier before generating DNS lookup query. By default, ebCoreParty Identifier type and Oasis SMP/Peppol Party identifier types are registered to the locator. For fine-tuning the resource identifier formatting, the user can register custom formatter types.
+
+Below is a list of configuration options:
+
+- **topDnsDomains**: Ordered List of top DNS domains to be used for lookup.  The implementation will execute the DNS lookup of the publisher address in the given top domain list order until it finds the first  result.
+- **dnsLookupTypeList**: Ordered List of DNS lookup types (NAPTR, CNAME) to be used for DNS lookup.
+- **dnsLookup**: DNS lookup implementation object. The implementation performs the DNS lookup. If not provided the  **DefaultDNSLookup** is used.
+- **ResourceIdentifierFormatter**: The list of resource/participant identifier formatter types. The formatter will detect and format/normalize the resource/participant identifier before lookup according to the formatter type. By default, ebCoreParty Identifier type (OasisSMPFormatterType) and Peppol Party identifier (OasisSMPFormatterType) types are registered to the locator.
+- Following options are quick controls the resource/participant identifier lookup:
+*  **resourceSchemeMandatory**: (default is false) If true, the locator will throw an exception if the resource/participant identifier scheme is null/empty.
+* **resourceSchemeValidationPattern**: (default is null) The client will validate the resource/participant identifier scheme against the provided pattern. If the pattern is not matched, the client will throw an exception.
+* **resourceCaseSensitiveSchemas**: (default is empty list) The list of resource/participant identifier schemes that are case-sensitive. if the resource identifier is not case-sensitive it will set it to lower case when calculating the hash for DNS lookup query.
+* Deprecated: **cnameURLScheme**: (default is http) The client will use URL scheme when resolving SMPs URL using the CNAME DNS records.
+* Deprecated: **cnameURLContextPath**: (default is '/') The client will use the context path when resolving SMPs URL using the CNAME DNS records.
+* Deprecated: **resourceWildcardEnabled**: (default is true). The value effect only CNAME lookup. If true, the  enables search wildcard DNS domain as *.acc.edelivery.tech.ec.europa.eu when participant has identifier value '*', else the value is always hashed.
+
+=== DefaultDNSLookup
+
+The DefaultDNSLookup is implementation of the IDNSLookup interface. This is DNSJava library based  implementation responsible for executing the DNS queries.
+
+Below is a list of configuration options:
+
+- **requiredURLSchemas**: (Default: "http" and "https" ) Only results with the given URL schema will be returned. If the lookup discovers publisher URL with different schema, the result is ignored.
+- **requiredNaptrServices**: (Default: "Meta:SMP) When using NAPTR lookup, results with the given NAPTR service will be returned and all other naptr records are ignored. Example if the NAPTR record has service "meta:cppa3" and required services are "Meta:SMP" and "oasis-bdxr-smp-2" the result is ignored." The service name is case-insensitive.  The returned results follows the order of the required service list.
+- **requiredNaptrFlagsList**: (Default: "u") When using NAPTR lookup, results with the given NAPTR flags will be returned and all other naptr records are ignored.
+
+== StaticMapMetadataLocator
+
+The StaticMapMetadataLocator is implementation of the IPublisherLocator interface. The implementation is a static configuration (map of: participant, URL) for locating the publisher URI based on the participant identifier. If the participant identifier is not found in the mapping, the default URI is returned.
+
+Below is a list of the configuration options:
+
+- **defaultURI**: The default URI to be returned if the participant identifier is not found in the mapping.
+- **participantIdentifierMapping**: The mapping of the participant identifier to the URI. If the participant identifier is not found in the mapping, the default URI is returned.
+
+== DefaultDocumentRequestProvider
+
+The DefaultDocumentRequestProvider is implementation of the IDocumentRequestProvider interface. The implementation builds the REST URL for fetching the  documents from the Publisher according to Oasis SMP 1.0/2.0 standard.
+
+Below is a list of the configuration options:
+- **resourceIdentifierFormatter**: The object is formats the resource identifier before generating the request URL. If not provided the **ParticipantIdentifierFormatter** is used.
+- **subresourceIdentifierFormatter**: The object is formats the subresource identifier before generating the request URL. If not provided the **DocumentIdentifierFormatter** is used.
+
+== DefaultURLFetcher
+
+The DefaultURLFetcher is implementation of the IDocumentFetcher interface based on apache http5 client. The implementation fetches the document using HTTP-get request and stores it to buffered input stream. The implementation  supports the following configuration options:
+
+- **proxyConfiguration**: The proxy configuration object implementing the interface: IProxyConfiguration. (For details and sample implementation see DefaultProxy)
+- **credentialProvider**: The **org.apache.hc.client5.http.auth.Credentials**  Credentials object for the HTTP authentication, which is used when the publisher server requires authentication.
+- **routePlanner**: The **org.apache.hc.client5.http.routing.HttpRoutePlanner** object for the HTTP routing. The object is used to determine the route for the HTTP request and can be used of offboarding TLS to proxy server.
+- **connectionManager**: The **org.apache.hc.client5.http.io.HttpClientConnectionManager** object for the HTTP connection management. The object is used to manage the HTTP connections and can be used finetune configuration of  the connections.
+- **sslContextBuilder**: The **org.apache.hc.client5.http.ssl.SSLContextBuilder** object for the SSL context configuration. The object is used to configure the SSL context for the HTTP client.
+- **tlsVersions**: The list of TLS versions supported by the client. The client will use only the given TLS versions for the connection (e.g. TLSv1.3). The TLS versions are defined by the JCE provider or JAVA version standard names.
+- **tlsCipherSuites**: The list of TLS cipher suites which can be used by the client (e.g. TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256). The client will use only the given TLS cipher suites for the connection. The cipher suits names are defined by the JCE provider or JAVA version standard names.
+- **noHostnameValidation**: If true, the client will not validate the hostname of the publisher server. The option is useful for testing purposes.
+- **httpSchemeEnabled**: If true, the client enable the use of the HTTP schema for fetching the document, else it throws an exception.
+- **httpsSchemeEnabled**: If true, the client enable the use of the HTTPS schema for fetching the document, else it throws an exception.
+
+== DefaultProxy Configuration
+
+The DefaultProxy is implementation of the IProxyConfiguration interface. The implementation enables the proxy settings for the fetcher such as the proxy host, port, proxy authentication. The objects has the following configuration options:
+
+- **serverAddress**: The proxy server host.
+- **serverPort**: The proxy server port.
+- **nonProxyHosts**: The list of non-proxy hosts. If the host is in the list, the fetcher will not use the proxy.
+- **username**: The proxy username to authenticate to the proxy server.
+- **password**: The proxy password to authenticate to the proxy server.
+
+== DefaultBDXRReader
+
+Default implementation of the **IDocumentReader** interface for reading the XML data from
+the Fetcher response and returning the target objects as SMPServiceMetadata. The implementation uses the factory pattern
+to read various XML types (OasisSMP 1.0, OasisSMP 2.0, etc.), and delegates handling to the
+extensions that are registered with the reader. The extension is activated based on the QName and the class of the target object.
+
+
+
 
 == References
 

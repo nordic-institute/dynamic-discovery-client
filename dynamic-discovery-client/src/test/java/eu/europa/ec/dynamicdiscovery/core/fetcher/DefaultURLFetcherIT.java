@@ -45,8 +45,8 @@ import java.security.KeyStore;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DefaultURLFetcherIntegrationTest {
-    static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcherIntegrationTest.class);
+public class DefaultURLFetcherIT {
+    static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcherIT.class);
     private static final String PASSWD = "test1234";
     private static final String KEYSTORE_TYPE = "PKCS12";
 
@@ -241,7 +241,7 @@ public class DefaultURLFetcherIntegrationTest {
     }
 
     @Test
-    @Disabled("TODO: Error since new jakarta EE 10 and httpclient 5.4.1")
+    //@Disabled("TODO: Error since new jakarta EE 10 and httpclient 5.4.1")
     void testDisableHTTP() throws TechnicalException {
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
@@ -250,8 +250,6 @@ public class DefaultURLFetcherIntegrationTest {
 
         URI fetchFromUri = serverHTTPUri.resolve("oasis-smp-1.0/extension.xml");
         assertEquals("http", fetchFromUri.getScheme());
-
-        FetcherResponse response = testInstance.fetch(fetchFromUri);
 
         ConnectionException result = assertThrows(ConnectionException.class, () -> testInstance.fetch(fetchFromUri));
 

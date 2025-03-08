@@ -22,6 +22,8 @@ package eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.AbstractExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Peppol SMP extension providing the ServiceGroup and SignedServiceMetadata parser
@@ -32,6 +34,9 @@ import java.util.Arrays;
 public class PeppolSMPExtension extends AbstractExtension {
 
     public static final String NAMESPACE = "http://busdox.org/serviceMetadata/publishing/1.0/";
+    public static final String DEFAULT_PUBLISHER_URL_CONTEXT = "/";
+    public static final String DEFAULT_SUBRESOURCE_URL_CONTEXT = "/services";
+    public static final String DEFAULT_LOOKUP_SERVICE = "Meta:SMP";
 
     final PeppolSMPServiceGroupReader serviceGroupReader;
     final PeppolSMPServiceMetadataReader serviceMetadataReader;
@@ -48,5 +53,25 @@ public class PeppolSMPExtension extends AbstractExtension {
 
     public void setIgnoreInvalidServices(boolean ignoreInvalidServices) {
         this.serviceMetadataReader.setIgnoreInvalidServices(ignoreInvalidServices);
+    }
+
+    @Override
+    public List<String> lookupServices() {
+        return Collections.singletonList(DEFAULT_LOOKUP_SERVICE);
+    }
+
+    @Override
+    public String contextPath() {
+        return DEFAULT_PUBLISHER_URL_CONTEXT;
+    }
+
+    @Override
+    public String subContextPath() {
+        return DEFAULT_SUBRESOURCE_URL_CONTEXT;
+    }
+
+    @Override
+    public String getExtensionIdentifier() {
+        return "peppol-smp-1";
     }
 }

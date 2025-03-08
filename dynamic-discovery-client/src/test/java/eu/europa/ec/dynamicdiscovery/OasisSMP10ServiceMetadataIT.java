@@ -20,6 +20,7 @@
 package eu.europa.ec.dynamicdiscovery;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.URLFetcherMock;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
@@ -35,10 +36,16 @@ import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
 import eu.europa.ec.dynamicdiscovery.util.TestCaseConstants;
 import gen.eu.europa.ec.ddc.api.smp10.SignedServiceMetadata;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.Collections;
+import java.util.List;
+
+import static eu.europa.ec.dynamicdiscovery.util.DNSUtils.createMockPublisherLookupNaptrResult;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -51,20 +58,22 @@ import static org.mockito.Mockito.mock;
  */
 class OasisSMP10ServiceMetadataIT {
 
-
     @Test
     void getServiceMetadataNaptrOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier, TestCaseConstants.PUBLISHER_URL_02);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(publisherLookupResult);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
@@ -88,16 +97,19 @@ class OasisSMP10ServiceMetadataIT {
     @Test
     void getSignedServiceMetadataNaptrOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier, TestCaseConstants.PUBLISHER_URL_02);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(publisherLookupResult);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -120,19 +132,25 @@ class OasisSMP10ServiceMetadataIT {
     @Test
     void getServiceMetadataCnameOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB,
+                "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(Collections.emptyList());
+        Mockito.when(defaultDNSLookup.dnsRecordExists(eq(participantIdentifier),
+                        anyString(),
+                        eq(DNSLookupType.CNAME)))
+                .thenReturn(true);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -154,27 +172,30 @@ class OasisSMP10ServiceMetadataIT {
     @Disabled("TODO: fix signature algorithm: Signature It is forbidden to use algorithm http://www.w3.org/2000/09/xmldsig#rsa-sha1 in the signature")
     void getSignedServiceMetadataCnameOk1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb", "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.addParameters(CommonUtil.OASIS_SMP_10, "signed_service_metadata_urn_poland_ncpb",
+                TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB
+                );
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
-        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107",
+                "ehealth-resid-qns");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
                         "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu"))
                 .thenReturn(null);
 
-        Mockito.when(defaultDNSLookup.dnsRecordNotExists(eq(participantIdentifier),
+        Mockito.when(defaultDNSLookup.dnsRecordExists(eq(participantIdentifier),
                         anyString(),
                         eq(DNSLookupType.CNAME)))
-                .thenReturn(false);
+                .thenReturn(true);
 
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -193,7 +214,6 @@ class OasisSMP10ServiceMetadataIT {
         assertEquals(1, serviceMetadata.getEndpoints().size());
     }
 
-
     @Test
     void getServiceMetadataNaptrOk2() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
@@ -201,13 +221,15 @@ class OasisSMP10ServiceMetadataIT {
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
-
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier, TestCaseConstants.PUBLISHER_URL_02);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(publisherLookupResult);
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -233,14 +255,16 @@ class OasisSMP10ServiceMetadataIT {
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
-
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier, TestCaseConstants.PUBLISHER_URL_02);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(publisherLookupResult);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -265,16 +289,16 @@ class OasisSMP10ServiceMetadataIT {
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.dnsRecordNotExists(eq(participantIdentifier),
+        Mockito.when(defaultDNSLookup.dnsRecordExists(eq(participantIdentifier),
                         anyString(),
                         eq(DNSLookupType.CNAME)))
-                .thenReturn(false);
+                .thenReturn(true);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -301,16 +325,16 @@ class OasisSMP10ServiceMetadataIT {
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.dnsRecordNotExists(eq(participantIdentifier),
+        Mockito.when(defaultDNSLookup.dnsRecordExists(eq(participantIdentifier),
                         anyString(),
                         eq(DNSLookupType.CNAME)))
-                .thenReturn(false);
+                .thenReturn(true);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -328,18 +352,20 @@ class OasisSMP10ServiceMetadataIT {
     @Test
     void getSignedServiceMetadataNaptrInvalidSignature1() throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb_invalid_signature");
+        urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "signed_service_metadata_urn_poland_ncpb_invalid_signature");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
-
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier, TestCaseConstants.PUBLISHER_URL_02);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(publisherLookupResult);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -356,14 +382,16 @@ class OasisSMP10ServiceMetadataIT {
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdxr-docid-qns");
-
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier, TestCaseConstants.PUBLISHER_URL_02);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "L7KCFF3BPTJLMZWOPCTSIAG4CTMUFMH2EEELHVL5QQ52JYPALDTA.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(publisherLookupResult);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
@@ -398,29 +426,32 @@ class OasisSMP10ServiceMetadataIT {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
         urlFetcherURL.setParameters(URLFetcherMock.LookupType.NAPTR, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, "service_metadata_urn_poland_ncpb");
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(new SMPParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns"), "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu")).thenReturn(TestCaseConstants.SMP_DOMAIN_ALIAS);
+        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:ehealth:pt:ncpb-idp", "ehealth-actorid-qns");
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier, TestCaseConstants.PUBLISHER_URL_02);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                "TTBA75HVAPVICNGX4N3FZJDS7Z6Q7H7MF2GQSLDJTN2UJV4TV6WQ.ehealth-actorid-qns.acc.edelivery.tech.ec.europa.eu")).thenReturn(publisherLookupResult);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
 
-        SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
+        SMPParticipantIdentifier participantIdentifier2 = new SMPParticipantIdentifier("urn:ehealth:pt:ncpb-idp123", "ehealth-actorid-qns");
         SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::105", "ehealth-resid-qns");
 
-        assertThrows(DNSLookupException.class, () -> smpClient.getSubresource(participantIdentifier, documentIdentifier));
+        assertThrows(DNSLookupException.class, () -> smpClient.getSubresource(participantIdentifier2, documentIdentifier));
     }
 
     @Test
     @Disabled("TODO: fix signature algorithm: Signature It is forbidden to use algorithm http://www.w3.org/2000/09/xmldsig#rsa-sha1 in the signature")
     void testSignedServiceMetadata() throws Exception {
-        SignedServiceMetadata SignedServiceMetadata = (SignedServiceMetadata) getSignedServiceMetada("extension", "urn:poland:ncpb", false);
+        SignedServiceMetadata SignedServiceMetadata = (SignedServiceMetadata) getSignedServiceMetadata("extension", "urn:poland:ncpb", false);
 
         assertEquals("urn::epsos##services:extended:epsos::107", SignedServiceMetadata.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getValue());
         assertEquals("ehealth-resid-qns", SignedServiceMetadata.getServiceMetadata().getServiceInformation().getDocumentIdentifier().getScheme());
@@ -435,24 +466,32 @@ class OasisSMP10ServiceMetadataIT {
     @Test
     void testSignedServiceMetadataParticipantNotOk() {
 
-        assertThrows(DNSLookupException.class, () -> getSignedServiceMetada("extension", "urn:poland:ncpb1", false));
+        DNSLookupException result = assertThrows(DNSLookupException.class,
+                () -> getSignedServiceMetadata("extension", "urn:poland:ncpb1", false));
+        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("can not be resolved!"));
     }
 
-    private Object getSignedServiceMetada(String filename, String participantId, boolean deprecateServiceMetadata) throws Exception {
+    private Object getSignedServiceMetadata(String filename, String participantId, boolean deprecateServiceMetadata) throws Exception {
         URLFetcherMock urlFetcherURL = new URLFetcherMock();
-        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB, filename, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
+        urlFetcherURL.setParameters(CommonUtil.OASIS_SMP_10, URLFetcherMock.LookupType.CNAME, TestCaseConstants.SERVICE_METADATA_URL_URN_POLAND_NCPB, filename, "b-adb4c6d3821d142c684b13ed269fad65.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu");
 
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier(participantId, "ehealth-actorid-qns");
-        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107", "ehealth-resid-qns");
+        SMPDocumentIdentifier documentIdentifier = new SMPDocumentIdentifier("urn::epsos##services:extended:epsos::107",
+                "ehealth-resid-qns");
+
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(participantIdentifier,
+                TestCaseConstants.PUBLISHER_URL_02);
 
         DefaultDNSLookup defaultDNSLookup = mock(DefaultDNSLookup.class);
-        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier, "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu")).thenReturn(null);
+        Mockito.when(defaultDNSLookup.naptrUrlValueLookup(participantIdentifier,
+                        "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns.ehealth.acc.edelivery.tech.ec.europa.eu"))
+                .thenReturn(publisherLookupResult);
 
         DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
                 .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .dnsLookup(defaultDNSLookup)
-                .build())
+                        .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
+                        .dnsLookup(defaultDNSLookup)
+                        .build())
                 .documentFetcher(urlFetcherURL)
                 .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))

@@ -19,11 +19,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.provider;
 
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
-
-import java.net.URI;
 
 /**
  * Interface for the Document request provider.The implementation of the interface
@@ -37,24 +35,47 @@ import java.net.URI;
  * @since 1.0
  */
 public interface IDocumentRequestProvider {
+    String DEFAULT_CONTEXT = "";
+    String DEFAULT_SUB_CONTEXT = "services";
+
+    default PublisherRequest createRequestForResource(PublisherLookupResult publisher, SMPParticipantIdentifier resourceIdentifier) {
+        return createRequestForResource(publisher, DEFAULT_CONTEXT, resourceIdentifier);
+    }
+
+
+    default PublisherRequest createRequestForSubresource(PublisherLookupResult publisher, SMPParticipantIdentifier resourceIdentifier, SMPDocumentIdentifier subresourceIdentifier) {
+        return createRequestForSubresource(publisher, DEFAULT_CONTEXT, resourceIdentifier, DEFAULT_SUB_CONTEXT, subresourceIdentifier);
+    }
 
     /**
      * Create request for the given resource identifier.
      *
-     * @param publisher          The result of the publisher locator
+     * @param publisher          The result of the metadata locator
+     * @param resourceContext    The context path of the resource
      * @param resourceIdentifier The resource identifier
      * @return The request for the given resource identifier
+     * @throws eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException if the request cannot be created
      */
-    URI createRequestForResource(URI publisher, SMPParticipantIdentifier resourceIdentifier);
+    PublisherRequest createRequestForResource(PublisherLookupResult publisher,
+                                              String resourceContext, SMPParticipantIdentifier resourceIdentifier);
 
     /**
-     * Create request for the given subresource identifier.
+     * Create request for the given resource identifier.
      *
-     * @param publisher             The result of the publisher locator
+     * @param publisher             The result of the metadata locator
+     * @param resourceContext       The context path of the resource
      * @param resourceIdentifier    The resource identifier
-     * @param subresourceIdentifier The resource identifier
+     * @param subresourceContext    The context path of the subresource
+     * @param subresourceIdentifier The subresource identifier
      * @return The request for the given resource identifier
+     * @throws eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException if the request cannot be created
      */
-    URI createRequestForSubresource(URI publisher, SMPParticipantIdentifier resourceIdentifier, SMPDocumentIdentifier subresourceIdentifier) throws TechnicalException;
+    PublisherRequest createRequestForSubresource(PublisherLookupResult publisher,
+                                                 String resourceContext, SMPParticipantIdentifier resourceIdentifier,
+                                                 String subresourceContext, SMPDocumentIdentifier subresourceIdentifier);
+
+    PublisherRequest createRequestForSubresource(PublisherRequest resourceRequest,
+                                                 String subresourceContext,
+                                                 SMPDocumentIdentifier documentIdentifier);
 
 }

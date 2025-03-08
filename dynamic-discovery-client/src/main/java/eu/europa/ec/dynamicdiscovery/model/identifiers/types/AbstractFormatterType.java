@@ -40,6 +40,7 @@ public abstract class AbstractFormatterType implements  FormatterType {
         return isSchemeMandatory;
     }
 
+    @Override
     public void setSchemeMandatory(boolean schemeMandatory) {
         isSchemeMandatory = schemeMandatory;
     }
@@ -58,7 +59,7 @@ public abstract class AbstractFormatterType implements  FormatterType {
     public Integer getSchemeMaxLength() {
         return schemeMaxLength;
     }
-
+    @Override
     public void setSchemeMaxLength(Integer schemeMaxLength) {
         this.schemeMaxLength = schemeMaxLength;
     }
@@ -68,6 +69,7 @@ public abstract class AbstractFormatterType implements  FormatterType {
         return valueMaxLength;
     }
 
+    @Override
     public void setValueMaxLength(Integer valueMaxLength) {
         this.valueMaxLength = valueMaxLength;
     }
@@ -77,14 +79,17 @@ public abstract class AbstractFormatterType implements  FormatterType {
         return valuePattern;
     }
 
+    @Override
     public void setValueValidationPattern(Pattern valueRegExp) {
         this.valuePattern = valueRegExp;
     }
 
+    @Override
     public Pattern getSchemeValidationPattern() {
         return schemePattern;
     }
 
+    @Override
     public void setSchemeValidationPattern(Pattern schemePattern) {
         this.schemePattern = schemePattern;
     }

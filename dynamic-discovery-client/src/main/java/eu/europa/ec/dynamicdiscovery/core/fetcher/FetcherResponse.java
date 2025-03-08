@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,25 +20,54 @@
 package eu.europa.ec.dynamicdiscovery.core.fetcher;
 
 import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Response entity for the fetcher containing the target input stream,
  *
  *
  * @author Flávio W. R. SANTOS
- * @author Erlend KLAKEGG BERGHEIM
+ * @author Erlend
  * @author Joze RIHTARSIC
  * @since 1.0
  */
 public class FetcherResponse {
 
-    private final InputStream inputStream;
+
+    private URI publisherURI;
+    private URI documentURI;
+    private InputStream inputStream;
+    private String extensionIdentifier;
 
     public FetcherResponse(InputStream inputStream) {
+        this(inputStream, null );
+    }
+    public FetcherResponse(InputStream inputStream,  URI documentURI) {
         this.inputStream = inputStream;
+        this.documentURI = documentURI;
     }
 
     public InputStream getInputStream() {
         return this.inputStream;
+    }
+
+    public URI getDocumentURI() {
+        return documentURI;
+    }
+
+    public URI getPublisherURI() {
+        return publisherURI;
+    }
+
+    public void setPublisherURI(URI publisherURI) {
+        this.publisherURI = publisherURI;
+    }
+
+    public String getExtensionIdentifier() {
+        return extensionIdentifier;
+    }
+
+    public void setExtensionIdentifier(String targetExtensionId) {
+        this.extensionIdentifier = targetExtensionId;
     }
 }

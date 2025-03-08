@@ -19,7 +19,9 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
@@ -30,6 +32,7 @@ import org.xbill.DNS.NAPTRRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,9 +41,13 @@ public class DNSUtils {
 
     protected static final ParticipantIdentifierFormatter identifierFormatter = new ParticipantIdentifierFormatter();
     protected static final Logger LOG = LoggerFactory.getLogger(DNSUtils.class);
-    public static final String NAPTR_SERVICE = "Meta:SMP";
-    public static final String TEST_TOP_DOMAIN = "ehealth.acc.edelivery.tech.ec.europa.eu";
-    public static final String TEST_TARGET_URL = "http://smp-mock-1.ehealth.eu:8888";
+    public static final String TEST_NAPTR_SERVICE_SMP1 = "Meta:SMP";
+    private static final String TEST_NAPTR_SERVICE_SMP2 = "oasis-bdxr-smp-2";
+    private static final String TEST_NAPTR_SERVICE_CPP3 = "Meta:CPP3";
+
+    public static final String TEST_TOP_DOMAIN_01 = "acc.edelivery.tech.ec.europa.eu";
+    public static final String TEST_TOP_DOMAIN_02 = "ehealth.acc.edelivery.tech.ec.europa.eu";
+    public static final String TEST_PUBLISHER_URL = "http://smp-mock-1.ehealth.eu:8888";
     public static final String NAPTR_FORMAT = "!.*!%s!";
     public static final String NAPTR_FORMAT_LEGACY = "!^.*$!%s!";
     public static final String DNS_NAME_SEPARATOR = ".";
@@ -50,15 +57,24 @@ public class DNSUtils {
     }
 
     public static List<Record> createSmpDnsNaptrResponse(SMPParticipantIdentifier participantIdentifier) {
-        return createSmpDnsNaptrResponse(participantIdentifier, NAPTR_SERVICE);
+        return createSmpDnsNaptrResponse(participantIdentifier, TEST_NAPTR_SERVICE_SMP1);
     }
 
     public static List<Record> createSmpDnsNaptrResponse(SMPParticipantIdentifier participantIdentifier, String service) {
         return createSmpDnsNaptrResponse(participantIdentifier,
-                TEST_TOP_DOMAIN,
-                TEST_TARGET_URL,
+                TEST_TOP_DOMAIN_02,
+                TEST_PUBLISHER_URL,
                 service);
     }
+
+    public static List<Record> createSmpDnsNaptrResponseForValue(SMPParticipantIdentifier participantIdentifier, String service, String urlValue) {
+        return createSmpDnsNaptrResponse(participantIdentifier,
+                TEST_TOP_DOMAIN_02,
+                urlValue,
+                service);
+    }
+
+
 
     public static List<Record> createSmpDnsNaptrResponse(SMPParticipantIdentifier participantIdentifier, String dnsZone, String targetUrl, String service) {
         return createSmpDnsNaptrResponse(participantIdentifier, dnsZone, targetUrl, service, NAPTR_FORMAT);
@@ -94,4 +110,15 @@ public class DNSUtils {
         return Name.fromString(smpDnsName + DNS_NAME_SEPARATOR);
     }
 
+    public static  List<PublisherLookupResult> createMockPublisherLookupNaptrResult(SMPParticipantIdentifier identifier, String urlAddress) {
+        return createMockPublisherLookupNaptrResult(identifier, urlAddress, DNSUtils.TEST_NAPTR_SERVICE_SMP1);
+    }
+
+    public static  List<PublisherLookupResult> createMockPublisherLookupNaptrResult(SMPParticipantIdentifier identifier, String urlAddress, String ... naptrServices) {
+        List<PublisherLookupResult> results = new ArrayList<>();
+        for (String naptrService : naptrServices) {
+            results.add(new PublisherLookupResult(identifier, URI.create(urlAddress),naptrService, DNSLookupType.NAPTR));
+        }
+        return results;
+    }
 }

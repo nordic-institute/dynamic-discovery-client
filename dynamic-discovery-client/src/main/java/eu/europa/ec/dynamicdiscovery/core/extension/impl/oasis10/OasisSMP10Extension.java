@@ -22,6 +22,8 @@ package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.AbstractExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Oasis SMP 1.0 extension providing je ServiceGroup and SignedServiceMetadata parser
@@ -32,6 +34,9 @@ import java.util.Arrays;
 public class OasisSMP10Extension extends AbstractExtension {
 
     public static final String NAMESPACE = "http://docs.oasis-open.org/bdxr/ns/SMP/2016/05";
+    public static final String DEFAULT_PUBLISHER_URL_CONTEXT = "/";
+    public static final String DEFAULT_SUBRESOURCE_URL_CONTEXT = "/services";
+    public static final String DEFAULT_LOOKUP_SERVICE = "Meta:SMP";
 
     final OasisSMP10ServiceGroupReader serviceGroupReader;
     final OasisSMP10ServiceMetadataReader serviceMetadataReader;
@@ -48,5 +53,25 @@ public class OasisSMP10Extension extends AbstractExtension {
 
     public void setIgnoreInvalidServices(boolean ignoreInvalidServices) {
         this.serviceMetadataReader.setIgnoreInvalidServices(ignoreInvalidServices);
+    }
+
+    @Override
+    public List<String> lookupServices() {
+        return Collections.singletonList(DEFAULT_LOOKUP_SERVICE);
+    }
+
+    @Override
+    public String contextPath() {
+        return DEFAULT_PUBLISHER_URL_CONTEXT;
+    }
+
+    @Override
+    public String subContextPath() {
+        return DEFAULT_SUBRESOURCE_URL_CONTEXT;
+    }
+
+    @Override
+    public String getExtensionIdentifier() {
+        return "oasis-smp-1.0";
     }
 }

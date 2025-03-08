@@ -258,8 +258,8 @@ public abstract class AbstractIdentifierFormatter<T> {
     /**
      * Method parses the object then it validates if scheme is case-sensitive and lower case the values accordingly.
      *
-     * @param value
-     * @return
+     * @param value the identifier object with scheme and identifier values
+     * @return the normalized identifier object
      */
     public T normalizeIdentifier(final String value) {
         T result = parse(value);
@@ -370,6 +370,7 @@ public abstract class AbstractIdentifierFormatter<T> {
     }
 
     public void setSchemeMandatory(boolean schemeMandatory) {
+        this.formatterTypes.forEach(formatterType -> formatterType.setSchemeMandatory(schemeMandatory));
         this.defaultFormatter.setSchemeMandatory(schemeMandatory);
     }
 
@@ -378,6 +379,7 @@ public abstract class AbstractIdentifierFormatter<T> {
     }
 
     public void setSchemeValidationPattern(Pattern schemeValidationPattern) {
+        this.formatterTypes.forEach(formatterType -> formatterType.setSchemeValidationPattern(schemeValidationPattern));
         this.defaultFormatter.setSchemeValidationPattern(schemeValidationPattern);
     }
 

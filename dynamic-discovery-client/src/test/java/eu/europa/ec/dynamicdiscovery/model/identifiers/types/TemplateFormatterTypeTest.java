@@ -113,7 +113,6 @@ class TemplateFormatterTypeTest {
             Throwable result = assertThrows(errorClass, () -> testInstance.parse(toParseIdentifier));
             MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString(containsErrorMessage));
         } else {
-
             String[] result = testInstance.parse(toParseIdentifier);
             assertNotNull(result);
             assertEquals(2, result.length);

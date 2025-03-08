@@ -91,7 +91,7 @@ class OasisSMP20ServiceGroupReaderTest {
         assertNotNull(result.getParticipantIdentifier());
         assertTrue(result.isWrapperFor(ServiceGroup.class));
         assertNotNull(result.unwrap(ServiceGroup.class));
-        assertEquals(PARTICIPANT_IDENTIFIER_ISO6253_01, result.getParticipantIdentifier());
+        assertEquals(PARTY_9925_0367302178_IDENTIFIER, result.getParticipantIdentifier());
         assertEquals(2, result.getDocumentIdentifiers().size());
         assertEquals(DOCUMENT_IDENTIFIER_001, result.getDocumentIdentifiers().get(0));
         assertEquals(DOCUMENT_IDENTIFIER_002, result.getDocumentIdentifiers().get(1));
@@ -107,7 +107,7 @@ class OasisSMP20ServiceGroupReaderTest {
         assertNotNull(result.getParticipantIdentifier());
         assertTrue(result.isWrapperFor(ServiceGroup.class));
         assertNotNull(result.unwrap(ServiceGroup.class));
-        assertEquals(PARTICIPANT_IDENTIFIER_ISO6253_01, result.getParticipantIdentifier());
+        assertEquals(PARTY_9925_0367302178_IDENTIFIER, result.getParticipantIdentifier());
         assertEquals(2, result.getDocumentIdentifiers().size());
         assertEquals(DOCUMENT_IDENTIFIER_001, result.getDocumentIdentifiers().get(0));
         assertEquals(DOCUMENT_IDENTIFIER_002, result.getDocumentIdentifiers().get(1));
