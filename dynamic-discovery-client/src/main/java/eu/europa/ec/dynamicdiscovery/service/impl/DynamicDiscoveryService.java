@@ -108,6 +108,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     public SMPServiceGroup getResource(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         final FetcherResponse fetcherResponse = retrieveResourceForIdentifier(participantIdentifier);
         if (fetcherResponse == null) {
+            LOG.debug("No document found for participant [{}].", participantIdentifier);
             return null;
         }
         // if only target extension
@@ -115,7 +116,6 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
                         extension -> StringUtils.equals(extension.getExtensionIdentifier(),
                                 fetcherResponse.getExtensionIdentifier()))
                 .collect(Collectors.toList());
-
 
         return documentReader.getResource(fetcherResponse, filteredExtensions);
     }
@@ -210,7 +210,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             try {
                 targetDocumentIdentifier = getDocumentIdentifierWithWildcardMatch(resourceRequest, documentIdentifier, Collections.singletonList(extension));
             } catch (DocumentParseException e) {
-                LOG.debug("Can not parse resource document with extension: [{}]  to resolve wildcard identifier: [{}]. Error: ",
+                LOG.debug("Can not parse resource document with extension: [{}]  to resolve wildcard identifier: [{}]. Error: [{}]",
                         documentIdentifier, extension.getExtensionIdentifier(), ExceptionUtils.getRootCauseMessage(e));
                 return null;
             } catch (Exception e) {
@@ -259,14 +259,10 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
 
         URI resourceURI = resourceRequest.getResourceUri();
         LOG.debug("Get resource/participant's  documents for resource URI: [{}].", resourceURI);
-        final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = new ArrayList<>();
-        //try {
-            final FetcherResponse fetcherResponse = documentFetcher.fetch(resourceURI);
-            final SMPServiceGroup serviceGroup = documentReader.getResource(fetcherResponse, extensions);
-            discoveredDocumentIdentifiers.addAll(serviceGroup.getDocumentIdentifiers());
-        /*} catch (TechnicalException e) {
-            throw new DNSFetchException("Can not resolve wildcard identifier []! Error retrieving document identifiers from URI: [" + resourceURI + "]", e);
-        }*/
+
+        final FetcherResponse fetcherResponse = documentFetcher.fetch(resourceURI);
+        final SMPServiceGroup serviceGroup = documentReader.getResource(fetcherResponse, extensions);
+        final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = new ArrayList<>(serviceGroup.getDocumentIdentifiers());
         //the document identifiers supported by the participant
         return getSmpDocumentIdentifierWithWildcardSchemeUsingExactOrLongestMatch(discoveredDocumentIdentifiers, documentIdentifier);
     }
