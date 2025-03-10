@@ -31,9 +31,8 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @since 2.0
  */
 public class OasisSMPFormatterType extends AbstractFormatterType {
-    static final String SEPARATOR = "::";
 
-    DNSLookupFormatType dnsLookupFormatType = null;
+    DNSLookupFormatType dnsLookupFormatType;
 
     public OasisSMPFormatterType() {
         setWildcardEnabled(true);
@@ -54,7 +53,7 @@ public class OasisSMPFormatterType extends AbstractFormatterType {
 
     @Override
     public String format(String scheme, String identifier, boolean noDelimiterOnEmptyScheme) {
-        return (isBlank(scheme) && noDelimiterOnEmptyScheme ? "" : trimToEmpty(scheme) + SEPARATOR) + trimToEmpty(identifier);
+        return (isBlank(scheme) && noDelimiterOnEmptyScheme ? "" : trimToEmpty(scheme) + OASIS_SMP_SEPARATOR) + trimToEmpty(identifier);
 
     }
 
@@ -67,7 +66,7 @@ public class OasisSMPFormatterType extends AbstractFormatterType {
     @Override
     public String[] parse(final String value) {
         String pValue = trim(value);
-        String[] splitValue = StringUtils.splitByWholeSeparatorPreserveAllTokens(pValue, SEPARATOR, 2);
+        String[] splitValue = StringUtils.splitByWholeSeparatorPreserveAllTokens(pValue, OASIS_SMP_SEPARATOR, 2);
         // if only one value is returned set it to identifier
         // else the first element is scheme and second identifier
         String scheme = trim(splitValue.length == 1 ? null : splitValue[0]);
