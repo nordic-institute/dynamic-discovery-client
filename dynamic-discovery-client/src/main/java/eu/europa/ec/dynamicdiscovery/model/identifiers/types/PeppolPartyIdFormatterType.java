@@ -43,7 +43,8 @@ public class PeppolPartyIdFormatterType extends OasisSMPFormatterType {
 
     @Override
     public String getInvalidSchemeMessage(String scheme, String identifier) {
-        return "The Scheme Identifier MUST take the form {domain}-{identifierArea}-{identifierType} such as for example 'busdox-actorid-upis'. It may only contain the following characters: [a-z0-9]+-[a-z0-9]+-[a-z0-9]+";
+        return schemePattern!=null? super.getInvalidSchemeMessage(scheme, identifier):
+                "The Scheme Identifier MUST take the form {domain}-{identifierArea}-{identifierType} such as for example 'busdox-actorid-upis'. It may only contain the following characters: [a-z0-9]+-[a-z0-9]+-[a-z0-9]+";
     }
 
 }

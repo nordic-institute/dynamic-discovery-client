@@ -19,13 +19,14 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolSMPExtension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.DocumentParseException;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -39,6 +40,8 @@ import org.mockito.Mockito;
 
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -70,6 +73,7 @@ class DefaultBDXRReaderTest {
 
     void testDefaultBDXRReaderFailForDocType(String standard, String filename, String error) throws Exception {
         //given
+        List<IExtension> extensions = Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension(), new PeppolSMPExtension());
         KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
         DefaultBDXRReader testInstance = new DefaultBDXRReader.Builder()
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
@@ -77,19 +81,21 @@ class DefaultBDXRReaderTest {
         InputStream xmlStream = CommonUtil.getISForName(filename, standard);
         FetcherResponse fetcherResponse = new FetcherResponse(xmlStream);
 
-        BindException result = assertThrows(BindException.class, () -> testInstance.getSubresource(fetcherResponse));
+        DocumentParseException result = assertThrows(DocumentParseException.class, () -> testInstance.getSubresource(fetcherResponse, extensions));
         MatcherAssert.assertThat(result.getMessage(), org.hamcrest.Matchers.containsString(error));
+
     }
 
 
     @Test
     void testGetServiceGroup() throws Exception {
+        List<IExtension> extensions = Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension(), new PeppolSMPExtension());
         KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
         DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader.Builder()
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("service_group_urn_poland_ncpb"));
-        SMPServiceGroup serviceGroup = defaultBDXRReader.getResource(fetcherResponse);
+        SMPServiceGroup serviceGroup = defaultBDXRReader.getResource(fetcherResponse, extensions);
 
         assertNotNull(serviceGroup);
         assertNotNull(serviceGroup.getParticipantIdentifier());
@@ -102,24 +108,26 @@ class DefaultBDXRReaderTest {
 
     @Test
     void testGetServiceGroupNullContent() throws Exception {
+        List<IExtension> extensions = Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension(), new PeppolSMPExtension());
         KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
         DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader.Builder()
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(null);
 
-        BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getResource(fetcherResponse));
+        DocumentParseException result = assertThrows(DocumentParseException.class, () -> defaultBDXRReader.getResource(fetcherResponse, extensions));
         assertEquals("Error occurred while retrieving the data!", result.getMessage());
     }
 
     @Test
     void testGetServiceMetadata() throws Exception {
+        List<IExtension> extensions = Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension(), new PeppolSMPExtension());
         KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
         DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader.Builder()
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(CommonUtil.getInputStreamFromOasisSMP10XmlResource("signed_service_metadata_invalid_certificate"));
-        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getSubresource(fetcherResponse);
+        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getSubresource(fetcherResponse, extensions);
 
         assertNotNull(serviceMetadata);
     }
@@ -131,17 +139,15 @@ class DefaultBDXRReaderTest {
             "oasis-smp-2.0, service_group_unsigned_valid_iso6523_namespace, 2",
     })
     void testGetServiceGroupOk(String standard, String filename, int serviceMetadataCount) throws Exception {
+        List<IExtension> extensions = Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension(), new PeppolSMPExtension());
 
         DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader.Builder()
                 .signatureValidator(signatureValidatorMock)
-                .addExtension(new OasisSMP10Extension())
-                .addExtension(new OasisSMP20Extension())
-                .addExtension(new PeppolSMPExtension())
                 .build();
 
         InputStream serviceMetadataStream = CommonUtil.getISForName(filename, standard);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
-        SMPServiceGroup serviceGroup = defaultBDXRReader.getResource(fetcherResponse);
+        SMPServiceGroup serviceGroup = defaultBDXRReader.getResource(fetcherResponse, extensions);
 
         assertNotNull(serviceGroup);
         assertEquals(serviceMetadataCount, serviceGroup.getDocumentIdentifiers().size());
@@ -159,17 +165,14 @@ class DefaultBDXRReaderTest {
             "peppol, signed_service_metadata_valid_iso6523_wildcard, false, false",
             "peppol, signed_service_metadata_redirection, true, true"})
     void testGetServiceMetadataOk(String standard, String filename, boolean isRedirect, boolean certUID) throws Exception {
-
+        List<IExtension> extensions = Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension(), new PeppolSMPExtension());
         DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader.Builder()
                 .signatureValidator(signatureValidatorMock)
-                .addExtension(new OasisSMP10Extension())
-                .addExtension(new OasisSMP20Extension())
-                .addExtension(new PeppolSMPExtension())
                 .build();
 
         InputStream serviceMetadataStream = CommonUtil.getISForName(filename, standard);
         FetcherResponse fetcherResponse = new FetcherResponse(serviceMetadataStream);
-        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getSubresource(fetcherResponse);
+        SMPServiceMetadata serviceMetadata = defaultBDXRReader.getSubresource(fetcherResponse, extensions);
 
         assertNotNull(serviceMetadata);
         assertEquals(1, serviceMetadata.getEndpoints().size());
@@ -193,14 +196,14 @@ class DefaultBDXRReaderTest {
 
     @Test
     void testGetServiceMetadataNotOk() throws Exception {
+        List<IExtension> extensions = Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension(), new PeppolSMPExtension());
         KeyStore keyStore = CommonUtil.loadTrustStore(TRUSTSTORE_PATH);
         DefaultBDXRReader defaultBDXRReader = new DefaultBDXRReader.Builder()
                 .signatureValidator(new DefaultSignatureValidator(keyStore))
                 .build();
         FetcherResponse fetcherResponse = new FetcherResponse(null);
 
-        BindException result = assertThrows(BindException.class, () -> defaultBDXRReader.getSubresource(fetcherResponse));
+        DocumentParseException result = assertThrows(DocumentParseException.class, () -> defaultBDXRReader.getSubresource(fetcherResponse, extensions));
         assertEquals("Error occurred while retrieving the data!", result.getMessage());
     }
-
 }

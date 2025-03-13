@@ -21,12 +21,12 @@ package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
-import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
-import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20.OasisSMP20Extension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.reader.IDocumentReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
+import eu.europa.ec.dynamicdiscovery.exception.DDCInvalidDataException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -34,13 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Default implementation of the {@link ISMPDocumentReader} interface. This class is
+ * Default implementation of the {@link IDocumentReader} interface. This class is
  * responsible for reading the XML data from the response and returning the corresponding
  * object. The various XML types (OasisSMP 1.0, OasisSMP 2.0, etc.) are handled by the
  * extensions that are registered with the reader. The reader will delegate the parsing
@@ -56,21 +54,19 @@ import java.util.Optional;
 public class DefaultBDXRReader extends AbstractXMLResponseReader implements ISMPDocumentReader {
     static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRReader.class);
     final ISignatureValidator signatureValidator;
-    final List<IExtension> listExtensions = new ArrayList<>();
+
 
     private DefaultBDXRReader(Builder builder) {
         signatureValidator = builder.signatureValidator;
-        listExtensions.addAll(builder.listExtensions);
     }
-
-    public List<IExtension> getExtensions() {
-        return listExtensions;
-    }
-
 
     @Override
-    public <T, C> IObjectReader<T, C> getParser(QName qName, Class<T> clazz) {
-        Optional<IExtension> optionalIExtension = listExtensions.stream().filter(parser -> parser.handles(qName, clazz)).findFirst();
+    public <T, C> IObjectReader<T, C> getParser(QName qName, Class<T> clazz, List<IExtension> extensions) {
+        if (extensions == null) {
+            throw new DDCInvalidDataException("Missing extensions to parse the data!");
+        }
+        Optional<IExtension> optionalIExtension = extensions.stream()
+                .filter(parser -> parser.handles(qName, clazz)).findFirst();
         if (!optionalIExtension.isPresent()) {
             LOG.error("No parses registered for [{}] and class [{}]", qName, clazz);
             return null;
@@ -79,29 +75,21 @@ public class DefaultBDXRReader extends AbstractXMLResponseReader implements ISMP
     }
 
     @Override
-    public SMPServiceGroup getResource(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException {
-        return readObject(fetcherResponse, SMPServiceGroup.class, this.signatureValidator, context);
+    public SMPServiceGroup getResource(FetcherResponse fetcherResponse, List<IExtension> extensions, SignatureValidationContext context)
+            throws TechnicalException {
+
+        return readObject(fetcherResponse, SMPServiceGroup.class, extensions, this.signatureValidator, context);
     }
 
     @Override
-    public SMPServiceMetadata getSubresource(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException {
-        return readObject(fetcherResponse, SMPServiceMetadata.class, this.signatureValidator, context);
+    public SMPServiceMetadata getSubresource(FetcherResponse fetcherResponse, List<IExtension> listExtensions, SignatureValidationContext context) throws TechnicalException {
+        return readObject(fetcherResponse, SMPServiceMetadata.class, listExtensions, this.signatureValidator, context);
     }
 
     public static class Builder {
 
         private ISignatureValidator signatureValidator;
-        List<IExtension> listExtensions = new ArrayList<>();
 
-        public Builder addExtension(IExtension extension) {
-            this.listExtensions.add(extension);
-            return this;
-        }
-
-        public Builder addExtensions(List<IExtension> extensions) {
-            this.listExtensions.addAll(extensions);
-            return this;
-        }
 
         public Builder signatureValidator(ISignatureValidator signatureValidator) {
             this.signatureValidator = signatureValidator;
@@ -109,15 +97,7 @@ public class DefaultBDXRReader extends AbstractXMLResponseReader implements ISMP
         }
 
         public DefaultBDXRReader build() {
-            validate();
             return new DefaultBDXRReader(this);
-        }
-
-        private void validate() {
-            if (listExtensions.isEmpty()) {
-                LOG.debug("No extensions were added to the reader. Adding default Oasis SMP 1.0/2.0 extensions");
-                listExtensions.addAll(Arrays.asList(new OasisSMP10Extension(), new OasisSMP20Extension()));
-            }
         }
 
     }

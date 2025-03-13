@@ -21,7 +21,7 @@ package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.DocumentParseException;
 import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.w3c.dom.Document;
@@ -72,7 +72,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
             // to remove xmlDeclaration
             jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException(smpExceptionCode, "Error occurred while serializing the ServiceGroup", e);
+            throw new DocumentParseException(smpExceptionCode, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 
@@ -86,7 +86,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
         try {
             return getUnmarshaller().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException(smpExceptionCode, "Error occurred while parsing the document", e);
+            throw new DocumentParseException(smpExceptionCode, "Error occurred while parsing the document", e);
         }
     }
 
@@ -98,7 +98,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
             Document document = db.parse(inputStream);
             return parseNativeAny(document);
         } catch (SAXException | IOException e) {
-            throw new BindException(smpExceptionCode, "Error occurred while SignedServiceMetadata serviceGroup", e);
+            throw new DocumentParseException(smpExceptionCode, "Error occurred while SignedServiceMetadata serviceGroup", e);
         }
     }
 
@@ -109,7 +109,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
             getMarshaller().marshal(sourceObject, document);
             return document;
         } catch (JAXBException e) {
-            throw new BindException(DDCExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
+            throw new DocumentParseException(DDCExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
         }
     }
 }

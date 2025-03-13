@@ -27,10 +27,7 @@ import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestPr
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
-import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPServiceMetadataException;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.exception.*;
 import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
@@ -58,14 +55,16 @@ import java.util.List;
 
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.BUSDOX_DOCID_QNS;
 import static eu.europa.ec.dynamicdiscovery.util.TestCaseConstants.PEPPOL_DOCTYPE_WILDCARD;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Purpose of this test is to perform live tests against the SMP service. The tests uses
- * dns domain: acc.edelivery.tech.ec.europa.eu wiith NAPTR and CNAME DNS lookup types.
- * The test is designed to loookup  Peppol SMP service metadata for a given participant identifier.
+ * Purpose of this test is to perform live tests against the SMP service. The tests use
+ * dns domain: acc.edelivery.tech.ec.europa.eu with NAPTR and CNAME DNS lookup types.
+ * The test is designed to lookup  Peppol SMP service metadata for a given participant identifier.
  * <ul<
  * <li>iso6523-actorid-upis::9925:EDELIVERY_TEST1</li>
  * <li>iso6523-actorid-upis::9901:pint_c4_jp_sb</li>
@@ -78,9 +77,9 @@ import static org.mockito.Mockito.verify;
  * @since 2.1
  */
 @EnabledIfSystemProperty(named = "live.tests", matches = "true")
-public class LiveDocumentIdentifierIT {
+public class LiveDDCSubresourceSearchIT {
 
-    static final Logger LOG = LoggerFactory.getLogger(LiveDocumentIdentifierIT.class);
+    static final Logger LOG = LoggerFactory.getLogger(LiveDDCSubresourceSearchIT.class);
     private static final String EDELIVERY_TECH_EC_EUROPA_EU = "acc.edelivery.tech.ec.europa.eu";
 
     @Test
@@ -171,7 +170,6 @@ public class LiveDocumentIdentifierIT {
         final KeyStore trustStore = CommonUtil.loadTrustStore("truststore/peppol-truststore.jks");
         final DefaultSignatureValidator defaultSignatureValidator = new DefaultSignatureValidator(trustStore);
         final DefaultBDXRReader bdxReader = new DefaultBDXRReader.Builder()
-                .addExtension(new PeppolSMPExtension())
                 .signatureValidator(defaultSignatureValidator)
                 .build();
 
@@ -181,14 +179,13 @@ public class LiveDocumentIdentifierIT {
                 .addTopDnsDomain(EDELIVERY_TECH_EC_EUROPA_EU)
                 .build();
         final DefaultDocumentRequestProvider defaultProvider = new DefaultDocumentRequestProvider.Builder()
-                .documentFetcher(urlFetcher)
-                .documentReader(bdxReader)
-                .wildcardSchemes(Collections.singletonList(PEPPOL_DOCTYPE_WILDCARD))
                 .build();
 
         //create the smp client
         return new DynamicDiscoveryService.Builder()
                 .publisherLocator(defaultBDXRLocator)
+                .addExtension(new PeppolSMPExtension())
+                .wildcardSubresourceSchemes(PEPPOL_DOCTYPE_WILDCARD)
                 .documentReader(bdxReader)
                 .documentFetcher(urlFetcher)
                 .documentRequestProvider(defaultProvider)
@@ -274,10 +271,9 @@ public class LiveDocumentIdentifierIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notSupported",
                 BUSDOX_DOCID_QNS);
 
-        assertThrows(DNSLookupException.class,
-                () -> smpClient.getSubresource(toCheckParticipantIdentifier, documentIdentifierNotRegisteredForParticipantBusdox),
-                "Expected: SMPServiceMeta with document identifier [" + documentIdentifierNotRegisteredForParticipantBusdox
-                        + "] not found for participant [" + toCheckParticipantIdentifier + "]");
+        DNSFetchException result = assertThrows(DNSFetchException.class,
+                () -> smpClient.getSubresource(toCheckParticipantIdentifier, documentIdentifierNotRegisteredForParticipantBusdox));
+        assertThat(result.getMessage(), containsString("Can not fetch document [" + documentIdentifierNotRegisteredForParticipantBusdox+"]"));
     }
 
     @Test
@@ -334,10 +330,10 @@ public class LiveDocumentIdentifierIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notExistent",
                 PEPPOL_DOCTYPE_WILDCARD);
 
-        final SMPServiceMetadataException exception = assertThrows(SMPServiceMetadataException.class,
+        final DNSFetchException exception = assertThrows(DNSFetchException.class,
                 () -> smpClient.getSubresource(toCheckParticipantIdentifier, toCheckDocumentIdentifier));
-        assertEquals(DDCExceptionCode.SERVICE_METADATA, exception.getSmpExceptionCode());
-        assertTrue(exception.getMessage().contains("Could not find SMPServiceMetadata for participant"));
+        assertEquals(DDCExceptionCode.FETCH_EXCEPTION, exception.getSmpExceptionCode());
+        assertThat(exception.getMessage(), containsString("Can not resolve wildcard identifier "));
 
     }
 
@@ -357,7 +353,7 @@ public class LiveDocumentIdentifierIT {
         final DNSLookupException exception = assertThrows(DNSLookupException.class, () ->
            smpClient.getSubresource(toCheckParticipantIdentifier, toCheckDocumentIdentifier)
         );
-        assertTrue(exception.getMessage().contains("Lookup [CNAME] for participant"));
+        assertThat(exception.getMessage(), containsString("can not be resolved!"));
         assertEquals(DDCExceptionCode.SERVICE_GROUP, exception.getSmpExceptionCode());
 
     }
@@ -389,7 +385,7 @@ public class LiveDocumentIdentifierIT {
                 PEPPOL_DOCTYPE_WILDCARD);
         supportedDocumentIdentifiers.add(wildcardDocumentIdentifier);
 
-        doTestGetServiceMetadataAndAssert(toCheckDocumentIdentifier, supportedDocumentIdentifiers, exactMatchDocumentIdentifier);
+        doTestGetServiceMetadataAndAssert(toCheckDocumentIdentifier, supportedDocumentIdentifiers);
     }
 
     @Test
@@ -421,10 +417,10 @@ public class LiveDocumentIdentifierIT {
         supportedDocumentIdentifiers.add(wildcardDocumentIdentifier);
 
         //we expect that the longest match is used
-        doTestGetServiceMetadataAndAssert(toCheckDocumentIdentifier, supportedDocumentIdentifiers, wildcardDocumentIdentifier);
+        doTestGetServiceMetadataAndAssert(toCheckDocumentIdentifier, supportedDocumentIdentifiers);
     }
 
-    private void doTestGetServiceMetadataAndAssert(SMPDocumentIdentifier toCheckDocumentIdentifier, List<SMPDocumentIdentifier> supportedDocumentIdentifiers, SMPDocumentIdentifier expectedMatch) throws TechnicalException {
+    private void doTestGetServiceMetadataAndAssert(SMPDocumentIdentifier toCheckDocumentIdentifier, List<SMPDocumentIdentifier> supportedDocumentIdentifiers) throws TechnicalException {
         SMPParticipantIdentifier participantIdentifier = Mockito.mock(SMPParticipantIdentifier.class);
         DynamicDiscoveryService dynamicDiscovery = Mockito.mock(DynamicDiscoveryService.class);
 

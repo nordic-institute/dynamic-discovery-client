@@ -22,10 +22,12 @@ package eu.europa.ec.ddc;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.PublisherRequest;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.AccessTokenCredentialProvider;
@@ -218,17 +220,36 @@ public class DdcMain {
                 .build();
 
         // lookup and download data
-        URI uri = smpClient.getPublisherLocator().lookup(participantIdentifier);
-        if (uri == null) {
+        List<PublisherLookupResult> lookupResults = smpClient.getPublisherLocator().lookup(participantIdentifier);
+        if (lookupResults == null|| lookupResults.isEmpty()) {
             throw new DDCRuntimeException("Can not resolve party identifier");
         }
 
         IDocumentRequestProvider metadataProvider = smpClient.getDocumentRequestProvider();
+        for (PublisherLookupResult lookupResult : lookupResults) {
+            try {
+                downloadResource(smpClient, metadataProvider, participantIdentifier, subresourceIdentifier, lookupResult, outputFilePath);
+                break;
+            } catch (TechnicalException e) {
+                System.out.println("Error downloading resource from: " + lookupResult.getUrl() + " - " + e.getMessage());
+            }
+        }
+    }
 
-        uri = subresourceIdentifier == null ? metadataProvider.createRequestForResource(uri, participantIdentifier) :
-                metadataProvider.createRequestForSubresource(uri, participantIdentifier, subresourceIdentifier);
+    protected void downloadResource(DynamicDiscoveryService smpClient, IDocumentRequestProvider metadataProvider,
+                                    SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier subresourceIdentifier,
+                                    PublisherLookupResult lookupResult, String outputFilePath) throws TechnicalException, IOException {
 
-        FetcherResponse response = smpClient.getDocumentFetcher().fetch(uri);
+        URI url;
+        if (subresourceIdentifier == null) {
+            url = metadataProvider.createRequestForResource(lookupResult, participantIdentifier).getResourceUri();
+        } else {
+            url = metadataProvider.createRequestForSubresource(lookupResult, participantIdentifier, subresourceIdentifier).getSubresourceUri();
+        }
+        PublisherRequest request = subresourceIdentifier == null ? metadataProvider.createRequestForResource(lookupResult, participantIdentifier) :
+                metadataProvider.createRequestForSubresource(lookupResult, participantIdentifier, subresourceIdentifier);
+
+        FetcherResponse response = smpClient.getDocumentFetcher().fetch(url);
         Files.copy(response.getInputStream(), Paths.get(outputFilePath), StandardCopyOption.REPLACE_EXISTING);
     }
 

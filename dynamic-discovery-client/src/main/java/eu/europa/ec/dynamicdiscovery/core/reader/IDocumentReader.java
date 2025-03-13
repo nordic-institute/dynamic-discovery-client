@@ -19,9 +19,12 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.reader;
 
+import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+
+import java.util.List;
 
 /**
  * The implementation of this interface should be able to read the data from the FetcherResponse
@@ -37,16 +40,16 @@ import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
  */
 public interface IDocumentReader<R, S> {
 
-    default R getResource(FetcherResponse fetcherResponse) throws TechnicalException {
-        return getResource(fetcherResponse, null);
+    default R getResource(FetcherResponse fetcherResponse, List<IExtension> listExtensions) throws TechnicalException {
+        return getResource(fetcherResponse, listExtensions, null);
     }
 
-    R getResource(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException;
+    R getResource(FetcherResponse fetcherResponse, List<IExtension> listExtensions, SignatureValidationContext context) throws TechnicalException;
 
-    default S getSubresource(FetcherResponse fetcherResponse) throws TechnicalException {
-        return getSubresource(fetcherResponse, null);
+    default S getSubresource(FetcherResponse fetcherResponse, List<IExtension> listExtensions) throws TechnicalException {
+        return getSubresource(fetcherResponse, listExtensions, null);
     }
 
-    S getSubresource(FetcherResponse fetcherResponse, SignatureValidationContext context) throws TechnicalException;
+    S getSubresource(FetcherResponse fetcherResponse, List<IExtension> listExtensions, SignatureValidationContext context) throws TechnicalException;
 }
 

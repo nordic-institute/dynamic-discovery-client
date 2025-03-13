@@ -55,6 +55,4 @@ public abstract class AbstractServiceGroupReader<C> extends AbstractObjectReader
     protected abstract SMPParticipantIdentifier getParticipantIdentifier(C serviceGroup);
 
     protected abstract List<SMPDocumentIdentifier> getDocumentIdentifiers(C serviceGroup);
-
-
 }

@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,16 +24,16 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.xml.namespace.QName;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * @author  Joze Rihtarsic
+ * @author Joze Rihtarsic
  * @since 2.0
  */
 class OasisSMP20ExtensionTest {
@@ -46,7 +46,7 @@ class OasisSMP20ExtensionTest {
                         OasisSMP20ServiceGroupReader.class,
                         true
                 ),
-                Arguments.of( "Test ServiceMetadata",
+                Arguments.of("Test ServiceMetadata",
                         new QName("http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceMetadata", "ServiceMetadata"),
                         SMPServiceMetadata.class,
                         OasisSMP20ServiceMetadataReader.class,
@@ -77,7 +77,7 @@ class OasisSMP20ExtensionTest {
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("testParameters")
-    void handlesTest(String name, QName qName, Class clazzResult,  Class clazzReader, boolean handles) {
+    void handlesTest(String name, QName qName, Class clazzResult, Class clazzReader, boolean handles) {
 
         boolean result = testInstance.handles(qName, clazzResult);
 
@@ -90,10 +90,41 @@ class OasisSMP20ExtensionTest {
 
         IObjectReader result = testInstance.getParser(qName, clazzResult);
 
-        assertEquals(handles, result!=null, name);
+        assertEquals(handles, result != null, name);
         if (handles) {
             assertEquals(clazzReader, result.getClass());
         }
 
     }
+
+    @ParameterizedTest
+    @CsvSource({"'oasis-bdxr-smp-2', true, true, 'oasis-bdxr-smp-2, Meta:SMP'",
+            "'oasis-bdxr-smp-2,Meta:SMP', true, false, 'oasis-bdxr-smp-2, Meta:SMP'",
+            "'oasis-bdxr-smp-2,Meta:SMP', false, true, 'oasis-bdxr-smp-2'",
+            "'oasis-bdxr-smp-2', false, false, 'oasis-bdxr-smp-2'",
+    })
+    void testSetSMP10LookupNaptrServiceEnabled(String initServices, boolean enable, boolean expectedResult, String finalServices) {
+        // given
+        OasisSMP20Extension testInstance = new OasisSMP20Extension(false, initServices.split(","));
+        // when
+        boolean result = testInstance.setSMP10LookupNaptrServiceEnabled(enable);
+        // then
+        assertEquals(expectedResult, result);
+        assertEquals(finalServices, String.join(", ", testInstance.lookupServices()));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"'oasis-bdxr-smp-2', false ",
+            "'oasis-bdxr-smp-2,Meta:SMP', true",
+            "'Meta:SMP', true",
+    })
+    void testIsSMP10LookupNaptrServiceEnabled(String initServices, boolean expectedResult) {
+        // given
+        OasisSMP20Extension testInstance = new OasisSMP20Extension(false, initServices.split(","));
+        // when
+        boolean result = testInstance.isSMP10LookupNaptrServiceEnabled();
+        // then
+        assertEquals(expectedResult, result);
+    }
+
 }

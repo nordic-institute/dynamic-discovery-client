@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,14 @@
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
-import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
-import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.exception.*;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.ParticipantIdentifierFormatter;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.types.FormatterType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +36,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * The BDXL locator implementation. The locator implementations is based on
- * the BDXL specification and eDelivery BDXL 2.0 profile. It uses DNS NAPTR (and legacy CNAME)
+ * The BDXR locator implementation. The locator implementations is based on
+ * the BDXR specification and eDelivery BDXR 2.0 profile. It uses DNS NAPTR (and legacy CNAME)
  * records to locate the metadata for the given participant identifier.
  * In case of the CNAME record, the URL is created from.
  *
@@ -53,18 +51,16 @@ import java.util.regex.Pattern;
  * @since 1.0
  */
 public class DefaultBDXRLocator implements IPublisherLocator {
-    static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
 
     ParticipantIdentifierFormatter resourceIdentifierFormatter = new ParticipantIdentifierFormatter();
     private static final String DOMAIN_SEPARATOR = ".";
 
-
-    private final List<String> topDnsDomains;
-    private final List<DNSLookupType> dnsLookupTypeList;
+    static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
+    private List<String> topDnsDomains;
+    private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
     private String cnameURLScheme = "http";
     private String cnameURLContext = "/";
-
-    private final IDNSLookup dnsLookup;
+    private IDNSLookup dnsLookup;
 
     private DefaultBDXRLocator(Builder builder) {
         this.topDnsDomains = new ArrayList<>(builder.topDnsDomains);
@@ -83,10 +79,6 @@ public class DefaultBDXRLocator implements IPublisherLocator {
             this.resourceIdentifierFormatter.setCaseSensitiveSchemas(builder.resourceCaseSensitiveSchemas);
         }
 
-        if (!builder.resourceFormatterTypes.isEmpty()) {
-            this.resourceIdentifierFormatter.setFormatterTypes(builder.resourceFormatterTypes);
-        }
-
         if (builder.resourceWildcardEnabled != null) {
             this.resourceIdentifierFormatter.setWildcardEnabled(builder.resourceWildcardEnabled);
         }
@@ -100,6 +92,19 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         }
     }
 
+    public DefaultBDXRLocator(List<String> domains) {
+        this(domains, new DefaultDNSLookup.Builder().build());
+    }
+
+    public DefaultBDXRLocator(String domain, IDNSLookup dnsLookup) {
+        this(Collections.singletonList(domain), dnsLookup);
+    }
+
+    public DefaultBDXRLocator(List<String> domains, IDNSLookup dnsLookup) {
+        this.topDnsDomains = domains;
+        this.dnsLookup = dnsLookup;
+    }
+
     public List<String> getTopDnsDomains() {
         return topDnsDomains;
     }
@@ -109,24 +114,56 @@ public class DefaultBDXRLocator implements IPublisherLocator {
     }
 
     /**
-     * Method validates record by record until
+     * Returns the resource identifier formatter which is responsible for
+     * normalizing the resource/participant identifier when generating the DNS query.
+     * @return The resource identifier formatter
+     */
+    public ParticipantIdentifierFormatter getResourceIdentifierFormatter() {
+        return resourceIdentifierFormatter;
+    }
+
+    /**
+     * Sets the resource identifier formatter. The formatter is used to normalize the resource/participant identifier before
+     * generating the resource hash value and the DNS query. The formatter contains a list of formatter types implementations such as
+     * {@link eu.europa.ec.dynamicdiscovery.model.identifiers.types.EBCorePartyIdFormatterType}
+     * and @link {@link eu.europa.ec.dynamicdiscovery.model.identifiers.types.OasisSMPFormatterType}.
+     * @param resourceIdentifierFormatter
+     */
+    public void setResourceIdentifierFormatter(ParticipantIdentifierFormatter resourceIdentifierFormatter) {
+        this.resourceIdentifierFormatter = resourceIdentifierFormatter;
+    }
+
+    /**
+     * This method performs a DNS lookup to retrieve the SMP addresses for the specified participant identifier.
+     * It returns the first result(s) found for each top domain and DNS record type.
+     * Note: for the same top domain and NAPTR record type, multiple results can be
+     * returned with different NAPTR services.
+     * The method returns just the first successful result, thus it does not iterate
+     * over all possible options to optimize performance by reducing the number of lookup queries.
+     * <br />
+     * The lookup is ordered by the order of list of top domains followed by the  ordered list
+     * of DNS record type. The first successful result is returned.
      *
      * @param participantIdentifier
-     * @return
-     * @throws TechnicalException
+     * @return The list of MetadataLocatorResult for the participant identifier or empty list if no DNS record exist.
+     * @throws TechnicalException if an error occurs during the DNS lookup
      */
-    public URI lookupPrivate(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public List<PublisherLookupResult> lookupPrivate(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+
+        List<PublisherLookupResult> results = new ArrayList<>();
 
         for (String domain : topDnsDomains) {
             for (DNSLookupType type : dnsLookupTypeList) {
-                URI participantIdentifierURI = getUrlForTopDomain(participantIdentifier, domain, type);
-                if (participantIdentifierURI != null) {
-                    return participantIdentifierURI;
+                List<PublisherLookupResult> resultForTopDomain = dnsLookupForTopDomain(participantIdentifier, domain, type);
+                if (!resultForTopDomain.isEmpty()) {
+                    results.addAll(resultForTopDomain);
+                    return results;
                 }
             }
         }
-        return null;
+        return results;
     }
+
 
     /**
      * This method is used to lookup the DNS record for the given participant identifier and top domain. It generates the DNS query
@@ -134,10 +171,18 @@ public class DefaultBDXRLocator implements IPublisherLocator {
      * @param identifier The target resource/participant identifier to discover the SMP's URL address
      * @param topDomain The SML DNS top domain to be used for the DNS query
      * @param lookupType The DNS record type to be used for the DNS query (NAPTR or CNAME)
-     * @return The URL of the publisher
+     * @return The list of MetadataLocatorResult for the participant identifier or empty list if no DNS record exist.
      * @throws TechnicalException if an error occurs during the DNS lookup
      */
-    private URI getUrlForTopDomain(SMPParticipantIdentifier identifier, String topDomain, DNSLookupType lookupType) throws TechnicalException {
+    private List<PublisherLookupResult> dnsLookupForTopDomain(SMPParticipantIdentifier identifier, String topDomain, DNSLookupType lookupType) throws TechnicalException {
+        if (identifier == null) {
+            throw new DDCInvalidDataException("Participant identifier must not be null");
+        }
+
+        if (StringUtils.isBlank(topDomain)) {
+            throw new DDCInvalidDataException("DNS top domain must not be blank");
+        }
+
         switch (lookupType) {
             case NAPTR:
                 return naptrLookup(identifier, topDomain);
@@ -149,8 +194,15 @@ public class DefaultBDXRLocator implements IPublisherLocator {
 
     }
 
+    /**
+     * This method is used to lookup the SMPs "addresses" for the given participant identifier.
+     *
+     * @param participantIdentifier The target resource/participant identifier to discover the SMP's URL address
+     * @return The list of MetadataLocatorResult for the participant identifier or empty list if no DNS record exist.
+     * @throws TechnicalException if an error occurs during the DNS lookup
+     */
     @Override
-    public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public List<PublisherLookupResult> lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         try {
             return this.lookupPrivate(resourceIdentifierFormatter.normalize(participantIdentifier));
         } catch (TechnicalException e) {
@@ -159,42 +211,41 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         }
     }
 
-    @Override
-    public URI lookup(String participantIdentifier, String participantScheme) throws TechnicalException {
-        try {
-            return this.lookupPrivate(resourceIdentifierFormatter.normalize(participantScheme, participantIdentifier));
-        } catch (TechnicalException e) {
-            e.setSmpExceptionCode(DDCExceptionCode.SERVICE_GROUP);
-            throw e;
-        }
-    }
-
-    protected URI cnameLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
+    /**
+     * This is a legacy method that generates a DNS domain based on the "CNAME record" rules for a participant identifier.
+     * The method is deprecated and NAPTR record should be used instead.
+     *
+     * @param participantIdentifier the participant identifier
+     * @param topDomain the top domain
+     * @return the singleton list of the MetadataLocatorResult for the participant identifier or empty list if the DNS record does not exist
+     * @throws TechnicalException if an error occurs during the URI creation
+     */
+    @Deprecated
+    protected List<PublisherLookupResult> cnameLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
         String dnsQuery = buildCNameDNSQuery(participantIdentifier, topDomain);
-        if (getDnsLookup().dnsRecordNotExists(participantIdentifier, dnsQuery, DNSLookupType.CNAME)) {
-            return null;
+        if (!getDnsLookup().dnsRecordExists(participantIdentifier, dnsQuery, DNSLookupType.CNAME)) {
+            return Collections.emptyList();
         }
 
         try {
-            return new URI(cnameURLScheme + "://" + dnsQuery + StringUtils.prependIfMissing(cnameURLContext, "/"));
+            URI uri = new URI(cnameURLScheme + "://" + dnsQuery + StringUtils.prependIfMissing(cnameURLContext, "/"));
+            return Collections.singletonList(new PublisherLookupResult(participantIdentifier, uri, null, DNSLookupType.CNAME));
         } catch (URISyntaxException exc) {
             throw new DNSLookupException(exc.getMessage(), exc);
         }
     }
 
-    private URI naptrLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
+    private List<PublisherLookupResult>  naptrLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
+        LOG.debug("Start naptr search for participant [{}].", participantIdentifier);
         try {
-            LOG.debug("Start naptr search for participant [{}].", participantIdentifier);
             String naptrURI = buildNaptrDNSQuery(participantIdentifier, topDomain);
-            String smpURI = naptrLookupForDomain(participantIdentifier, naptrURI);
-            LOG.debug("Got URL: [{}] for participant [{}] with naptr query url: [{}].", smpURI, participantIdentifier, naptrURI);
-            return new URI(smpURI);
-        } catch (URISyntaxException exc) {
-            throw new DNSLookupException(exc.getMessage(), exc);
+            List<PublisherLookupResult> results = naptrLookupForDomain(participantIdentifier, naptrURI);
+            LOG.debug("Got DNS results: [{}] for participant [{}] with naptr query url: [{}].", results, participantIdentifier, naptrURI);
+            return results;
         } catch (TechnicalException | NullPointerException exc) {
             LOG.debug("Naptr lookup was not possible, CNAME lookup will be used instead for participant [{}]", participantIdentifier);
             //It was not possible to lookup using NAPTR, CNAME lookup will be used instead
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -216,13 +267,14 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         return sb.toString();
     }
 
-    public String naptrLookupForDomain(SMPParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException {
+    public List<PublisherLookupResult> naptrLookupForDomain(SMPParticipantIdentifier participantIdentifier, String participantURI) throws TechnicalException {
         return getDnsLookup().naptrUrlValueLookup(participantIdentifier, participantURI);
     }
 
     public IDNSLookup getDnsLookup() {
         return dnsLookup;
     }
+
     /**
      * Builder class for the BDXR locator.
      */
@@ -236,7 +288,6 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         private Boolean resourceWildcardEnabled;
         private Pattern resourceSchemeValidationPattern;
         private List<String> resourceCaseSensitiveSchemas = new ArrayList<>();
-        private List<FormatterType> resourceFormatterTypes = new ArrayList<>();
         private String cnameURLScheme = "http";
         private String cnameURLContext = "/";
 
@@ -311,7 +362,9 @@ public class DefaultBDXRLocator implements IPublisherLocator {
          * Sets the wildcard enabled flag. If set to true, the locator will accept participant identifiers with a wildcard.
          * @param resourceWildcardEnabled The wildcard enabled flag
          * @return The builder instance
+         * @deprecated The wildcard support is not specified in eDelivery profiles and support will be removed in the future.
          */
+        @Deprecated
         public Builder resourceWildcardEnabled(Boolean resourceWildcardEnabled) {
             this.resourceWildcardEnabled = resourceWildcardEnabled;
             return this;
@@ -357,38 +410,12 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         }
 
         /**
-         * Adds a list of formatter types to the list of formatter types.
-         * The client will format/normalize the resource/participant identifier before
-         * lookup according to the formatter type. By default, ebCoreParty Identifier
-         * type and Peppol Party identifier types are registered.
-         *
-         * @param resourceFormatterType The list of formatter types
-         * @return The builder instance
-         */
-        public Builder addResourceFormatterType(FormatterType resourceFormatterType) {
-            this.resourceFormatterTypes.add(resourceFormatterType);
-            return this;
-        }
-
-        /**
-         * Adds a list of formatter types to the list of formatter types.
-         * The client will format/normalize the resource/participant identifier before
-         * lookup according to the formatter type. By default, ebCoreParty Identifier
-         * type and Peppol Party identifier types are registered.
-         *
-         * @param formatters The list of formatter types
-         * @return The builder instance
-         */
-        public Builder addResourceFormatterTypes(List<FormatterType> formatters) {
-            this.resourceFormatterTypes.addAll(formatters);
-            return this;
-        }
-
-        /**
          * Sets the CNAME URL scheme. The locator will use this scheme to create the SMPs URL for the participant identifier.
          * @param scheme The CNAME URL scheme   (default: http)
          * @return The builder instance
+         * @deprecated The CNAME support is not specified in eDelivery profiles and support will be removed in the future.
          */
+        @Deprecated
         public Builder cnameURLScheme(String scheme) {
             this.cnameURLScheme = scheme;
             return this;
@@ -398,7 +425,9 @@ public class DefaultBDXRLocator implements IPublisherLocator {
          * Sets the CNAME URL context. The locator will use this context to create the SMPs URL for the participant identifier.
          * @param context The CNAME URL context (default: /)
          * @return The builder instance
+         * @deprecated The CNAME support is not specified in eDelivery profiles and support will be removed in the future.
          */
+        @Deprecated
         public Builder cnameURLContext(String context) {
             this.cnameURLContext = context;
             return this;
@@ -421,6 +450,4 @@ public class DefaultBDXRLocator implements IPublisherLocator {
             }
         }
     }
-
-
 }

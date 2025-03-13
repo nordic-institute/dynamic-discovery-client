@@ -26,12 +26,12 @@ import javax.xml.namespace.QName;
 import java.util.List;
 
 /**
- * AbstractExtension providing the common functionality for the OasisSMP 2.0 extensiona
+ * AbstractExtension providing the common functionality for the OasisSMP 2.0 extensions.
  *
  * @author Joze Rihtarsic
  * @since 2.2
  */
-public class AbstractExtension implements IExtension {
+public abstract class AbstractExtension implements IExtension {
     protected List<IObjectReader<?, ?>> parsers;
 
     @Override
@@ -42,6 +42,7 @@ public class AbstractExtension implements IExtension {
     @Override
     public <T, C> IObjectReader<T, C> getParser(QName qName, Class<T> clazz) {
         return (IObjectReader<T, C>) parsers.stream()
-                .filter(parser -> parser.handles(qName, clazz)).findFirst().orElse(null);
+                .filter(parser -> parser.handles(qName, clazz))
+                .findFirst().orElse(null);
     }
 }

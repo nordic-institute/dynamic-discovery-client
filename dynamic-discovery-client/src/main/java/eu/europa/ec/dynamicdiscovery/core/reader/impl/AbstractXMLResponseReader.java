@@ -19,11 +19,12 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.reader.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.extension.IExtension;
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
+import eu.europa.ec.dynamicdiscovery.exception.DocumentParseException;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.util.IOUtils;
@@ -41,6 +42,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Abstract  class with common methods for reading XML responses.
@@ -52,7 +54,7 @@ public abstract class AbstractXMLResponseReader {
     static final Logger LOG = LoggerFactory.getLogger(AbstractXMLResponseReader.class);
 
     private static final String DISALLOW_DOCTYPE_FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
-    private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(AbstractXMLResponseReader::createDocumentBuilder);
+    private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> createDocumentBuilder());
 
     public static DocumentBuilder createDocumentBuilder() {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -70,51 +72,71 @@ public abstract class AbstractXMLResponseReader {
         }
     }
 
-    public Document parse(FetcherResponse fetcherResponse) throws BindException {
+    public Document parse(FetcherResponse fetcherResponse) throws DocumentParseException {
         byte[] byteArray;
         try {
             byteArray = IOUtils.readResponseData(fetcherResponse);
         } catch (NullPointerException | IOException e) {
-            throw new BindException("Error occurred while retrieving the data!", e);
+            throw new DocumentParseException("Error occurred while retrieving the data!", e);
         }
 
         try {
             return parse(new ByteArrayInputStream(byteArray));
         } catch (IOException | SAXException e) {
-            throw new BindException("Error occurred while reading the data! " + ExceptionUtils.getRootCauseMessage(e), e);
+            throw new DocumentParseException("Error occurred while reading the data! " + ExceptionUtils.getRootCauseMessage(e), e);
         }
     }
 
-    public <T> T readObject(FetcherResponse fetcherResponse, Class<T> clazz, ISignatureValidator iSignatureValidator) throws TechnicalException {
-        return readObject(fetcherResponse, clazz, iSignatureValidator, null);
-    }
-
-    public <T, C> T readObject(FetcherResponse fetcherResponse, Class<T> clazz, ISignatureValidator iSignatureValidator, SignatureValidationContext context) throws TechnicalException {
+    /**
+     * Read object from the fetcher response input stream. If the document is signed, the signature is validated.
+     *
+     * @param fetcherResponse - response from the fetcher containing the input stream document.
+     * @param targetClazz - the target class of the object to be read. (e.g. SMPServiceGroup.class, SMPServiceMetadata.class)
+     * @param extensions -  List of extensions to parse the document to the target object.
+     * @param iSignatureValidator - the signature validator to validate the signature of the document.
+     * @param context - additional context for the signature validation.
+     * @return the instance/object of the targetClazz read from the document.
+     * @throws TechnicalException - if an error occurs while reading the object from the document.
+     */
+    public <T, C> T readObject(FetcherResponse fetcherResponse,
+                               Class<T> targetClazz,
+                               List<IExtension> extensions,
+                               ISignatureValidator iSignatureValidator,
+                               SignatureValidationContext context) throws TechnicalException {
 
         Document document = parse(fetcherResponse);
         QName rootQName = getRootElementQName(document);
 
-        IObjectReader<T, C> parser = getParser(rootQName, clazz);
+        IObjectReader<T, C> parser = getParser(rootQName, targetClazz, extensions);
         if (parser == null) {
-            throw new BindException("No parser registered for the document [" + rootQName + "]");
+            throw new DocumentParseException("No parser registered for the document [" + rootQName + "]");
         }
         return parser.parseAndValidateSignature(document, iSignatureValidator, context);
     }
 
-    public abstract <T, C> IObjectReader<T, C> getParser(QName qName, Class<T> clazz);
+    /**
+     * Get parser for the given root element QName and targetClazz.
+     * @param qName
+     * @param targetClazz
+     * @return the parser for the given root element QName and targetClazz.
+     * @param <T> - the target class of the object to be read.
+     * @param <C> - the root element type of the object to be read.
+     * @param extensions -  List of extensions to read the document to the target object.
+     */
+    public abstract <T, C> IObjectReader<T, C> getParser(QName qName, Class<T> targetClazz, List<IExtension> extensions);
 
     protected DocumentBuilder getDocumentBuilder() {
         return threadLocalDocumentBuilder.get();
     }
 
-    /**\
-     * Method enables unload of the thread local document builder at the end of the thread.
+
+    /**
+     * Parse the input stream to a XML DOM Document.
+     * @param inputStream - the input stream to be parsed.
+     * @return the XML DOM Document parsed from the input stream.
+     * @throws IOException - if an error occurs while reading the input stream.
+     * @throws SAXException - if an error occurs while parsing the input stream.
      */
-    public void unload() {
-        threadLocalDocumentBuilder.remove();
-    }
-
-
     public Document parse(InputStream inputStream) throws IOException, SAXException {
         DocumentBuilder builder = getDocumentBuilder();
         try {
@@ -124,6 +146,11 @@ public abstract class AbstractXMLResponseReader {
         }
     }
 
+    /**
+     * Get the qualified name of the root element (QName) of the document.
+     * @param document - the document to get the root element QName.
+     * @return the root element QName of the document.
+     */
     public QName getRootElementQName(Document document) {
         Element element = document.getDocumentElement();
         String namespace = element.getNamespaceURI();
