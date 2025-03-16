@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,13 @@
 package eu.europa.ec.dynamicdiscovery.model.identifiers.types;
 
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupFormatType;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
 import eu.europa.ec.dynamicdiscovery.exception.MalformedIdentifierException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,9 +42,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * @since 2.0
  */
 public class TemplateFormatterType  extends AbstractFormatterType {
-
     private static final Logger LOG = LoggerFactory.getLogger(TemplateFormatterType.class);
-
     public static final String SPLIT_GROUP_SCHEME_NAME = "scheme";
     public static final String SPLIT_GROUP_IDENTIFIER_NAME = "identifier";
     public static final String SPLIT_GROUP_SCHEME_TAG = "${" + SPLIT_GROUP_SCHEME_NAME + "}";
@@ -57,18 +57,32 @@ public class TemplateFormatterType  extends AbstractFormatterType {
     private final String formatTemplate;
     private final String formatTemplateNullScheme;
 
+    private final String lookupSuffixTemplate;
+    private final Pattern lookupSuffixSplitPattern;
+
 
     public TemplateFormatterType(Pattern matchSchema, String formatTemplate, Pattern splitRegularExpression) {
         this(matchSchema, formatTemplate, formatTemplate, splitRegularExpression, DNSLookupFormatType.ALL_IN_HASH);
     }
 
     public TemplateFormatterType(Pattern matchSchema, String formatTemplate, String formatTemplateNullScheme, Pattern splitRegularExpression, DNSLookupFormatType dnsLookupFormatType) {
+        this(matchSchema, formatTemplate, formatTemplateNullScheme, splitRegularExpression, dnsLookupFormatType, null, null);
+    }
+
+    public TemplateFormatterType(Pattern matchSchema, String formatTemplate, String formatTemplateNullScheme,
+                                 Pattern splitRegularExpression,
+                                 DNSLookupFormatType dnsLookupFormatType,
+                                 String lookupSuffixTemplate,
+                                 Pattern lookupSuffixSplitPattern) {
         this.schemaPattern = matchSchema;
         this.formatTemplate = formatTemplate;
         this.formatTemplateNullScheme = formatTemplateNullScheme;
         this.splitRegularExpression = splitRegularExpression;
         this.dnsLookupFormatType = dnsLookupFormatType;
+        this.lookupSuffixTemplate = lookupSuffixTemplate;
+        this.lookupSuffixSplitPattern = lookupSuffixSplitPattern;
     }
+
 
     /**
      * {@inheritDoc}
@@ -106,7 +120,7 @@ public class TemplateFormatterType  extends AbstractFormatterType {
 
     @Override
     public String format(String scheme, String identifier, boolean noDelimiterOnEmptyScheme) {
-        return replaceEach(scheme == null ? formatTemplateNullScheme : formatTemplate, REPLACE_TAGS, new String[] {scheme, identifier});
+        return replaceEach(scheme == null ? formatTemplateNullScheme : formatTemplate, REPLACE_TAGS, new String[]{scheme, identifier});
 
     }
 
@@ -138,9 +152,40 @@ public class TemplateFormatterType  extends AbstractFormatterType {
         return result;
     }
 
+
     @Override
     public DNSLookupFormatType getDNSFormatType() {
         // default ALL_IN_HASH
         return dnsLookupFormatType == null ? DNSLookupFormatType.ALL_IN_HASH : dnsLookupFormatType;
+    }
+
+
+    /**
+     *  Returns only the hash value as part of the lookup request
+     * @param scheme          scheme part of identifier
+     * @param identifier      value part of identifier
+     * @param dnsType dns lookup type
+     * @return  hash value
+     */
+    @Override
+    public String dnsLookupSuffix(final String scheme, final String identifier, DNSLookupHashType dnsType) {
+        if (this.lookupSuffixTemplate == null || this.lookupSuffixSplitPattern == null) {
+            return super.dnsLookupSuffix(scheme, identifier, dnsType);
+        }
+        String formattedValue = format(scheme, identifier);
+        Matcher matcher = lookupSuffixSplitPattern.matcher(formattedValue);
+        if (!matcher.matches()) {
+            throw new MalformedIdentifierException("Identifier: [" + formattedValue + "] does not match regular expression [" + lookupSuffixSplitPattern.pattern() + "]");
+        }
+
+        Map<String, Integer> groups =  matcher.namedGroups();
+        String [] groupValues = groups.keySet().stream()
+                .map(matcher::group)
+                .toArray(String[]::new);
+
+        String [] groupNames = groups.keySet().stream()
+                .map(val -> "${"+val+"}")
+                .toArray(String[]::new);
+        return replaceEach(lookupSuffixTemplate, groupNames, groupValues);
     }
 }
