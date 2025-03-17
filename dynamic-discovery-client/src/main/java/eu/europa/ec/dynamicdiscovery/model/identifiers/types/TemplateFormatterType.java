@@ -26,7 +26,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +45,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 public class TemplateFormatterType  extends AbstractFormatterType {
     private static final Logger LOG = LoggerFactory.getLogger(TemplateFormatterType.class);
+
+
+    public static final Pattern PARSE_VARIABLE_NAMES = Pattern.compile("\\$\\{(\\w+)}");
     public static final String SPLIT_GROUP_SCHEME_NAME = "scheme";
     public static final String SPLIT_GROUP_IDENTIFIER_NAME = "identifier";
     public static final String SPLIT_GROUP_SCHEME_TAG = "${" + SPLIT_GROUP_SCHEME_NAME + "}";
@@ -178,14 +183,32 @@ public class TemplateFormatterType  extends AbstractFormatterType {
             throw new MalformedIdentifierException("Identifier: [" + formattedValue + "] does not match regular expression [" + lookupSuffixSplitPattern.pattern() + "]");
         }
 
-        Map<String, Integer> groups =  matcher.namedGroups();
-        String [] groupValues = groups.keySet().stream()
+
+
+        List<String> variableNames = getVariableNames(lookupSuffixTemplate);
+        String [] groupValues = variableNames.stream()
                 .map(matcher::group)
                 .toArray(String[]::new);
 
-        String [] groupNames = groups.keySet().stream()
+        String [] variablePlaceholders = variableNames.stream()
                 .map(val -> "${"+val+"}")
                 .toArray(String[]::new);
-        return replaceEach(lookupSuffixTemplate, groupNames, groupValues);
+        return replaceEach(lookupSuffixTemplate, variablePlaceholders, groupValues);
+    }
+
+    private List<String> getVariableNames(String value){
+        if (StringUtils.isBlank(value) && !value.contains("${")){
+            return Collections.emptyList();
+        }
+
+        Matcher matcher = PARSE_VARIABLE_NAMES.matcher(value);
+        List<String> result = new ArrayList<>();
+        while (matcher.find()) {
+            String variable = matcher.group(1);
+            if (!result.contains(variable)){
+                result.add(variable);
+            }
+        }
+        return result;
     }
 }
