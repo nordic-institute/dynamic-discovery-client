@@ -349,6 +349,47 @@ DynamicDiscoverySevice smpClient= new DynamicDiscoverySevice.Builder()
         .build();
 ----
 
+===== Example: Basic discovery with custom participant formatter
+
+TemplateFormatterType can also be used to format DNS lookup query. The following example shows how to use the TemplateFormatterType to format the DNS lookup query.
+In the example we want to lookup the DNS record for the participant identifier with the scheme *"iso6523-actorid-upis"* and the identifier *"0088:123456789"* and the top domain participants.ecosystem.org with the following DNS query:
+DNS queries like (Note ICD code is part of the DNS query):
+
+    NTP...N75FYF5GHUWSCQ.0195.iso6523-actorid-upis.participants.ecosystem.org.
+
+[source,java]
+----
+// Use template formatter or create own formatter type
+
+Pattern matchSchema = Pattern.compile("^(?i)(iso6523-actorid-upis)");
+String formatTemplate = "${scheme}::${identifier}";
+Pattern splitRegularExpression = Pattern.compile("^(?i)\\s*(::)?(?<scheme>(iso6523-actorid-upis))::?(?<identifier>.+)?\\s*$");
+Pattern splitDNSLookupRegularExpression = Pattern.compile("^(?i)\\s*(::)?(?<scheme>(iso6523-actorid-upis))::?(?<icd>\\d{4})?:(?<identifier>.+)?\\s*$");
+String dnsSuffixTemplate = "${icd}.${scheme}";
+
+FormatterType customFormatter  = new TemplateFormatterType(
+                matchSchema,
+                formatTemplate,
+                formatTemplate,
+                splitRegularExpression,
+                DNSLookupFormatType.ALL_IN_HASH,
+                dnsSuffixTemplate,
+                splitDNSLookupRegularExpression
+                );
+// register formatter to DefaultBDXRLocator
+DynamicDiscoverySevice smpClient= new DynamicDiscoverySevice.Builder()
+        .publisherLocator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addFormatterType(customFormatter)
+                .dnsLookup(new DefaultDNSLookup.Builder()
+                        .addRequiredNaptrService("meta:cppa3")
+                        .addRequiredNaptrURLSchema( "https")
+                        .build())
+                .build())
+        .documentReader(new DefaultBDXRReader(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts"))))
+        .build();
+----
+
 ===== Example: Static Metadata Locator with single SMP url
 Example of how to configure with StaticMapMetadataLocator. The DDC will always fetch the party identifier's service metadata data from the give URI: " http://localhost:8090/cipa-smp-full-webapp/"
 [source,java]

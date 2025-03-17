@@ -19,12 +19,17 @@
  */
 package eu.europa.ec.dynamicdiscovery.model.identifiers.types;
 
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupFormatType;
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -119,5 +124,48 @@ class TemplateFormatterTypeTest {
             assertEquals(schemaPart, result[0]);
             assertEquals(idPart, result[1]);
         }
+    }
+
+    @ParameterizedTest(name = "{index} {0}")
+    @CsvSource({
+            "Test NAPTR 9915, iso6523-actorid-upis, 9915:1234567890, SHA256_BASE32, BCUOAEE2FJQI5TBPCPVWKCOZVSOYEEJCKVDIXSIIKL6HDCFTG5BQ.9915.iso6523-actorid-upis",
+            "Test NAPTR 0088, iso6523-actorid-upis, 0088:1234567890, SHA256_BASE32, RX4WWW6VK4IWN4CRWBGFJELXZJIZMIT3EMS5M6JXTNYXZD24RSAA.0088.iso6523-actorid-upis",
+            "Test CNAME 9915, iso6523-actorid-upis, 9915:1234567890, MD5_HEX, B-21535383fe9cfa94c56f5407cf9ac66d.9915.iso6523-actorid-upis",
+            "Test CNAME 0088, iso6523-actorid-upis, 0088:1234567890, MD5_HEX, B-2c0a1ef81bda58e8145e4d57b2d92066.0088.iso6523-actorid-upis",
+    })
+    void testDNSLookup(String testName, String scheme, String identifier, DNSLookupHashType hashType, String expected) {
+        System.out.println(testName);
+        Pattern matchSchema = Pattern.compile("^(?i)(iso6523-actorid-upis)");
+        String formatTemplate = "${scheme}::${identifier}";
+        Pattern splitRegularExpression = Pattern.compile("^(?i)\\s*(::)?(?<scheme>(iso6523-actorid-upis))::?(?<identifier>.+)?\\s*$");
+        Pattern splitDNSLookupRegularExpression = Pattern.compile("^(?i)\\s*(::)?(?<scheme>(iso6523-actorid-upis))::?(?<icd>\\d{4})?:(?<identifier>.+)?\\s*$");
+
+        TemplateFormatterType testInstanceFormat  = new TemplateFormatterType(
+                        matchSchema,
+                        formatTemplate,
+                        formatTemplate,
+                        splitRegularExpression,
+                        DNSLookupFormatType.ALL_IN_HASH,
+                        "${icd}.${scheme}",
+                        splitDNSLookupRegularExpression
+                );
+
+        String result = testInstanceFormat.dnsLookupFormat(scheme, identifier, hashType);
+        assertEquals(expected, result);
+
+    }
+
+    @Test
+    void testRegularExpression(){
+        String testValue = "iso6523-actorid-upis::9915:1234567890123";
+        Pattern splitDNSLookupRegularExpression = Pattern.compile("^(?i)\\s*(::)?(?<scheme>(iso6523-actorid-upis))::?(?<icd>\\d{4})?:(?<identifier>.+)?\\s*$");
+
+        Matcher matcher = splitDNSLookupRegularExpression.matcher(testValue);
+
+        assertTrue(matcher.matches());
+        assertEquals("iso6523-actorid-upis", matcher.group("scheme"));
+        assertEquals("9915", matcher.group("icd"));
+        assertEquals("1234567890123", matcher.group("identifier"));
+
     }
 }
