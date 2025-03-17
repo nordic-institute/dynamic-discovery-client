@@ -183,12 +183,16 @@ public class TemplateFormatterType  extends AbstractFormatterType {
             throw new MalformedIdentifierException("Identifier: [" + formattedValue + "] does not match regular expression [" + lookupSuffixSplitPattern.pattern() + "]");
         }
 
-
-
         List<String> variableNames = getVariableNames(lookupSuffixTemplate);
         String [] groupValues = variableNames.stream()
-                .map(matcher::group)
-                .toArray(String[]::new);
+                .map(name -> {
+                    try {
+                        return matcher.group(name);
+                    } catch (IllegalArgumentException error) {
+                        LOG.warn("Group not exists: [{}] identifier [{}]. Return empty string", lookupSuffixTemplate, formattedValue);
+                        return "";
+                    }
+                }).toArray(String[]::new);
 
         String [] variablePlaceholders = variableNames.stream()
                 .map(val -> "${"+val+"}")
