@@ -127,6 +127,7 @@ public interface FormatterType {
         switch (dnsFormatType) {
             case ALL_IN_HASH:
                 return dnsLookupFormatAllInHash(scheme, identifier, dnsType, withPrefix);
+            case IDENTIFIER_IN_HASH:
             case SCHEMA_AFTER_HASH:
                 return dnsLookupFormatSchemaAfterHash("", identifier, dnsType, withPrefix);
             default:
@@ -151,6 +152,7 @@ public interface FormatterType {
     default String dnsLookupSuffix(final String scheme, final String identifier, DNSLookupHashType dnsType) {
         DNSLookupFormatType dnsFormatType = getDNSFormatType();
         switch (dnsFormatType) {
+            case IDENTIFIER_IN_HASH:
             case ALL_IN_HASH:
                 return null;
             case SCHEMA_AFTER_HASH:

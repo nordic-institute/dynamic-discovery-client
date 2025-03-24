@@ -128,10 +128,10 @@ class TemplateFormatterTypeTest {
 
     @ParameterizedTest(name = "{index} {0}")
     @CsvSource({
-            "Test NAPTR 9915, iso6523-actorid-upis, 9915:1234567890, SHA256_BASE32, BCUOAEE2FJQI5TBPCPVWKCOZVSOYEEJCKVDIXSIIKL6HDCFTG5BQ.9915.iso6523-actorid-upis",
-            "Test NAPTR 0088, iso6523-actorid-upis, 0088:1234567890, SHA256_BASE32, RX4WWW6VK4IWN4CRWBGFJELXZJIZMIT3EMS5M6JXTNYXZD24RSAA.0088.iso6523-actorid-upis",
-            "Test CNAME 9915, iso6523-actorid-upis, 9915:1234567890, MD5_HEX, B-21535383fe9cfa94c56f5407cf9ac66d.9915.iso6523-actorid-upis",
-            "Test CNAME 0088, iso6523-actorid-upis, 0088:1234567890, MD5_HEX, B-2c0a1ef81bda58e8145e4d57b2d92066.0088.iso6523-actorid-upis",
+            "Test NAPTR 9915, iso6523-actorid-upis, 9915:1234567890, SHA256_BASE32, 7XKO2KDROICHCCHPB7U6KMM5U7E2UHV6NR4OP4AD7R74HYNDNOXQ.9915.iso6523-actorid-upis",
+            "Test NAPTR 0088, iso6523-actorid-upis, 0088:1234567890, SHA256_BASE32, RJUAFVEKBQJSVT3HDHLN34S4BVVM5GBFTPD5TDI5BTBTKXKBNTNA.0088.iso6523-actorid-upis",
+            "Test CNAME 9915, iso6523-actorid-upis, 9915:1234567890, MD5_HEX, B-1b3826fdfc84df07744b11acae7fa614.9915.iso6523-actorid-upis",
+            "Test CNAME 0088, iso6523-actorid-upis, 0088:1234567890, MD5_HEX, B-8d445c8aa1f398f6f5f4a147fe63f120.0088.iso6523-actorid-upis",
     })
     void testDNSLookup(String testName, String scheme, String identifier, DNSLookupHashType hashType, String expected) {
         System.out.println(testName);
@@ -145,14 +145,40 @@ class TemplateFormatterTypeTest {
                         formatTemplate,
                         formatTemplate,
                         splitRegularExpression,
-                        DNSLookupFormatType.ALL_IN_HASH,
+                        DNSLookupFormatType.IDENTIFIER_IN_HASH,
                         "${icd}.${scheme}",
                         splitDNSLookupRegularExpression
                 );
-
         String result = testInstanceFormat.dnsLookupFormat(scheme, identifier, hashType);
         assertEquals(expected, result);
+    }
 
+    @CsvSource({
+            "Test NAPTR 9915, iso6523-actorid-upis, 9915:1234567890, SHA256_BASE32",
+            "Test NAPTR 0088, iso6523-actorid-upis, 0088:1234567890, SHA256_BASE32",
+            "Test CNAME 9915, iso6523-actorid-upis, 9915:1234567890, MD5_HEX",
+            "Test CNAME 0088, iso6523-actorid-upis, 0088:1234567890, MD5_HEX",
+    })
+    void testDNSLookupAsPeppolFormat(String testName, String scheme, String identifier, DNSLookupHashType hashType, String expected) {
+        System.out.println(testName);
+        Pattern matchSchema = Pattern.compile("^(?i)(iso6523-actorid-upis)");
+        String formatTemplate = "${scheme}::${identifier}";
+        Pattern splitRegularExpression = Pattern.compile("^(?i)\\s*(::)?(?<scheme>(iso6523-actorid-upis))::?(?<identifier>.+)?\\s*$");
+        Pattern splitDNSLookupRegularExpression = splitRegularExpression;
+
+        TemplateFormatterType testInstanceFormat  = new TemplateFormatterType(
+                matchSchema,
+                formatTemplate,
+                formatTemplate,
+                splitRegularExpression,
+                DNSLookupFormatType.IDENTIFIER_IN_HASH,
+                "${scheme}",
+                splitDNSLookupRegularExpression
+        );
+        PeppolPartyIdFormatterType testInstanceFormatPeppol  = new PeppolPartyIdFormatterType();
+        String expectedPeppol = testInstanceFormatPeppol.dnsLookupFormat(scheme, identifier, hashType);
+        String result = testInstanceFormat.dnsLookupFormat(scheme, identifier, hashType);
+        assertEquals(expectedPeppol, result);
     }
 
     @Test

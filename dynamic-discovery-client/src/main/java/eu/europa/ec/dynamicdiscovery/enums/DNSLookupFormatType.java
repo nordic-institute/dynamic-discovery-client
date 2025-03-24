@@ -31,6 +31,12 @@ public enum DNSLookupFormatType {
      * hashed(format(<identifier>,<schema>)>
      */
     ALL_IN_HASH,
+
+    /**
+     * Only the  participant identifier is in hash
+     * hashed(format(<identifier>)>
+     */
+    IDENTIFIER_IN_HASH,
     /**
      * schema is appended after hashed identifier
      * hashed(<identifier>)>[.<schema>]
