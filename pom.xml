@@ -77,7 +77,7 @@
         <bouncycastle.version>1.79</bouncycastle.version>
         <commons-cli.version>1.9.0</commons-cli.version>
         <commons-lang3.version>3.17.0</commons-lang3.version>
-        <dnsjava.version>3.6.2</dnsjava.version>
+        <dnsjava.version>3.6.3</dnsjava.version>
         <hamcrest.version>3.0</hamcrest.version>
         <httpclient.version>5.3.1</httpclient.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
@@ -85,30 +85,30 @@
         <junit.version>5.11.4</junit.version>
         <mockito.version>5.2.0</mockito.version>
         <net.bytebuddy.version>1.15.11</net.bytebuddy.version>
-        <org.eclipse.jetty.version>11.0.24</org.eclipse.jetty.version>
+        <org.eclipse.jetty.version>11.0.25</org.eclipse.jetty.version>
         <org.glassfish.jaxb.jaxb-runtime.version>4.0.5</org.glassfish.jaxb.jaxb-runtime.version>
         <saxon-he.version>12.4</saxon-he.version>
-        <slf4j.version>2.0.16</slf4j.version>
-        <spring-test.version>6.2.1</spring-test.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <spring-test.version>6.2.5</spring-test.version>
         <!-- documentation dependencies -->
         <asciidoctor.maven.plugin.version>3.1.1</asciidoctor.maven.plugin.version>
         <asciidoctorj.version>3.0.0</asciidoctorj.version>
         <asciidoctorj.diagram.version>2.3.1</asciidoctorj.diagram.version>
         <asciidoctorj.pdf.version>2.3.19</asciidoctorj.pdf.version>
-        <jruby.version>9.4.9.0</jruby.version>
+        <jruby.version>9.4.12.0</jruby.version>
         <!-- plugins -->
-        <plugin.dependency-check-maven.version>11.1.0</plugin.dependency-check-maven.version>
-        <plugin.jacoco-maven-plugin.version>0.8.12</plugin.jacoco-maven-plugin.version>
+        <plugin.dependency-check-maven.version>11.1.1</plugin.dependency-check-maven.version>
+        <plugin.jacoco-maven-plugin.version>0.8.13</plugin.jacoco-maven-plugin.version>
         <plugin.jaxb2-maven-plugin.version>3.2.0</plugin.jaxb2-maven-plugin.version>
         <plugin.jbuild-helper-maven-plugin.version>3.6.0</plugin.jbuild-helper-maven-plugin.version>
         <plugin.license-maven-plugin.version>2.4.0</plugin.license-maven-plugin.version>
         <plugin.maven-assembly-plugin.version>3.7.1</plugin.maven-assembly-plugin.version>
         <plugin.maven-compiler-plugin.version>3.13.0</plugin.maven-compiler-plugin.version>
-        <plugin.maven-failsafe-plugin.version>3.5.2</plugin.maven-failsafe-plugin.version>
+        <plugin.maven-failsafe-plugin.version>3.5.3</plugin.maven-failsafe-plugin.version>
         <plugin.maven-jar-plugin.version.version>3.3.0</plugin.maven-jar-plugin.version.version>
         <plugin.maven-release-plugin.version>3.1.1</plugin.maven-release-plugin.version>
         <plugin.maven-shade-plugin.version>3.6.0</plugin.maven-shade-plugin.version>
-        <plugin.maven-surefire-plugin.version>3.5.2</plugin.maven-surefire-plugin.version>
+        <plugin.maven-surefire-plugin.version>3.5.3</plugin.maven-surefire-plugin.version>
         <plugin.xml-maven-plugin.version>1.1.0</plugin.xml-maven-plugin.version>
         <!-- latest version compatible with SonarQube 5.6 -->
         <plugin.sonar.version>4.0.0.4121</plugin.sonar.version>
