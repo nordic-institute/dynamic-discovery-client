@@ -34,7 +34,7 @@ This product includes dynamically linked software developed by third parties whi
 - Copyright:
   - Copyright (c) 2024
 
-***net.bytebuddy:byte-buddy:1.15.11*** 
+***net.bytebuddy:byte-buddy:1.17.5*** 
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
@@ -55,7 +55,7 @@ This product includes dynamically linked software developed by third parties whi
 - Copyright:
   - Copyright (c) 2024
 
-***org.bouncycastle:bcpkix-jdk18on:1.79*** 
+***org.bouncycastle:bcpkix-jdk18on:1.80*** 
 - License: Bouncy Castle Licence
 - Url: https://www.bouncycastle.org/licence.html
 - File: license/third-party-licenses/Bouncy Castle Licence.txt
