@@ -17,17 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package eu.europa.ec.dynamicdiscovery.core.fetcher;
-
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-
-import java.net.URI;
+package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
- * @author Flávio W. R. Santos
- * @author Erlend Klakegg Bergheim
+ * DDCRuntimeException is the "unchecked exception" thrown when an exceptional condition has occurred. The error
+ * does not need to be declared in a method or constructor's throws clause.
+ * NOTE: The error must not be used in regular negative flows of the dynamic discovery process.
+ *
+ * @since 3.0
+ * @author Joze Rihtarsic
  */
-public interface IMetadataFetcher {
+public class DDCCertificateNotFoundException extends RuntimeException {
 
-    FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException;
+
+    public DDCCertificateNotFoundException(String message) {
+        super(message);
+    }
+
+    public DDCCertificateNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

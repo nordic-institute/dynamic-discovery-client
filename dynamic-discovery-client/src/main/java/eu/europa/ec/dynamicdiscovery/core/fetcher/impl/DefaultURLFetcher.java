@@ -20,7 +20,7 @@
 package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.*;
@@ -54,6 +54,7 @@ import org.apache.hc.core5.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import java.io.*;
 import java.net.SocketException;
@@ -65,62 +66,24 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithAny;
 
 /**
+ * The default implementation of the {@link IDocumentFetcher} interface. This class is responsible for fetching the
+ * metadata from the SMP server using the provided URI. It also handles the authentication and proxy settings.
+ *
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  * @author Sebastian-Ion TINCU
+ * @author Joze RIHTARSIC
  * @since 1.13
  */
-public class DefaultURLFetcher implements IMetadataFetcher {
+public class DefaultURLFetcher implements IDocumentFetcher {
     static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
 
     private final IProxyConfiguration proxyConfiguration;
     private final ICredentialProvider credentialProvider;
-
+    // HTTP client components for URL connection management
     private final HttpRoutePlanner routePlanner;
-
     private final HttpClientConnectionManager connectionManager;
 
-    /**
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher() {
-        this(null, null, null, null);
-    }
-
-    /**
-     * @param proxyConfiguration
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(IProxyConfiguration proxyConfiguration) {
-
-        this(null, null, null, proxyConfiguration);
-    }
-
-    /**
-     * @param routePlanner
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(HttpRoutePlanner routePlanner) {
-        this(null, routePlanner, null, null);
-    }
-
-    /**
-     * @param proxyConfiguration
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(HttpRoutePlanner routePlanner, IProxyConfiguration proxyConfiguration) {
-        this(null, routePlanner, null, proxyConfiguration);
-    }
-
-    private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
-                              HttpRoutePlanner routePlanner,
-                              IProxyConfiguration proxyConfiguration) {
-        this(connectionManager, routePlanner, null, proxyConfiguration);
-    }
 
     private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
                               HttpRoutePlanner routePlanner,
@@ -133,8 +96,8 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     }
 
     @Override
-    public FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException {
-        LOG.debug("Fetch data for participantURI [{}]", participantUnderSmpURI);
+    public FetcherResponse fetch(URI documentURI) throws TechnicalException {
+        LOG.debug("Fetch data for participantURI [{}]", documentURI);
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .setConnectionManager(connectionManager)
@@ -142,9 +105,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 
         // set authentication for target uri
-        BasicCredentialsProvider credentialsProvider = buildAuthenticationForTarget(participantUnderSmpURI, null);
+        BasicCredentialsProvider credentialsProvider = buildAuthenticationForTarget(documentURI, null);
         // set proxy
-        String participantUnderSmpURIHost = participantUnderSmpURI.getHost();
+        String participantUnderSmpURIHost = documentURI.getHost();
         if (proxyConfiguration != null && !proxyConfiguration.isNonProxyHost(participantUnderSmpURIHost)) {
             LOG.debug("Fetch data using proxy");
             HttpHost proxyHost = proxyConfiguration.getProxyHost(participantUnderSmpURIHost);
@@ -160,13 +123,14 @@ public class DefaultURLFetcher implements IMetadataFetcher {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
 
-        HttpGet httpGet = new HttpGet(participantUnderSmpURI);
+        HttpGet httpGet = new HttpGet(documentURI);
         httpGet.setConfig(requestConfigBuilder.build());
 
         try {
-            return connect(httpClientBuilder.build(), httpGet);
+            InputStream inputStream =  connect(httpClientBuilder.build(), httpGet);
+            return new FetcherResponse(inputStream, documentURI);
         } catch (TechnicalException e) {
-            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            e.setSmpExceptionCode(DDCExceptionCode.SERVICE_GROUP);
             throw e;
         }
     }
@@ -210,7 +174,7 @@ public class DefaultURLFetcher implements IMetadataFetcher {
      * @return the fetcher response containing the data
      * @throws TechnicalException the technical exception
      */
-    public FetcherResponse connect(CloseableHttpClient httpClient, HttpGet httpGet) throws TechnicalException {
+    protected InputStream connect(CloseableHttpClient httpClient, HttpGet httpGet) throws TechnicalException {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             switch (response.getCode()) {
                 case 200:
@@ -239,16 +203,20 @@ public class DefaultURLFetcher implements IMetadataFetcher {
     }
 
     /**
-     * Convert input stream to in-memory fetcher response.
+     * Convert input stream to in-memory bytearray response. This is used to avoid the need to keep the connection open
+     * while processing the data. The input stream is closed after the data is read.
+     * <p>
+     * The SMP documents are expected to be small, so loading the entire response in memory is acceptable, but
+     * future versions may consider using a different approach to avoid loading the entire response in memory.
      *
      * @param inputStream input stream from the document source
      * @return in-memory fetcher response
      * @throws IOException if an I/O error occurs
      */
-    public FetcherResponse toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
+    protected InputStream toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             IOUtils.copy(inputStream, baos);
-            return new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
+            return new ByteArrayInputStream(baos.toByteArray());
         }
     }
 
@@ -267,7 +235,8 @@ public class DefaultURLFetcher implements IMetadataFetcher {
      */
     public static class Builder {
 
-        private SSLContextBuilder sslContextBuilder = SSLContexts.custom();
+        private SSLContextBuilder sslContextBuilder = null;
+        private SSLContext sslContext = null;
         private String[] tlsVersions;
         private String[] tlsCipherSuites;
         private boolean noHostnameValidation;
@@ -279,6 +248,19 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         private ICredentialProvider credentialProvider;
         private HttpRoutePlanner routePlanner;
 
+        public Builder() {
+            sslContextBuilder = SSLContexts.custom();
+        }
+
+        /**
+         * Creates a Builder that uses an existing SSLContext
+         *
+         * @param sslContext is the sslContext to be used
+         * @return builder
+         */
+        public Builder(SSLContext sslContext) {
+            this.sslContext = sslContext;
+        }
 
         /**
          * Set list of allowed TLS versions as TLSv1.1, TLSv1.2, TLSv1.3 etc
@@ -301,6 +283,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          */
 
         public Builder tlsTruststore(final KeyStore truststore) throws NoSuchAlgorithmException, KeyStoreException {
+            if (this.sslContextBuilder == null) {
+                throw new IllegalStateException("A truststore cannot be added if a SSLContext is set in Builder constructor");
+            }
             this.sslContextBuilder.loadTrustMaterial(truststore, null);
             return this;
         }
@@ -316,6 +301,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          * @throws KeyStoreException
          */
         public Builder tlsKeystore(final KeyStore keystore, final char[] password) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+            if (this.sslContextBuilder == null) {
+                throw new IllegalStateException("A keystore cannot be added if a SSLContext is set in the Builder constructor");
+            }
             this.sslContextBuilder.loadKeyMaterial(keystore, password);
             return this;
         }
@@ -412,18 +400,25 @@ public class DefaultURLFetcher implements IMetadataFetcher {
                 registryBuilder.register("https", buildSSLConnectionSocketFactory());
             }
 
-            final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(registryBuilder.build());
+            final HttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(registryBuilder.build());
+
             return new DefaultURLFetcher(connectionManager, routePlanner, credentialProvider, proxyConfiguration);
         }
 
         private SSLConnectionSocketFactory buildSSLConnectionSocketFactory() {
             try {
-                return SSLConnectionSocketFactoryBuilder.create()
+                SSLConnectionSocketFactoryBuilder builder = SSLConnectionSocketFactoryBuilder.create()
                         .setCiphers(this.tlsCipherSuites)
                         .setTlsVersions(this.tlsVersions)
-                        .setHostnameVerifier(this.noHostnameValidation ? NoopHostnameVerifier.INSTANCE : new DefaultHostnameVerifier())
-                        .setSslContext(this.sslContextBuilder.build())
-                        .build();
+                        .setHostnameVerifier(this.noHostnameValidation ? NoopHostnameVerifier.INSTANCE : new DefaultHostnameVerifier());
+
+                if (this.sslContextBuilder != null) {
+                    builder = builder.setSslContext(this.sslContextBuilder.build());
+                }
+                if (this.sslContext != null) {
+                    builder = builder.setSslContext(this.sslContext);
+                }
+                return builder.build();
             } catch (KeyManagementException | NoSuchAlgorithmException e) {
                 throw new DDCRuntimeException("TLS configuration error: " + ExceptionUtils.getRootCauseMessage(e), e);
             }

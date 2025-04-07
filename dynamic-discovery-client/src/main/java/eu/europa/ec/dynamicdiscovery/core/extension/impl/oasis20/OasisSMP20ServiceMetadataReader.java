@@ -26,20 +26,21 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceMetadata;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.Process;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.*;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ServiceID;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
@@ -118,7 +119,7 @@ public class OasisSMP20ServiceMetadataReader extends AbstractServiceMetadataRead
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceMetadata.class;
+        return NamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceMetadata.class, qName, clazz);
     }
 
 
@@ -185,64 +186,75 @@ public class OasisSMP20ServiceMetadataReader extends AbstractServiceMetadataRead
     protected List<SMPEndpoint> readEndpoints(ServiceMetadata serviceMetadata) {
 
         List<SMPEndpoint> endpoints = new ArrayList<>();
-
         List<ProcessMetadata> processTypeIterator = serviceMetadata.getProcessMetadatas();
         for (ProcessMetadata processMetadata : processTypeIterator) {
 
             // get process identifiers
             List<SMPProcessIdentifier> processIdentifiers = readProcessIdentifier(processMetadata);
+            processMetadata.getEndpoints().stream()
+                    .map(endpointType -> convertEndpoint(endpointType, processIdentifiers))
+                    .filter(Objects::nonNull)
+                    .forEach(endpoints::add);
 
-            for (Endpoint endpointType : processMetadata.getEndpoints()) {
-                String transportProfile = endpointType.getTransportProfileID() == null ? null : endpointType.getTransportProfileID().getValue();
-                String addressURI = endpointType.getAddressURI() == null ? null : endpointType.getAddressURI().getValue();
-
-                if (!(isIgnoreInvalidServices() || isServiceValid(endpointType))) {
-                    LOG.debug("Ignore not-active/expired service for process [{}], transport [{}], url [{}]", processIdentifiers,
-                            transportProfile,
-                            addressURI);
-                    continue;
-                }
-
-                SMPEndpoint endpoint = new SMPEndpoint.Builder()
-                        .addProcessIdentifiers(processIdentifiers)
-                        .transportProfile(transportProfile)
-                        .address(addressURI)
-                        .addCertificates(getX509CertificatesFromEndpoint(endpointType))
-                        .activationDate(endpointType.getActivationDate() == null ? null : endpointType.getActivationDate().getValue())
-                        .expirationDate(endpointType.getExpirationDate() == null ? null : endpointType.getExpirationDate().getValue())
-                        .build();
-                LOG.debug("Add endpoint for process [{}], transport [{}], url [{}]", processIdentifiers,
-                        transportProfile,
-                        addressURI);
-                endpoints.add(endpoint);
-            }
             SMPRedirect redirect = readRedirect(processMetadata.getRedirect());
-            if (!processMetadata.getEndpoints().isEmpty()) {
-                if (redirect != null) {
-                    LOG.warn("Process  [{}] has endpoint and redirect! The redirect is skipped!",
-                            processIdentifiers);
-                }
-                continue;
+            if (redirect == null) {
+                LOG.debug("Process  [{}] has no redirect element!", processIdentifiers);
+               continue;
             }
-            // no endpoint, try to read redirect
-            LOG.debug("No endpoint for process [{}], try to read redirect", processIdentifiers);
-            if (redirect != null) {
-                SMPEndpoint endpoint = new SMPEndpoint.Builder()
-                        .addProcessIdentifiers(processIdentifiers)
-                        .redirect(redirect)
-                        .build();
+            SMPEndpoint endpoint = convertRedirect(redirect,
+                    processIdentifiers,
+                    !processMetadata.getEndpoints().isEmpty());
+            if (endpoint != null) {
                 endpoints.add(endpoint);
             }
         }
         return endpoints;
     }
 
+    private SMPEndpoint convertRedirect(SMPRedirect redirect, List<SMPProcessIdentifier> processIdentifiers, boolean endpointExists) {
+        if (endpointExists) {
+            LOG.warn("Process  [{}] has endpoint and redirect! The redirect is skipped!", processIdentifiers);
+            return null;
+        }
+        return new SMPEndpoint.Builder()
+                .addProcessIdentifiers(processIdentifiers)
+                .redirect(redirect)
+                .build();
+
+    }
+
+    private SMPEndpoint convertEndpoint(Endpoint endpointType, List<SMPProcessIdentifier> processIdentifiers) {
+        String transportProfile = endpointType.getTransportProfileID() == null ? null : endpointType.getTransportProfileID().getValue();
+        String addressURI = endpointType.getAddressURI() == null ? null : endpointType.getAddressURI().getValue();
+
+        if (!(isIgnoreInvalidServices() || isServiceValid(endpointType))) {
+            LOG.debug("Ignore not-active/expired service for process [{}], transport [{}], url [{}]", processIdentifiers,
+                    transportProfile,
+                    addressURI);
+            return null;
+        }
+
+        SMPEndpoint endpoint = new SMPEndpoint.Builder()
+                .addProcessIdentifiers(processIdentifiers)
+                .transportProfile(transportProfile)
+                .address(addressURI)
+                .addCertificates(getX509CertificatesFromEndpoint(endpointType))
+                .activationDate(endpointType.getActivationDate() == null ? null : endpointType.getActivationDate().getValue())
+                .expirationDate(endpointType.getExpirationDate() == null ? null : endpointType.getExpirationDate().getValue())
+                .build();
+        LOG.debug("Add endpoint for process [{}], transport [{}], url [{}]", processIdentifiers,
+                transportProfile,
+                addressURI);
+        return endpoint;
+    }
+
+
     /**
      * Method reads the redirect from Oasis SMP 2.0 ServiceMetadata and return
      * the SMPRedirect
      *
-     * @param redirect
-     * @return
+     * @param redirect redirect element from Oasis SMP 2.0 ServiceMetadata
+     * @return SMPRedirect object with redirect URL and certificates
      */
     public SMPRedirect readRedirect(Redirect redirect) {
         if (redirect == null) {
@@ -258,9 +270,9 @@ public class OasisSMP20ServiceMetadataReader extends AbstractServiceMetadataRead
     }
 
     /**
-     * Method validates if service is valid!
+     * Method validates if service is valid! That is if current date is between activation and expiration dates!
      *
-     * @return
+     * @return true if endpoint is valid.
      */
     protected boolean isServiceValid(Endpoint endpointType) {
         OffsetDateTime currentDateTime = OffsetDateTime.now();
@@ -282,8 +294,8 @@ public class OasisSMP20ServiceMetadataReader extends AbstractServiceMetadataRead
     /**
      * Method returns map of certificates and types
      *
-     * @param endpointType
-     * @return
+     * @param endpointType endpoint type with certificates and address URI
+     * @return map of certificates and types
      */
     protected Map<String, X509Certificate> getX509CertificatesFromEndpoint(Endpoint endpointType) {
         if (endpointType == null) {

@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,24 @@
 package eu.europa.ec.dynamicdiscovery.exception;
 
 /**
- * @author Cosmin Baciu
- * @since 2.1
+ * @author Joze RIHTARSIC
+ * @since 3.0
  */
-public class SMPServiceMetadataException extends TechnicalException {
+public class DNSFetchException extends DDCRuntimeException {
 
-    public SMPServiceMetadataException(SMPExceptionCode smpExceptionCode, String message) {
+    public DNSFetchException(String message) {
+        this(DDCExceptionCode.FETCH_EXCEPTION, message);
+    }
+
+    public DNSFetchException(DDCExceptionCode smpExceptionCode, String message) {
         super(smpExceptionCode, message);
     }
 
-    public SMPServiceMetadataException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
-        super(smpExceptionCode, message, cause);
+    public DNSFetchException(String message, Throwable cause) {
+        super(message, cause);
     }
 
+    public DNSFetchException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
+        super(smpExceptionCode, message, cause);
+    }
 }

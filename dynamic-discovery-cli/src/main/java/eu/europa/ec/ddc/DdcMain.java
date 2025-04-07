@@ -19,26 +19,26 @@
  */
 package eu.europa.ec.ddc;
 
-
-import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
-import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.PublisherRequest;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.AccessTokenCredentialProvider;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.xbill.DNS.CNAMERecord;
@@ -66,6 +66,7 @@ import static org.apache.commons.lang3.StringUtils.split;
  * Main class for the Dynamic Discovery Client (DDC) command line interface
  */
 public class DdcMain {
+    private static final String LOG_ERROR= "[ERROR] ";
 
     public static void main(String[] args) throws RuntimeException {
 
@@ -78,12 +79,14 @@ public class DdcMain {
         try {
             cmd = parser.parse(commands, args, true);
         } catch (ParseException e) {
-            System.out.println("ERROR: " + e.getMessage() + "\n\n");
+            System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
             printCommandHelp(commands);
+            return;
         }
 
-        if (cmd.getOptions() == null || cmd.getOptions().length == 0) {
+        if (cmd == null ||  cmd.getOptions() == null || cmd.getOptions().length == 0) {
             printCommandHelp(commands);
+            return;
         }
 
         if (cmd.hasOption(COMMAND_DNS.getOption())) {
@@ -91,7 +94,7 @@ public class DdcMain {
             try {
                 cmd = parser.parse(options, args);
             } catch (ParseException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
                 printHelpOptions(options, COMMAND_DNS.getName());
                 System.exit(1);
             }
@@ -105,7 +108,7 @@ public class DdcMain {
             try {
                 cmd = parser.parse(options, args);
             } catch (ParseException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
                 printHelpOptions(options, COMMAND_GET.getName());
                 System.exit(1);
             }
@@ -113,7 +116,7 @@ public class DdcMain {
                 ddc.runGet(cmd);
             } catch (TechnicalException | IOException | UnrecoverableKeyException | NoSuchAlgorithmException |
                      KeyStoreException | URISyntaxException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
             }
         } else {
             printCommandHelp(commands);
@@ -179,7 +182,7 @@ public class DdcMain {
         KeyStore truststore = getTruststore(cmd);
         KeyStore keyStore = getKeystore(cmd);
 
-        IMetadataLocator testBDXRLocator;
+        IPublisherLocator testBDXRLocator;
         if (StringUtils.isBlank(smpurl)){
             // configure DNS lookup client if SMP URL is not provided
             DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
@@ -209,25 +212,44 @@ public class DdcMain {
         }
         DefaultURLFetcher testURLFetcher = testURLFetcherBuilder.build();
 
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .provider(new DefaultProvider.Builder().build())
-                .reader(new DefaultBDXRReader.Builder().build())
-                .fetcher(testURLFetcher)
-                .locator(testBDXRLocator)
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .documentRequestProvider(new DefaultDocumentRequestProvider.Builder().build())
+                .documentReader(new DefaultBDXRReader.Builder().build())
+                .documentFetcher(testURLFetcher)
+                .publisherLocator(testBDXRLocator)
                 .build();
 
         // lookup and download data
-        URI uri = smpClient.getService().getMetadataLocator().lookup(participantIdentifier);
-        if (uri == null) {
+        List<PublisherLookupResult> lookupResults = smpClient.getPublisherLocator().lookup(participantIdentifier);
+        if (lookupResults == null|| lookupResults.isEmpty()) {
             throw new DDCRuntimeException("Can not resolve party identifier");
         }
 
-        IMetadataProvider metadataProvider = smpClient.getService().getMetadataProvider();
+        IDocumentRequestProvider metadataProvider = smpClient.getDocumentRequestProvider();
+        for (PublisherLookupResult lookupResult : lookupResults) {
+            try {
+                downloadResource(smpClient, metadataProvider, participantIdentifier, subresourceIdentifier, lookupResult, outputFilePath);
+                break;
+            } catch (TechnicalException e) {
+                System.out.println("Error downloading resource from: " + lookupResult.getUrl() + " - " + e.getMessage());
+            }
+        }
+    }
 
-        uri = subresourceIdentifier == null ? metadataProvider.resolveForParticipantIdentifier(uri, participantIdentifier) :
-                metadataProvider.resolveServiceMetadata(uri, participantIdentifier, subresourceIdentifier);
+    protected void downloadResource(DynamicDiscoveryService smpClient, IDocumentRequestProvider metadataProvider,
+                                    SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier subresourceIdentifier,
+                                    PublisherLookupResult lookupResult, String outputFilePath) throws TechnicalException, IOException {
 
-        FetcherResponse response = smpClient.getService().getMetadataFetcher().fetch(uri);
+        URI url;
+        if (subresourceIdentifier == null) {
+            url = metadataProvider.createRequestForResource(lookupResult, participantIdentifier).getResourceUri();
+        } else {
+            url = metadataProvider.createRequestForSubresource(lookupResult, participantIdentifier, subresourceIdentifier).getSubresourceUri();
+        }
+        PublisherRequest request = subresourceIdentifier == null ? metadataProvider.createRequestForResource(lookupResult, participantIdentifier) :
+                metadataProvider.createRequestForSubresource(lookupResult, participantIdentifier, subresourceIdentifier);
+
+        FetcherResponse response = smpClient.getDocumentFetcher().fetch(url);
         Files.copy(response.getInputStream(), Paths.get(outputFilePath), StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -277,7 +299,7 @@ public class DdcMain {
                 }
             }
         } catch (DNSLookupException e) {
-            if (e.getSmpExceptionCode() != SMPExceptionCode.INVALID_DNS_TYPE) {
+            if (e.getSmpExceptionCode() != DDCExceptionCode.INVALID_DNS_TYPE) {
                 throw e;
             }
         }

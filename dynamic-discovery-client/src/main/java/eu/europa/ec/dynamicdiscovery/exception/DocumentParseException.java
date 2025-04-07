@@ -24,21 +24,21 @@ package eu.europa.ec.dynamicdiscovery.exception;
  * @since 1.0
  *
  */
-public class BindException extends TechnicalException {
+public class DocumentParseException extends TechnicalException {
 
-    public BindException(String message) {
+    public DocumentParseException(String message) {
         super(message);
     }
 
-    public BindException(SMPExceptionCode smpExceptionCode, String message) {
+    public DocumentParseException(DDCExceptionCode smpExceptionCode, String message) {
         super(smpExceptionCode, message);
     }
 
-    public BindException(String message, Throwable cause) {
+    public DocumentParseException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public BindException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+    public DocumentParseException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
         super(smpExceptionCode, message, cause);
     }
 }

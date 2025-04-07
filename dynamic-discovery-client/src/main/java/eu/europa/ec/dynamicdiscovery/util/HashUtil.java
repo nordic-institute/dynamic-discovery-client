@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Base32;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +43,7 @@ public class HashUtil {
      *
      * @param stringToBeHashed the string to be hashed
      * @return the MD5 hash of the given string
-     * @throws NoSuchAlgorithmException  if the algorithm is not supported
+     * @throws NoSuchAlgorithmException if the algorithm is not supported
      */
     public static String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
         return getHash(stringToBeHashed, "MD5", false, false);
@@ -83,7 +82,8 @@ public class HashUtil {
 
         if (isBase32) {
             String base32Value = Base32.toBase32String(hashBytes);
-            base32Value = base32Value.replaceAll("=*$", "");
+
+            base32Value = StringUtils.stripEnd(base32Value, "=");
             // remove padding
             return updateStringCase(base32Value, toUpperCase);
         } else {
@@ -111,8 +111,8 @@ public class HashUtil {
         return toUpperCase ? StringUtils.upperCase(value) : StringUtils.lowerCase(value);
     }
 
-        public static String getDnsDiscoveryHash(String value, DNSLookupHashType dnsType, boolean withPrefix) {
-        String hashPrefix =withPrefix?StringUtils.trimToEmpty(dnsType.getPrefix()):"";
+    public static String getDnsDiscoveryHash(String value, DNSLookupHashType dnsType, boolean withPrefix) {
+        String hashPrefix = withPrefix ? StringUtils.trimToEmpty(dnsType.getPrefix()) : "";
         try {
             return hashPrefix + getHash(value, dnsType.getAlgorithm(), dnsType.isBase32(), dnsType.isUpperCase());
         } catch (NoSuchAlgorithmException e) {

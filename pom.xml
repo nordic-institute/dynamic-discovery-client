@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.europa.ec.dynamic-discovery</groupId>
     <artifactId>dynamic-discovery-parent</artifactId>
-    <version>2.4-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>dynamic-discovery-parent</name>
-    <description>Library for discovering data dynamically based on e-SENS BDXL specification</description>
+    <description>Library for discovering data dynamically based on eDelivery SMP, AP and BDXL profiles</description>
 
     <licenses>
         <license>
@@ -48,56 +50,72 @@
         <project.scm.id>edelivery-scm</project.scm.id>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-
-        <release.arguments>-Dmaven.javadoc.skip=true -Dmaven.test.skipTests=true -Dmaven.test.skip=true</release.arguments>
-
-        <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
-        <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
-        <sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar</sonar.host.url>
-        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-        <sonar.jacoco.reportPath>${project.basedir}/target/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
-        <sonar.scm.disabled>true</sonar.scm.disabled>
-        <sonar.sources>src/main/java</sonar.sources>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.test.argLine>-XX:+EnableDynamicAgentLoading</maven.test.argLine>
         <surefire.argLine>-Xmx1G</surefire.argLine>
 
+        <skipIT>false</skipIT>
+        <!-- push the aggregated reports which contains code coverage from linked modules
+      pushing each report like this
+      ${project.basedir}/target/site/jacoco/jacoco.xml,${project.basedir}/target/site/jacoco-it/jacoco.xml
+      will not cover the coverage from dependent modules when executing integration tests
+      ${project.root.baseUri}/dynamic-discovery-client/target/site/jacoco-aggregate/jacoco.xml
+      -->
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/target/site/jacoco/jacoco.xml,${project.basedir}/target/site/jacoco-it/jacoco.xml
+
+        </sonar.coverage.jacoco.xmlReportPaths>
+
+        <sonar.host.url>http://localhost:9000/sonar/</sonar.host.url>
+        <sonar.language>java</sonar.language>
+        <sonar.binaries>${project.basedir}/target/classes</sonar.binaries>
+        <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
+        <sonar.scm.disabled>true</sonar.scm.disabled>
+
         <!-- dependencies -->
-        <bouncycastle.version>1.78</bouncycastle.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
-        <commons-cli.version>1.6.0</commons-cli.version>
-        <dnsjava.version>3.6.0</dnsjava.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
+        <commons-cli.version>1.9.0</commons-cli.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <dnsjava.version>3.6.3</dnsjava.version>
+        <hamcrest.version>3.0</hamcrest.version>
         <httpclient.version>5.3.1</httpclient.version>
-
-        <jaxb-api.version>2.3.1</jaxb-api.version>
-        <org.glassfish.jaxb.jaxb-runtime.version>2.3.8</org.glassfish.jaxb.jaxb-runtime.version>
-        <org.eclipse.jetty.version>9.4.54.v20240208</org.eclipse.jetty.version>
-
+        <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
-        <junit.version>5.10.2</junit.version>
-        <hamcrest.version>2.2</hamcrest.version>
-        <slf4j.version>2.0.12</slf4j.version>
-        <mockito.version>4.11.0</mockito.version>
-        <spring-test.version>5.3.33</spring-test.version>
+        <junit.version>5.12.1</junit.version>
+        <mockito.version>5.2.0</mockito.version>
+        <net.bytebuddy.version>1.17.5</net.bytebuddy.version>
+        <org.eclipse.jetty.version>11.0.25</org.eclipse.jetty.version>
+        <org.glassfish.jaxb.jaxb-runtime.version>4.0.5</org.glassfish.jaxb.jaxb-runtime.version>
+        <saxon-he.version>12.4</saxon-he.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <spring-test.version>6.2.5</spring-test.version>
+        <!-- documentation dependencies -->
+        <asciidoctor.maven.plugin.version>3.2.0</asciidoctor.maven.plugin.version>
+        <asciidoctorj.version>3.0.0</asciidoctorj.version>
+        <asciidoctorj.diagram.version>2.3.2</asciidoctorj.diagram.version>
+        <asciidoctorj.pdf.version>2.3.19</asciidoctorj.pdf.version>
+        <jruby.version>9.4.12.0</jruby.version>
         <!-- plugins -->
-        <plugin.jacoco-maven-plugin.version>0.8.11</plugin.jacoco-maven-plugin.version>
-        <plugin.maven-jar-plugin.version.version>3.3.0</plugin.maven-jar-plugin.version.version>
-        <plugin.maven-assembly-plugin.version> 3.6.0</plugin.maven-assembly-plugin.version>
-        <plugin.maven-release-plugin.version>3.0.1</plugin.maven-release-plugin.version>
-        <plugin.dependency-check-maven.version>10.0.1</plugin.dependency-check-maven.version>
-        <plugin.license-maven-plugin.version>2.3.0</plugin.license-maven-plugin.version>
-        <plugin.maven-compiler-plugin.version>3.12.1</plugin.maven-compiler-plugin.version>
-        <plugin.jaxb2-maven-plugin.version>2.5.0</plugin.jaxb2-maven-plugin.version>
-        <plugin.jbuild-helper-maven-plugin.version>1.12</plugin.jbuild-helper-maven-plugin.version>
-        <plugin.maven-surefire-plugin.version>3.2.5</plugin.maven-surefire-plugin.version>
-        <plugin.maven-failsafe-plugin.version>3.1.2</plugin.maven-failsafe-plugin.version>
-        <plugin.maven-shade-plugin.version>3.5.1</plugin.maven-shade-plugin.version>
+        <plugin.dependency-check-maven.version>11.1.1</plugin.dependency-check-maven.version>
+        <plugin.jacoco-maven-plugin.version>0.8.13</plugin.jacoco-maven-plugin.version>
+        <plugin.jaxb2-maven-plugin.version>3.3.0</plugin.jaxb2-maven-plugin.version>
+        <plugin.jbuild-helper-maven-plugin.version>3.6.0</plugin.jbuild-helper-maven-plugin.version>
+        <plugin.license-maven-plugin.version>2.5.0</plugin.license-maven-plugin.version>
+        <plugin.maven-assembly-plugin.version>3.7.1</plugin.maven-assembly-plugin.version>
+        <plugin.maven-compiler-plugin.version>3.14.0</plugin.maven-compiler-plugin.version>
+        <plugin.maven-failsafe-plugin.version>3.5.3</plugin.maven-failsafe-plugin.version>
+        <plugin.maven-jar-plugin.version.version>3.4.2</plugin.maven-jar-plugin.version.version>
+        <plugin.maven-release-plugin.version>3.1.1</plugin.maven-release-plugin.version>
+        <plugin.maven-shade-plugin.version>3.6.0</plugin.maven-shade-plugin.version>
+        <plugin.maven-surefire-plugin.version>3.5.3</plugin.maven-surefire-plugin.version>
+        <plugin.xml-maven-plugin.version>1.1.0</plugin.xml-maven-plugin.version>
+        <plugin.versions-maven-plugin.version>2.18.0</plugin.versions-maven-plugin.version>
         <!-- latest version compatible with SonarQube 5.6 -->
-        <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
-        <plugin.maven-source-plugin.version>3.3.0</plugin.maven-source-plugin.version>
-        <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
+        <plugin.sonar.version>4.0.0.4121</plugin.sonar.version>
+        <plugin.maven-source-plugin.version>3.3.1</plugin.maven-source-plugin.version>
+        <plugin.maven-resources-plugin.version>3.3.1</plugin.maven-resources-plugin.version>
     </properties>
-
     <profiles>
         <profile>
             <id>dependency-check</id>
@@ -106,7 +124,6 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>${plugin.dependency-check-maven.version}</version>
                         <configuration>
                             <nvdApiServerId>edelivery-owasp</nvdApiServerId>
                             <!-- Disable .Net Assembly Analyzer -->
@@ -130,7 +147,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>license-maven-plugin</artifactId>
-                         <executions>
+                        <executions>
                             <execution>
                                 <id>download-licenses</id>
                                 <goals>
@@ -270,6 +287,261 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <!-- Generate NOTICE.md file from licenses.xml
+            The plugin will download all licenses from the dependencies and
+            generate a target/generated-resources/licenses.xml file with
+            org.codehaus.mojo:license-maven-plugin.
+            Then it will transform the licenses.xml file to a NOTICE.md file
+            with org.codehaus.mojo:xml-maven-plugin and the licenses/config/license.xsl stylesheet.
+
+            To generate the NOTICE.md file, run the following command:
+
+            mvn clean process-resources -Plicense-generate-notice
+
+            NOTE: do not forget to regenerate the NOTICE.md file when adding new dependencies or updating the existing ones
+            and before the release!
+            -->
+            <id>license-generate-notice</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>${plugin.license-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>download-licenses</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>aggregate-download-licenses</goal>
+                                    <goal>aggregate-add-third-party</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
+                            <removeOrphanLicenseFiles>true</removeOrphanLicenseFiles>
+                            <excludedGroups>com.smartbear.*|eu.europa.ec.*</excludedGroups>
+                            <excludeTransitiveDependencies>true</excludeTransitiveDependencies>
+                            <excludedScopes>test</excludedScopes>
+                            <includeTransitiveDependencies>false</includeTransitiveDependencies>
+                            <sortArtifactByName>true</sortArtifactByName>
+                            <licenseMerges>
+                                <licenseMerge>Apache-2.0|Apache License, Version 2.0|Apache License 2.0|The Apache Software License, Version 2.0|Apache Public License 2.0|Apache 2|Apache License, version 2.0|The Apache License, Version 2.0|Apache 2.0</licenseMerge>
+                                <!--  Common Public License Version 1.0|CPL was replaced by Eclipse Public License -->
+                                <licenseMerge>EPL-2.0|EPL 2.0|Eclipse Public License 2.0</licenseMerge>
+                                <licenseMerge>EPL-1.0| (EPL-1.0)|Eclipse Public License (EPL) v1.0|Eclipse Public License (EPL), Version 1.0|Eclipse Public License - v 1.0|Eclipse Public License 1.0|EDL 1.0|Common Public License Version 1.0|CPL</licenseMerge>
+                                <licenseMerge>GPL-2.0-or-later|The GNU General Public License, v2 with Universal FOSS Exception, v1.0</licenseMerge>
+                                <licenseMerge>MIT|The MIT License|MIT License</licenseMerge>
+                                <licenseMerge>BSD-3-Clause|BSD license (all versions)|BSD License|The BSD License|BSD 3-clause New License|BSD Licence 3|BSD-Style License|New BSD License|Eclipse Distribution License - v 1.0|Eclipse Distribution License (EDL), Version 1.0</licenseMerge>
+                                <licenseMerge>LGPL-2.1+|GNU Library General Public License v2.1 or later|GNU Lesser General Public License</licenseMerge>
+                                <licenseMerge>CDDL-1.1|Dual license consisting of the CDDL v1.1 and GPL v2|CDDL + GPLv2 with classpath exception|CDDL/GPLv2+CE|CDDL+GPL License</licenseMerge>
+                                <licenseMerge>CDDL-1.0|Common Development and Distribution License (CDDL)|Common Development and Distribution License (CDDL) v1.0|Common Development and Distribution|CDDL 1.1|</licenseMerge>
+                            </licenseMerges>
+                            <excludedLicenses>
+                                <excludedLicense>Unknown license</excludedLicense>
+                                <excludedLicense>licenseB</excludedLicense>
+                            </excludedLicenses>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>xml-maven-plugin</artifactId>
+                        <version>${plugin.xml-maven-plugin.version}</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>transform</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <catalogHandling>local</catalogHandling>
+                            <catalogs>
+                                <catalog>license/third-party-licenses/Apache-2.0.txt</catalog>
+                            </catalogs>
+                            <transformationSets>
+                                <transformationSet>
+                                    <dir>target/generated-resources/</dir>
+                                    <includes>
+                                        <include>licenses.xml</include>
+                                    </includes>
+                                    <stylesheet>license/config/license.xsl</stylesheet>
+                                    <outputDir>./</outputDir>
+
+                                    <fileMappers>
+                                        <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
+                                            <pattern>licenses.xml</pattern>
+                                            <replacement>Notice.md</replacement>
+                                        </fileMapper>
+                                    </fileMappers>
+                                    <parameters>
+                                        <parameter>
+                                            <!-- This is external stylesheet parameter set in pom.xml plugin configuration
+                                            to include the licenses in the notice file. The value of this parameter is a
+                                            comma separated list of licenses as exampled: Apache-2.0,MIT.
+                                            Make sure to include the license files in the license/third-party-licenses/${license}.txt
+                                            -->
+                                            <name>IncludeLicenses</name>
+                                            <value>Apache-2.0,BSD-2-Clause,EPL-1.0,EPL-2.0,GPL-2.0-or-later,LGPL-2.1+,MIT</value>
+                                        </parameter>
+                                    </parameters>
+                                </transformationSet>
+                            </transformationSets>
+                        </configuration>
+                        <dependencies>
+                            <!-- Enable XSLT 2.0 with this dependency -->
+                            <dependency>
+                                <groupId>net.sf.saxon</groupId>
+                                <artifactId>Saxon-HE</artifactId>
+                                <version>${saxon-he.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>generate-documentation</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <version>${asciidoctor.maven.plugin.version}</version>
+                        <inherited>false</inherited>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj-pdf</artifactId>
+                                <version>${asciidoctorj.pdf.version}</version>
+                            </dependency>
+                            <!-- Comment this section to use the default jruby artifact provided by the plugin -->
+                            <dependency>
+                                <groupId>org.jruby</groupId>
+                                <artifactId>jruby</artifactId>
+                                <version>${jruby.version}</version>
+                            </dependency>
+                            <!-- Comment this section to use the default AsciidoctorJ artifact provided by the plugin -->
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj</artifactId>
+                                <version>${asciidoctorj.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj-diagram</artifactId>
+                                <version>${asciidoctorj.diagram.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <id>generate-html</id>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <phase>prepare-package</phase>
+                                <configuration>
+                                    <backend>html</backend>
+                                    <outputDirectory>${project.build.directory}/docs/html</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>generate-pdf</id>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <phase>prepare-package</phase>
+                                <configuration>
+                                    <backend>pdf</backend>
+                                    <outputDirectory>${project.build.directory}/docs/pdf</outputDirectory>
+                                    <attributes>
+                                        <source-highlighter>rouge</source-highlighter>
+                                        <icons>font</icons>
+                                        <pagenums/>
+                                        <toc/>
+                                        <idprefix/>
+                                        <idseparator>-</idseparator>
+                                    </attributes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <!-- (Mandatory) Directory to copy from. Paths are relative to maven's ${baseDir} -->
+                                    <directory>{project.basedir}</directory>
+                                    <!-- Do not copy anything from the base dir, just generate the docs -->
+                                    <excludes>
+                                        <exclude>**/.*</exclude>
+                                    </excludes>
+                                </resource>
+
+                            </resources>
+                            <sourceDirectory>${project.basedir}</sourceDirectory>
+                            <sourceDocumentName>README.adoc</sourceDocumentName>
+                            <standalone>true</standalone>
+                            <!-- Require the Ruby gem bundled in asciidoctorj-diagram JAR to make them available to Asciidoctor -->
+                            <requires>
+                                <require>asciidoctor-diagram</require>
+                            </requires>
+                            <attributes>
+                                <!-- Example below shows how to specify in this pom instead of System's PATH, the location of dot command of Graphviz.
+                                     This is required by PlantUML libraries, unless 'smetana' is used https://plantuml.com/de/smetana02 -->
+                                <!-- Windows:
+                                    <graphvizdot>C:\Program Files (x86)\Graphviz2.38\bin\dot.exe</graphvizdot>
+                                -->
+                                <!-- *nix :
+                                    <graphvizdot>/usr/local/bin/dot</graphvizdot>
+                                -->
+                                <source-highlighter>rouge</source-highlighter>
+                                <imagesdir>./images</imagesdir>
+                                <toc>left</toc>
+                                <icons>font</icons>
+                                <sectanchors>true</sectanchors>
+                                <!-- set the idprefix to blank -->
+                                <idprefix/>
+                                <idseparator>-</idseparator>
+                                <docinfo1>true</docinfo1>
+                            </attributes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-documentation-pdf</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+
+                                <configuration>
+                                    <outputDirectory>${basedir}/</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/docs/pdf</directory>
+                                            <includes>
+                                                <include>*.pdf</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <!-- Default version numbers to use -->
@@ -319,15 +591,10 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <!-- jaxb implementation for cli packaging. -->
-            <!-- dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>${jaxb-api.version}</version>
-            </dependency -->
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>2.3.3</version>
+                <version>${jakarta.xml.bind-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
@@ -390,6 +657,16 @@
                 <version>${org.eclipse.jetty.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${net.bytebuddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>${net.bytebuddy.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -420,7 +697,7 @@
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>${dependency-check-maven.version}</version>
+                    <version>${plugin.dependency-check-maven.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -434,19 +711,33 @@
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>${plugin.versions-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${plugin.maven-source-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
                     <version>${plugin.jaxb2-maven-plugin.version}</version>
                     <!--add for building it with jdk9+ -->
                     <dependencies>
-                        <!-- dependency>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                            <version>${jaxb-api.version}</version>
-                        </dependency -->
                         <dependency>
                             <groupId>jakarta.xml.bind</groupId>
                             <artifactId>jakarta.xml.bind-api</artifactId>
-                            <version>2.3.3</version>
+                            <version>${jakarta.xml.bind-api.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>org.glassfish.jaxb</groupId>
@@ -487,16 +778,8 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${plugin.maven-source-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar-no-fork</goal>
-                            </goals>
-                        </execution>
-                    </executions>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${plugin.maven-resources-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -508,6 +791,153 @@
                     <arguments>-Dmaven.javadoc.skip=true -Dmaven.test.skipTests=true -Dmaven.test.skip=true</arguments>
                     <!-- Automatically assign submodules the parent version during the release. -->
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <reportFormat>brief</reportFormat>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                    <!-- We need to reinitialize classes based on the configuration -->
+                    <reuseForks>false</reuseForks>
+                    <forkNode
+                            implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+                    <!-- @{argLine} is generated by jacoco-prepare -->
+                    <argLine>${maven.test.argLine} @{argLine}</argLine>
+                    <systemPropertyVariables>
+                        <product.version>${project.version}</product.version>
+                        <org.apache.xml.security.securerandom.algorithm>
+                            SHA1PRNG
+                        </org.apache.xml.security.securerandom.algorithm>
+                        <file.encoding>UTF-8</file.encoding>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                    <argLine>${maven.test.argLine} @{argLine}</argLine>
+                    <skipExec>${skipIT}</skipExec>
+                    <forkCount>1</forkCount>
+                    <forkNode
+                            implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+                    <systemPropertyVariables>
+                        <product.version>${project.version}</product.version>
+                        <javax.xml.accessExternalDTD>file
+                        </javax.xml.accessExternalDTD>
+                        <org.apache.xml.security.securerandom.algorithm>
+                            SHA1PRNG
+                        </org.apache.xml.security.securerandom.algorithm>
+                        <file.encoding>UTF-8</file.encoding>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Jacoco plugin configuration to activate code coverage agent -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <formats>
+                        <!-- SonarQube uses xml reports -->
+                        <format>XML</format>
+                        <format>HTML</format>
+                    </formats>
+                    <!-- exclude generated code-->
+                    <excludes>
+                        <exclude>gen/eu/europa/ec/ddc/**/*.class</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id>
+                        <goals>
+                            <goal>report-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>merge-results</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>*.exec</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>aggregate.exec</exclude>
+                                    </excludes>
+                                </fileSet>
+                            </fileSets>
+                            <destFile>${project.build.directory}/aggregate.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-merge-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/aggregate.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <!--To update only bugfix versions mvn versions:update-properties -DallowSnapshots=false -DallowMajorUpdates=false -DallowMinorUpdates=false -->
+                <!--To update minor versions mvn versions:update-properties -DallowSnapshots=false -DallowMajorUpdates=false  -->
+                <configuration>
+                    <!-- ignore non numeric versions!-->
+                    <ignoredVersions>(?i).*-(alpha|beta|m|rc)([-.]?\d+)?</ignoredVersions>
                 </configuration>
             </plugin>
         </plugins>

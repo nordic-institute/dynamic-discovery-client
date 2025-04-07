@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.smp10.ParticipantIdentifierType;
 import gen.eu.europa.ec.ddc.api.smp10.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp10.ServiceMetadataReferenceType;
@@ -32,10 +33,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -105,7 +106,7 @@ public class OasisSMP10ServiceGroupReader extends AbstractServiceGroupReader<Ser
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceGroup.class;
+        return NamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceGroup.class, qName, clazz);
     }
 
     @Override

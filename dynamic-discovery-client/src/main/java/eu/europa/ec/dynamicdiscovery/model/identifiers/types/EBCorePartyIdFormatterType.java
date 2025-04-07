@@ -50,8 +50,6 @@ public class EBCorePartyIdFormatterType extends AbstractFormatterType {
     public static final String EBCORE_IDENTIFIER_PREFIX = "urn:oasis:names:tc:ebcore:partyid-type:";
     public static final String EBCORE_IDENTIFIER_ISO6523_SCHEME = "iso6523";
     public static final String EBCORE_IDENTIFIER_UNREGISTERED_SCHEME = "unregistered";
-    private static final String EBCORE_SEPARATOR = ":";
-    private static final String OASIS_SMP_SEPARATOR = "::";
 
 
     @Override

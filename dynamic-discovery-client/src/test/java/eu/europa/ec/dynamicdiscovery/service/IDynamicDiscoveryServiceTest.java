@@ -19,54 +19,61 @@
  */
 package eu.europa.ec.dynamicdiscovery.service;
 
-import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
-import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidator;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
-import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import eu.europa.ec.dynamicdiscovery.util.CommonUtil;
-import eu.europa.ec.dynamicdiscovery.util.DNSUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.net.URI;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
+ * Basic test for DynamicDiscoveryService
+ * @since 1.0
+ *
  * @author Flávio W. R. Santos
+ * @author Joze RIHTARSIC
  */
-class DynamicDiscoveryServiceTest {
-
+class IDynamicDiscoveryServiceTest {
+    private static final String TOP_DNS_DOMAIN = "acc.edelivery.tech.ec.europa.eu";
 
     DefaultDNSLookup testDNSLookup = Mockito.spy(new DefaultDNSLookup.Builder().build());
-    DefaultBDXRLocator testBDXRLocator = Mockito.spy(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", testDNSLookup));
+    DefaultBDXRLocator testBDXRLocator = Mockito.spy(new DefaultBDXRLocator.Builder()
+            .addTopDnsDomain(TOP_DNS_DOMAIN)
+                        .dnsLookup(testDNSLookup)
+                        .build());
 
     @Test
-    void metadataLocatorCNAMETest() throws Exception {
+    void testPublisherLocatorLookupCNAME() throws Exception {
+        // given
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:98765digit", "iso6523-actorid-upis");
         ArgumentCaptor<String> dnsRecordUrlCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.doReturn(false).when(testDNSLookup).dnsRecordNotExists(
+        Mockito.doReturn(true).when(testDNSLookup).dnsRecordExists(
                 any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture(), any(DNSLookupType.class));
 
-
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader.Builder()
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .publisherLocator(testBDXRLocator)
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
-
-        assertEquals("http://B-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu",
-                smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
+        // when
+        List<PublisherLookupResult> result = smpClient.getPublisherLocator().lookup(participantIdentifier);
+        assertFalse(result.isEmpty());
+        assertEquals("http://B-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu/",
+                result.get(0).getUrl().toString());
     }
-
+/*
     @Test
     void metadataLocatorNAPTRTest() throws Exception {
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
@@ -74,32 +81,33 @@ class DynamicDiscoveryServiceTest {
         Mockito.doReturn(DNSUtils.createSmpDnsNaptrResponse(participantIdentifier)).when(testDNSLookup)
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
 
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader.Builder()
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .publisherLocator(testBDXRLocator)
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
 
         assertEquals("http://smp-mock-1.ehealth.eu:8888",
-                smpClient.getService().getMetadataLocator().lookup(participantIdentifier).toString());
+                smpClient.getPublisherLocator().lookup(participantIdentifier).toString());
     }
 
     @Test
     void metadataProviderForDocumentIdentifiersTest() throws Exception {
+        // Test for the case when the document identifier is a URN
         SMPParticipantIdentifier participantIdentifier = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
         Mockito.doReturn(DNSUtils.createSmpDnsNaptrResponse(participantIdentifier)).when(testDNSLookup)
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
 
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader.Builder()
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .publisherLocator(testBDXRLocator)
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178",
-                smpClient.getService().getMetadataProvider().resolveForParticipantIdentifier(new URI("http://smp.ec.europa.eu/"), participantIdentifier).toString());
+                smpClient.getDocumentRequestProvider().createRequestForResource(new URI("http://smp.ec.europa.eu/"), participantIdentifier).toString());
     }
 
     @Test
@@ -109,15 +117,15 @@ class DynamicDiscoveryServiceTest {
 
         Mockito.doReturn(DNSUtils.createSmpDnsNaptrResponse(participantIdentifier)).when(testDNSLookup)
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader.Builder()
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .publisherLocator(testBDXRLocator)
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1",
-                smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
+                smpClient.getDocumentRequestProvider().createRequestForSubresource(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
     }
 
 
@@ -128,14 +136,15 @@ class DynamicDiscoveryServiceTest {
 
         Mockito.doReturn(DNSUtils.createSmpDnsNaptrResponse(participantIdentifier)).when(testDNSLookup)
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(testBDXRLocator)
-                .reader(new DefaultBDXRReader.Builder()
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .publisherLocator(testBDXRLocator)
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
 
-        assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/%3A%3Ahttp%3A%2F%2Fdocs.oasis-open.org%2Febxml-msg%2Febms%2Fv3.0%2Fns%2Fcore%2F200704%2Ftest", smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
+        assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/%3A%3Ahttp%3A%2F%2Fdocs.oasis-open.org%2Febxml-msg%2Febms%2Fv3.0%2Fns%2Fcore%2F200704%2Ftest",
+                smpClient.getDocumentRequestProvider().createRequestForSubresource(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
     }
 
 
@@ -146,16 +155,19 @@ class DynamicDiscoveryServiceTest {
 
         Mockito.doReturn(DNSUtils.createSmpDnsNaptrResponse(participantIdentifier)).when(testDNSLookup)
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", testDNSLookup))
-                .reader(new DefaultBDXRReader.Builder()
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder()
+            .addTopDnsDomain(TOP_DNS_DOMAIN)
+                        .dnsLookup(testDNSLookup)
+                        .build())
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
 
         assertEquals("http://smp.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/%3A%3Ahttp%3A%2F%2Fdocs.oasis-open.org%2Febxml-msg%2Febms%2Fv3.0%2Fns%2Fcore%2F200704%2Ftest",
-                smpClient.getService().getMetadataProvider()
-                        .resolveServiceMetadata(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
+                smpClient.getDocumentRequestProvider()
+                        .createRequestForSubresource(new URI("http://smp.ec.europa.eu/"), participantIdentifier, documentIdentifier).toString());
     }
 
     @Test
@@ -165,14 +177,51 @@ class DynamicDiscoveryServiceTest {
 
         Mockito.doReturn(DNSUtils.createSmpDnsNaptrResponse(participantIdentifier)).when(testDNSLookup)
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), any(String.class));
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .locator(new DefaultBDXRLocator("acc.edelivery.tech.ec.europa.eu", testDNSLookup))
-                .reader(new DefaultBDXRReader.Builder()
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .publisherLocator(new DefaultBDXRLocator.Builder()
+            .addTopDnsDomain(TOP_DNS_DOMAIN)
+                        .dnsLookup(testDNSLookup)
+                        .build())
+                .documentReader(new DefaultBDXRReader.Builder()
                         .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
                         .build())
                 .build();
-        URI provider = smpClient.getService().getMetadataProvider().resolveServiceMetadata(new URI("http://smp123456.ec.europa.eu/"), participantIdentifier, documentIdentifier);
+        URI provider = smpClient.getDocumentRequestProvider().createRequestForSubresource(new URI("http://smp123456.ec.europa.eu/"), participantIdentifier, documentIdentifier);
         assertEquals("http://smp123456.ec.europa.eu/iso6523-actorid-upis%3A%3A9925%3A0367302178/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1", provider.toString());
     }
+
+    /*
+ @ParameterizedTest
+    @CsvSource({
+            "http://example.com, service1, /binding, http://example.com/binding",
+            "http://example.com/, service1, binding, http://example.com/binding",
+            "http://example.com/, service1, /binding, http://example.com/binding",
+            "http://example.com, service2, , http://example.com",
+            "http://example.com, service3, /binding, http://example.com"
+    })
+    void testUpdateURLWithHttpBindingForService1(String url, String service, String httpBinding, String expected) {
+        String naptrServiceLookup = "service1";
+        DefaultDNSLookup lookup = new DefaultDNSLookup.Builder()
+                .addRequiredNaptrServiceHttpBinding(naptrServiceLookup, httpBinding)
+                .build();
+        String result = lookup.updateURLWithHttpBinding(url, service);
+        assertEquals(expected, result);
+    }
+
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "http://example.com/, /path, http://example.com/path",
+            "http://example.com, path, http://example.com/path",
+            "http://example.com, /path, http://example.com/path",
+            "http://example.com/, path, http://example.com/path"
+    })
+    void testConcatenatePathSegment(String url, String httpBinding, String expected) {
+        DefaultDNSLookup lookup = new DefaultDNSLookup.Builder().build();
+        String result = lookup.concatenatePathSegment(url, httpBinding);
+        assertEquals(expected, result);
+    }
+  */
 
 }

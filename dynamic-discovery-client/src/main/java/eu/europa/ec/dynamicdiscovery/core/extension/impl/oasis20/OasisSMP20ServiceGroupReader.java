@@ -20,13 +20,13 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.AbstractServiceGroupReader;
-import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
 import eu.europa.ec.dynamicdiscovery.core.security.SignatureValidationContext;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.ServiceReference;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
@@ -35,10 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.util.Collections;
 import java.util.List;
@@ -104,7 +104,7 @@ public class OasisSMP20ServiceGroupReader extends AbstractServiceGroupReader<Ser
 
     @Override
     public boolean handles(QName qName, Class<?> clazz) {
-        return PARSE_ELEMENT.equals(qName) && clazz == SMPServiceGroup.class;
+        return NamespaceUtil.supportedQNameMatchesProvided(PARSE_ELEMENT, SMPServiceGroup.class, qName, clazz);
     }
 
     @Override
