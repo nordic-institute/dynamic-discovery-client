@@ -117,12 +117,13 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
     /**
      * Method returns endpoint for given participant, document, process identifiers and transport profile.
      * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     * The first transport option that matches the criteria will be returned and the remaining options in the list will be ignored.
      *
      * @param participantIdentifier participant identifier to discover endpoint
      * @param documentIdentifier the target document identifier (or action identifier for AS4)
      * @param processId process identifier (or service identifier for AS4)
      * @param processIdScheme process identifier scheme
-     * @param transportProfiles a list of transport profile to match against
+     * @param transportProfiles a list of transport profile to match against; the order of the transport options is important, the first match being returned
      * @return endpoint for given parameters or null if no endpoint is found.
      * @throws TechnicalException if any error occurs during the lookup
      */
@@ -135,12 +136,13 @@ public class DynamicDiscoveryService implements IDynamicDiscoveryService {
 
     /**
      * Method returns endpoint for given serviceMetadata with process identifiers and transport profile.
-     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     * If redirectionEnabled is set to true and returned Endpoint contains redirect it tries to resolve the redirect as well.
+     * The first transport option that matches the criteria will be returned and the remaining options in the list will be ignored.
      *
      * @param serviceMetadata serviceMetadata
      * @param processId process identifier (or service identifier for AS4)
      * @param processIdScheme process identifier scheme
-     * @param transportProfiles a list of transport profile to match against
+     * @param transportProfiles a list of transport profile to match against; the order of the transport options is important, the first match being returned
      * @return endpoint for given parameters or null if no endpoint is found.
      * @throws TechnicalException if any error occurs during the lookup
      */
