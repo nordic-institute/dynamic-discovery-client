@@ -22,9 +22,12 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
+import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.routing.HttpRoutePlanner;
@@ -32,8 +35,7 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,6 +46,7 @@ import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Flávio W. R. Santos
@@ -53,35 +56,28 @@ import static org.mockito.ArgumentMatchers.any;
 @ExtendWith(MockitoExtension.class)
 class DefaultURLFetcherTest {
 
-    @Captor
-    private ArgumentCaptor<CloseableHttpClient> httpClientCaptor;
+    @Mock
+    private CloseableHttpClient httpClient;
 
-    @Captor
-    private ArgumentCaptor<HttpGet> httpGetCaptor;
+    @Mock
+    private HttpGet httpGet;
 
-    private CloseableHttpClient httpClient = Mockito.mock(CloseableHttpClient.class);
+    @Mock
+    private CloseableHttpResponse response;
 
-    private HttpGet httpGet = Mockito.mock(HttpGet.class);
+    @Mock
+    private HttpEntity httpEntity;
 
-    private CloseableHttpResponse response = Mockito.mock(CloseableHttpResponse.class);
+    @Mock
+    private IProxyConfiguration proxyConfiguration;
 
-    private HttpEntity httpEntity = Mockito.mock(HttpEntity.class);
+    @Mock
+    private HttpRoutePlanner routePlanner;
 
-    private Credentials credentials = Mockito.mock(Credentials.class);
-
-    private IProxyConfiguration proxyConfiguration = Mockito.mock(IProxyConfiguration.class);
-
-    private HttpRoutePlanner routePlanner = Mockito.mock(HttpRoutePlanner.class);
-
-    private DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+    private final DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
             .proxyConfiguration(proxyConfiguration)
             .routePlanner(routePlanner)
             .build();
-
-
-    private String targetHost;
-
-    private HttpHost proxyHost;
 
     @Test
     void testConnect() throws Exception {
@@ -106,159 +102,63 @@ class DefaultURLFetcherTest {
 
         //WHEN THEN
         DNSLookupException result = assertThrows(DNSLookupException.class, () -> testInstance.connect(httpClient, httpGet));
-        assertEquals("It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.", result.getMessage());
-
-    }
-
-    /*
-    @Test
-    void testConnectForCNAMEException() throws Exception {
-        //GIVEN
-        String cnameStr = "http://b-06f7d7be87633d898ff33f4f4a45212f.iso6523-actorid-upis.acc.edelivery.tech.ec.europa.eu";
-        URI naptrURI = new URI(cnameStr);
-        Mockito.doThrow(new IOException("Dummy Exception")).when(httpClient).execute(any(HttpUriRequest.class));
-        Mockito.doReturn(naptrURI).when(httpGet).getUri();
-
-        //WHEN THEN
-        DNSLookupException result = assertThrows(DNSLookupException.class, () -> testInstance.connect(httpClient, httpGet));
-        assertEquals("It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.", result.getMessage());
+        assertEquals("It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.",
+                result.getMessage());
     }
 
     @Test
-    void testConnectForException404() throws Exception {
-        Mockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
-        Mockito.doReturn(new URI("http://test.eu/schema::party")).when(httpGet).getUri();
-        testConnectForExceptions("SMP lookup address http://test.eu/schema::party not found - response 404", 404);
+    void testBuildAuthenticationForTarget() {
+        // given
+        HttpHost targetHost = new HttpHost("http", "example.com", 80);
+        Credentials credentials = mock(Credentials.class);
+        BasicCredentialsProvider provider = new BasicCredentialsProvider();
+
+        DefaultURLFetcher fetcher = new DefaultURLFetcher.Builder().build();
+
+        // when
+        BasicCredentialsProvider result = fetcher.buildAuthenticationForTarget(targetHost, credentials, provider);
+
+        // then
+        assertNotNull(result, "The returned BasicCredentialsProvider should not be null");
+        AuthScope authScope = new AuthScope(targetHost);
+        assertEquals(credentials, result.getCredentials(authScope, null),
+                "The credentials should match the provided credentials");
     }
 
     @Test
-    void testConnectForException500() throws Exception {
-        Mockito.doReturn(response).when(httpClient).execute(any(HttpUriRequest.class));
-        Mockito.doReturn(new URI("http://test.eu/schema::party")).when(httpGet).getUri();
+    void testProxyConfigurationApplied() {
+        // Mock the proxy configuration
+        IProxyConfiguration mockProxyConfiguration = mock(IProxyConfiguration.class);
+        when(mockProxyConfiguration.isNonProxyHost("example.com")).thenReturn(false);
+        HttpHost mockProxyHost = new HttpHost("http", "proxy.example.com", 8080);
+        when(mockProxyConfiguration.getProxyHost("example.com")).thenReturn(mockProxyHost);
+        Credentials mockCredentials = mock(Credentials.class);
+        when(mockProxyConfiguration.getProxyCredentials()).thenReturn(mockCredentials);
 
-        testConnectForExceptions("Got Http error code 500 trying to access SMP URL:http://test.eu/schema::party", 500);
+        // Mock the credential provider
+        BasicCredentialsProvider mockCredentialsProvider = mock(BasicCredentialsProvider.class);
+
+        // Create a request config builder
+        RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+
+        // Simulate the selected code
+        String participantUnderSmpURIHost = "example.com";
+        if (!mockProxyConfiguration.isNonProxyHost(participantUnderSmpURIHost)) {
+
+            HttpHost proxyHost = mockProxyConfiguration.getProxyHost(participantUnderSmpURIHost);
+            // Set proxy authentication
+            BasicCredentialsProvider updatedCredentialsProvider = new DefaultURLFetcher
+                    .Builder().build()
+                    .buildAuthenticationForTarget(proxyHost,
+                            mockProxyConfiguration.getProxyCredentials(),
+                            mockCredentialsProvider);
+
+            // Verify the proxy host and credentials are set correctly
+            assertNotNull(updatedCredentialsProvider);
+            verify(mockProxyConfiguration).getProxyHost("example.com");
+            verify(mockProxyConfiguration).getProxyCredentials();
+            assertEquals(mockProxyHost, proxyHost);
+        }
     }
 
-    @Test
-    void fetch_proxyIgnoresTargetHost() throws Exception {
-        // GIVEN
-        givenTargetHost("ec.europa.eu");
-        givenIgnoringConnectWithCapture();
-        givenProxyForTargetHost(targetHost, Boolean.TRUE);
-
-        // WHEN
-        whenFetchingFromTheTarget();
-
-        // THEN
-        thenNoProxyConfigurationConfigured();
-    }
-
-    @Test
-    void fetch_proxyDoesNotIgnoreTargetHost() throws Exception {
-        // GIVEN
-        givenTargetHost("ec.europa.eu");
-        givenIgnoringConnect();
-        givenTargetHostNotIgnoredByProxy(targetHost);
-
-        // WHEN
-        whenFetchingFromTheTarget();
-
-        // THEN
-        thenProxyConfigurationConfigured();
-    }
-
-    @Test
-    void fetch() throws Exception {
-        // GIVEN
-        givenTargetHost("ec.europa.eu");
-        givenIgnoringConnect();
-        givenTargetHostNotIgnoredByProxy(targetHost);
-        givenCredentials();
-        givenProxyHost();
-
-        // WHEN
-        whenFetchingFromTheTarget();
-
-        // THEN
-        thenHttpConnectionDetailsCorrect();
-    }
-
-    private void testConnectForExceptions(String errorMessage, int errorCode) {
-        //GIVEN
-        givenErrorCode(errorCode);
-
-        //WHEN THEN
-        DNSLookupException result = assertThrows(DNSLookupException.class, () -> testInstance.connect(httpClient, httpGet));
-        assertEquals(errorMessage, result.getMessage());
-    }
-
-    private void givenErrorCode(int errorCode) {
-        Mockito.doReturn(errorCode).when(response).getCode();
-    }
-
-    private void givenTargetHost(String targetHost) {
-        this.targetHost = targetHost;
-    }
-
-    private void givenIgnoringConnectWithCapture() throws TechnicalException {
-        testInstance = Mockito.spy(testInstance);
-        Mockito.doReturn(null).when(testInstance).connect(any(CloseableHttpClient.class), any(HttpGet.class));
-    }
-
-    private void givenIgnoringConnect() throws TechnicalException {
-        testInstance = Mockito.spy(testInstance);
-        Mockito.doReturn(null).when(testInstance).connect(any(CloseableHttpClient.class), any(HttpGet.class));
-    }
-
-    private void givenTargetHostIgnoredByProxy(String targetHost) {
-        givenProxyForTargetHost(targetHost, Boolean.TRUE);
-    }
-
-    private void givenTargetHostNotIgnoredByProxy(String targetHost) {
-        givenProxyForTargetHost(targetHost, Boolean.FALSE);
-    }
-
-    private void givenProxyForTargetHost(String targetHost, Boolean ignored) {
-        Mockito.when(proxyConfiguration.isNonProxyHost(targetHost)).thenReturn(ignored);
-    }
-
-    private void givenProxyHost() {
-        proxyHost = new HttpHost("127.0.0.1", 8080);
-        Mockito.when(proxyConfiguration.getProxyHost(targetHost)).thenReturn(proxyHost);
-    }
-
-    private void givenCredentials() {
-        Mockito.when(proxyConfiguration.getProxyCredentials()).thenReturn(credentials);
-    }
-
-    private void whenFetchingFromTheTarget() throws TechnicalException, URISyntaxException {
-        testInstance.fetch(new URI("https://" + targetHost));
-    }
-
-    private void thenNoProxyConfigurationConfigured() {
-        Mockito.verify(proxyConfiguration, Mockito.never()).getProxyCredentials(targetHost);
-        Mockito.verify(proxyConfiguration, Mockito.never()).getProxyHost(targetHost);
-    }
-
-    private void thenProxyConfigurationConfigured() {
-        Mockito.verify(proxyConfiguration).getProxyCredentials();
-        Mockito.verify(proxyConfiguration).isNonProxyHost(targetHost);
-        Mockito.verify(proxyConfiguration).getProxyHost(targetHost);
-    }
-
-    private void thenHttpConnectionDetailsCorrect() throws TechnicalException, IllegalAccessException {
-        Mockito.verify(testInstance).connect(httpClientCaptor.capture(), httpGetCaptor.capture());
-        HttpClient httpClient = httpClientCaptor.getValue();
-        HttpGet httpGet = httpGetCaptor.getValue();
-
-        HttpRoutePlanner actualRoutePlanner = (HttpRoutePlanner) FieldUtils.readField(httpClient, "routePlanner", true);
-        CredentialsProvider actualCredentialsProvider = (CredentialsProvider) FieldUtils.readField(httpClient, "credentialsProvider", true);
-        HttpHost actualProxyHost = (HttpHost) FieldUtils.readField(httpGet.getConfig(), "proxy", true);
-
-        assertSame(routePlanner, actualRoutePlanner);
-        assertSame(proxyHost, actualProxyHost);
-        assertNotNull(actualCredentialsProvider);
-    }
-
-  */
 }

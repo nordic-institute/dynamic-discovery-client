@@ -135,7 +135,7 @@ public class DefaultURLFetcher implements IDocumentFetcher {
         }
     }
 
-    private BasicCredentialsProvider buildAuthenticationForTarget(URI targetUri, BasicCredentialsProvider provider) {
+    protected BasicCredentialsProvider buildAuthenticationForTarget(URI targetUri, BasicCredentialsProvider provider) {
         if (credentialProvider == null) {
             LOG.debug("No credential provider set for target url [{}].", targetUri);
             return provider;
@@ -146,7 +146,7 @@ public class DefaultURLFetcher implements IDocumentFetcher {
                 credentialProvider.getCredentials(), provider);
     }
 
-    private BasicCredentialsProvider buildAuthenticationForTarget(HttpHost targetHost,
+    protected BasicCredentialsProvider buildAuthenticationForTarget(HttpHost targetHost,
                                                                   Credentials credentials,
                                                                   BasicCredentialsProvider provider) {
         if (credentials == null) {

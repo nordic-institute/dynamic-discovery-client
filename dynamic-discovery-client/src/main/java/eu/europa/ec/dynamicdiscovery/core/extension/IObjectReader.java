@@ -31,16 +31,15 @@ import java.io.OutputStream;
 /**
  * Object implementing this class can read the Document and produces the object <T>
  *
- * @param <T, C>
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public interface IObjectReader<T, C> {
+    public interface IObjectReader<T, C> {
 
     default void serializeNative(C jaxbObject, OutputStream outputStream, boolean prettyPrint) throws TechnicalException{
         serializeNativeAny(jaxbObject, outputStream, prettyPrint);
     }
-    default  C parseNative(Document document) throws TechnicalException{
+    default C parseNative(Document document) throws TechnicalException{
         return (C) parseNativeAny(document);
     }
 
