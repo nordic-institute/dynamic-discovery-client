@@ -27,8 +27,12 @@ class OffsetDateAdapterTest {
                         null
                 ),
                 Arguments.of("DateTime with positive offset",
-                        "2024-09-03+02:00",
-                        OffsetDateTime.parse("2024-09-03T00:00:00+02:00")
+                        "2024-09-03" + OffsetDateTime.now().getOffset(),
+                        OffsetDateTime.parse("2024-09-03T00:00:00" + OffsetDateTime.now().getOffset())
+                ),
+                Arguments.of("DateTime with default offset",
+                        "2024-09-03",
+                        OffsetDateTime.parse("2024-09-03T00:00:00" + OffsetDateTime.now().getOffset())
                 )
         );
     }
