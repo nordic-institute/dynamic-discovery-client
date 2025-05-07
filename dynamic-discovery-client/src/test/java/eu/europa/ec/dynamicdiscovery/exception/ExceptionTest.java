@@ -12,14 +12,14 @@ class ExceptionTest {
     @CsvSource({
             "eu.europa.ec.dynamicdiscovery.exception.ConnectionException",
             "eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException",
+            "eu.europa.ec.dynamicdiscovery.exception.DDCCertificateNotFoundException",
             "eu.europa.ec.dynamicdiscovery.exception.DDCInvalidConfigurationException",
             "eu.europa.ec.dynamicdiscovery.exception.DDCInvalidDataException",
             "eu.europa.ec.dynamicdiscovery.exception.DNSFetchException",
             "eu.europa.ec.dynamicdiscovery.exception.DNSLookupException",
             "eu.europa.ec.dynamicdiscovery.exception.DocumentParseException",
             "eu.europa.ec.dynamicdiscovery.exception.MalformedIdentifierException",
-            "eu.europa.ec.dynamicdiscovery.exception.SignatureException",
-            //"eu.europa.ec.dynamicdiscovery.exception.XmlInvalidAgainstSchemaException",
+            "eu.europa.ec.dynamicdiscovery.exception.SignatureException"
     })
     void testExceptionWithMessage(String className) throws Exception {
         String message = "Test message";
@@ -37,6 +37,7 @@ class ExceptionTest {
             "eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException",
             "eu.europa.ec.dynamicdiscovery.exception.DDCInvalidConfigurationException",
             "eu.europa.ec.dynamicdiscovery.exception.DDCInvalidDataException",
+            "eu.europa.ec.dynamicdiscovery.exception.DDCCertificateNotFoundException",
             "eu.europa.ec.dynamicdiscovery.exception.DNSFetchException",
             "eu.europa.ec.dynamicdiscovery.exception.DNSLookupException",
             "eu.europa.ec.dynamicdiscovery.exception.DocumentParseException",
