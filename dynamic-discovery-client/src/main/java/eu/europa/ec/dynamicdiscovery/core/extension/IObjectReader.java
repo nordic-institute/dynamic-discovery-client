@@ -40,12 +40,14 @@ import java.io.OutputStream;
         serializeNativeAny(jaxbObject, outputStream, prettyPrint);
     }
     default C parseNative(Document document) throws TechnicalException{
+        //noinspection unchecked
         return (C) parseNativeAny(document);
     }
 
     default C parseNative(InputStream document) throws TechnicalException{
+        //noinspection unchecked
         return (C) parseNativeAny(document);
-    };
+    }
 
     Document objectToDocument(C sourceObject) throws TechnicalException;
 
