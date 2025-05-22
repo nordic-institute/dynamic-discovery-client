@@ -20,7 +20,7 @@ This product includes dynamically linked software developed by third parties whi
 - Copyright:
   - Copyright (c) 2024
 
-***dnsjava:dnsjava:3.6.2*** 
+***dnsjava:dnsjava:3.6.3*** 
 - License: BSD-3-Clause
 - Url: https://opensource.org/licenses/BSD-3-Clause
 - File: license/third-party-licenses/BSD-3-Clause.txt
@@ -69,17 +69,17 @@ This product includes dynamically linked software developed by third parties whi
 - Copyright:
   - Copyright (c) 2024
 
-***org.slf4j:slf4j-api:2.0.16*** 
-- License: MIT License
-- Url: http://www.opensource.org/licenses/mit-license.php
-- File: license/third-party-licenses/MIT License.txt
+***org.slf4j:slf4j-api:2.0.17*** 
+- License: MIT
+- Url: https://opensource.org/license/mit
+- File: license/third-party-licenses/MIT.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.slf4j:slf4j-simple:2.0.16*** 
-- License: MIT License
-- Url: http://www.opensource.org/licenses/mit-license.php
-- File: license/third-party-licenses/MIT License.txt
+***org.slf4j:slf4j-simple:2.0.17*** 
+- License: MIT
+- Url: https://opensource.org/license/mit
+- File: license/third-party-licenses/MIT.txt
 - Copyright:
   - Copyright (c) 2024
 

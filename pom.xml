@@ -66,7 +66,7 @@
         <bouncycastle.version>1.78.1</bouncycastle.version>
         <commons-cli.version>1.6.0</commons-cli.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
-        <dnsjava.version>3.6.2</dnsjava.version>
+        <dnsjava.version>3.6.3</dnsjava.version>
         <hamcrest.version>2.2</hamcrest.version>
         <httpclient.version>5.3.1</httpclient.version>
         <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
@@ -78,11 +78,11 @@
         <org.eclipse.jetty.version>9.4.57.v20241219</org.eclipse.jetty.version>
         <org.glassfish.jaxb.jaxb-runtime.version>2.3.9</org.glassfish.jaxb.jaxb-runtime.version>
         <saxon-he.version>12.4</saxon-he.version>
-        <slf4j.version>2.0.16</slf4j.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <spring-test.version>5.3.39</spring-test.version>
         <!-- plugins -->
         <plugin.dependency-check-maven.version>11.1.0</plugin.dependency-check-maven.version>
-        <plugin.jacoco-maven-plugin.version>0.8.12</plugin.jacoco-maven-plugin.version>
+        <plugin.jacoco-maven-plugin.version>0.8.13</plugin.jacoco-maven-plugin.version>
         <plugin.jaxb2-maven-plugin.version>2.5.0</plugin.jaxb2-maven-plugin.version>
         <plugin.jbuild-helper-maven-plugin.version>1.12</plugin.jbuild-helper-maven-plugin.version>
         <plugin.license-maven-plugin.version>2.3.0</plugin.license-maven-plugin.version>
