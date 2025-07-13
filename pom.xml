@@ -5,7 +5,7 @@
 
     <groupId>org.niis.dynamic-discovery</groupId>
     <artifactId>dynamic-discovery-parent</artifactId>
-    <version>2.3</version>
+    <version>2.4</version>
     <packaging>pom</packaging>
 
     <name>Harmony dynamic-discovery-parent</name>
@@ -57,39 +57,40 @@
         <surefire.argLine>-Xmx1G</surefire.argLine>
 
         <!-- dependencies -->
-        <bouncycastle.version>1.78</bouncycastle.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <bouncycastle.version>1.78.1</bouncycastle.version>
         <commons-cli.version>1.6.0</commons-cli.version>
-        <dnsjava.version>3.6.0</dnsjava.version>
-        <httpclient.version>5.3.1</httpclient.version>
-
-        <jaxb-api.version>2.3.1</jaxb-api.version>
-        <org.glassfish.jaxb.jaxb-runtime.version>2.3.8</org.glassfish.jaxb.jaxb-runtime.version>
-        <org.eclipse.jetty.version>9.4.54.v20240208</org.eclipse.jetty.version>
-
-        <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
-        <junit.version>5.10.2</junit.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <dnsjava.version>3.6.3</dnsjava.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <slf4j.version>2.0.12</slf4j.version>
+        <httpclient.version>5.3.1</httpclient.version>
+        <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
+        <junit.version>5.10.5</junit.version>
         <mockito.version>4.11.0</mockito.version>
-        <spring-test.version>5.3.33</spring-test.version>
+        <net.bytebuddy.version>1.15.11</net.bytebuddy.version>
+        <org.eclipse.jetty.version>9.4.57.v20241219</org.eclipse.jetty.version>
+        <org.glassfish.jaxb.jaxb-runtime.version>2.3.9</org.glassfish.jaxb.jaxb-runtime.version>
+        <saxon-he.version>12.4</saxon-he.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <spring-test.version>5.3.39</spring-test.version>
         <!-- plugins -->
-        <plugin.jacoco-maven-plugin.version>0.8.11</plugin.jacoco-maven-plugin.version>
-        <plugin.maven-jar-plugin.version.version>3.3.0</plugin.maven-jar-plugin.version.version>
-        <plugin.maven-assembly-plugin.version> 3.6.0</plugin.maven-assembly-plugin.version>
-        <plugin.maven-release-plugin.version>3.0.1</plugin.maven-release-plugin.version>
-        <plugin.dependency-check-maven.version>10.0.1</plugin.dependency-check-maven.version>
-        <plugin.license-maven-plugin.version>2.3.0</plugin.license-maven-plugin.version>
-        <plugin.maven-compiler-plugin.version>3.12.1</plugin.maven-compiler-plugin.version>
+        <plugin.dependency-check-maven.version>11.1.0</plugin.dependency-check-maven.version>
+        <plugin.jacoco-maven-plugin.version>0.8.13</plugin.jacoco-maven-plugin.version>
         <plugin.jaxb2-maven-plugin.version>2.5.0</plugin.jaxb2-maven-plugin.version>
         <plugin.jbuild-helper-maven-plugin.version>1.12</plugin.jbuild-helper-maven-plugin.version>
-        <plugin.maven-surefire-plugin.version>3.2.5</plugin.maven-surefire-plugin.version>
+        <plugin.license-maven-plugin.version>2.3.0</plugin.license-maven-plugin.version>
+        <plugin.maven-assembly-plugin.version> 3.6.0</plugin.maven-assembly-plugin.version>
+        <plugin.maven-compiler-plugin.version>3.12.1</plugin.maven-compiler-plugin.version>
         <plugin.maven-failsafe-plugin.version>3.1.2</plugin.maven-failsafe-plugin.version>
-        <plugin.maven-shade-plugin.version>3.5.1</plugin.maven-shade-plugin.version>
+        <plugin.maven-jar-plugin.version.version>3.3.0</plugin.maven-jar-plugin.version.version>
+        <plugin.maven-release-plugin.version>3.0.1</plugin.maven-release-plugin.version>
+        <plugin.maven-shade-plugin.version>3.5.3</plugin.maven-shade-plugin.version>
+        <plugin.maven-surefire-plugin.version>3.2.5</plugin.maven-surefire-plugin.version>
+        <plugin.xml-maven-plugin.version>1.1.0</plugin.xml-maven-plugin.version>
         <!-- latest version compatible with SonarQube 5.6 -->
         <plugin.sonar.version>3.5.0.1254</plugin.sonar.version>
-        <plugin.maven-source-plugin.version>3.3.0</plugin.maven-source-plugin.version>
-        <jakarta.xml.bind-api.version>2.3.3</jakarta.xml.bind-api.version>
+        <plugin.maven-source-plugin.version>3.3.1</plugin.maven-source-plugin.version>
         <owasp.nvd-api-key></owasp.nvd-api-key>
     </properties>
 
@@ -217,6 +218,173 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>update-license-headers</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>update-license</id>
+                                <goals>
+                                    <goal>update-file-header</goal>
+                                </goals>
+                                <phase>process-sources</phase>
+                                <configuration>
+                                    <licenseResolver>file://${project.root.baseUri}/license</licenseResolver>
+                                    <licenseName>lgpl-2.1</licenseName>
+                                    <inceptionYear>2016</inceptionYear>
+                                    <organizationName>NIIS | Harmony eDelivery | Dynamic Discovery Client</organizationName>
+                                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                                    <processStartTag>#%L</processStartTag>
+                                    <processEndTag>#L%</processEndTag>
+                                    <sectionDelimiter>%%</sectionDelimiter>
+                                    <extraExtensions>
+                                        <xjb>xml</xjb>
+                                    </extraExtensions>
+                                    <includes>
+                                        <include>**/*.java</include>
+                                        <include>**/*.xml</include>
+                                        <include>**/*.xsd</include>
+                                        <include>**/*.xjb</include>
+                                        <include>**/*.properties</include>
+                                        <include>**/*.txt</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>**/src/main/resources/xsd/**</exclude>
+                                    </excludes>
+                                    <roots>
+                                        <root>src/main</root>
+                                        <root>src/test</root>
+                                    </roots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Generate NOTICE.md file from licenses.xml
+            The plugin will download all licenses from the dependencies and
+            generate a target/generated-resources/licenses.xml file with
+            org.codehaus.mojo:license-maven-plugin.
+            Then it will transform the licenses.xml file to a NOTICE.md file
+            with org.codehaus.mojo:xml-maven-plugin and the licenses/config/license.xsl stylesheet.
+
+            To generate the NOTICE.md file, run the following command:
+
+            mvn clean process-resources -Plicense-generate-notice
+
+            NOTE: do not forget to regenerate the NOTICE.md file when adding new dependencies or updating the existing ones
+            and before the release!
+            -->
+            <id>license-generate-notice</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>${plugin.license-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>download-licenses</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>aggregate-download-licenses</goal>
+                                    <goal>aggregate-add-third-party</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
+                            <removeOrphanLicenseFiles>true</removeOrphanLicenseFiles>
+                            <excludedGroups>com.smartbear.*|eu.europa.ec.*</excludedGroups>
+                            <excludeTransitiveDependencies>true</excludeTransitiveDependencies>
+                            <excludedScopes>test</excludedScopes>
+                            <includeTransitiveDependencies>false</includeTransitiveDependencies>
+                            <sortArtifactByName>true</sortArtifactByName>
+                            <licenseMerges>
+                                <licenseMerge>Apache-2.0|Apache License, Version 2.0|Apache License 2.0|The Apache Software License, Version 2.0|Apache Public License 2.0|Apache 2|Apache License, version 2.0|The Apache License, Version 2.0|Apache 2.0</licenseMerge>
+                                <!--  Common Public License Version 1.0|CPL was replaced by Eclipse Public License -->
+                                <licenseMerge>EPL-2.0|EPL 2.0|Eclipse Public License 2.0</licenseMerge>
+                                <licenseMerge>EPL-1.0| (EPL-1.0)|Eclipse Public License (EPL) v1.0|Eclipse Public License (EPL), Version 1.0|Eclipse Public License - v 1.0|Eclipse Public License 1.0|EDL 1.0|Common Public License Version 1.0|CPL</licenseMerge>
+                                <licenseMerge>GPL-2.0-or-later|The GNU General Public License, v2 with Universal FOSS Exception, v1.0</licenseMerge>
+                                <licenseMerge>MIT|The MIT License|MIT License</licenseMerge>
+                                <licenseMerge>BSD-3-Clause|BSD license (all versions)|BSD License|The BSD License|BSD 3-clause New License|BSD Licence 3|BSD-Style License|New BSD License|Eclipse Distribution License - v 1.0|Eclipse Distribution License (EDL), Version 1.0</licenseMerge>
+                                <licenseMerge>LGPL-2.1+|GNU Library General Public License v2.1 or later|GNU Lesser General Public License</licenseMerge>
+                                <licenseMerge>CDDL-1.1|Dual license consisting of the CDDL v1.1 and GPL v2|CDDL + GPLv2 with classpath exception|CDDL/GPLv2+CE|CDDL+GPL License</licenseMerge>
+                                <licenseMerge>CDDL-1.0|Common Development and Distribution License (CDDL)|Common Development and Distribution License (CDDL) v1.0|Common Development and Distribution|CDDL 1.1|</licenseMerge>
+                            </licenseMerges>
+                            <excludedLicenses>
+                                <excludedLicense>Unknown license</excludedLicense>
+                                <excludedLicense>licenseB</excludedLicense>
+                            </excludedLicenses>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>xml-maven-plugin</artifactId>
+                        <version>${plugin.xml-maven-plugin.version}</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>transform</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <catalogHandling>local</catalogHandling>
+                            <catalogs>
+                                <catalog>license/third-party-licenses/Apache-2.0.txt</catalog>
+                            </catalogs>
+                            <transformationSets>
+                                <transformationSet>
+                                    <dir>target/generated-resources/</dir>
+                                    <includes>
+                                        <include>licenses.xml</include>
+                                    </includes>
+                                    <stylesheet>license/config/license.xsl</stylesheet>
+                                    <outputDir>./</outputDir>
+
+                                    <fileMappers>
+                                        <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
+                                            <pattern>licenses.xml</pattern>
+                                            <replacement>Notice.md</replacement>
+                                        </fileMapper>
+                                    </fileMappers>
+                                    <parameters>
+                                        <parameter>
+                                            <!-- This is external stylesheet parameter set in pom.xml plugin configuration
+                                            to include the licenses in the notice file. The value of this parameter is a
+                                            comma separated list of licenses as exampled: Apache-2.0,MIT.
+                                            Make sure to include the license files in the license/third-party-licenses/${license}.txt
+                                            -->
+                                            <name>IncludeLicenses</name>
+                                            <value>Apache-2.0,BSD-2-Clause,EPL-1.0,EPL-2.0,GPL-2.0-or-later,LGPL-2.1+,MIT</value>
+                                        </parameter>
+                                    </parameters>
+                                </transformationSet>
+                            </transformationSets>
+                        </configuration>
+                        <dependencies>
+                            <!-- Enable XSLT 2.0 with this dependency -->
+                            <dependency>
+                                <groupId>net.sf.saxon</groupId>
+                                <artifactId>Saxon-HE</artifactId>
+                                <version>${saxon-he.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <!-- Default version numbers to use -->
@@ -266,15 +434,10 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <!-- jaxb implementation for cli packaging. -->
-            <!-- dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>${jaxb-api.version}</version>
-            </dependency -->
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>2.3.3</version>
+                <version>${jakarta.xml.bind-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
@@ -337,6 +500,16 @@
                 <version>${org.eclipse.jetty.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${net.bytebuddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>${net.bytebuddy.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -385,15 +558,10 @@
                     <version>${plugin.jaxb2-maven-plugin.version}</version>
                     <!--add for building it with jdk9+ -->
                     <dependencies>
-                        <!-- dependency>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                            <version>${jaxb-api.version}</version>
-                        </dependency -->
                         <dependency>
                             <groupId>jakarta.xml.bind</groupId>
                             <artifactId>jakarta.xml.bind-api</artifactId>
-                            <version>2.3.3</version>
+                            <version>${jakarta.xml.bind-api.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>org.glassfish.jaxb</groupId>

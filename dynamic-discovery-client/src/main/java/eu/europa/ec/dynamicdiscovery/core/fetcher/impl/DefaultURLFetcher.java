@@ -54,6 +54,7 @@ import org.apache.hc.core5.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import java.io.*;
 import java.net.SocketException;
@@ -267,7 +268,8 @@ public class DefaultURLFetcher implements IMetadataFetcher {
      */
     public static class Builder {
 
-        private SSLContextBuilder sslContextBuilder = SSLContexts.custom();
+        private SSLContextBuilder sslContextBuilder = null;
+        private SSLContext sslContext = null;
         private String[] tlsVersions;
         private String[] tlsCipherSuites;
         private boolean noHostnameValidation;
@@ -279,6 +281,19 @@ public class DefaultURLFetcher implements IMetadataFetcher {
         private ICredentialProvider credentialProvider;
         private HttpRoutePlanner routePlanner;
 
+        public Builder() {
+            sslContextBuilder = SSLContexts.custom();
+        }
+
+        /**
+         * Creates a Builder that uses an existing SSLContext
+         *
+         * @param sslContext is the sslContext to be used
+         * @return builder
+         */
+        public Builder(SSLContext sslContext) {
+            this.sslContext = sslContext;
+        }
 
         /**
          * Set list of allowed TLS versions as TLSv1.1, TLSv1.2, TLSv1.3 etc
@@ -301,6 +316,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          */
 
         public Builder tlsTruststore(final KeyStore truststore) throws NoSuchAlgorithmException, KeyStoreException {
+            if (this.sslContextBuilder == null) {
+                throw new IllegalStateException("A truststore cannot be added if a SSLContext is set in Builder constructor");
+            }
             this.sslContextBuilder.loadTrustMaterial(truststore, null);
             return this;
         }
@@ -316,6 +334,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          * @throws KeyStoreException
          */
         public Builder tlsKeystore(final KeyStore keystore, final char[] password) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+            if (this.sslContextBuilder == null) {
+                throw new IllegalStateException("A keystore cannot be added if a SSLContext is set in the Builder constructor");
+            }
             this.sslContextBuilder.loadKeyMaterial(keystore, password);
             return this;
         }
@@ -418,12 +439,18 @@ public class DefaultURLFetcher implements IMetadataFetcher {
 
         private SSLConnectionSocketFactory buildSSLConnectionSocketFactory() {
             try {
-                return SSLConnectionSocketFactoryBuilder.create()
+                SSLConnectionSocketFactoryBuilder builder = SSLConnectionSocketFactoryBuilder.create()
                         .setCiphers(this.tlsCipherSuites)
                         .setTlsVersions(this.tlsVersions)
-                        .setHostnameVerifier(this.noHostnameValidation ? NoopHostnameVerifier.INSTANCE : new DefaultHostnameVerifier())
-                        .setSslContext(this.sslContextBuilder.build())
-                        .build();
+                        .setHostnameVerifier(this.noHostnameValidation ? NoopHostnameVerifier.INSTANCE : new DefaultHostnameVerifier());
+
+                if (this.sslContextBuilder != null) {
+                    builder = builder.setSslContext(this.sslContextBuilder.build());
+                }
+                if (this.sslContext != null) {
+                    builder = builder.setSslContext(this.sslContext);
+                }
+                return builder.build();
             } catch (KeyManagementException | NoSuchAlgorithmException e) {
                 throw new DDCRuntimeException("TLS configuration error: " + ExceptionUtils.getRootCauseMessage(e), e);
             }
