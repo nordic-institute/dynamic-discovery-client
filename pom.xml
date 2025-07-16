@@ -59,7 +59,7 @@
         <!-- dependencies -->
         <bouncycastle.version>1.78.1</bouncycastle.version>
         <commons-cli.version>1.6.0</commons-cli.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <dnsjava.version>3.6.3</dnsjava.version>
         <hamcrest.version>2.2</hamcrest.version>
         <httpclient.version>5.3.1</httpclient.version>
