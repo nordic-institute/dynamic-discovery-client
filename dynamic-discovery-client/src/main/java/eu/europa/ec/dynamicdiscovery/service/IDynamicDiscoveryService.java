@@ -30,6 +30,8 @@ import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 
+import java.util.List;
+
 /**
  * @author Flávio W. R. Santos
  */
@@ -44,10 +46,10 @@ public interface IDynamicDiscoveryService {
 
     SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier,
                                  SMPDocumentIdentifier documentIdentifier,
-                                 String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+                                 String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException;
 
     SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
-                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+                                        String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException;
 
 
 

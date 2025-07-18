@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +71,7 @@ class DynamicDiscoveryServiceTest {
 
         // when
         SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
-                processIdentifierValue, processIdentifierScheme, transportProfileID);
+                processIdentifierValue, processIdentifierScheme, Collections.singletonList(transportProfileID));
         // then
         assertNotNull(endpoint);
         assertNotNull(endpoint.getTransportProfile());
@@ -109,7 +110,7 @@ class DynamicDiscoveryServiceTest {
         // when
         testInstance.setRedirectionEnabled(false); // make sure it is disabled
         SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
-                anyString, anyString, anyString);
+                anyString, anyString, Collections.singletonList("any"));
         // then
         assertNotNull(endpoint);
         assertNotNull(endpoint.getRedirect());
@@ -152,7 +153,7 @@ class DynamicDiscoveryServiceTest {
         // when
         testInstance.setRedirectionEnabled(true); // make sure it is enabled
         SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
-                processIdentifierValue, processIdentifierScheme, transportProfileID);
+                processIdentifierValue, processIdentifierScheme, Collections.singletonList(transportProfileID));
         // then
         Mockito.verify(metadataFetcher, Mockito.times(2)).fetch(Mockito.any());
         assertNotNull(endpoint);

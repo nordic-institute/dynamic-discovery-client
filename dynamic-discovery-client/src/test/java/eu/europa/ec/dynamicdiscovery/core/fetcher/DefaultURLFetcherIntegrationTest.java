@@ -35,7 +35,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.*;
 import java.net.URI;
 import java.security.KeyStore;
 
@@ -43,8 +46,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DefaultURLFetcherIntegrationTest {
-    private static String PASSWD = "test1234";
-    private static String KEYSTORE_TYPE = "PKCS12";
+    static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcherIntegrationTest.class);
+    private static final String PASSWD = "test1234";
+    private static final String KEYSTORE_TYPE = "PKCS12";
 
 
     private static Server serverHTTP;
@@ -54,6 +58,7 @@ public class DefaultURLFetcherIntegrationTest {
     @BeforeAll
     public static void startHTTPJetty() throws Exception {
         // Create Server
+        LOG.info("Start integration test jetty server with HTTP and HTTPS enabled on random ports");
         serverHTTP = new Server();
         // configure http
         ServerConnector httpConnector = new ServerConnector(serverHTTP);
@@ -115,6 +120,8 @@ public class DefaultURLFetcherIntegrationTest {
         if (host == null) {
             host = "localhost";
         }
+        LOG.info("Jetty server started on host: [{}], http port: [{}], https port: [{}]",
+                host, httpConnector.getLocalPort(), sslConnector.getLocalPort());
         serverHTTPUri = new URI(String.format("http://%s:%d/", host, httpConnector.getLocalPort()));
         serverHTTPSUri = new URI(String.format("https://%s:%d/", host, sslConnector.getLocalPort()));
     }
@@ -125,7 +132,7 @@ public class DefaultURLFetcherIntegrationTest {
         try {
             serverHTTP.stop();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Error occurred while stopping jetty server", e);
         }
     }
 
@@ -140,11 +147,10 @@ public class DefaultURLFetcherIntegrationTest {
         assertNotNull(response);
     }
 
-    @Disabled//fails with eu.europa.ec.dynamicdiscovery.exception.ConnectionException: Error occurred while retrieving [/oasis-smp-1.0/extension.xml]: Error: [InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty]
     @Test
     void testSimpleHTTPSFetchOK() throws Exception {
-        KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
-        KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
@@ -159,7 +165,7 @@ public class DefaultURLFetcherIntegrationTest {
     }
 
     @Test
-    void testSimpleHTTPSFetchMissmatchCipherSuite() throws Exception {
+    void testSimpleHTTPSFetchMismatchCipherSuite() throws Exception {
         KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
         KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
@@ -180,7 +186,7 @@ public class DefaultURLFetcherIntegrationTest {
     }
 
     @Test
-    void testSimpleHTTPSFetchMissmatchTLSVersion() throws Exception {
+    void testSimpleHTTPSFetchMismatchTLSVersion() throws Exception {
         KeyStore clientKeystore = CommonUtil.loadKeystore("truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
         KeyStore clientTruststore = CommonUtil.loadKeystore("truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
         assertNotNull(clientTruststore);
@@ -197,8 +203,8 @@ public class DefaultURLFetcherIntegrationTest {
 
         assertNotNull(result);
         MatcherAssert.assertThat(result.getMessage(),  CoreMatchers.anyOf(CoreMatchers.containsString("SSLHandshakeException: No appropriate protocol"),
-                CoreMatchers.containsString("SSLHandshakeException: Received fatal alert: protocol_version"))
-        );
+                        CoreMatchers.containsString("SSLHandshakeException: Received fatal alert: protocol_version"))
+                );
 
     }
 
@@ -245,5 +251,75 @@ public class DefaultURLFetcherIntegrationTest {
 
         assertNotNull(result);
         MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("http protocol is not supported"));
+    }
+
+    @Test
+    void testHTTPSFetchWithSSLContextOK() throws Exception {
+        SSLContext sslContext = getSSLContext(true, true);
+
+        DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder(sslContext)
+                .httpSchemeEnabled(false)
+                .build();
+
+        FetcherResponse response = testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml"));
+
+        assertNotNull(response);
+    }
+
+    @Test
+    @Disabled ("FIX: Unstable test - sometimes fails with SSLHandshakeException and sometimes socketException: Broken pipe")
+    void testHTTPSFetchWithSSLContextFailKeystoreMissing() throws Exception {
+        SSLContext sslContext = getSSLContext(false, true);
+
+        DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder(sslContext)
+                .httpSchemeEnabled(false)
+                .build();
+
+        ConnectionException result = assertThrows(ConnectionException.class, ()
+                -> testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml")));
+
+        assertNotNull(result);
+        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("SSLHandshakeException"));
+    }
+
+    @Test
+    void testHTTPSFetchWithSSLContextFailTruststoreMissing() throws Exception {
+        SSLContext sslContext = getSSLContext(true, false);
+
+        DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder(sslContext)
+                .httpSchemeEnabled(false)
+                .build();
+
+        ConnectionException result = assertThrows(ConnectionException.class, ()
+                -> testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml")));
+
+        assertNotNull(result);
+        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("unable to find valid certification path to requested target"));
+    }
+
+    private SSLContext getSSLContext(boolean addKeyManager, boolean addTrustManager) throws Exception {
+        KeyManager[] keyManagers = null;
+        if (addKeyManager) {
+            KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+            assertNotNull(clientKeystore);
+
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(clientKeystore, PASSWD.toCharArray());
+            keyManagers = keyManagerFactory.getKeyManagers();
+        }
+
+        TrustManager[] trustManagers = null;
+        if (addTrustManager) {
+            KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+            assertNotNull(clientTruststore);
+
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(clientTruststore);
+            trustManagers = trustManagerFactory.getTrustManagers();
+        }
+
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+        sslContext.init(keyManagers, trustManagers, null);
+        return sslContext;
     }
 }
