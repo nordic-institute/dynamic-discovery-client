@@ -31,12 +31,12 @@ import java.net.URI;
  * @author Joze RIHTARSIC
  * @since 1.0
  */
-public class FetcherResponse {
+public class FetcherResponse implements IFetcherResponse {
 
 
+    private final URI documentURI;
+    private final InputStream inputStream;
     private URI publisherURI;
-    private URI documentURI;
-    private InputStream inputStream;
     private String extensionIdentifier;
 
     public FetcherResponse(InputStream inputStream) {
@@ -47,6 +47,7 @@ public class FetcherResponse {
         this.documentURI = documentURI;
     }
 
+    @Override
     public InputStream getInputStream() {
         return this.inputStream;
     }

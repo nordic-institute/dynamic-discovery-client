@@ -149,7 +149,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             List<PublisherRequest> resultsForExtension = generatePublisherRequestsForResource(extension, lookupResult, identifier);
             for (PublisherRequest request : resultsForExtension) {
                 try {
-                    FetcherResponse fetcherResponse = documentFetcher.fetch(request.getResourceUri());
+                    FetcherResponse fetcherResponse = (FetcherResponse) documentFetcher.fetch(request.getResourceUri());
                     if (fetcherResponse != null) {
                         fetcherResponse.setExtensionIdentifier(extension.getExtensionIdentifier());
                         return fetcherResponse;
@@ -230,7 +230,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
                 targetDocumentIdentifier);
         try {
 
-            FetcherResponse fetcherResponse = documentFetcher.fetch(subresourceRequest.getSubresourceUri());
+            FetcherResponse fetcherResponse = (FetcherResponse) documentFetcher.fetch(subresourceRequest.getSubresourceUri());
             if (fetcherResponse != null) {
                 return fetcherResponse;
             }
@@ -260,7 +260,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         URI resourceURI = resourceRequest.getResourceUri();
         LOG.debug("Get resource/participant's  documents for resource URI: [{}].", resourceURI);
 
-        final FetcherResponse fetcherResponse = documentFetcher.fetch(resourceURI);
+        final FetcherResponse fetcherResponse = (FetcherResponse) documentFetcher.fetch(resourceURI);
         final SMPServiceGroup serviceGroup = documentReader.getResource(fetcherResponse, extensions);
         final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = new ArrayList<>(serviceGroup.getDocumentIdentifiers());
         //the document identifiers supported by the participant
@@ -546,7 +546,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     private SMPServiceMetadata processRedirection(SMPRedirect redirect, SignatureValidationContext context) throws TechnicalException {
         URI redirectURI = URI.create(redirect.getRedirectUrl());
         LOG.info("Fetch document from redirection [{}].", redirectURI);
-        final FetcherResponse fetcherResponseForServiceMetadata = documentFetcher.fetch(redirectURI);
+        final FetcherResponse fetcherResponseForServiceMetadata = (FetcherResponse) documentFetcher.fetch(redirectURI);
 
         return documentReader.getSubresource(fetcherResponseForServiceMetadata, getExtensions(), context);
     }

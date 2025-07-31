@@ -249,7 +249,7 @@ public class DdcMain {
         PublisherRequest request = subresourceIdentifier == null ? metadataProvider.createRequestForResource(lookupResult, participantIdentifier) :
                 metadataProvider.createRequestForSubresource(lookupResult, participantIdentifier, subresourceIdentifier);
 
-        FetcherResponse response = smpClient.getDocumentFetcher().fetch(url);
+        FetcherResponse response = (FetcherResponse) smpClient.getDocumentFetcher().fetch(url);
         Files.copy(response.getInputStream(), Paths.get(outputFilePath), StandardCopyOption.REPLACE_EXISTING);
     }
 
