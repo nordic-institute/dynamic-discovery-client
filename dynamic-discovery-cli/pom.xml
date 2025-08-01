@@ -50,6 +50,9 @@
                     <finalName>ddc-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <mainClass>eu.europa.ec.ddc.DdcMain</mainClass>

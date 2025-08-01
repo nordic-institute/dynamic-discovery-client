@@ -126,7 +126,7 @@ if (Custom configuration?) then (No)
 else (yes)
 endif
 
-' Because margin/pading/MinWidth the spaces helps to make the
+' Because margin/padding/MinWidth the spaces helps to make the
 ' diagram more readable
 partition "    Lookup                                "{
 
@@ -618,6 +618,46 @@ DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
         .tlsVersions("TLSv1.2","TLSv1.3")
         .build();
 ----
+
+
+=== Configure JWT authorization to  the Default Fetcher
+
+Following example configures the default fetcher with allowed TLS Cipher suites and TLS versions.
+The cipher suits names and TLS versions are supported and defined by JCE provider or JAVA version standard names:
+
+https://docs.oracle.com/en/java/javase/18/docs/specs/security/standard-names.html#sslcontext-algorithms
+
+[source,java]
+----
+// load keystore and truststore for TLS mutual authentication to jwt authorization server/
+KeyStore tlsKeystore = CommonUtil.loadKeystoreFromFile("ddc-client.p12",  KEYSTORE_TYPE, PASSWD);
+KeyStore tlsTruststore = CommonUtil.loadKeystoreFromFile("truststore.p12",  KEYSTORE_TYPE, PASSWD);
+// JWT authorization server URL
+String url = "https://localhost:8443/realms/OOTS/protocol/openid-connect/token";
+// Document URI for which the JWT token is requested
+URI documentURI = URI.create("http://localhost:8080/smp/private-domain/ehealth-actorid-qns::0088:7770010100777:test:SMP001");
+
+// configure JWT authorization token fetcher
+JWTAuthorizationTokenFetcher fetcher = new JWTAuthorizationTokenFetcher.Builder()
+        .clientId("my-client-id")
+        .tlsKeystore(tlsKeystore, PASSWD.toCharArray())
+        .tlsTruststore(tlsTruststore)
+        .build();
+// configure JWTCredentialProvider
+JwtTokenCredentialProvider jwtCredentialProvider = new JwtTokenCredentialProvider.Builder()
+        .jwtFetcher(fetcher)
+        .authorizationServerURI(url)
+        .build();
+// configure DefaultURLFetcher with JWT authorization
+DefaultURLFetcher documentFetcher = new DefaultURLFetcher.Builder()
+        .credentialProvider(jwtCredentialProvider)
+        .build();
+
+// fetcj the document using the DefaultURLFetcher
+documentFetcher.fetch(documentURI);
+
+----
+
 
 == How to use the dynamic discovery client
 

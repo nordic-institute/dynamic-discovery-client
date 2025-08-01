@@ -19,23 +19,22 @@
  */
 package eu.europa.ec.dynamicdiscovery.exception;
 
-public enum DDCExceptionCode {
-    DNS_QUERY_ERROR("DNS query error"),
-    INVALID_DNS_TYPE("DNS Type is invalid"),
-    FETCH_EXCEPTION("Fetch exception"),
-    SERVICE_GROUP("Service group error"),
-    SERVICE_METADATA("Service metadata error"),
-    INVALID_DATA("Invalid query data"),
-    GENERIC_ERROR("Invalid configuration data"),
-    AUTHORIZATION_ERROR("Invalid authorization data"),;
+/**
+ * @author Joze RIHTARSIC
+ * @since 3.0
+ */
+public class DDCAuthorizationException extends DDCRuntimeException {
 
-    final String message;
-
-    DDCExceptionCode(String message) {
-        this.message = message;
+    public DDCAuthorizationException(String message) {
+        this(DDCExceptionCode.AUTHORIZATION_ERROR, message);
     }
 
-    public String getMessage() {
-        return message;
+    public DDCAuthorizationException(DDCExceptionCode smpExceptionCode, String message) {
+        super(smpExceptionCode, message);
     }
+
+    public DDCAuthorizationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

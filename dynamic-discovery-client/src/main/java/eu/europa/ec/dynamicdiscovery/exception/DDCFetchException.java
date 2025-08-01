@@ -23,21 +23,21 @@ package eu.europa.ec.dynamicdiscovery.exception;
  * @author Joze RIHTARSIC
  * @since 3.0
  */
-public class DNSFetchException extends DDCRuntimeException {
+public class DDCFetchException extends DDCRuntimeException {
 
-    public DNSFetchException(String message) {
+    public DDCFetchException(String message) {
         this(DDCExceptionCode.FETCH_EXCEPTION, message);
     }
 
-    public DNSFetchException(DDCExceptionCode smpExceptionCode, String message) {
+    public DDCFetchException(DDCExceptionCode smpExceptionCode, String message) {
         super(smpExceptionCode, message);
     }
 
-    public DNSFetchException(String message, Throwable cause) {
+    public DDCFetchException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DNSFetchException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
+    public DDCFetchException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
         super(smpExceptionCode, message, cause);
     }
 }
