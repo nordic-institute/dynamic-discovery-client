@@ -19,17 +19,17 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
-import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.JwtResponse;
 import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.io.HttpClientConnectionManager;
-import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.util.Args;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import java.io.InputStream;
@@ -45,20 +45,35 @@ import java.nio.charset.Charset;
  */
 public class JWTAuthorizationTokenFetcher extends AbstractURLFetcher {
 
-    private final String clientId;
+    private static final Logger LOG = LoggerFactory.getLogger(JWTAuthorizationTokenFetcher.class);
+   private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
 
-    private JWTAuthorizationTokenFetcher(HttpClientConnectionManager connectionManager,
-                                         HttpRoutePlanner routePlanner,
-                                         ICredentialProvider credentialProvider,
-                                         IProxyConfiguration proxyConfiguration,
-                                         String clientId) {
-        super(connectionManager, routePlanner, credentialProvider, proxyConfiguration);
-        this.clientId = clientId;
+    private final String clientId;
+    private final String scopes;
+
+    private JWTAuthorizationTokenFetcher(Builder builder) {
+        super(builder);
+        Args.notBlank(builder.clientId, "Client ID must not be blank");
+        this.clientId = builder.clientId;
+        this.scopes = builder.scopes;
     }
 
     @Override
     public JwtResponse fetch(URI documentURI) throws TechnicalException {
-        String body = "grant_type=client_credentials&client_id="+ clientId+"&scope=oots-smp-domain oots-smp-group-be";
+        LOG.debug("Fetch JWT token for clientId [{}] from URI [{}]", clientId, documentURI);
+        // build the request body for client credentials grant type
+        StringBuilder bodyBuilder = new StringBuilder("grant_type=")
+                .append(GRANT_TYPE_CLIENT_CREDENTIALS)
+                .append("&client_id=")
+                .append(clientId);
+        if (StringUtils.isNotBlank(scopes)) {
+            bodyBuilder.append("&scope=")
+                    .append(scopes);
+        }
+
+        String body = bodyBuilder.toString();
         return fetchToken(documentURI, body);
     }
 
@@ -71,14 +86,12 @@ public class JWTAuthorizationTokenFetcher extends AbstractURLFetcher {
      * @throws TechnicalException If an error occurs during the fetch.
      */
     public JwtResponse fetchToken(URI tokenEndpoint, String requestBody) throws TechnicalException {
-
-
         String targetHostname = tokenEndpoint.getHost();
         RequestConfig requestConfig = createRequestConfig(targetHostname);
         CloseableHttpClient httpClient = createHttpClient(tokenEndpoint);
         HttpPost httpPost = new HttpPost(tokenEndpoint);
         httpPost.setEntity(new StringEntity(requestBody, Charset.defaultCharset()));
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_FORM_URLENCODED);
         httpPost.setConfig(requestConfig);
 
         try {
@@ -93,6 +106,7 @@ public class JWTAuthorizationTokenFetcher extends AbstractURLFetcher {
 
     public static class Builder extends AbstractFetcherBuilder<Builder> {
         String clientId;
+        String scopes;
 
         public Builder() {
             super();
@@ -112,13 +126,14 @@ public class JWTAuthorizationTokenFetcher extends AbstractURLFetcher {
             return this;
         }
 
+        public Builder scopes(String scopes) {
+            this.scopes = scopes;
+            return this;
+        }
+
         @Override
         public JWTAuthorizationTokenFetcher build() {
-            final HttpClientConnectionManager connectionManager = buildHttpClientConnectionManager();
-            return new JWTAuthorizationTokenFetcher(connectionManager, routePlanner,
-                    credentialProvider,
-                    proxyConfiguration,
-                    clientId);
+            return new JWTAuthorizationTokenFetcher(this);
         }
     }
 }

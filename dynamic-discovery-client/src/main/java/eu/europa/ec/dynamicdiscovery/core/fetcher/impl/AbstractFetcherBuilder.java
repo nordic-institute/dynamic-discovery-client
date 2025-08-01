@@ -63,6 +63,9 @@ public abstract class AbstractFetcherBuilder<T extends AbstractFetcherBuilder<T>
     protected ICredentialProvider credentialProvider;
     protected HttpRoutePlanner routePlanner;
 
+
+
+
     /**
      * Default constructor that initializes the custom SSLContextBuilder for TLS configuration with
      *  provided keystore and truststore TLS versions and cipher suites.

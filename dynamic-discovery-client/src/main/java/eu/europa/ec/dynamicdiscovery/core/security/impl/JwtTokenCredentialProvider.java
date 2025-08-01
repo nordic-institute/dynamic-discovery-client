@@ -22,7 +22,9 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.JwtResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.JWTAuthorizationTokenFetcher;
 import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
+import eu.europa.ec.dynamicdiscovery.exception.DDCAuthorizationException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.net.URI;
 
@@ -56,7 +58,8 @@ public class JwtTokenCredentialProvider implements ICredentialProvider {
         try {
             response = jwtFetcher.fetch(authorizationServerUri);
         } catch (TechnicalException e) {
-            throw new RuntimeException(e);
+            String errMsg = "Error occurred while fetching the JWT token from URL [" + authorizationServerUri + "]: " + ExceptionUtils.getRootCauseMessage(e);
+            throw new DDCAuthorizationException(errMsg , e);
         }
         if (response == null || response.getJwtCredentials() == null) {
             return null;
@@ -67,8 +70,6 @@ public class JwtTokenCredentialProvider implements ICredentialProvider {
     public static class Builder {
         private URI uri;
         private JWTAuthorizationTokenFetcher jwtFetcher;
-        JwtCredentials jwtResponse;
-
         public Builder authorizationServerURI(String uri) {
             this.uri = URI.create(uri);
             return this;

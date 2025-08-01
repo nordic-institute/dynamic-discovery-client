@@ -126,7 +126,7 @@ if (Custom configuration?) then (No)
 else (yes)
 endif
 
-' Because margin/pading/MinWidth the spaces helps to make the
+' Because margin/padding/MinWidth the spaces helps to make the
 ' diagram more readable
 partition "    Lookup                                "{
 
@@ -635,11 +635,11 @@ KeyStore tlsTruststore = CommonUtil.loadKeystoreFromFile("truststore.p12",  KEYS
 // JWT authorization server URL
 String url = "https://localhost:8443/realms/OOTS/protocol/openid-connect/token";
 // Document URI for which the JWT token is requested
-URI documentURI = URI.create("http://localhost:8080/smp/oots-smp-domain/ehealth-actorid-qns::0088:7770010100777:test:SMP001");
+URI documentURI = URI.create("http://localhost:8080/smp/private-domain/ehealth-actorid-qns::0088:7770010100777:test:SMP001");
 
 // configure JWT authorization token fetcher
 JWTAuthorizationTokenFetcher fetcher = new JWTAuthorizationTokenFetcher.Builder()
-        .clientId("oots-ddc-client")
+        .clientId("my-client-id")
         .tlsKeystore(tlsKeystore, PASSWD.toCharArray())
         .tlsTruststore(tlsTruststore)
         .build();
@@ -649,9 +649,12 @@ JwtTokenCredentialProvider jwtCredentialProvider = new JwtTokenCredentialProvide
         .authorizationServerURI(url)
         .build();
 // configure DefaultURLFetcher with JWT authorization
-DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+DefaultURLFetcher documentFetcher = new DefaultURLFetcher.Builder()
         .credentialProvider(jwtCredentialProvider)
         .build();
+
+// fetcj the document using the DefaultURLFetcher
+documentFetcher.fetch(documentURI);
 
 ----
 

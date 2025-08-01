@@ -25,10 +25,12 @@ import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.JwtCredentials;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.JwtTokenCredentialProvider;
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
+import eu.europa.ec.dynamicdiscovery.exception.DDCFetchException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.util.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hc.client5.http.UnsupportedSchemeException;
 import org.apache.hc.client5.http.auth.AuthScope;
@@ -72,14 +74,11 @@ public abstract class AbstractURLFetcher implements IDocumentFetcher {
     protected final HttpRoutePlanner routePlanner;
     protected final HttpClientConnectionManager connectionManager;
 
-    protected AbstractURLFetcher(HttpClientConnectionManager connectionManager,
-                                 HttpRoutePlanner routePlanner,
-                                 ICredentialProvider credentialProvider,
-                                 IProxyConfiguration proxyConfiguration) {
-        this.connectionManager = connectionManager;
-        this.routePlanner = routePlanner;
-        this.credentialProvider = credentialProvider;
-        this.proxyConfiguration = proxyConfiguration;
+    protected AbstractURLFetcher(AbstractFetcherBuilder<?> builder) {
+        this.connectionManager = builder.buildHttpClientConnectionManager();
+        this.routePlanner = builder.routePlanner;
+        this.credentialProvider = builder.credentialProvider;
+        this.proxyConfiguration = builder.proxyConfiguration;
     }
 
 
@@ -124,7 +123,7 @@ public abstract class AbstractURLFetcher implements IDocumentFetcher {
         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
         // set proxy
         if (proxyConfiguration != null && !proxyConfiguration.isNonProxyHost(targetHostname)) {
-            LOG.debug("Fetch data using proxy");
+            LOG.debug("Fetch data using proxy for target hostname: [{}]", targetHostname);
             HttpHost proxyHost = proxyConfiguration.getProxyHost(targetHostname);
             // set proxy authentication
             requestConfigBuilder.setProxy(proxyHost);
@@ -177,7 +176,7 @@ public abstract class AbstractURLFetcher implements IDocumentFetcher {
                 case 404:
                     throw new DNSLookupException("SMP lookup address " + httpRequest.getUri() + " not found - response 404");
                 default:
-                    throw new DNSLookupException("Got Http error code " + response.getCode() + " trying to access SMP URL:" + httpRequest.getUri());
+                    throw new DDCFetchException("Got Http error code " + response.getCode() + " trying to access URL:" + httpRequest.getUri());
             }
         } catch (DNSLookupException exc) {
             throw exc;
@@ -188,7 +187,7 @@ public abstract class AbstractURLFetcher implements IDocumentFetcher {
         } catch (Exception exc) {
             String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
             String uri = lowerCase(getUriFromHttpRequest(httpRequest));
-            if (startsWithAny(uri, "http://b-", "https://b-")) {
+            if (Strings.CI.startsWithAny(uri, "http://b-", "https://b-")) {
                 message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
             }
             throw new DNSLookupException(message, exc);

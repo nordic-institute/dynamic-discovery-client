@@ -183,7 +183,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             }
             LOG.debug("No document found or can be retrieved for the extension [{}]", extension.getExtensionIdentifier());
         }
-        throw new DNSFetchException("No document found for resource identifier: [" + resourceIdentifier
+        throw new DDCFetchException("No document found for resource identifier: [" + resourceIdentifier
                 + "] and document identifier: [" + documentIdentifier + "]");
     }
 
@@ -214,12 +214,12 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
                         documentIdentifier, extension.getExtensionIdentifier(), ExceptionUtils.getRootCauseMessage(e));
                 return null;
             } catch (Exception e) {
-                throw new DNSFetchException("Can not resolve wildcard identifier [" + documentIdentifier
+                throw new DDCFetchException("Can not resolve wildcard identifier [" + documentIdentifier
                         + "]! Error retrieving document identifiers from URI: [" + resourceRequest.getResourceIdentifier() + "]");
             }
             // can parse documetns but can not resolve wildcard identifier
             if (targetDocumentIdentifier == null) {
-                throw new DNSFetchException("Can not resolve wildcard identifier [" + documentIdentifier
+                throw new DDCFetchException("Can not resolve wildcard identifier [" + documentIdentifier
                         + "]! Error retrieving document identifiers from URI: [" + resourceRequest.getResourceIdentifier() + "]");
 
             }
@@ -238,7 +238,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             LOG.info("Error during fetching the extension for request [{}] and extension [{}] with cause error [{}]",
                     subresourceRequest, extension, ExceptionUtils.getRootCauseMessage(e));
             // throw error if subresource is not found
-            throw new DNSFetchException("Can not fetch document [" + documentIdentifier + "]! Error retrieving document identifiers from URI: ["
+            throw new DDCFetchException("Can not fetch document [" + documentIdentifier + "]! Error retrieving document identifiers from URI: ["
                     + subresourceRequest.getSubresourceUri() + "]", e);
         }
         return null;
@@ -251,7 +251,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * @param resourceRequest    resource request
      * @param documentIdentifier document identifier to be matched
      * @return the document identifier with the best match
-     * @throws DNSFetchException if the document identifiers can not be retrieved from the resource URI.
+     * @throws DDCFetchException if the document identifiers can not be retrieved from the resource URI.
      */
     protected SMPDocumentIdentifier getDocumentIdentifierWithWildcardMatch(PublisherRequest resourceRequest,
                                                                            SMPDocumentIdentifier documentIdentifier,
@@ -678,7 +678,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             }
 
             if (listExtensions.isEmpty()) {
-                LOG.info("No extensions are registered. Registering default extensions OasisSMP10Extension and OasisSMP20Extension");
+                LOG.info("No extensions are registered. Registering the default extensions OasisSMP10Extension and OasisSMP20Extension");
                 listExtensions.add(new OasisSMP10Extension());
                 listExtensions.add(new OasisSMP20Extension());
             }

@@ -21,15 +21,11 @@ package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
-import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
-import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
 import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.io.HttpClientConnectionManager;
-import org.apache.hc.client5.http.routing.HttpRoutePlanner;
 
 import javax.net.ssl.SSLContext;
 import java.io.InputStream;
@@ -47,11 +43,8 @@ import java.net.URI;
  */
 public class DefaultURLFetcher extends AbstractURLFetcher {
 
-    private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
-                              HttpRoutePlanner routePlanner,
-                              ICredentialProvider credentialProvider,
-                              IProxyConfiguration proxyConfiguration) {
-        super(connectionManager, routePlanner, credentialProvider, proxyConfiguration);
+    private DefaultURLFetcher(Builder builder) {
+        super(builder);
     }
 
     @Override
@@ -96,8 +89,7 @@ public class DefaultURLFetcher extends AbstractURLFetcher {
          */
         @Override
         public DefaultURLFetcher build() {
-            final HttpClientConnectionManager connectionManager = buildHttpClientConnectionManager();
-            return new DefaultURLFetcher(connectionManager, routePlanner, credentialProvider, proxyConfiguration);
+            return new DefaultURLFetcher(this);
         }
     }
 }

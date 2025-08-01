@@ -48,6 +48,9 @@ public enum CliOptions {
     OPTION_KEYSTORE_PASSWORD("kp", "keystore-password", true, false, "Client TLS keystore password"),
     OPTION_KEYSTORE_TYPE("kt", "keystore-type", true, false, "Client TLS keystore type: Default PKCS12"),
     OPTIONS_KEYSTORE_KEY_PASSWORD("kkp", "keystore-key-password", true, false, "Client TLS keystore alias password"),
+    OPTIONS_JWT_AUTHORIZATION_SERVER_URL("jwta", "jwt-url", true, false, "JWT authorization server URL, used for JWT authentication"),
+    OPTIONS_JWT_CLIENT_ID("jwtc", "jwt-client-id", true, false, "JWT client ID, used for JWT authentication"),
+    OPTIONS_JWT_SCOPE("jwts", "jwt-scopes", true, false, "JWT scope, used for JWT authentication"),
     OPTIONS_SMP_URL("smp", "smp-url", true, false, "If provided, SMP URL is used instead of DNS discovery"),;
     private final Option option;
 
@@ -132,9 +135,13 @@ public enum CliOptions {
         options.addOption(OPTION_KEYSTORE_FILEPATH.getOption());
         options.addOption(OPTION_KEYSTORE_PASSWORD.getOption());
         options.addOption(OPTION_KEYSTORE_TYPE.getOption());
+        options.addOption(OPTIONS_KEYSTORE_KEY_PASSWORD.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_NAME.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_VALUE.getOption());
         options.addOption(OPTIONS_SMP_URL.getOption());
+        options.addOption(OPTIONS_JWT_AUTHORIZATION_SERVER_URL.getOption());
+        options.addOption(OPTIONS_JWT_CLIENT_ID.getOption());
+        options.addOption(OPTIONS_JWT_SCOPE.getOption());
         return options;
     }
 }
