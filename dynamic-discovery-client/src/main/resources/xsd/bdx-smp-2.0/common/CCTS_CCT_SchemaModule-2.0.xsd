@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Service Metadata Publishing (SMP) Version 2.0
+     Committee Specification 03
+     22 January 2021
+     Copyright (c) OASIS Open 2021. All Rights Reserved.
+     Source: https://docs.oasis-open.org/bdxr/bdx-smp/v2.0/cs03/
+     Latest version of narrative specification: https://docs.oasis-open.org/bdxr/bdx-smp/v2.0/bdx-smp-v2.0.html
+     TC IPR Statement: https://www.oasis-open.org/committees/bdxr/ipr.php
+-->
 <!-- ====================================================================== -->
 <!-- ===== CCTS Core Component Type Schema Module ===== -->
 <!-- ====================================================================== -->
