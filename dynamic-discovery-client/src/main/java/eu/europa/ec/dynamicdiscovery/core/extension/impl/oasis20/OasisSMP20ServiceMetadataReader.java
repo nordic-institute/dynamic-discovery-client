@@ -156,10 +156,7 @@ public class OasisSMP20ServiceMetadataReader extends AbstractServiceMetadataRead
             return null;
         }
 
-        String value = StringUtils.trim(identifierType.getValue());
-        String schemeID = StringUtils.trim(identifierType.getSchemeID());
-
-        return new SMPDocumentIdentifier(value, schemeID);
+        return new SMPDocumentIdentifier(StringUtils.trim(identifierType.getValue()), StringUtils.trim(identifierType.getSchemeID()));
     }
 
     /**
