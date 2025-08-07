@@ -48,7 +48,11 @@ class DynamicDiscoveryServiceTest {
                     "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl," +
                     " bdxr-transport-ebms3-as4-v1p0, " +
                     "https://test.erechnung.gv.at/as4/msh/",
-            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523, " +
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_draft, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_final, " +
                     "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
                     "bdxr-transport-ebms3-as4-v1p0, " +
                     "https://ap.example.com/as4",
@@ -124,7 +128,11 @@ class DynamicDiscoveryServiceTest {
                     "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl," +
                     " bdxr-transport-ebms3-as4-v1p0, " +
                     "https://test.erechnung.gv.at/as4/msh/",
-            "oasis-smp-2.0, service_metadata_unsigned_redirection, service_metadata_unsigned_valid_iso6523, " +
+            "oasis-smp-2.0, service_metadata_unsigned_redirection, service_metadata_unsigned_valid_iso6523_draft, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "oasis-smp-2.0, service_metadata_unsigned_redirection, service_metadata_unsigned_valid_iso6523_final, " +
                     "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
                     "bdxr-transport-ebms3-as4-v1p0, " +
                     "https://ap.example.com/as4",

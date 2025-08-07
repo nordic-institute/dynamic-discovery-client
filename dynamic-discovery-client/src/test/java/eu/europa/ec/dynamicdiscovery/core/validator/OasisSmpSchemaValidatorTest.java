@@ -95,7 +95,8 @@ class OasisSmpSchemaValidatorTest {
     }
 
     @ParameterizedTest(name = "{index}: {0}")
-    @CsvSource({"service_metadata_unsigned_valid_iso6523, false, null",
+    @CsvSource({"service_metadata_unsigned_valid_iso6523_draft, false, null",
+            "service_metadata_unsigned_valid_iso6523_final, false, null",
             "service_metadata_unsigned_redirection, false, null",
             "service_metadata_unsigned_invalid_iso6523, true, 'Invalid content was found starting with element'",
             "service_metadata_unsigned_invalid_iso6523_DTD-01, true, 'External DTD: Failed to read external DTD'"})

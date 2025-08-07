@@ -28,10 +28,10 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.util.NamespaceUtil;
 import gen.eu.europa.ec.ddc.api.smp20.ServiceMetadata;
+import gen.eu.europa.ec.ddc.api.smp20.UnqualifiedDataTypes.IdentifierType;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.Process;
 import gen.eu.europa.ec.ddc.api.smp20.aggregate.*;
 import gen.eu.europa.ec.ddc.api.smp20.basic.ParticipantID;
-import gen.eu.europa.ec.ddc.api.smp20.basic.ServiceID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -147,10 +147,14 @@ public class OasisSMP20ServiceMetadataReader extends AbstractServiceMetadataRead
      */
     @Override
     protected SMPDocumentIdentifier readDocumentIdentifier(ServiceMetadata serviceMetadata) {
-        if (serviceMetadata.getServiceID() == null) {
+        IdentifierType identifierType = serviceMetadata.getID();
+        if (identifierType == null) {
+            identifierType = serviceMetadata.getServiceID();
+        }
+
+        if (identifierType == null) {
             return null;
         }
-        ServiceID identifierType = serviceMetadata.getServiceID();
 
         return new SMPDocumentIdentifier(StringUtils.trim(identifierType.getValue()), StringUtils.trim(identifierType.getSchemeID()));
     }
