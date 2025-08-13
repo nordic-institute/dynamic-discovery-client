@@ -153,8 +153,10 @@ class DefaultBDXRReaderTest {
             "oasis-smp-1.0, signed_service_metadata_not-signed_valid_iso6523_namespace, false, false",
             "oasis-smp-1.0, signed_service_metadata_redirection, true, true",
             "oasis-smp-1.0, signed_service_metadata_redirection_namespace, true, true",
-            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523, false, false",
-            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_namespace, false, false",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_draft, false, false",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_final, false, false",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_namespace_draft, false, false",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_namespace_final, false, false",
             "oasis-smp-2.0, service_metadata_unsigned_redirection, true, false",
             "peppol, signed_service_metadata_valid_iso6523_wildcard, false, false",
             "peppol, signed_service_metadata_redirection, true, true"})

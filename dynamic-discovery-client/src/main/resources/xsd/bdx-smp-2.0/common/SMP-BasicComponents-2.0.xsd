@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
      Service Metadata Publishing (SMP) Version 2.0
-     Committee Specification Draft 01 / Public Review Draft 01
-     18 July 2018
-     Copyright (c) OASIS Open 2018. All Rights Reserved.
-     Source: http://docs.oasis-open.org/bdxr/bdx-smp/v2.0/csprd01/xsd/common/
-     Latest version of narrative specification: http://docs.oasis-open.org/bdxr/bdx-smp/v2.0/bdx-smp-v2.0.html
-     TC IPR Statement: https://www.oasis-open.org/committees/bdxr/ipr.php 
+     Committee Specification 03
+     22 January 2021
+     Copyright (c) OASIS Open 2021. All Rights Reserved.
+     Source: https://docs.oasis-open.org/bdxr/bdx-smp/v2.0/cs03/
+     Latest version of narrative specification: https://docs.oasis-open.org/bdxr/bdx-smp/v2.0/bdx-smp-v2.0.html
+     TC IPR Statement: https://www.oasis-open.org/committees/bdxr/ipr.php
 -->
 <!--
-  Library:           OASIS Service Metadata Publisher (SMP) 2.0 2.0 CSD01WD01
-                     http://docs.oasis-open.org/bdxr/bdx-smp/v2.0/csd01wd01/
-  Release Date:      12 April 2018
+  Library:           OASIS Service Metadata Publisher (SMP) 2.0 2.0 CSD01
+                     http://docs.oasis-open.org/bdxr/bdx-smp/v2.0/csd01/
+  Release Date:      29 April 2019
   Module:            xsd/common/SMP-BasicComponents-2.0.xsd
-  Generated on:      2018-04-27 19:13z
-  Copyright (c) OASIS Open 2018. All Rights Reserved.
+  Generated on:      2019-04-29 18:16z
+  Copyright (c) OASIS Open 2021. All Rights Reserved.
 -->
 <xsd:schema xmlns="http://docs.oasis-open.org/bdxr/ns/SMP/2/BasicComponents"
             xmlns:qdt="http://docs.oasis-open.org/bdxr/ns/SMP/2/QualifiedDataTypes"

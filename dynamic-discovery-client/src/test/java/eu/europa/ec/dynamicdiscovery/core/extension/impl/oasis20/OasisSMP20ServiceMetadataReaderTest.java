@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.Unmarshaller;
@@ -106,10 +107,14 @@ class OasisSMP20ServiceMetadataReaderTest {
         assertFalse(result);
     }
 
-    @Test
-    void testParseOK() throws Exception {
+    @ParameterizedTest(name = "{index}: {0}")
+    @ValueSource(strings = {
+        "service_metadata_unsigned_valid_iso6523_draft",
+        "service_metadata_unsigned_valid_iso6523_final"
+    })
+    void testParseOK(String xmlFilename) throws Exception {
         // given
-        Document doc = CommonUtil.getOasisSMP20DocumentFromXmlFile("service_metadata_unsigned_valid_iso6523");
+        Document doc = CommonUtil.getOasisSMP20DocumentFromXmlFile(xmlFilename);
         // when
         SMPServiceMetadata result = testInstance.parse(doc);
         // then
