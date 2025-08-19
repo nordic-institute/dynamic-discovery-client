@@ -323,17 +323,24 @@ DynamicDiscoverySevice smpClient = new DynamicDiscoverySevice.Builder()
 ----
 
 ===== Example: Basic discovery with custom participant formatter
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on custom PartyIdentifier types. By default ebCoreParty Identifier type and Peppol Party identifier types are registered.
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier types. By default ebCoreParty Identifier type and Peppol Party identifier types are registered in the ParticipantIdentifierFormatter. The formatter is used to validate and format/normalize the PartyIdentifier before lookup according to custom FormatterType. The PartyIdentifierFormatter is configurable to support custom PartyIdentifier types.
 
-The DefaultBDXRLocator will format/normalize the PartyIdentifier before lookup according to custom FormatterType
 
 [source,java]
 ----
-// Use template formatter or create own formatter type
-FormatterType customFormatter = new TemplateFormatterType(Pattern.compile("^(?i)mailto.*$"),
-                "${scheme}-->${identifier}","${identifier}",
-                Pattern.compile("^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$"),
-                DNSLookupFormatType.SCHEMA_AFTER_HASH);
+
+   ParticipantIdentifierFormatter customFormatter = new ParticipantIdentifierFormatter.Builder()
+                .formatterTypes.add(new EBCorePartyIdFormatterType(),
+                        new PeppolPartyIdFormatterType())
+                .defaultFormatter(new OasisSMPFormatterType.Builder()
+                        .wildcardEnabled(false)
+                        .valueMaxLength(15)
+                        .schemeMandatory(true)
+                        .schemeMaxLength(10)
+                        .schemeValidationPattern(Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+-[a-zA-Z0-9]+$"))
+                        .valueValidationPattern(Pattern.compile("^[0-9]{4}:[a-zA-Z0-9]+$"))
+                        .build())
+                .build();
 
 // register formatter to DefaultBDXRLocator
 DynamicDiscoverySevice smpClient= new DynamicDiscoverySevice.Builder()

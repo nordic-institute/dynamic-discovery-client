@@ -36,6 +36,28 @@ public abstract class AbstractFormatterType implements  FormatterType {
 
     public static final String EBCORE_SEPARATOR = ":";
     public static final String OASIS_SMP_SEPARATOR = "::";
+    private static final String DEFAULT_SCHEME = "iso6523-actorid-upis";
+
+    /**
+     * Default constructor
+     */
+    @Deprecated
+    public AbstractFormatterType() {
+        // Default constructor
+    }
+    /**
+     * Constructor with builder
+     *
+     * @param builder Builder instance
+     */
+    protected AbstractFormatterType(AbstractFormatterBuilder<?> builder) {
+        this.isSchemeMandatory = builder.isSchemeMandatory;
+        this.wildcardEnabled = builder.wildcardEnabled;
+        this.schemeMaxLength = builder.schemeMaxLength;
+        this.valueMaxLength = builder.valueMaxLength;
+        this.valuePattern = builder.valuePattern;
+        this.schemePattern = builder.schemePattern;
+    }
 
     @Override
     public boolean isSchemeMandatory() {
@@ -94,5 +116,50 @@ public abstract class AbstractFormatterType implements  FormatterType {
     @Override
     public void setSchemeValidationPattern(Pattern schemePattern) {
         this.schemePattern = schemePattern;
+    }
+
+    public static abstract class AbstractFormatterBuilder<T extends AbstractFormatterType> {
+        boolean isSchemeMandatory = true;
+        boolean wildcardEnabled = true;
+        Integer schemeMaxLength;
+        Integer valueMaxLength;
+        Pattern valuePattern;
+        Pattern schemePattern;
+
+        public AbstractFormatterBuilder() {
+
+        }
+
+        public AbstractFormatterBuilder<T> schemeMandatory(boolean mandatory) {
+            this.isSchemeMandatory = mandatory;
+            return this;
+        }
+
+        public AbstractFormatterBuilder<T> wildcardEnabled(boolean enabled) {
+            this.wildcardEnabled = enabled;
+            return this;
+        }
+
+        public AbstractFormatterBuilder<T> schemeMaxLength(Integer length) {
+            this.schemeMaxLength = length;
+            return this;
+        }
+
+        public AbstractFormatterBuilder<T> valueMaxLength(Integer length) {
+            this.valueMaxLength = length;
+            return this;
+        }
+
+        public AbstractFormatterBuilder<T> valueValidationPattern(java.util.regex.Pattern pattern) {
+            this.valuePattern = pattern;
+            return this;
+        }
+
+        public AbstractFormatterBuilder<T> schemeValidationPattern(java.util.regex.Pattern pattern) {
+            this.schemePattern = pattern;
+            return this;
+        }
+
+        abstract public T build();
     }
 }
