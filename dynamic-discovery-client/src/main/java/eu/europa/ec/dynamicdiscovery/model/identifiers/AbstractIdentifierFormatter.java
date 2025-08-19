@@ -61,7 +61,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @author Joze Rihtarsic
  * @since 4.3
  */
-public abstract class AbstractIdentifierFormatter<T, S > {
+public abstract class AbstractIdentifierFormatter<T, S> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIdentifierFormatter.class);
 
     protected AbstractFormatterType defaultFormatter;

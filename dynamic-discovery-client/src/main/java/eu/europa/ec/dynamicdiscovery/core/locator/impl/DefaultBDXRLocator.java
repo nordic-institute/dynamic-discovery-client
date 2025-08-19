@@ -34,10 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -67,13 +64,9 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         this.dnsLookupTypeList = new ArrayList<>(builder.dnsLookupTypeList);
         this.dnsLookup = builder.dnsLookup;
 
-        if (builder.resourceIdentifierFormatter == null) {
-            this.resourceIdentifierFormatter = new ParticipantIdentifierFormatter.Builder()
-                    .initDefault()
-                    .build();
-        } else {
-            this.resourceIdentifierFormatter = builder.resourceIdentifierFormatter;
-        }
+
+        this.resourceIdentifierFormatter = Optional.ofNullable(builder.resourceIdentifierFormatter)
+                .orElse(new ParticipantIdentifierFormatter.Builder().initDefault().build());
 
         if (builder.resourceSchemeMandatory != null) {
             this.resourceIdentifierFormatter.setSchemeMandatory(builder.resourceSchemeMandatory);
