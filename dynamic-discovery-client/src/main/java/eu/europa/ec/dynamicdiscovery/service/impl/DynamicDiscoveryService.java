@@ -310,9 +310,9 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      */
     @Override
     public SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier,
-                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException {
+                                        String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException {
         SMPServiceMetadata serviceMetadata = getSubresource(participantIdentifier, documentIdentifier);
-        return discoverEndpoint(serviceMetadata, processId, processIdScheme, transportProfile);
+        return discoverEndpoint(serviceMetadata, processId, processIdScheme, transportProfiles);
     }
 
     /**
@@ -321,11 +321,11 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     @Override
     public SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
                                         String processId, String processIdScheme,
-                                        String transportProfile) throws TechnicalException {
-        SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
+                                        List<String> transportProfiles) throws TechnicalException {
+        SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfiles);
         if (endpoint == null) {
             LOG.debug("No Endpoint found for process id [{}] with scheme [{}] and transport [{}].",
-                    processId, processIdScheme, transportProfile);
+                    processId, processIdScheme, transportProfiles);
             return null;
         }
 
@@ -345,7 +345,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
                 svcBuilder.certificateValidationStrategy(TRUSTSTORE);
             }
             serviceMetadata = processRedirection(endpoint.getRedirect(), svcBuilder.build());
-            endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
+            endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfiles);
         }
         return endpoint;
     }
@@ -363,7 +363,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
 
         final SMPEndpoint endpoint = discoverEndpoint(participantIdentifier, documentIdentifier,
                 processIdentifier.getIdentifier(), processIdentifier.getScheme(),
-                transportProfile.getIdentifier());
+                List.of(transportProfile.getIdentifier()));
         if (endpoint == null) {
             throw new DDCCertificateNotFoundException("No endpoint found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
         }
@@ -410,14 +410,13 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * @param smpEndpoints     list of all processes
      * @param processId        target process identifier
      * @param processIdScheme  target process identifier scheme
-     * @param transportProfile list of targeted transport profiles
+     * @param transportProfiles a list of transport profile to match against
      * @return valid endpoint
      * @throws DDCInvalidDataException if filter values are null or empty
      */
     private SMPEndpoint getEndpoint(List<SMPEndpoint> smpEndpoints, String processId,
-                                    String processIdScheme, String transportProfile) throws DDCInvalidDataException {
-
-        if (StringUtils.isBlank(transportProfile)) {
+                                    String processIdScheme, List<String> transportProfiles) throws DDCInvalidDataException {
+        if (transportProfiles == null || transportProfiles.isEmpty() || transportProfiles.stream().allMatch(StringUtils::isEmpty)) {
             throw new DDCInvalidDataException("Null or empty transport profile");
         }
 
@@ -426,17 +425,20 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         }
         String trimProcessIdScheme = trim(processIdScheme);
         String trimProcessId = trim(processId);
-        String trimTransportProfile = trim(transportProfile);
+        List<String> trimTransportProfiles = transportProfiles.stream()
+                .filter(StringUtils::isNotEmpty) // exclude any empty transport profiles
+                .map(StringUtils::trim)
+                .collect(Collectors.toList());
 
-        LOG.debug("Search for a Endpoint with process  id: [{}], process scheme [{}] and transportProfile: [{}]]!",
-                processId, processIdScheme, transportProfile);
+        LOG.debug("Search for a Endpoint with process  id: [{}], process scheme [{}] and transportProfiles: [{}]!",
+                processId, processIdScheme, transportProfiles);
         List<SMPEndpoint> endpoints = smpEndpoints.stream()
-                .filter(processType -> smpEndpointMatchesOrRedirect(processType, trimProcessId, trimProcessIdScheme, trimTransportProfile))
+                .filter(processType -> smpEndpointMatchesOrRedirect(processType, trimProcessId, trimProcessIdScheme, trimTransportProfiles))
                 .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {
             LOG.warn("No Endpoints found for process id [{}] with scheme [{}] and transport [{}].",
-                    processId, processIdScheme, transportProfile);
+                    processId, processIdScheme, transportProfiles);
             return null;
         }
 
@@ -451,28 +453,28 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     }
 
     /**
-     * Method returns validates  endpoint match for given processId, processIdScheme and transportProfile or
+     * Method returns validates  endpoint match for given processId, processIdScheme and transportProfiles or
      * if the endpoint is redirection.
      *
      * @param smpEndpoint           endpoint to validate
      * @param filterProcessId       filter process identifier value
      * @param filterProcessIdScheme filter process identifier scheme
-     * @param filterTransportId     filter transport profile value
+     * @param filterTransportIds    filter transport profile values
      * @return true if endpoint matches the filter values or is redirection else false
      */
     protected boolean smpEndpointMatchesOrRedirect(SMPEndpoint smpEndpoint,
                                                    String filterProcessId, String filterProcessIdScheme,
-                                                   String filterTransportId) {
+                                                   List<String> filterTransportIds) {
         if (smpEndpointMatchesProcessValues(smpEndpoint, filterProcessId, filterProcessIdScheme)
-                && matchesEndpointTransport(smpEndpoint, filterTransportId)) {
-            LOG.debug("Found matching Endpoint with process id: [{}] scheme [{}] and transport profile [{}]",
-                    filterProcessId, filterProcessIdScheme, filterTransportId);
+                && matchesEndpointTransports(smpEndpoint, filterTransportIds)) {
+            LOG.debug("Found matching Endpoint with process id: [{}] scheme [{}] and transport profiles [{}]",
+                    filterProcessId, filterProcessIdScheme, filterTransportIds);
             return true;
         }
 
         if (smpEndpoint.getRedirect() != null) {
-            LOG.debug("Found redirection Endpoint for process id: [{}] scheme [{}] and transport profile [{}]",
-                    filterProcessId, filterProcessIdScheme, filterTransportId);
+            LOG.debug("Found redirection Endpoint for process id: [{}] scheme [{}] and transport profiles [{}]",
+                    filterProcessId, filterProcessIdScheme, filterTransportIds);
             return true;
         }
         return false;
@@ -488,7 +490,6 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * @return true if endpoint's is matching to the filter parameters
      */
     protected boolean smpEndpointMatchesProcessValues(SMPEndpoint smpEndpoint, String filterProcessId, String filterProcessIdScheme) {
-
         if (hasEmptyProcessList(smpEndpoint)) {
             return defaultEndpointForEmptyProcess;
         }
@@ -507,7 +508,6 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         return result.isPresent();
     }
 
-
     /**
      * Method returns true if endpoint has no process identifiers.
      *
@@ -523,21 +523,22 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     }
 
     /**
-     * This method exists to be used to filter list of endpointType for particular transportProfile.
+     * This method exists to be used to filter list of endpointType against any of the particular transportProfile values.
      *
      * @param endpointType          endpoint to validate
-     * @param transportProfileValue target transport profile value
+     * @param transportProfileValues target transport profile values
      * @return true if endpoint's transport equals to search transport identifier
      */
-    protected boolean matchesEndpointTransport(SMPEndpoint endpointType, String transportProfileValue) {
+    protected boolean matchesEndpointTransports(SMPEndpoint endpointType, List<String> transportProfileValues) {
         final SMPTransportProfile transportProfile = endpointType.getTransportProfile();
         if (transportProfile == null) {
             return false;
         }
 
-        boolean isValidTransport = StringUtils.equals(trim(transportProfile.getIdentifier()), trim(transportProfileValue));
+        boolean isValidTransport = transportProfileValues.stream().anyMatch(
+                transportProfileValue -> StringUtils.equals(trim(transportProfile.getIdentifier()), trim(transportProfileValue)));
         if (!isValidTransport) {
-            LOG.debug("Search for endpoint with transport [{}], but found [{}]", transportProfileValue, transportProfile);
+            LOG.debug("Search for endpoint with transports [{}], but found [{}]", transportProfileValues, transportProfile);
         }
         return isValidTransport;
     }
