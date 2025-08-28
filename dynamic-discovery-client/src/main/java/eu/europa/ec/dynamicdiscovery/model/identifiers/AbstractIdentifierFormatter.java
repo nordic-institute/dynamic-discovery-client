@@ -61,15 +61,30 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @author Joze Rihtarsic
  * @since 4.3
  */
-public abstract class AbstractIdentifierFormatter<T> {
+public abstract class AbstractIdentifierFormatter<T, S> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIdentifierFormatter.class);
 
-    protected AbstractFormatterType defaultFormatter = new OasisSMPFormatterType();
+    protected AbstractFormatterType defaultFormatter;
 
     protected List<String> caseSensitiveSchemas;
     protected List<FormatterType> formatterTypes = new ArrayList<>();
-
     protected Integer maxSchemeLength = null;
+
+
+    protected AbstractIdentifierFormatter (AbstractBuilder<S> builder) {
+        // default constructor
+        this.formatterTypes.addAll(builder.formatterTypes);
+        this.defaultFormatter = builder.defaultFormatter;
+        this.caseSensitiveSchemas = builder.caseSensitiveSchemas;
+        this.maxSchemeLength = builder.maxSchemeLength;
+        if (this.formatterTypes.isEmpty()) {
+            LOG.warn("No formatter types defined for identifier formatter. Using default formatter: [{}]", this.defaultFormatter.getClass().getName());
+        }
+        if (this.defaultFormatter == null) {
+            LOG.warn("Default formatter is null. Using default OasisSMPFormatterType.");
+            this.defaultFormatter = new OasisSMPFormatterType.Builder().build();
+        }
+    }
 
     /**
      * Formats the object according to formatTemplate. If template is 'blank' the scheme and identifier are concatenated
@@ -357,7 +372,7 @@ public abstract class AbstractIdentifierFormatter<T> {
         return caseSensitiveSchemas;
     }
 
-    public AbstractIdentifierFormatter<T> caseSensitiveSchemas(List<String> caseSensitiveSchemas) {
+    public AbstractIdentifierFormatter<T, S> caseSensitiveSchemas(List<String> caseSensitiveSchemas) {
         this.caseSensitiveSchemas = caseSensitiveSchemas;
         return this;
     }
@@ -391,5 +406,40 @@ public abstract class AbstractIdentifierFormatter<T> {
     public void setMaxSchemeLength(Integer maxSchemeLength) {
         this.maxSchemeLength = maxSchemeLength;
     }
+
+
+
+    protected static abstract class AbstractBuilder<S> {
+        protected List<FormatterType> formatterTypes = new ArrayList<>();
+        protected AbstractFormatterType defaultFormatter = new OasisSMPFormatterType.Builder().build();
+        protected List<String> caseSensitiveSchemas = new ArrayList<>();
+        protected Integer maxSchemeLength = null;
+
+        public AbstractBuilder<S> addFormatterTypes(FormatterType... formatterTypes) {
+            if (formatterTypes != null && formatterTypes.length > 0) {
+                this.formatterTypes.addAll(Arrays.asList(formatterTypes));
+            }
+            return this;
+        }
+
+        public AbstractBuilder<S> defaultFormatter(AbstractFormatterType defaultFormatter) {
+            this.defaultFormatter = defaultFormatter;
+            return this;
+        }
+
+        public AbstractBuilder<S> caseSensitiveSchemas(List<String> caseSensitiveSchemas) {
+
+            this.caseSensitiveSchemas = caseSensitiveSchemas;
+            return this;
+        }
+
+        public AbstractBuilder<S> setMaxSchemeLength(Integer maxSchemeLength) {
+            this.maxSchemeLength = maxSchemeLength;
+            return this;
+        }
+
+        public abstract S build();
+    }
+
 }
 

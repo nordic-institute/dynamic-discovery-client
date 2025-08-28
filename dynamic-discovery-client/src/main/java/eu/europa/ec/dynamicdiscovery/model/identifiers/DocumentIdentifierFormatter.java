@@ -27,8 +27,27 @@ package eu.europa.ec.dynamicdiscovery.model.identifiers;
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class DocumentIdentifierFormatter extends AbstractIdentifierFormatter<SMPDocumentIdentifier> {
+public class DocumentIdentifierFormatter extends AbstractIdentifierFormatter<SMPDocumentIdentifier, DocumentIdentifierFormatter> {
 
+
+    /**
+     * Default constructor for DocumentIdentifierFormatter.
+     * @deprecated Use {@link Builder} to create an instance instead.
+     */
+    @Deprecated
+    public DocumentIdentifierFormatter() {
+        super(new Builder());
+    }
+
+    /**
+     * Protected constructor for DocumentIdentifierFormatter.
+     * Use {@link Builder} to create an instance.
+     *
+     * @param builder the builder instance
+     */
+    protected DocumentIdentifierFormatter(Builder builder) {
+        super(builder);
+    }
 
     @Override
     protected String getSchemeFromObject(SMPDocumentIdentifier object) {
@@ -49,5 +68,16 @@ public class DocumentIdentifierFormatter extends AbstractIdentifierFormatter<SMP
     protected void updateObject(SMPDocumentIdentifier identifierObject, String scheme, String identifier) {
         identifierObject.setScheme(scheme);
         identifierObject.setIdentifier(identifier);
+    }
+
+    /**
+     * Builder class for creating instances of ProcessIdentifierFormatter.
+     * This class extends AbstractBuilder to provide a fluent interface for building the formatter.
+     */
+    public static class Builder extends AbstractBuilder<DocumentIdentifierFormatter> {
+        @Override
+        public DocumentIdentifierFormatter build() {
+            return new DocumentIdentifierFormatter(this);
+        }
     }
 }

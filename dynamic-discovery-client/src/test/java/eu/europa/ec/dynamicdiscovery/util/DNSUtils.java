@@ -39,7 +39,7 @@ import java.util.List;
 
 public class DNSUtils {
 
-    protected static final ParticipantIdentifierFormatter identifierFormatter = new ParticipantIdentifierFormatter();
+    protected static final ParticipantIdentifierFormatter identifierFormatter = new ParticipantIdentifierFormatter.Builder().initDefault().build();
     protected static final Logger LOG = LoggerFactory.getLogger(DNSUtils.class);
     public static final String TEST_NAPTR_SERVICE_SMP1 = "Meta:SMP";
     private static final String TEST_NAPTR_SERVICE_SMP2 = "oasis-bdxr-smp-2";

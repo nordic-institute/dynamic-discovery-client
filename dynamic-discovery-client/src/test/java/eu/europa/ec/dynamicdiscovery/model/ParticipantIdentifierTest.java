@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ParticipantIdentifierTest {
 
-    ParticipantIdentifierFormatter formatter = (ParticipantIdentifierFormatter) new ParticipantIdentifierFormatter()
+    ParticipantIdentifierFormatter formatter = (ParticipantIdentifierFormatter) new ParticipantIdentifierFormatter.Builder().initDefault().build()
             .caseSensitiveSchemas(Collections.singletonList("case-sensitive-qns"));
 
     private static Stream<Arguments> participantIdentifierTestArguments() {

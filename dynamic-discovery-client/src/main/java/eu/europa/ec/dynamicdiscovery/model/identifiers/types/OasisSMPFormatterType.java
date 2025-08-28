@@ -21,6 +21,10 @@ package eu.europa.ec.dynamicdiscovery.model.identifiers.types;
 
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupFormatType;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -31,12 +35,14 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @since 2.0
  */
 public class OasisSMPFormatterType extends AbstractFormatterType {
-
+    private static final Logger LOG = LoggerFactory.getLogger(OasisSMPFormatterType.class);
     DNSLookupFormatType dnsLookupFormatType;
+    Pattern matchPattern;
 
-    public OasisSMPFormatterType() {
-        setWildcardEnabled(true);
-        setSchemeMandatory(false);
+    protected OasisSMPFormatterType(Builder builder) {
+        super(builder);
+        this.dnsLookupFormatType = builder.dnsLookupFormatType;
+        this.matchPattern = builder.matchPattern;
     }
 
     @Override
@@ -47,8 +53,13 @@ public class OasisSMPFormatterType extends AbstractFormatterType {
 
     @Override
     public boolean isType(final String value) {
-        // the value should start with valid scheme
-        return true;
+        if (matchPattern == null) {
+            // if no match pattern is defined, then the value is valid
+            LOG.debug("No match pattern defined for OasisSMPFormatterType, assuming all values are valid.");
+            return true;
+        }
+        return matchPattern.matcher(value).matches();
+
     }
 
     @Override
@@ -84,5 +95,37 @@ public class OasisSMPFormatterType extends AbstractFormatterType {
         return dnsLookupFormatType == null ? DNSLookupFormatType.SCHEMA_AFTER_HASH : dnsLookupFormatType;
     }
 
+    /**
+     *  Builder for OasisSMPFormatterType formatter type creates the OasisSMPFormatterType with
+     *  OASIS SMP specific parameters:
+     *  <ul>
+     *      <li><b>Wildcard enabled:</b> true</li>
+     *      <li><b>Scheme mandatory:</b> false</li>
+     *  </ul>
+     */
+    public static class Builder extends AbstractFormatterBuilder<OasisSMPFormatterType> {
+        DNSLookupFormatType dnsLookupFormatType;
+        Pattern matchPattern = null;
 
+        public Builder() {
+            // set default values
+            wildcardEnabled = true;
+            isSchemeMandatory =false;
+        }
+
+        public Builder pattern(Pattern matchPattern) {
+            this.matchPattern = matchPattern;
+            return this;
+        }
+
+        public Builder dnsLookupFormatType(DNSLookupFormatType dnsLookupFormatType) {
+            this.dnsLookupFormatType = dnsLookupFormatType;
+            return this;
+        }
+
+        @Override
+        public OasisSMPFormatterType build() {
+            return new OasisSMPFormatterType(this);
+        }
+    }
 }

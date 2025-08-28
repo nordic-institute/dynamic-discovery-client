@@ -259,7 +259,7 @@ class DefaultBDXRLocatorTest {
             "Wildcard enabled, true,, *.ehealth.acc.edelivery.tech.ec.europa.eu",
             "Wildcard enabled, true, urn:oasis:names:tc:ebcore:partyid-type:unregistered, *.ehealth.acc.edelivery.tech.ec.europa.eu",
             "Wildcard enabled, false, urn:oasis:names:tc:ebcore:partyid-type:unregistered, B-5ca89d645e0c61390281b8d7f857fd3c.ehealth.acc.edelivery.tech.ec.europa.eu",
-            "Wildcard disabled, false,iso6523-actorid-upis, B-3389dae361af79b04c9c8e7057f60cc6.iso6523-actorid-upis.ehealth.acc.edelivery.tech.ec.europa.eu"})
+            "Wildcard disabled, false, test-test-test, B-3389dae361af79b04c9c8e7057f60cc6.test-test-test.ehealth.acc.edelivery.tech.ec.europa.eu"})
     void testWildcardCNAMEEnabled(String name, boolean enable, String idScheme, String expectedDomain) throws Exception {
         //GIVEN
         String targetUrl = TEST_PUBLISHER_URL;

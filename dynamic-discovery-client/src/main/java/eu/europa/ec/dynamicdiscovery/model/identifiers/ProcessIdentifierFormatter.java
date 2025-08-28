@@ -26,8 +26,18 @@ package eu.europa.ec.dynamicdiscovery.model.identifiers;
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class ProcessIdentifierFormatter extends AbstractIdentifierFormatter<SMPProcessIdentifier> {
+public class ProcessIdentifierFormatter extends AbstractIdentifierFormatter<SMPProcessIdentifier, ProcessIdentifierFormatter> {
 
+
+    /**
+     * Protected constructor for ProcessIdentifierFormatter.
+     * Use {@link Builder} to create an instance.
+     *
+     * @param builder the builder instance
+     */
+    protected ProcessIdentifierFormatter(Builder builder) {
+        super(builder);
+    }
 
     @Override
     protected String getSchemeFromObject(SMPProcessIdentifier object) {
@@ -48,5 +58,17 @@ public class ProcessIdentifierFormatter extends AbstractIdentifierFormatter<SMPP
     protected void updateObject(SMPProcessIdentifier identifierObject, String scheme, String identifier) {
         identifierObject.setScheme(scheme);
         identifierObject.setIdentifier(identifier);
+    }
+
+
+    /**
+     * Builder class for creating instances of ProcessIdentifierFormatter.
+     * This class extends AbstractBuilder to provide a fluent interface for building the formatter.
+     */
+    public static class Builder extends AbstractBuilder<ProcessIdentifierFormatter> {
+        @Override
+        public ProcessIdentifierFormatter build() {
+            return new ProcessIdentifierFormatter(this);
+        }
     }
 }

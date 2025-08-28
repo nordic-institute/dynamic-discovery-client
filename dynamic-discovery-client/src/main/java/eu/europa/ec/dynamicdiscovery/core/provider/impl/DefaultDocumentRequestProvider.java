@@ -104,7 +104,7 @@ public class DefaultDocumentRequestProvider implements IDocumentRequestProvider 
      * @param baseURI           - the base URI
      * @param resourceContext   - the context path of the resource.
      * @param encodedIdentifier - the URL encoded identifier.
-     * @return
+     * @return URI of the document REST resource.
      */
     protected URI createRequestURI(URI baseURI, String resourceContext, String encodedIdentifier) {
         String contextPath = StringUtils.isBlank(resourceContext) ?
@@ -195,10 +195,10 @@ public class DefaultDocumentRequestProvider implements IDocumentRequestProvider 
         private void validate() {
             //if no formatters are provided, use the default ones
             if (this.resourceIdentifierFormatter == null) {
-                this.resourceIdentifierFormatter = new ParticipantIdentifierFormatter();
+                this.resourceIdentifierFormatter = new ParticipantIdentifierFormatter.Builder().initDefault().build();
             }
             if (this.subresourceIdentifierFormatter == null) {
-                this.subresourceIdentifierFormatter = new DocumentIdentifierFormatter();
+                this.subresourceIdentifierFormatter = new DocumentIdentifierFormatter.Builder().build();
             }
         }
     }

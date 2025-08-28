@@ -34,10 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -52,20 +49,24 @@ import java.util.regex.Pattern;
  */
 public class DefaultBDXRLocator implements IPublisherLocator {
 
-    ParticipantIdentifierFormatter resourceIdentifierFormatter = new ParticipantIdentifierFormatter();
+    ParticipantIdentifierFormatter resourceIdentifierFormatter;
     private static final String DOMAIN_SEPARATOR = ".";
 
     static final Logger LOG = LoggerFactory.getLogger(DefaultBDXRLocator.class);
-    private List<String> topDnsDomains;
+    private final List<String> topDnsDomains;
     private List<DNSLookupType> dnsLookupTypeList = new ArrayList<>(Arrays.asList(DNSLookupType.NAPTR, DNSLookupType.CNAME));
     private String cnameURLScheme = "http";
     private String cnameURLContext = "/";
-    private IDNSLookup dnsLookup;
+    private final IDNSLookup dnsLookup;
 
     private DefaultBDXRLocator(Builder builder) {
         this.topDnsDomains = new ArrayList<>(builder.topDnsDomains);
         this.dnsLookupTypeList = new ArrayList<>(builder.dnsLookupTypeList);
         this.dnsLookup = builder.dnsLookup;
+
+
+        this.resourceIdentifierFormatter = Optional.ofNullable(builder.resourceIdentifierFormatter)
+                .orElse(new ParticipantIdentifierFormatter.Builder().initDefault().build());
 
         if (builder.resourceSchemeMandatory != null) {
             this.resourceIdentifierFormatter.setSchemeMandatory(builder.resourceSchemeMandatory);
@@ -90,6 +91,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         if (StringUtils.isNotEmpty(builder.cnameURLContext)) {
             this.cnameURLContext = builder.cnameURLContext;
         }
+
     }
 
     public DefaultBDXRLocator(List<String> domains) {
@@ -116,6 +118,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
     /**
      * Returns the resource identifier formatter which is responsible for
      * normalizing the resource/participant identifier when generating the DNS query.
+     *
      * @return The resource identifier formatter
      */
     public ParticipantIdentifierFormatter getResourceIdentifierFormatter() {
@@ -127,7 +130,8 @@ public class DefaultBDXRLocator implements IPublisherLocator {
      * generating the resource hash value and the DNS query. The formatter contains a list of formatter types implementations such as
      * {@link eu.europa.ec.dynamicdiscovery.model.identifiers.types.EBCorePartyIdFormatterType}
      * and @link {@link eu.europa.ec.dynamicdiscovery.model.identifiers.types.OasisSMPFormatterType}.
-     * @param resourceIdentifierFormatter
+     *
+     * @param resourceIdentifierFormatter The resource identifier formatter to be used
      */
     public void setResourceIdentifierFormatter(ParticipantIdentifierFormatter resourceIdentifierFormatter) {
         this.resourceIdentifierFormatter = resourceIdentifierFormatter;
@@ -144,7 +148,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
      * The lookup is ordered by the order of list of top domains followed by the  ordered list
      * of DNS record type. The first successful result is returned.
      *
-     * @param participantIdentifier
+     * @param participantIdentifier The target resource/participant identifier to discover the SMP's URL address
      * @return The list of MetadataLocatorResult for the participant identifier or empty list if no DNS record exist.
      * @throws TechnicalException if an error occurs during the DNS lookup
      */
@@ -168,8 +172,9 @@ public class DefaultBDXRLocator implements IPublisherLocator {
     /**
      * This method is used to lookup the DNS record for the given participant identifier and top domain. It generates the DNS query
      * based on the DNS record type.
+     *
      * @param identifier The target resource/participant identifier to discover the SMP's URL address
-     * @param topDomain The SML DNS top domain to be used for the DNS query
+     * @param topDomain  The SML DNS top domain to be used for the DNS query
      * @param lookupType The DNS record type to be used for the DNS query (NAPTR or CNAME)
      * @return The list of MetadataLocatorResult for the participant identifier or empty list if no DNS record exist.
      * @throws TechnicalException if an error occurs during the DNS lookup
@@ -216,7 +221,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
      * The method is deprecated and NAPTR record should be used instead.
      *
      * @param participantIdentifier the participant identifier
-     * @param topDomain the top domain
+     * @param topDomain             the top domain
      * @return the singleton list of the MetadataLocatorResult for the participant identifier or empty list if the DNS record does not exist
      * @throws TechnicalException if an error occurs during the URI creation
      */
@@ -235,7 +240,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         }
     }
 
-    private List<PublisherLookupResult>  naptrLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
+    private List<PublisherLookupResult> naptrLookup(SMPParticipantIdentifier participantIdentifier, String topDomain) throws TechnicalException {
         LOG.debug("Start naptr search for participant [{}].", participantIdentifier);
         try {
             String naptrURI = buildNaptrDNSQuery(participantIdentifier, topDomain);
@@ -290,9 +295,12 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         private List<String> resourceCaseSensitiveSchemas = new ArrayList<>();
         private String cnameURLScheme = "http";
         private String cnameURLContext = "/";
+        private ParticipantIdentifierFormatter resourceIdentifierFormatter;
+
 
         /**
          * Add a DNS record type which can be used with the BDXR locator.
+         *
          * @param recordType The DNS record type (Currently supported: NAPTR, CNAME)
          * @return The builder instance
          */
@@ -303,6 +311,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
 
         /**
          * Add a list of DNS record types which can be used with the BDXR locator.
+         *
          * @param recordTypes The ordered list of DNS record types (Currently supported: NAPTR, CNAME)
          * @return The builder instance
          */
@@ -339,6 +348,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
 
         /**
          * Sets the DNS lookup implementation of the IDNSLookup interface to be used with the BDXR locator.
+         *
          * @param dnsLookup
          * @return
          */
@@ -350,6 +360,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
         /**
          * Sets the resource/participant scheme mandatory flag. If set to true, the locator will only accept resource/participant identifiers
          * with a scheme.
+         *
          * @param resourceSchemeMandatory The participant scheme mandatory flag
          * @return The builder instance
          */
@@ -360,6 +371,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
 
         /**
          * Sets the wildcard enabled flag. If set to true, the locator will accept participant identifiers with a wildcard.
+         *
          * @param resourceWildcardEnabled The wildcard enabled flag
          * @return The builder instance
          * @deprecated The wildcard support is not specified in eDelivery profiles and support will be removed in the future.
@@ -370,9 +382,14 @@ public class DefaultBDXRLocator implements IPublisherLocator {
             return this;
         }
 
+        public Builder resourceIdentifierFormatter(ParticipantIdentifierFormatter resourceIdentifierFormatter) {
+            this.resourceIdentifierFormatter = resourceIdentifierFormatter;
+            return this;
+        }
 
         /**
          * Sets the resource/participant scheme validation pattern. The locator will use this pattern to validate the scheme of the participant identifier.
+         *
          * @param resourceSchemeValidationPattern The participant scheme validation pattern
          * @return The builder instance
          */
@@ -386,6 +403,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
          * The locator will use this list to validate the scheme of the resource/participant identifier.
          * If the scheme is not in the list, the locator will set the identifier to lowercase before calling the hash value
          * for the DNS query.
+         *
          * @param scheme The case-sensitive schema
          * @return The builder instance
          */
@@ -401,6 +419,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
          * The locator will use this list to validate the scheme of the resource/participant identifier.
          * If the scheme is not in the list, the locator will set the identifier to lowercase before calling the hash value
          * for the DNS query.
+         *
          * @param schemes The case-sensitive schema
          * @return The builder instance
          */
@@ -411,6 +430,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
 
         /**
          * Sets the CNAME URL scheme. The locator will use this scheme to create the SMPs URL for the participant identifier.
+         *
          * @param scheme The CNAME URL scheme   (default: http)
          * @return The builder instance
          * @deprecated The CNAME support is not specified in eDelivery profiles and support will be removed in the future.
@@ -423,6 +443,7 @@ public class DefaultBDXRLocator implements IPublisherLocator {
 
         /**
          * Sets the CNAME URL context. The locator will use this context to create the SMPs URL for the participant identifier.
+         *
          * @param context The CNAME URL context (default: /)
          * @return The builder instance
          * @deprecated The CNAME support is not specified in eDelivery profiles and support will be removed in the future.
@@ -447,6 +468,10 @@ public class DefaultBDXRLocator implements IPublisherLocator {
             }
             if (dnsLookup == null) {
                 dnsLookup = new DefaultDNSLookup.Builder().build();
+            }
+
+            if (resourceIdentifierFormatter == null) {
+                resourceIdentifierFormatter = new ParticipantIdentifierFormatter.Builder().initDefault().build();
             }
         }
     }
