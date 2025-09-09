@@ -47,6 +47,7 @@ public enum CliOptions {
     OPTION_KEYSTORE_FILEPATH("kf", "keystore-filepath", true, false, "Client TLS keystore file path"),
     OPTION_KEYSTORE_PASSWORD("kp", "keystore-password", true, false, "Client TLS keystore password"),
     OPTION_KEYSTORE_TYPE("kt", "keystore-type", true, false, "Client TLS keystore type: Default PKCS12"),
+    OPTION_NO_TLS_HOSTNAME_VALIDATION("nthv", "no-tls-hostname-validation", false, false, "if provided skip  hostname and the CN of the TLS server certificate validation"),
     OPTIONS_KEYSTORE_KEY_PASSWORD("kkp", "keystore-key-password", true, false, "Client TLS keystore alias password"),
     OPTIONS_JWT_AUTHORIZATION_SERVER_URL("jwta", "jwt-url", true, false, "JWT authorization server URL, used for JWT authentication"),
     OPTIONS_JWT_CLIENT_ID("jwtc", "jwt-client-id", true, false, "JWT client ID, used for JWT authentication"),
@@ -136,6 +137,7 @@ public enum CliOptions {
         options.addOption(OPTION_KEYSTORE_PASSWORD.getOption());
         options.addOption(OPTION_KEYSTORE_TYPE.getOption());
         options.addOption(OPTIONS_KEYSTORE_KEY_PASSWORD.getOption());
+        options.addOption(OPTION_NO_TLS_HOSTNAME_VALIDATION.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_NAME.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_VALUE.getOption());
         options.addOption(OPTIONS_SMP_URL.getOption());

@@ -212,7 +212,10 @@ public class DdcMain {
                 throw new IllegalArgumentException("Keystore key password is not defined");
             }
             testURLFetcherBuilder.tlsKeystore(keyStore, pwd.toCharArray());
+            testURLFetcherBuilder.noHostnameValidation(cmd.hasOption(OPTION_NO_TLS_HOSTNAME_VALIDATION.getOption()));
         }
+
+
 
         JwtTokenCredentialProvider jwtTokenCredentialProvider = buildJwtTokenCredentialProvider(cmd, truststore, keyStore);
         if (jwtTokenCredentialProvider != null) {
@@ -256,6 +259,7 @@ public class DdcMain {
         String jwtClientId = cmd.getOptionValue(OPTIONS_JWT_CLIENT_ID.getOption());
         String jwtScope = cmd.getOptionValue(OPTIONS_JWT_SCOPE.getOption());
         String passwd = cmd.getOptionValue(OPTIONS_KEYSTORE_KEY_PASSWORD.getOption());
+        boolean noTlsHostnameValidation = cmd.hasOption(OPTION_NO_TLS_HOSTNAME_VALIDATION.getOption());
         Args.notBlank(jwtAuthorizationUrl, "JWT authorization server URL");
         Args.notBlank(jwtClientId, "jwt claim: client id");
         Objects.requireNonNull(tlsKeystore, "tls keystore must not be null");
@@ -266,6 +270,7 @@ public class DdcMain {
                 .scopes(jwtScope)
                 .tlsKeystore(tlsKeystore, passwd.toCharArray())
                 .tlsTruststore(tlsTruststore)
+                .noHostnameValidation(noTlsHostnameValidation)
                 .build();
 // configure JWTCredentialProvider
         return new JwtTokenCredentialProvider.Builder()
