@@ -629,10 +629,12 @@ DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
 
 === Configure JWT authorization to  the Default Fetcher
 
-Following example configures the default fetcher with allowed TLS Cipher suites and TLS versions.
-The cipher suits names and TLS versions are supported and defined by JCE provider or JAVA version standard names:
+The following example demonstrates how to configure the default fetcher to retrieve a document from the SMP server
+using JWT-based authorization. The JWT token is obtained from the authorization server via TLS mutual authentication (mTLS).
 
-https://docs.oracle.com/en/java/javase/18/docs/specs/security/standard-names.html#sslcontext-algorithms
+In scenarios where binding between the JWT token and the client certificate is required; as specified in RFC 8705;
+the DefaultURLFetcher must be configured with both a keystore and truststore. This ensures proper mTLS setup with the
+SMP server, enabling SMP to validate DDC certificate with the JWT token.
 
 [source,java]
 ----
@@ -658,6 +660,8 @@ JwtTokenCredentialProvider jwtCredentialProvider = new JwtTokenCredentialProvide
 // configure DefaultURLFetcher with JWT authorization
 DefaultURLFetcher documentFetcher = new DefaultURLFetcher.Builder()
         .credentialProvider(jwtCredentialProvider)
+        .tlsKeystore(clientKeystore, PASSWD.toCharArray())  // the truststore and keystore are used for TLS mutual
+        .tlsTruststore(clientTruststore) // authentication to the SMP server when JWT token is used as described in RFC 8705
         .build();
 
 // fetcj the document using the DefaultURLFetcher
