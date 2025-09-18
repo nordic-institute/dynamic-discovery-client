@@ -35,6 +35,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,6 +162,37 @@ public class DefaultURLFetcherIT {
         FetcherResponse response = testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml"));
 
         assertNotNull(response);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "Correct alias, localhost, true, ",
+            "Wrong alias, wrongalias, false,'Error occurred while retrieving [/oasis-smp-1.0/extension.xml]'",
+            "Empty alias, '', false,'Error occurred while retrieving [/oasis-smp-1.0/extension.xml]'",
+            "Null alias, null, false,'Error occurred while retrieving [/oasis-smp-1.0/extension.xml]',"
+    })
+    void testSimpleHTTPSFetchWithAlias(String testDesc, String alias, boolean success, String errorMessage) throws Exception {
+        System.out.println(testDesc);
+        KeyStore clientKeystore = CommonUtil.loadKeystore("/truststore/server-keystore.p12", KEYSTORE_TYPE, PASSWD);
+        KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.p12", KEYSTORE_TYPE, PASSWD);
+        assertNotNull(clientTruststore);
+
+        DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
+                .httpSchemeEnabled(false)
+                .tlsKeystore(clientKeystore, alias, PASSWD.toCharArray())
+                .tlsTruststore(clientTruststore)
+                .build();
+
+        if (!success) {
+            ConnectionException result = assertThrows(ConnectionException.class, ()
+                    -> testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml")));
+            assertNotNull(result);
+            MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString(errorMessage));
+        }
+        else {
+            FetcherResponse response = testInstance.fetch(serverHTTPSUri.resolve("oasis-smp-1.0/extension.xml"));
+            assertNotNull(response);
+        }
     }
 
     @Test
