@@ -499,7 +499,7 @@ DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
 
 ==== Example: eDelivery SMP 2.0 with "eDelivery SMP 2 MAY" and eDelivery SMP 1.0 Fallback
 
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service. If parsing of the SMP 2.0 document fails, it will fallback to Oasis SMP 1.0 document.
 
 [source,java]
 ----
@@ -619,7 +619,7 @@ KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.
 
 DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
         .enableHttpScheme(false)
-        .tlsKeystore(clientKeystore, PASSWD.toCharArray())
+        .tlsKeystore(clientKeystore, CLIENT_CERT_ALIAS, KEY_PASSWD.toCharArray())
         .tlsTruststore(clientTruststore)
         .tlsCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
         .tlsVersions("TLSv1.2","TLSv1.3")
@@ -627,7 +627,7 @@ DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
 ----
 
 
-=== Configure JWT authorization to  the Default Fetcher
+=== Configure JWT authorization to the Default Fetcher
 
 The following example demonstrates how to configure the default fetcher to retrieve a document from the SMP server
 using JWT-based authorization. The JWT token is obtained from the authorization server via TLS mutual authentication (mTLS).
@@ -649,7 +649,7 @@ URI documentURI = URI.create("http://localhost:8080/smp/private-domain/ehealth-a
 // configure JWT authorization token fetcher
 JWTAuthorizationTokenFetcher fetcher = new JWTAuthorizationTokenFetcher.Builder()
         .clientId("my-client-id")
-        .tlsKeystore(tlsKeystore, PASSWD.toCharArray())
+        .tlsKeystore(tlsKeystore, CLIENT_CERT_ALIAS, KEY_PASSWD.toCharArray())
         .tlsTruststore(tlsTruststore)
         .build();
 // configure JWTCredentialProvider
@@ -660,7 +660,7 @@ JwtTokenCredentialProvider jwtCredentialProvider = new JwtTokenCredentialProvide
 // configure DefaultURLFetcher with JWT authorization
 DefaultURLFetcher documentFetcher = new DefaultURLFetcher.Builder()
         .credentialProvider(jwtCredentialProvider)
-        .tlsKeystore(clientKeystore, PASSWD.toCharArray())  // the truststore and keystore are used for TLS mutual
+        .tlsKeystore(clientKeystore, CLIENT_CERT_ALIAS, KEY_PASSWD.toCharArray())  // the truststore and keystore are used for TLS mutual
         .tlsTruststore(clientTruststore) // authentication to the SMP server when JWT token is used as described in RFC 8705
         .build();
 

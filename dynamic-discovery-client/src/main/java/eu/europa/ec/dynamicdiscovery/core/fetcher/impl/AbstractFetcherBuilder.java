@@ -33,6 +33,7 @@ import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.ssl.PrivateKeyStrategy;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.ssl.SSLContexts;
 
@@ -93,8 +94,33 @@ public abstract class AbstractFetcherBuilder<T extends AbstractFetcherBuilder<T>
         return self();
     }
 
+    /**
+     * Sets the keystore to be used for TLS client authentication.
+     * @param keystore the keystore containing the client certificate(s)
+     * @param password the password for the keys in the keystore
+     * @return the builder instance for method chaining
+     * @throws UnrecoverableKeyException if the key cannot be recovered (e.g., wrong password)
+     * @throws NoSuchAlgorithmException if the algorithm for recovering the key is not available
+     * @throws KeyStoreException if there is an issue with the keystore
+     */
     public T tlsKeystore(final KeyStore keystore, final char[] password) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
         this.sslContextBuilder.loadKeyMaterial(keystore, password);
+        return self();
+    }
+
+    /**
+     * Sets the keystore with a specific key alias to be used for TLS client authentication.
+     * @param keystore the keystore containing the client certificate
+     * @param alias the alias of the key to be used for authentication
+     * @param keyPassword the password for the key in the keystore
+     * @return the builder instance for method chaining
+     * @throws UnrecoverableKeyException if the key cannot be recovered (e.g., wrong password)
+     * @throws NoSuchAlgorithmException  if the algorithm for recovering the key is not available
+     * @throws KeyStoreException        if there is an issue with the keystore
+     */
+    public T tlsKeystore(final KeyStore keystore, String alias, final char[] keyPassword) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+        PrivateKeyStrategy pkStrategy = (map, socket) -> alias;
+        this.sslContextBuilder.loadKeyMaterial(keystore, keyPassword, pkStrategy);
         return self();
     }
 
