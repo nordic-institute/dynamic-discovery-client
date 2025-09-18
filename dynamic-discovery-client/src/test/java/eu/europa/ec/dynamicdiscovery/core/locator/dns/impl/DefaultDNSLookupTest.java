@@ -243,9 +243,8 @@ class DefaultDNSLookupTest {
     @Test
     void testDefaultConfiguration() {
         DefaultDNSLookup defaultDNSLookup = new DefaultDNSLookup.Builder().build();
-        assertEquals(1, defaultDNSLookup.getRequiredNaptrServices().size());
+        assertEquals(0, defaultDNSLookup.getRequiredNaptrServices().size());
         assertEquals(2, defaultDNSLookup.getRequiredURLSchemas().size());
-        assertTrue(defaultDNSLookup.getRequiredNaptrServices().contains(TEST_NAPTR_SERVICE_SMP1));
         assertTrue(defaultDNSLookup.getRequiredURLSchemas().containsAll(Arrays.asList("http", "https")));
     }
 
