@@ -20,7 +20,9 @@
 package eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.impl.AbstractExtension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,14 +40,30 @@ public class PeppolSMPExtension extends AbstractExtension {
     public static final String DEFAULT_SUBRESOURCE_URL_CONTEXT = "/services";
     public static final String DEFAULT_LOOKUP_SERVICE = "Meta:SMP";
 
-    final PeppolSMPServiceGroupReader serviceGroupReader;
-    final PeppolSMPServiceMetadataReader serviceMetadataReader;
+    List<String> serviceTypes;
+    String contextPath;
+    String subContextPath;
+    PeppolSMPServiceGroupReader serviceGroupReader;
+    PeppolSMPServiceMetadataReader serviceMetadataReader;
 
     public PeppolSMPExtension() {
-        this(false);
+        serviceTypes = Collections.singletonList(DEFAULT_LOOKUP_SERVICE);
+        contextPath = DEFAULT_PUBLISHER_URL_CONTEXT;
+        subContextPath = DEFAULT_SUBRESOURCE_URL_CONTEXT;
+        initParsers(false);
     }
 
-    public PeppolSMPExtension(boolean ignoreInvalidServices) {
+    protected PeppolSMPExtension(PeppolSMPExtension.Builder builder) {
+        this.contextPath = builder.contextPath != null ? builder.contextPath : DEFAULT_PUBLISHER_URL_CONTEXT;
+        this.subContextPath = builder.subContextPath != null ? builder.subContextPath : DEFAULT_SUBRESOURCE_URL_CONTEXT;
+        this.serviceTypes = new ArrayList<>(builder.naprServices);
+        if (this.serviceTypes.isEmpty()) {
+            this.serviceTypes.add(DEFAULT_LOOKUP_SERVICE);
+        }
+        initParsers(builder.ignoreInvalidServices);
+    }
+
+    protected void initParsers(boolean ignoreInvalidServices) {
         serviceGroupReader = new PeppolSMPServiceGroupReader();
         serviceMetadataReader = new PeppolSMPServiceMetadataReader(ignoreInvalidServices);
         parsers = Arrays.asList(serviceGroupReader, serviceMetadataReader);
@@ -57,21 +75,60 @@ public class PeppolSMPExtension extends AbstractExtension {
 
     @Override
     public List<String> lookupServices() {
-        return Collections.singletonList(DEFAULT_LOOKUP_SERVICE);
+        return serviceTypes;
     }
 
     @Override
     public String contextPath() {
-        return DEFAULT_PUBLISHER_URL_CONTEXT;
+        return contextPath;
     }
 
     @Override
     public String subContextPath() {
-        return DEFAULT_SUBRESOURCE_URL_CONTEXT;
+        return subContextPath;
     }
 
     @Override
     public String getExtensionIdentifier() {
         return "peppol-smp-1";
+    }
+
+    /**
+     * Builder for {@link OasisSMP10Extension}
+     */
+    public static class Builder {
+        private boolean ignoreInvalidServices = false;
+        private List<String> naprServices = new ArrayList<>();
+        private String contextPath;
+        private String subContextPath;
+
+        public PeppolSMPExtension.Builder ignoreInvalidServices(boolean ignoreInvalidServices) {
+            this.ignoreInvalidServices = ignoreInvalidServices;
+            return this;
+        }
+
+        public PeppolSMPExtension.Builder addNaptrService(String service) {
+            this.naprServices.add(service);
+            return this;
+        }
+
+        public PeppolSMPExtension.Builder addNaptrServices(String... services) {
+            this.naprServices.addAll(Arrays.asList(services));
+            return this;
+        }
+
+        public PeppolSMPExtension.Builder contextPath(String contextPath) {
+            this.contextPath = contextPath;
+            return this;
+        }
+
+        public PeppolSMPExtension.Builder subContextPath(String subContextPath) {
+            this.subContextPath = subContextPath;
+            return this;
+        }
+
+        public PeppolSMPExtension build() {
+            return new PeppolSMPExtension(this);
+        }
     }
 }

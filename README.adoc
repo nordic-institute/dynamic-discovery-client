@@ -453,6 +453,28 @@ DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
         .build();
 ----
 
+==== Example: eDelivery SMP 1.0 Only with additional  NAPTR services for the lookup
+
+Please note that extensions have properties where you can configure multiple NAPTR services to be used for lookup for the extension.
+[source,java]
+----
+OasisSMP20Extension extension = new OasisSMP20Extension.Builder()
+                .addNaptrServices( "oasis-bdxr-smp-2")
+                .addNaptrService("Meta:SMP")
+                .addNaptrService("x-einvoice")
+                .build();
+
+----
+
+When an extension is registered with the DynamicDiscoveryService (DDC), the client will prioritize and use the NAPTR services in the order specified by the extension.
+
+However, if NAPTR services are already defined in the DefaultBDXRLocator as well, the locator will use its own service definitions for the lookup—ignoring those from the extension.
+
+⚠️ Important Note: The extension will only be activated if the lookup results match the services defined within the extension. If the DefaultBDXRLocator and the extension specify different NAPTR services, the extension will not be triggered, as none of the lookup results will align with the extension's configuration.
+
+To ensure the extension is used, you can leave the DefaultBDXRLocator empty. In that case, the DDS will automatically apply the NAPTR services from the extension to the locator.
+
+
 ==== Example: eDelivery SMP 2.0 Only
 
 Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains and only NAPTR DNS records with service "oasis-bdxr-smp-2". The NAPTR service is "oasis-bdxr-smp-2" and is defined by the OasisSMP20Extension.
@@ -784,7 +806,7 @@ The DefaultDNSLookup is implementation of the IDNSLookup interface. This is DNSJ
 Below is a list of configuration options:
 
 - **requiredURLSchemas**: (Default: "http" and "https" ) Only results with the given URL schema will be returned. If the lookup discovers publisher URL with different schema, the result is ignored.
-- **requiredNaptrServices**: (Default: "Meta:SMP) When using NAPTR lookup, results with the given NAPTR service will be returned and all other naptr records are ignored. Example if the NAPTR record has service "meta:cppa3" and required services are "Meta:SMP" and "oasis-bdxr-smp-2" the result is ignored." The service name is case-insensitive.  The returned results follows the order of the required service list.
+- **requiredNaptrServices**: (Default: "empty) When using NAPTR lookup, results with the given NAPTR service will be returned and all other naptr records are ignored. Example if the NAPTR record has service "meta:cppa3" and required services are "Meta:SMP" and "oasis-bdxr-smp-2" the result is ignored." The service name is case-insensitive.  The returned results follows the order of the required service list. When the list is empty, it returns all naptr records
 - **requiredNaptrFlagsList**: (Default: "u") When using NAPTR lookup, results with the given NAPTR flags will be returned and all other naptr records are ignored.
 
 == StaticMapMetadataLocator

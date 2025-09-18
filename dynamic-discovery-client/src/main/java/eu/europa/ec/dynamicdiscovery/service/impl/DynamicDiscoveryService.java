@@ -27,6 +27,8 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.PublisherRequest;
 import eu.europa.ec.dynamicdiscovery.core.provider.WildcardUtil;
@@ -391,9 +393,22 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * @throws DNSLookupException               if the participant's SMP address can not be resolved
      */
     private List<PublisherLookupResult> lookupPublisherAddresses(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+
         if (publisherLocator == null) {
             throw new DDCInvalidConfigurationException("Missing metadataLocator. The locator is required to lookup the participant's SMP address");
         }
+        // if lookup is DefaultBDXRLocator, set the required NAPTR services from extensions if not already set
+        if (publisherLocator instanceof DefaultBDXRLocator) {
+            if (((DefaultBDXRLocator)publisherLocator).getDnsLookup() instanceof DefaultDNSLookup ){
+                DefaultDNSLookup lookup = (DefaultDNSLookup) ((DefaultBDXRLocator)publisherLocator).getDnsLookup();
+                if (lookup.getRequiredNaptrServices().isEmpty()){
+                    List<String> naptrServices = getOrderedNaptrServicesForExtensions();
+                    LOG.info("Setting required NAPTR services to: [{}].", naptrServices);
+                    lookup.setRequiredNaptrServices(naptrServices);
+                }
+            }
+        }
+
         List<PublisherLookupResult> results = publisherLocator.lookup(participantIdentifier);
         if (results.isEmpty()) {
             throw new DNSLookupException(DDCExceptionCode.SERVICE_GROUP, "The SMP URL value for participant [" + participantIdentifier + "] can not be resolved!");
@@ -401,6 +416,22 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         //
         LOG.debug("Got SMP address results: [{}] for participant: [{}].", results, participantIdentifier);
         return results;
+    }
+
+    /**
+     * Get all naptr services from registered extensions in the order of the extensions.
+     * @return list of target  naptr services
+     */
+    protected List<String> getOrderedNaptrServicesForExtensions() {
+        List<String> naptrServices = new ArrayList<>();
+        for (IExtension extension : listExtensions) {
+            for (String service : extension.lookupServices()) {
+                if (!naptrServices.contains(service)) {
+                    naptrServices.add(service);
+                }
+            }
+        }
+        return naptrServices;
     }
 
     /**
@@ -596,6 +627,12 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             return this;
         }
 
+        /**
+         *  Add extensions by class names. The classes must implement the IExtension interface and have a default constructor.
+         *
+         * @param extensionClassNames
+         * @return
+         */
         public Builder addExtensionsForClassNames(String... extensionClassNames) {
             for (String className : extensionClassNames) {
                 try {
