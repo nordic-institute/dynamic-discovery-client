@@ -34,12 +34,12 @@ import org.xbill.DNS.Lookup;
 import org.xbill.DNS.NAPTRRecord;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.SimpleResolver;
 
 import java.net.URI;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
-import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * Default implementation of the {@link IDNSLookup} interface.
@@ -56,11 +56,15 @@ public class DefaultDNSLookup implements IDNSLookup {
     final List<String> requiredURLSchemas;
     final List<String> requiredNaptrServices;
     final List<String> requiredNaptrFlags;
+    final String nameserver;
+    final Integer nameserverPort;
 
     protected DefaultDNSLookup(Builder builder) {
         this.requiredURLSchemas = new ArrayList<>(builder.requiredURLSchemas);
         this.requiredNaptrServices = new ArrayList<>(builder.requiredNaptrServices);
         this.requiredNaptrFlags = new ArrayList<>(builder.requiredNaptrFlags);
+        this.nameserver = builder.nameserver;
+        this.nameserverPort = builder.nameserverPort;
     }
 
 
@@ -224,6 +228,16 @@ public class DefaultDNSLookup implements IDNSLookup {
         Lookup lookupClient;
         try {
             lookupClient = new Lookup(uri, dnsType);
+
+            if (StringUtils.isNotBlank(nameserver) ||  nameserverPort != null) {
+                String localNameserver = StringUtils.isNotBlank(nameserver)?StringUtils.trim(nameserver): "localhost";
+                int port = nameserverPort != null? nameserverPort:53;
+                LOG.debug("Using DNS nameserver: [{}:{}] for DNS lookup", localNameserver, port);
+                SimpleResolver resolver = new SimpleResolver(localNameserver ); // localhost's DNS
+                resolver.setPort(port);
+                lookupClient.setResolver(resolver);
+            }
+
             lookupClient.setCache(null);
             records = lookupClient.run();
 
@@ -256,6 +270,8 @@ public class DefaultDNSLookup implements IDNSLookup {
         List<String> requiredURLSchemas = new ArrayList<>();
         List<String> requiredNaptrServices = new ArrayList<>();
         List<String> requiredNaptrFlags = new ArrayList<>();
+        String nameserver;
+        Integer nameserverPort;
 
         public DefaultDNSLookup.Builder addRequiredNaptrURLSchema(String schema) {
             this.requiredURLSchemas.add(StringUtils.removeEnd(schema, ":"));
@@ -288,6 +304,16 @@ public class DefaultDNSLookup implements IDNSLookup {
 
         public DefaultDNSLookup.Builder addRequiredNaptrFlags(List<String> flags) {
             this.requiredNaptrFlags.addAll(flags);
+            return this;
+        }
+
+        public Builder nameserver(String nameserver) {
+            this.nameserver = nameserver;
+            return this;
+        }
+
+        public Builder nameserverPort(Integer nameserverPort) {
+            this.nameserverPort = nameserverPort;
             return this;
         }
 

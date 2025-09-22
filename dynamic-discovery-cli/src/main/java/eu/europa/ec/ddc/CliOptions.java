@@ -35,6 +35,9 @@ public enum CliOptions {
     OPTION_SUBRESOURCE_IDENTIFIER("si", "subresource-identifier", true, false, "Subresource identifier: ex: Invoice"),
     OPTION_SUBRESOURCE_SCHEME("ss", "subresource-scheme", true, false, "Subresource scheme :org:xml"),
     OPTION_DNS_DOMAIN("d", "domain", true, false, "Network DNS domain: eq.: acc.edelivery.tech.ec.europa.eu"),
+    OPTION_DNS_NAMESERVER("n", "nameserver", true, false, "Network DNS nameserver, if not provided system default is used"),
+    OPTION_DNS_NAMESERVER_PORT("p", "port", true, false, "Network DNS nameserver port, if not provided system default is used"),
+
     OPTION_NAPTR_SERVICE("s", "services", true, false, "Comma separated NAPTR service value as: Meta:SMP,meta:cppa"),
     OPTION_OUTPUT("o", "output", true, false, "Output filename. If file already exists it is overwritten." +
             " If not provided, output is printed to console"),
@@ -109,6 +112,8 @@ public enum CliOptions {
         options.addOption(OPTION_DNS_DOMAIN.getOption());
         options.addOption(OPTION_RECORD_TYPE.getOption());
         options.addOption(OPTION_NAPTR_SERVICE.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER_PORT.getOption());
         return options;
     }
 
@@ -129,6 +134,8 @@ public enum CliOptions {
         options.addOption(OPTION_RECORD_TYPE.getOption());
         options.addOption(OPTION_NAPTR_SERVICE.getOption());
         options.addOption(OPTION_OUTPUT.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER_PORT.getOption());
 
         options.addOption(OPTION_TRUSTSTORE_FILEPATH.getOption());
         options.addOption(OPTION_TRUSTSTORE_PASSWORD.getOption());
