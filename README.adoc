@@ -427,15 +427,15 @@ DynamicDiscoverySevice smpClient = new DynamicDiscoverySevice.Builder()
 The new eDelivery SMP 2.0 profile identifies the NAPTR record using the service "oasis-bdxr-smp-2" and provides support for the legacy service "Meta:SMP" as a fallback. The DDC can be configured to support eDelivery SMP 1.0 and eDelivery SMP 2.0 profiles at the same time.
 By utilizing the OasisSMP10Extension and OasisSMP20Extension, the DDC allows configuration of the following options:
 
-* **eDelivery SMP 1.0 Only**: The client uses NAPTR DNS records with the service "Meta:SMP" and accepts only Oasis SMP 1.0 documents.
-* **eDelivery SMP 2.0 Only**: The client uses NAPTR DNS records with the service "oasis-bdxr-smp-2" and accepts only Oasis SMP 2.0 documents.
-* **eDelivery SMP 2.0 with "eDelivery SMP 2 MAY"**: The client accepts only Oasis SMP 2.0 documents and primarily uses NAPTR DNS records with the service "oasis-bdxr-smp-2." If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
-* **eDelivery SMP 2.0 with 1.0 Fallback**: The client accepts Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If these documents are unavailable, it will fall back to the "Meta:SMP" service and Oasis SMP 1.0 documents.
-* **eDelivery SMP 2.0 with "eDelivery SMP 2 MAY" and 1.0 Fallback**: The client first attempts to retrieve Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If this attempt fails, it falls back to the "Meta:SMP" service. Should both approaches be unsuccessful, the client will make a final attempt by using the Oasis SMP 1.0 profile process to retrieve the documents.
+* **Standard-compliant eDelivery SMP 1.0 discovery**: The client uses NAPTR DNS records with the service "Meta:SMP" and accepts only Oasis SMP 1.0 documents.
+* **Standard-compliant eDelivery SMP 2.0 discovery**: The client uses NAPTR DNS records with the service "oasis-bdxr-smp-2" and accepts only Oasis SMP 2.0 documents.
+* **Standard-compliant eDelivery SMP 2.0 discovery with DNS lookup fallback using 'Meta:SMP' NAPTR service**: The client accepts only Oasis SMP 2.0 documents and primarily uses NAPTR DNS records with the service "oasis-bdxr-smp-2." If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+* **Standard-compliant eDelivery SMP 2.0 discovery with fallback on standard compliant SMP 1.0 discovery**: The client accepts Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If these documents are unavailable, it will fall back to the "Meta:SMP" service and Oasis SMP 1.0 documents.
+* **Standard-compliant eDelivery SMP 2.0 discovery with DNS lookup fallback using 'Meta:SMP' or on standard compliant SMP 1.0 discovery**: The client first attempts to retrieve Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2". If this attempt fails, it falls back to the "Meta:SMP" service. Should both approaches be unsuccessful, the client will make a final attempt by using the Oasis SMP 1.0 profile process to retrieve the documents.
 
-==== Example: eDelivery SMP 1.0 Only
+==== Example: Standard-compliant eDelivery SMP 1.0 discovery
 
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains and only NAPTR DNS records with service "Meta:SMP" The NAPTR service is "Meta:SMP" and is defined by the OasisSMP10Extension.
+The *DefaultBDXRLocator* is configured to resolve the SMP URI using a PartyIdentifier within the DNS zone "acc.edelivery.tech.ec.europa.eu". It performs this resolution by querying NAPTR DNS records that specify the service "Meta:SMP". Once the SMP endpoint is located, the response is parsed as an *OASIS SMP 1.0 document*. Note: The "Meta:SMP" NAPTR service lookup is defined as default naptr service value by the *OasisSMP10Extension*.
 
 [source,java]
 ----
@@ -453,7 +453,27 @@ DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
         .build();
 ----
 
-==== Example: eDelivery SMP 1.0 Only with additional  NAPTR services for the lookup
+==== Example: Standard-compliant eDelivery SMP 2.0 discovery
+
+The *DefaultBDXRLocator* is configured to resolve the SMP URI using a PartyIdentifier within the DNS zone "acc.edelivery.tech.ec.europa.eu". It performs this resolution by querying NAPTR DNS records that specify the service "oasis-bdxr-smp-2". Once the SMP endpoint is located, the response is parsed as an *OASIS SMP 2.0 document*. Note: The "oasis-bdxr-smp-2" NAPTR service lookup is defined as default naptr service value by the *OasisSMP20Extension*.
+
+[source,java]
+----
+DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+        .addExtension(new OasisSMP20Extension())
+        .publisherLocator(new DefaultBDXRLocator.Builder()
+                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                .addDnsLookupType(DNSLookupType.NAPTR)
+                .dnsLookup(defaultDNSLookup)
+                .build())
+        .documentReader(new DefaultBDXRReader.Builder()
+                .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
+                .build())
+        .documentFetcher(urlFetcherURL)
+        .build();
+----
+
+==== Example: eDelivery SMP 2.0 document with additional NAPTR services for the DNS lookup
 
 Please note that extensions have properties where you can configure multiple NAPTR services to be used for lookup for the extension.
 [source,java]
@@ -475,29 +495,10 @@ However, if NAPTR services are already defined in the DefaultBDXRLocator as well
 To ensure the extension is used, you can leave the DefaultBDXRLocator empty. In that case, the DDS will automatically apply the NAPTR services from the extension to the locator.
 
 
-==== Example: eDelivery SMP 2.0 Only
+==== Example: Standard-compliant eDelivery SMP 2.0 discovery with DNS lookup fallback using 'Meta:SMP' NAPTR service
 
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains and only NAPTR DNS records with service "oasis-bdxr-smp-2". The NAPTR service is "oasis-bdxr-smp-2" and is defined by the OasisSMP20Extension.
-
-[source,java]
-----
-DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
-        .addExtension(new OasisSMP20Extension())
-        .publisherLocator(new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
-                .addDnsLookupType(DNSLookupType.NAPTR)
-                .dnsLookup(defaultDNSLookup)
-                .build())
-        .documentReader(new DefaultBDXRReader.Builder()
-                .signatureValidator(new DefaultSignatureValidator(CommonUtil.loadTrustStore("truststore/truststoreForTrustedCertificate.ts")))
-                .build())
-        .documentFetcher(urlFetcherURL)
-        .build();
-----
-
-==== Example: eDelivery SMP 2.0 with "eDelivery SMP 2 MAY"
-
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service. To enable DNS lookup fallback using 'Meta:SMP' the property *smp10LookupNaptrServiceEnabled* of the *OasisSMP20Extension* must be set to true.
+Another option is to set multiple NAPTR services in the *DefaultBDXRLocator* as described in the previous example.
 
 [source,java]
 ----
@@ -519,7 +520,7 @@ DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
         .build();
 ----
 
-==== Example: eDelivery SMP 2.0 with "eDelivery SMP 2 MAY" and eDelivery SMP 1.0 Fallback
+==== Either eDelivery SMP 2.0 or 1.0 NAPTR service to retrieve eDelivery SMP 2.0 document, with fallback to 1.0 NAPTR service and document
 
 Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service. If parsing of the SMP 2.0 document fails, it will fallback to Oasis SMP 1.0 document.
 
