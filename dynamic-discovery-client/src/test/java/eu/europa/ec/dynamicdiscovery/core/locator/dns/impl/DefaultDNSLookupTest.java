@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static eu.europa.ec.dynamicdiscovery.util.DNSUtils.*;
+import static eu.europa.ec.dynamicdiscovery.util.DNSUtils.TEST_NAPTR_SERVICE_SMP1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -181,7 +181,8 @@ class DefaultDNSLookupTest {
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("naptrValueExamplesArguments")
-    void testResolveNaptrValue(String name, String regularExpression, String hostname, String expectedResult){
+    void testResolveNaptrValue(String name, String regularExpression, String hostname, String expectedResult) {
+        System.out.println(name);
         DefaultDNSLookup testInstance = Mockito.spy(new DefaultDNSLookup.
                 Builder().build());
 
@@ -208,10 +209,10 @@ class DefaultDNSLookupTest {
                 .when(testInstance)
                 .getAllNaptrRecords(any(SMPParticipantIdentifier.class), anyString());
 
-        List<PublisherLookupResult> result =  testInstance.naptrUrlValueLookup(identifier, testUri);
+        List<PublisherLookupResult> result = testInstance.naptrUrlValueLookup(identifier, testUri);
 
         assertEquals(expectedResultCount, result.size());
-        if (expectedResultCount > 0){
+        if (expectedResultCount > 0) {
             assertEquals(expectedResult, result.get(0).getUrl().toString());
         }
     }
@@ -237,7 +238,6 @@ class DefaultDNSLookupTest {
         assertEquals(1, result.size());
         assertEquals(expectedResult, result.get(0).getUrl().toString());
     }
-
 
 
     @Test

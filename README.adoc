@@ -725,6 +725,22 @@ SMPServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIde
 SMPEndpoint endpoint = serviceMetadata.getEndpoints().get(0);
 ----
 
+== Define target DNS server for lookup
+
+The Dynamic Discovery Client (DDC) performs DNS lookups using the system-configured DNS server by default. To override this behavior, users can supply a custom implementation of the DefaultBDXRLocator, enabling the use of a specific DNS server for resolution.
+Example of configuring a custom DNS server:
+[source,java]
+----
+ DefaultBDXRLocator testBDXRLocator = new DefaultBDXRLocator.Builder()
+                    .dnsLookup(new DefaultDNSLookup.Builder()
+                            .nameserverPort(port)
+                            .nameserver(nameserver).build())
+                    .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                    .addDnsLookupTypes(Collections.singletonList(DNSLookupType.NAPTR))
+                    .build();
+
+----
+
 
 === Certificate Pinning/Whitelisting: A Security Technique for Validating Digital Certificates
 
@@ -809,6 +825,10 @@ Below is a list of configuration options:
 - **requiredURLSchemas**: (Default: "http" and "https" ) Only results with the given URL schema will be returned. If the lookup discovers publisher URL with different schema, the result is ignored.
 - **requiredNaptrServices**: (Default: "empty) When using NAPTR lookup, results with the given NAPTR service will be returned and all other naptr records are ignored. Example if the NAPTR record has service "meta:cppa3" and required services are "Meta:SMP" and "oasis-bdxr-smp-2" the result is ignored." The service name is case-insensitive.  The returned results follows the order of the required service list. When the list is empty, it returns all naptr records
 - **requiredNaptrFlagsList**: (Default: "u") When using NAPTR lookup, results with the given NAPTR flags will be returned and all other naptr records are ignored.
+- **nameserver**: (Default: null) The DNS server address. If just nameserver is provided without port, the default DNS port 53 is used (If Port nad nameserver are not provided, the default system DNS configuration is used).
+- **nameserverPort**: (Default: null) The DNS server port (If just port is provided without nameserver, the localhost is used as nameserver host) (If Port nad nameserver are not provided, the default system DNS configuration is used).
+
+
 
 == StaticMapMetadataLocator
 
