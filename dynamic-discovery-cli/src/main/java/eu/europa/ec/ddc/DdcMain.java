@@ -77,7 +77,7 @@ public class DdcMain {
         Options commands = CliOptions.getCommandList();
 
         CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = null;//not a good practice, it serves it purpose
+        CommandLine cmd;//not a good practice, it serves it purpose
 
         try {
             cmd = parser.parse(commands, args, true);
@@ -168,6 +168,12 @@ public class DdcMain {
         // read parameters
         SMPParticipantIdentifier participantIdentifier = getResourceIdentifier(cmd);
         String domain = cmd.getOptionValue(OPTION_DNS_DOMAIN.getOption());
+        String nameserver = cmd.getOptionValue(OPTION_DNS_NAMESERVER.getOption());
+        String nameserverPort  = cmd.getOptionValue(OPTION_DNS_NAMESERVER_PORT.getOption());
+        Integer port = null;
+        if (StringUtils.isNotEmpty(nameserverPort)) {
+            port = Integer.parseInt(nameserverPort);
+        }
         String smpurl = cmd.getOptionValue(OPTIONS_SMP_URL.getOption());
         List<String> naptrServices = getNaptrServices(cmd);
         List<DNSLookupType> dnsLookupTypes = getDNSLookupTypes(cmd);
@@ -189,6 +195,8 @@ public class DdcMain {
         if (StringUtils.isBlank(smpurl)) {
             // configure DNS lookup client if SMP URL is not provided
             DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
+                    .nameserverPort(port)
+                    .nameserver(nameserver)
                     .addRequiredNaptrServices(naptrServices)
                     .build();
             // configure BDXR locator
@@ -299,9 +307,17 @@ public class DdcMain {
         String domain = cmd.getOptionValue("domain");
         List<String> naptrServices = getNaptrServices(cmd);
         List<DNSLookupType> dnsLookupTypes = getDNSLookupTypes(cmd);
+        String nameserver = cmd.getOptionValue(OPTION_DNS_NAMESERVER.getOption());
+        String nameserverPort  = cmd.getOptionValue(OPTION_DNS_NAMESERVER_PORT.getOption());
+        Integer port = null;
+        if (StringUtils.isNotEmpty(nameserverPort)) {
+            port = Integer.parseInt(nameserverPort);
+        }
 
         // configure ddc client
         DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
+                .nameserverPort(port)
+                .nameserver(nameserver)
                 .addRequiredNaptrServices(naptrServices)
                 .build();
 
