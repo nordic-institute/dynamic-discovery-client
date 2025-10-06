@@ -272,7 +272,7 @@ public class DefaultURLFetcherIT {
     }
 
     @Test
-    //@Disabled("TODO: Error since new jakarta EE 10 and httpclient 5.4.1")
+    @Disabled("TODO: Error since httpclient 5.4.1+")
     void testDisableHTTP() {
 
         DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
