@@ -86,12 +86,12 @@
         <junit-platform-surefire-provider.version>1.3.2</junit-platform-surefire-provider.version>
         <junit.version>5.14.0</junit.version>
         <mockito.version>5.2.0</mockito.version>
-        <net.bytebuddy.version>1.17.7</net.bytebuddy.version>
+        <net.bytebuddy.version>1.17.8</net.bytebuddy.version>
         <org.eclipse.jetty.version>11.0.26</org.eclipse.jetty.version>
         <org.glassfish.jaxb.jaxb-runtime.version>4.0.6</org.glassfish.jaxb.jaxb-runtime.version>
         <saxon-he.version>12.4</saxon-he.version>
         <slf4j.version>2.0.17</slf4j.version>
-        <spring-test.version>6.2.11</spring-test.version>
+        <spring-test.version>6.2.12</spring-test.version>
         <!-- documentation dependencies -->
         <asciidoctor.maven.plugin.version>3.2.0</asciidoctor.maven.plugin.version>
         <asciidoctorj.version>3.0.0</asciidoctorj.version>
@@ -100,7 +100,7 @@
         <jruby.version>9.4.14.0</jruby.version>
         <!-- plugins -->
         <plugin.dependency-check-maven.version>11.1.1</plugin.dependency-check-maven.version>
-        <plugin.jacoco-maven-plugin.version>0.8.13</plugin.jacoco-maven-plugin.version>
+        <plugin.jacoco-maven-plugin.version>0.8.14</plugin.jacoco-maven-plugin.version>
         <plugin.jaxb2-maven-plugin.version>3.3.0</plugin.jaxb2-maven-plugin.version>
         <plugin.jbuild-helper-maven-plugin.version>3.6.1</plugin.jbuild-helper-maven-plugin.version>
         <plugin.license-maven-plugin.version>2.7.0</plugin.license-maven-plugin.version>
