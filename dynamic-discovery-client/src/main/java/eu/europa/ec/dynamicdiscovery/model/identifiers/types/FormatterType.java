@@ -98,7 +98,6 @@ public interface FormatterType {
      * Feature which enables/disables wildcard support. If enabled, the formatter will use wildcard character '* when generating DNS lookup if that
      * is set in the identifier value, else it will use the actual value.
      * The feature was specific for Peppol SMP technical specification and is deprecated.
-     * @return true if wildcard is enabled, else false
      */
     @Deprecated
     void setWildcardEnabled(boolean wildcardEnabled);
@@ -223,8 +222,12 @@ public interface FormatterType {
         if (valueMaxLength != null && valueMaxLength < length(trimmedValue)) {
             throw new MalformedIdentifierException("A identifier value MUST NOT exceed " + valueMaxLength + " characters!");
         }
+        if (isWildcardEnabled() && StringUtils.equals("*", trimmedValue)) {
+            return;
+        }
+
         Pattern valueValidationPattern = getValueValidationPattern();
-        if (trimmedValue != null && valueValidationPattern != null && !valueValidationPattern.matcher(trimmedValue).matches()) {
+        if (valueValidationPattern != null && !valueValidationPattern.matcher(trimmedValue).matches()) {
             throw new MalformedIdentifierException(String.format("Identifier value [" + trimmedValue + "] is illegal."));
         }
     }

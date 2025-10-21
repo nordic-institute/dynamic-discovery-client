@@ -50,6 +50,7 @@ import static eu.europa.ec.dynamicdiscovery.util.DNSUtils.createMockPublisherLoo
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 
 class DynamicDiscoveryServiceImplTest {
 
@@ -92,12 +93,12 @@ class DynamicDiscoveryServiceImplTest {
         assertNotNull(serviceMetadataStream);
         // given
         List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(new SMPParticipantIdentifier(processIdentifierValue, processIdentifierScheme), smpURI);
-        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
-        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(Mockito.any());
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
+        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
         // when
         SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
-                processIdentifierValue, processIdentifierScheme, transportProfileID);
+                processIdentifierValue, processIdentifierScheme, List.of(transportProfileID));
         // then
         assertNotNull(endpoint);
         assertNotNull(endpoint.getTransportProfile());
@@ -123,6 +124,7 @@ class DynamicDiscoveryServiceImplTest {
 
         String anyString = "anyString";
         String smpURI = "http://example.local:1234/";
+        List<String> anyTransportProfile = List.of("transportProfile");
         FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
         SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
         SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
@@ -130,14 +132,14 @@ class DynamicDiscoveryServiceImplTest {
         assertNotNull(serviceMetadataStream);
         // given
         List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
-        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
-        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(Mockito.any());
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
+        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
 
         // when
         testInstance.setRedirectionEnabled(false); // make sure it is disabled
         SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
-                anyString, anyString, anyString);
+                anyString, anyString, anyTransportProfile);
         // then
         assertNotNull(endpoint);
         assertNotNull(endpoint.getRedirect());
@@ -172,18 +174,18 @@ class DynamicDiscoveryServiceImplTest {
 
         // given
         List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
-        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
         // first return serviceMetadataStream and then serviceMetadataRedirectedStream
-        Mockito.doReturn(fetcherResponse1, fetcherResponse2).when(metadataFetcher).fetch(Mockito.any());
+        Mockito.doReturn(fetcherResponse1, fetcherResponse2).when(metadataFetcher).fetch(any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse1).getInputStream();
         Mockito.doReturn(serviceMetadataRedirectedStream).when(fetcherResponse2).getInputStream();
 
         // when
         testInstance.setRedirectionEnabled(true); // make sure it is enabled
         SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
-                processIdentifierValue, processIdentifierScheme, transportProfileID);
+                processIdentifierValue, processIdentifierScheme, List.of(transportProfileID));
         // then
-        Mockito.verify(metadataFetcher, Mockito.times(2)).fetch(Mockito.any());
+        Mockito.verify(metadataFetcher, Mockito.times(2)).fetch(any());
         assertNotNull(endpoint);
         assertNotNull(endpoint.getTransportProfile());
         assertNotNull(endpoint.getProcessIdentifier());
@@ -228,8 +230,8 @@ class DynamicDiscoveryServiceImplTest {
         assertNotNull(serviceMetadataStream);
         // given
         List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
-        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(Mockito.any());
-        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(Mockito.any());
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
+        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(any());
         Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
 
         // when

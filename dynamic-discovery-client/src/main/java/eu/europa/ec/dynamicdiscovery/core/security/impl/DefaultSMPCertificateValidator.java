@@ -89,7 +89,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
         LOG.debug("Certificate % is valid and trusted [{}].", certName);
     }
 
-    private void validateCertificateSubjectMatch(X509Certificate certificate, SignatureValidationContext context) throws CertificateException {
+    protected void validateCertificateSubjectMatch(X509Certificate certificate, SignatureValidationContext context) throws CertificateException {
         if (context == null) {
             throw new CertificateException("SignatureValidationContext is null!");
         }
@@ -105,7 +105,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
         LOG.debug("Certificate subject UID [{}] matches the provided certificate subject",  certificateUUID );
     }
 
-    private void validateCertificateWithTrustedList(X509Certificate certificate, SignatureValidationContext context, String certName) throws CertificateException {
+    protected void validateCertificateWithTrustedList(X509Certificate certificate, SignatureValidationContext context, String certName) throws CertificateException {
         if (context == null) {
             throw new CertificateException("SignatureValidationContext is null!");
         }
@@ -127,7 +127,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
      * @param signerCertificate
      * @throws CertificateException
      */
-    private void verifyCertificateSubject(X509Certificate signerCertificate) throws CertificateException {
+    protected void verifyCertificateSubject(X509Certificate signerCertificate) throws CertificateException {
         if (regexCertificateSubjectValidation != null) {
             String patternString = regexCertificateSubjectValidation.pattern();
             String subject = signerCertificate.getSubjectX500Principal().toString();
@@ -150,7 +150,7 @@ public class DefaultSMPCertificateValidator implements ISMPCertificateValidator 
      * @param signedCertificate
      * @throws CertificateException
      */
-    private void verifyTrust(X509Certificate signedCertificate) throws CertificateException {
+    protected void verifyTrust(X509Certificate signedCertificate) throws CertificateException {
         try {
             for (String signerCertificateAlias : Collections.list(trustStore.aliases())) {
 

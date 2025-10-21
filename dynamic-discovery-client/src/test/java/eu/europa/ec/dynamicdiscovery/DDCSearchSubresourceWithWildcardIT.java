@@ -28,7 +28,7 @@ import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.ISignatureValidator;
-import eu.europa.ec.dynamicdiscovery.exception.DNSFetchException;
+import eu.europa.ec.dynamicdiscovery.exception.DDCFetchException;
 import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
@@ -138,7 +138,7 @@ void testSubresourceWildcardDiscoveryOK( String name,
                 identifier,
                 WILDCARD_SCHEME);
 
-        DNSFetchException result = assertThrows(DNSFetchException.class, () -> getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, null, WILDCARD_SCHEME));
+        DDCFetchException result = assertThrows(DDCFetchException.class, () -> getDocumentWithWildcardSchemeAndAssert(urlFetcherURL, smpDocumentIdentifierToCheck, null, WILDCARD_SCHEME));
         assertThat(result.getMessage(), containsString("Can not resolve wildcard identifier"));
     }
 

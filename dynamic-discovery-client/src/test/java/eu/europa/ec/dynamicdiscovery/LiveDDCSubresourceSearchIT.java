@@ -271,7 +271,7 @@ public class LiveDDCSubresourceSearchIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notSupported",
                 BUSDOX_DOCID_QNS);
 
-        DNSFetchException result = assertThrows(DNSFetchException.class,
+        DDCFetchException result = assertThrows(DDCFetchException.class,
                 () -> smpClient.getSubresource(toCheckParticipantIdentifier, documentIdentifierNotRegisteredForParticipantBusdox));
         assertThat(result.getMessage(), containsString("Can not fetch document [" + documentIdentifierNotRegisteredForParticipantBusdox+"]"));
     }
@@ -330,7 +330,7 @@ public class LiveDDCSubresourceSearchIT {
                 "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##notExistent",
                 PEPPOL_DOCTYPE_WILDCARD);
 
-        final DNSFetchException exception = assertThrows(DNSFetchException.class,
+        final DDCFetchException exception = assertThrows(DDCFetchException.class,
                 () -> smpClient.getSubresource(toCheckParticipantIdentifier, toCheckDocumentIdentifier));
         assertEquals(DDCExceptionCode.FETCH_EXCEPTION, exception.getSmpExceptionCode());
         assertThat(exception.getMessage(), containsString("Can not resolve wildcard identifier "));

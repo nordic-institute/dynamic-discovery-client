@@ -105,7 +105,10 @@ class OasisSMP20ExtensionTest {
     })
     void testSetSMP10LookupNaptrServiceEnabled(String initServices, boolean enable, boolean expectedResult, String finalServices) {
         // given
-        OasisSMP20Extension testInstance = new OasisSMP20Extension(false, initServices.split(","));
+        OasisSMP20Extension testInstance = new OasisSMP20Extension.Builder()
+                .ignoreInvalidServices(false)
+                .addNaptrServices(initServices.split(","))
+                .build();
         // when
         boolean result = testInstance.setSMP10LookupNaptrServiceEnabled(enable);
         // then
@@ -120,7 +123,10 @@ class OasisSMP20ExtensionTest {
     })
     void testIsSMP10LookupNaptrServiceEnabled(String initServices, boolean expectedResult) {
         // given
-        OasisSMP20Extension testInstance = new OasisSMP20Extension(false, initServices.split(","));
+        OasisSMP20Extension testInstance = new OasisSMP20Extension.Builder()
+                .ignoreInvalidServices(false)
+                .addNaptrServices(initServices.split(","))
+                .build();
         // when
         boolean result = testInstance.isSMP10LookupNaptrServiceEnabled();
         // then

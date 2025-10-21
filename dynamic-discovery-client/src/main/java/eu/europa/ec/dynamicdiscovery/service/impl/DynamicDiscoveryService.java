@@ -27,6 +27,8 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
 import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
+import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.provider.PublisherRequest;
 import eu.europa.ec.dynamicdiscovery.core.provider.WildcardUtil;
@@ -149,7 +151,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             List<PublisherRequest> resultsForExtension = generatePublisherRequestsForResource(extension, lookupResult, identifier);
             for (PublisherRequest request : resultsForExtension) {
                 try {
-                    FetcherResponse fetcherResponse = documentFetcher.fetch(request.getResourceUri());
+                    FetcherResponse fetcherResponse = (FetcherResponse) documentFetcher.fetch(request.getResourceUri());
                     if (fetcherResponse != null) {
                         fetcherResponse.setExtensionIdentifier(extension.getExtensionIdentifier());
                         return fetcherResponse;
@@ -183,7 +185,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             }
             LOG.debug("No document found or can be retrieved for the extension [{}]", extension.getExtensionIdentifier());
         }
-        throw new DNSFetchException("No document found for resource identifier: [" + resourceIdentifier
+        throw new DDCFetchException("No document found for resource identifier: [" + resourceIdentifier
                 + "] and document identifier: [" + documentIdentifier + "]");
     }
 
@@ -214,12 +216,12 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
                         documentIdentifier, extension.getExtensionIdentifier(), ExceptionUtils.getRootCauseMessage(e));
                 return null;
             } catch (Exception e) {
-                throw new DNSFetchException("Can not resolve wildcard identifier [" + documentIdentifier
+                throw new DDCFetchException("Can not resolve wildcard identifier [" + documentIdentifier
                         + "]! Error retrieving document identifiers from URI: [" + resourceRequest.getResourceIdentifier() + "]");
             }
             // can parse documetns but can not resolve wildcard identifier
             if (targetDocumentIdentifier == null) {
-                throw new DNSFetchException("Can not resolve wildcard identifier [" + documentIdentifier
+                throw new DDCFetchException("Can not resolve wildcard identifier [" + documentIdentifier
                         + "]! Error retrieving document identifiers from URI: [" + resourceRequest.getResourceIdentifier() + "]");
 
             }
@@ -230,7 +232,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
                 targetDocumentIdentifier);
         try {
 
-            FetcherResponse fetcherResponse = documentFetcher.fetch(subresourceRequest.getSubresourceUri());
+            FetcherResponse fetcherResponse = (FetcherResponse) documentFetcher.fetch(subresourceRequest.getSubresourceUri());
             if (fetcherResponse != null) {
                 return fetcherResponse;
             }
@@ -238,7 +240,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             LOG.info("Error during fetching the extension for request [{}] and extension [{}] with cause error [{}]",
                     subresourceRequest, extension, ExceptionUtils.getRootCauseMessage(e));
             // throw error if subresource is not found
-            throw new DNSFetchException("Can not fetch document [" + documentIdentifier + "]! Error retrieving document identifiers from URI: ["
+            throw new DDCFetchException("Can not fetch document [" + documentIdentifier + "]! Error retrieving document identifiers from URI: ["
                     + subresourceRequest.getSubresourceUri() + "]", e);
         }
         return null;
@@ -251,7 +253,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * @param resourceRequest    resource request
      * @param documentIdentifier document identifier to be matched
      * @return the document identifier with the best match
-     * @throws DNSFetchException if the document identifiers can not be retrieved from the resource URI.
+     * @throws DDCFetchException if the document identifiers can not be retrieved from the resource URI.
      */
     protected SMPDocumentIdentifier getDocumentIdentifierWithWildcardMatch(PublisherRequest resourceRequest,
                                                                            SMPDocumentIdentifier documentIdentifier,
@@ -260,7 +262,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         URI resourceURI = resourceRequest.getResourceUri();
         LOG.debug("Get resource/participant's  documents for resource URI: [{}].", resourceURI);
 
-        final FetcherResponse fetcherResponse = documentFetcher.fetch(resourceURI);
+        final FetcherResponse fetcherResponse = (FetcherResponse) documentFetcher.fetch(resourceURI);
         final SMPServiceGroup serviceGroup = documentReader.getResource(fetcherResponse, extensions);
         final List<SMPDocumentIdentifier> discoveredDocumentIdentifiers = new ArrayList<>(serviceGroup.getDocumentIdentifiers());
         //the document identifiers supported by the participant
@@ -310,9 +312,9 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      */
     @Override
     public SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier,
-                                        String processId, String processIdScheme, String transportProfile) throws TechnicalException {
+                                        String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException {
         SMPServiceMetadata serviceMetadata = getSubresource(participantIdentifier, documentIdentifier);
-        return discoverEndpoint(serviceMetadata, processId, processIdScheme, transportProfile);
+        return discoverEndpoint(serviceMetadata, processId, processIdScheme, transportProfiles);
     }
 
     /**
@@ -321,11 +323,11 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     @Override
     public SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
                                         String processId, String processIdScheme,
-                                        String transportProfile) throws TechnicalException {
-        SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
+                                        List<String> transportProfiles) throws TechnicalException {
+        SMPEndpoint endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfiles);
         if (endpoint == null) {
             LOG.debug("No Endpoint found for process id [{}] with scheme [{}] and transport [{}].",
-                    processId, processIdScheme, transportProfile);
+                    processId, processIdScheme, transportProfiles);
             return null;
         }
 
@@ -345,7 +347,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
                 svcBuilder.certificateValidationStrategy(TRUSTSTORE);
             }
             serviceMetadata = processRedirection(endpoint.getRedirect(), svcBuilder.build());
-            endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfile);
+            endpoint = getEndpoint(serviceMetadata.getEndpoints(), processId, processIdScheme, transportProfiles);
         }
         return endpoint;
     }
@@ -363,7 +365,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
 
         final SMPEndpoint endpoint = discoverEndpoint(participantIdentifier, documentIdentifier,
                 processIdentifier.getIdentifier(), processIdentifier.getScheme(),
-                transportProfile.getIdentifier());
+                List.of(transportProfile.getIdentifier()));
         if (endpoint == null) {
             throw new DDCCertificateNotFoundException("No endpoint found for participant [" + participantIdentifier + "], document [" + documentIdentifier + "], process [" + processIdentifier + "] and transport [" + transportProfile + "]");
         }
@@ -391,9 +393,22 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * @throws DNSLookupException               if the participant's SMP address can not be resolved
      */
     private List<PublisherLookupResult> lookupPublisherAddresses(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+
         if (publisherLocator == null) {
             throw new DDCInvalidConfigurationException("Missing metadataLocator. The locator is required to lookup the participant's SMP address");
         }
+        // if lookup is DefaultBDXRLocator, set the required NAPTR services from extensions if not already set
+        if (publisherLocator instanceof DefaultBDXRLocator) {
+            if (((DefaultBDXRLocator)publisherLocator).getDnsLookup() instanceof DefaultDNSLookup ){
+                DefaultDNSLookup lookup = (DefaultDNSLookup) ((DefaultBDXRLocator)publisherLocator).getDnsLookup();
+                if (lookup.getRequiredNaptrServices().isEmpty()){
+                    List<String> naptrServices = getOrderedNaptrServicesForExtensions();
+                    LOG.info("Setting required NAPTR services to: [{}].", naptrServices);
+                    lookup.setRequiredNaptrServices(naptrServices);
+                }
+            }
+        }
+
         List<PublisherLookupResult> results = publisherLocator.lookup(participantIdentifier);
         if (results.isEmpty()) {
             throw new DNSLookupException(DDCExceptionCode.SERVICE_GROUP, "The SMP URL value for participant [" + participantIdentifier + "] can not be resolved!");
@@ -404,20 +419,35 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     }
 
     /**
+     * Get all naptr services from registered extensions in the order of the extensions.
+     * @return list of target  naptr services
+     */
+    protected List<String> getOrderedNaptrServicesForExtensions() {
+        List<String> naptrServices = new ArrayList<>();
+        for (IExtension extension : listExtensions) {
+            for (String service : extension.lookupServices()) {
+                if (!naptrServices.contains(service)) {
+                    naptrServices.add(service);
+                }
+            }
+        }
+        return naptrServices;
+    }
+
+    /**
      * Method filters all SMPEndpoints by processId, processIdScheme and transportProfile.
      * If no endpoint is found, Empty collection is returned.
      *
      * @param smpEndpoints     list of all processes
      * @param processId        target process identifier
      * @param processIdScheme  target process identifier scheme
-     * @param transportProfile list of targeted transport profiles
+     * @param transportProfiles a list of transport profile to match against
      * @return valid endpoint
      * @throws DDCInvalidDataException if filter values are null or empty
      */
     private SMPEndpoint getEndpoint(List<SMPEndpoint> smpEndpoints, String processId,
-                                    String processIdScheme, String transportProfile) throws DDCInvalidDataException {
-
-        if (StringUtils.isBlank(transportProfile)) {
+                                    String processIdScheme, List<String> transportProfiles) throws DDCInvalidDataException {
+        if (transportProfiles == null || transportProfiles.isEmpty() || transportProfiles.stream().allMatch(StringUtils::isEmpty)) {
             throw new DDCInvalidDataException("Null or empty transport profile");
         }
 
@@ -426,17 +456,20 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         }
         String trimProcessIdScheme = trim(processIdScheme);
         String trimProcessId = trim(processId);
-        String trimTransportProfile = trim(transportProfile);
+        List<String> trimTransportProfiles = transportProfiles.stream()
+                .filter(StringUtils::isNotEmpty) // exclude any empty transport profiles
+                .map(StringUtils::trim)
+                .collect(Collectors.toList());
 
-        LOG.debug("Search for a Endpoint with process  id: [{}], process scheme [{}] and transportProfile: [{}]]!",
-                processId, processIdScheme, transportProfile);
+        LOG.debug("Search for a Endpoint with process  id: [{}], process scheme [{}] and transportProfiles: [{}]!",
+                processId, processIdScheme, transportProfiles);
         List<SMPEndpoint> endpoints = smpEndpoints.stream()
-                .filter(processType -> smpEndpointMatchesOrRedirect(processType, trimProcessId, trimProcessIdScheme, trimTransportProfile))
+                .filter(processType -> smpEndpointMatchesOrRedirect(processType, trimProcessId, trimProcessIdScheme, trimTransportProfiles))
                 .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {
             LOG.warn("No Endpoints found for process id [{}] with scheme [{}] and transport [{}].",
-                    processId, processIdScheme, transportProfile);
+                    processId, processIdScheme, transportProfiles);
             return null;
         }
 
@@ -451,28 +484,28 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     }
 
     /**
-     * Method returns validates  endpoint match for given processId, processIdScheme and transportProfile or
+     * Method returns validates  endpoint match for given processId, processIdScheme and transportProfiles or
      * if the endpoint is redirection.
      *
      * @param smpEndpoint           endpoint to validate
      * @param filterProcessId       filter process identifier value
      * @param filterProcessIdScheme filter process identifier scheme
-     * @param filterTransportId     filter transport profile value
+     * @param filterTransportIds    filter transport profile values
      * @return true if endpoint matches the filter values or is redirection else false
      */
     protected boolean smpEndpointMatchesOrRedirect(SMPEndpoint smpEndpoint,
                                                    String filterProcessId, String filterProcessIdScheme,
-                                                   String filterTransportId) {
+                                                   List<String> filterTransportIds) {
         if (smpEndpointMatchesProcessValues(smpEndpoint, filterProcessId, filterProcessIdScheme)
-                && matchesEndpointTransport(smpEndpoint, filterTransportId)) {
-            LOG.debug("Found matching Endpoint with process id: [{}] scheme [{}] and transport profile [{}]",
-                    filterProcessId, filterProcessIdScheme, filterTransportId);
+                && matchesEndpointTransports(smpEndpoint, filterTransportIds)) {
+            LOG.debug("Found matching Endpoint with process id: [{}] scheme [{}] and transport profiles [{}]",
+                    filterProcessId, filterProcessIdScheme, filterTransportIds);
             return true;
         }
 
         if (smpEndpoint.getRedirect() != null) {
-            LOG.debug("Found redirection Endpoint for process id: [{}] scheme [{}] and transport profile [{}]",
-                    filterProcessId, filterProcessIdScheme, filterTransportId);
+            LOG.debug("Found redirection Endpoint for process id: [{}] scheme [{}] and transport profiles [{}]",
+                    filterProcessId, filterProcessIdScheme, filterTransportIds);
             return true;
         }
         return false;
@@ -488,7 +521,6 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
      * @return true if endpoint's is matching to the filter parameters
      */
     protected boolean smpEndpointMatchesProcessValues(SMPEndpoint smpEndpoint, String filterProcessId, String filterProcessIdScheme) {
-
         if (hasEmptyProcessList(smpEndpoint)) {
             return defaultEndpointForEmptyProcess;
         }
@@ -507,7 +539,6 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
         return result.isPresent();
     }
 
-
     /**
      * Method returns true if endpoint has no process identifiers.
      *
@@ -523,21 +554,22 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     }
 
     /**
-     * This method exists to be used to filter list of endpointType for particular transportProfile.
+     * This method exists to be used to filter list of endpointType against any of the particular transportProfile values.
      *
      * @param endpointType          endpoint to validate
-     * @param transportProfileValue target transport profile value
+     * @param transportProfileValues target transport profile values
      * @return true if endpoint's transport equals to search transport identifier
      */
-    protected boolean matchesEndpointTransport(SMPEndpoint endpointType, String transportProfileValue) {
+    protected boolean matchesEndpointTransports(SMPEndpoint endpointType, List<String> transportProfileValues) {
         final SMPTransportProfile transportProfile = endpointType.getTransportProfile();
         if (transportProfile == null) {
             return false;
         }
 
-        boolean isValidTransport = StringUtils.equals(trim(transportProfile.getIdentifier()), trim(transportProfileValue));
+        boolean isValidTransport = transportProfileValues.stream().anyMatch(
+                transportProfileValue -> StringUtils.equals(trim(transportProfile.getIdentifier()), trim(transportProfileValue)));
         if (!isValidTransport) {
-            LOG.debug("Search for endpoint with transport [{}], but found [{}]", transportProfileValue, transportProfile);
+            LOG.debug("Search for endpoint with transports [{}], but found [{}]", transportProfileValues, transportProfile);
         }
         return isValidTransport;
     }
@@ -546,7 +578,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
     private SMPServiceMetadata processRedirection(SMPRedirect redirect, SignatureValidationContext context) throws TechnicalException {
         URI redirectURI = URI.create(redirect.getRedirectUrl());
         LOG.info("Fetch document from redirection [{}].", redirectURI);
-        final FetcherResponse fetcherResponseForServiceMetadata = documentFetcher.fetch(redirectURI);
+        final FetcherResponse fetcherResponseForServiceMetadata = (FetcherResponse) documentFetcher.fetch(redirectURI);
 
         return documentReader.getSubresource(fetcherResponseForServiceMetadata, getExtensions(), context);
     }
@@ -595,6 +627,12 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             return this;
         }
 
+        /**
+         *  Add extensions by class names. The classes must implement the IExtension interface and have a default constructor.
+         *
+         * @param extensionClassNames
+         * @return
+         */
         public Builder addExtensionsForClassNames(String... extensionClassNames) {
             for (String className : extensionClassNames) {
                 try {
@@ -678,7 +716,7 @@ public class DynamicDiscoveryService implements ISMPDynamicDiscoveryService {
             }
 
             if (listExtensions.isEmpty()) {
-                LOG.info("No extensions are registered. Registering default extensions OasisSMP10Extension and OasisSMP20Extension");
+                LOG.info("No extensions are registered. Registering the default extensions OasisSMP10Extension and OasisSMP20Extension");
                 listExtensions.add(new OasisSMP10Extension());
                 listExtensions.add(new OasisSMP20Extension());
             }

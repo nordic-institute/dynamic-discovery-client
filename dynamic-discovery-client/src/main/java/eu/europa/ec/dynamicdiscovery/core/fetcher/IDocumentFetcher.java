@@ -42,5 +42,5 @@ public interface IDocumentFetcher {
      * @return the response {@link FetcherResponse} from the SMP server
      * @throws TechnicalException if any error occurs during the fetch
      */
-    FetcherResponse fetch(URI documentURI) throws TechnicalException;
+    IFetcherResponse fetch(URI documentURI) throws TechnicalException;
 }

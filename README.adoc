@@ -126,7 +126,7 @@ if (Custom configuration?) then (No)
 else (yes)
 endif
 
-' Because margin/pading/MinWidth the spaces helps to make the
+' Because margin/padding/MinWidth the spaces helps to make the
 ' diagram more readable
 partition "    Lookup                                "{
 
@@ -323,17 +323,24 @@ DynamicDiscoverySevice smpClient = new DynamicDiscoverySevice.Builder()
 ----
 
 ===== Example: Basic discovery with custom participant formatter
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on custom PartyIdentifier types. By default ebCoreParty Identifier type and Peppol Party identifier types are registered.
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier types. By default ebCoreParty Identifier type and Peppol Party identifier types are registered in the ParticipantIdentifierFormatter. The formatter is used to validate and format/normalize the PartyIdentifier before lookup according to custom FormatterType. The PartyIdentifierFormatter is configurable to support custom PartyIdentifier types.
 
-The DefaultBDXRLocator will format/normalize the PartyIdentifier before lookup according to custom FormatterType
 
 [source,java]
 ----
-// Use template formatter or create own formatter type
-FormatterType customFormatter = new TemplateFormatterType(Pattern.compile("^(?i)mailto.*$"),
-                "${scheme}-->${identifier}","${identifier}",
-                Pattern.compile("^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$"),
-                DNSLookupFormatType.SCHEMA_AFTER_HASH);
+
+   ParticipantIdentifierFormatter customFormatter = new ParticipantIdentifierFormatter.Builder()
+                .formatterTypes.add(new EBCorePartyIdFormatterType(),
+                        new PeppolPartyIdFormatterType())
+                .defaultFormatter(new OasisSMPFormatterType.Builder()
+                        .wildcardEnabled(false)
+                        .valueMaxLength(15)
+                        .schemeMandatory(true)
+                        .schemeMaxLength(10)
+                        .schemeValidationPattern(Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+-[a-zA-Z0-9]+$"))
+                        .valueValidationPattern(Pattern.compile("^[0-9]{4}:[a-zA-Z0-9]+$"))
+                        .build())
+                .build();
 
 // register formatter to DefaultBDXRLocator
 DynamicDiscoverySevice smpClient= new DynamicDiscoverySevice.Builder()
@@ -420,15 +427,15 @@ DynamicDiscoverySevice smpClient = new DynamicDiscoverySevice.Builder()
 The new eDelivery SMP 2.0 profile identifies the NAPTR record using the service "oasis-bdxr-smp-2" and provides support for the legacy service "Meta:SMP" as a fallback. The DDC can be configured to support eDelivery SMP 1.0 and eDelivery SMP 2.0 profiles at the same time.
 By utilizing the OasisSMP10Extension and OasisSMP20Extension, the DDC allows configuration of the following options:
 
-* **eDelivery SMP 1.0 Only**: The client uses NAPTR DNS records with the service "Meta:SMP" and accepts only Oasis SMP 1.0 documents.
-* **eDelivery SMP 2.0 Only**: The client uses NAPTR DNS records with the service "oasis-bdxr-smp-2" and accepts only Oasis SMP 2.0 documents.
-* **eDelivery SMP 2.0 with "eDelivery SMP 2 MAY"**: The client accepts only Oasis SMP 2.0 documents and primarily uses NAPTR DNS records with the service "oasis-bdxr-smp-2." If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
-* **eDelivery SMP 2.0 with 1.0 Fallback**: The client accepts Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If these documents are unavailable, it will fall back to the "Meta:SMP" service and Oasis SMP 1.0 documents.
-* **eDelivery SMP 2.0 with "eDelivery SMP 2 MAY" and 1.0 Fallback**: The client first attempts to retrieve Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If this attempt fails, it falls back to the "Meta:SMP" service. Should both approaches be unsuccessful, the client will make a final attempt by using the Oasis SMP 1.0 profile process to retrieve the documents.
+* **Standard-compliant eDelivery SMP 1.0 discovery**: The client uses NAPTR DNS records with the service "Meta:SMP" and accepts only Oasis SMP 1.0 documents.
+* **Standard-compliant eDelivery SMP 2.0 discovery**: The client uses NAPTR DNS records with the service "oasis-bdxr-smp-2" and accepts only Oasis SMP 2.0 documents.
+* **Standard-compliant eDelivery SMP 2.0 discovery with DNS lookup fallback using 'Meta:SMP' NAPTR service**: The client accepts only Oasis SMP 2.0 documents and primarily uses NAPTR DNS records with the service "oasis-bdxr-smp-2." If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+* **Standard-compliant eDelivery SMP 2.0 discovery with fallback on standard compliant SMP 1.0 discovery**: The client accepts Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2." If these documents are unavailable, it will fall back to the "Meta:SMP" service and Oasis SMP 1.0 documents.
+* **Standard-compliant eDelivery SMP 2.0 discovery with DNS lookup fallback using 'Meta:SMP' or on standard compliant SMP 1.0 discovery**: The client first attempts to retrieve Oasis SMP 2.0 documents using NAPTR DNS records with the service "oasis-bdxr-smp-2". If this attempt fails, it falls back to the "Meta:SMP" service. Should both approaches be unsuccessful, the client will make a final attempt by using the Oasis SMP 1.0 profile process to retrieve the documents.
 
-==== Example: eDelivery SMP 1.0 Only
+==== Example: Standard-compliant eDelivery SMP 1.0 discovery
 
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains and only NAPTR DNS records with service "Meta:SMP" The NAPTR service is "Meta:SMP" and is defined by the OasisSMP10Extension.
+The *DefaultBDXRLocator* is configured to resolve the SMP URI using a PartyIdentifier within the DNS zone "acc.edelivery.tech.ec.europa.eu". It performs this resolution by querying NAPTR DNS records that specify the service "Meta:SMP". Once the SMP endpoint is located, the response is parsed as an *OASIS SMP 1.0 document*. Note: The "Meta:SMP" NAPTR service lookup is defined as default naptr service value by the *OasisSMP10Extension*.
 
 [source,java]
 ----
@@ -446,9 +453,9 @@ DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
         .build();
 ----
 
-==== Example: eDelivery SMP 2.0 Only
+==== Example: Standard-compliant eDelivery SMP 2.0 discovery
 
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier with list top dns domains and only NAPTR DNS records with service "oasis-bdxr-smp-2". The NAPTR service is "oasis-bdxr-smp-2" and is defined by the OasisSMP20Extension.
+The *DefaultBDXRLocator* is configured to resolve the SMP URI using a PartyIdentifier within the DNS zone "acc.edelivery.tech.ec.europa.eu". It performs this resolution by querying NAPTR DNS records that specify the service "oasis-bdxr-smp-2". Once the SMP endpoint is located, the response is parsed as an *OASIS SMP 2.0 document*. Note: The "oasis-bdxr-smp-2" NAPTR service lookup is defined as default naptr service value by the *OasisSMP20Extension*.
 
 [source,java]
 ----
@@ -466,9 +473,32 @@ DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
         .build();
 ----
 
-==== Example: eDelivery SMP 2.0 with "eDelivery SMP 2 MAY"
+==== Example: eDelivery SMP 2.0 document with additional NAPTR services for the DNS lookup
 
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+Please note that extensions have properties where you can configure multiple NAPTR services to be used for lookup for the extension.
+[source,java]
+----
+OasisSMP20Extension extension = new OasisSMP20Extension.Builder()
+                .addNaptrServices( "oasis-bdxr-smp-2")
+                .addNaptrService("Meta:SMP")
+                .addNaptrService("x-einvoice")
+                .build();
+
+----
+
+When an extension is registered with the DynamicDiscoveryService (DDC), the client will prioritize and use the NAPTR services in the order specified by the extension.
+
+However, if NAPTR services are already defined in the DefaultBDXRLocator as well, the locator will use its own service definitions for the lookup—ignoring those from the extension.
+
+⚠️ Important Note: The extension will only be activated if the lookup results match the services defined within the extension. If the DefaultBDXRLocator and the extension specify different NAPTR services, the extension will not be triggered, as none of the lookup results will align with the extension's configuration.
+
+To ensure the extension is used, you can leave the DefaultBDXRLocator empty. In that case, the DDS will automatically apply the NAPTR services from the extension to the locator.
+
+
+==== Example: Standard-compliant eDelivery SMP 2.0 discovery with DNS lookup fallback using 'Meta:SMP' NAPTR service
+
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service. To enable DNS lookup fallback using 'Meta:SMP' the property *smp10LookupNaptrServiceEnabled* of the *OasisSMP20Extension* must be set to true.
+Another option is to set multiple NAPTR services in the *DefaultBDXRLocator* as described in the previous example.
 
 [source,java]
 ----
@@ -490,9 +520,9 @@ DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
         .build();
 ----
 
-==== Example: eDelivery SMP 2.0 with "eDelivery SMP 2 MAY" and eDelivery SMP 1.0 Fallback
+==== Either eDelivery SMP 2.0 or 1.0 NAPTR service to retrieve eDelivery SMP 2.0 document, with fallback to 1.0 NAPTR service and document
 
-Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service.
+Configuration of the DefaultBDXRLocator to resolve SMP's URI based on PartyIdentifier using  NAPTR DNS records with service "oasis-bdxr-smp-2".  If the required record is unavailable, it will retry with "Meta:SMP" NAPTR service. If parsing of the SMP 2.0 document fails, it will fallback to Oasis SMP 1.0 document.
 
 [source,java]
 ----
@@ -612,12 +642,56 @@ KeyStore clientTruststore = CommonUtil.loadKeystore("/truststore/tls-truststore.
 
 DefaultURLFetcher testInstance = new DefaultURLFetcher.Builder()
         .enableHttpScheme(false)
-        .tlsKeystore(clientKeystore, PASSWD.toCharArray())
+        .tlsKeystore(clientKeystore, CLIENT_CERT_ALIAS, KEY_PASSWD.toCharArray())
         .tlsTruststore(clientTruststore)
         .tlsCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
         .tlsVersions("TLSv1.2","TLSv1.3")
         .build();
 ----
+
+
+=== Configure JWT authorization to the Default Fetcher
+
+The following example demonstrates how to configure the default fetcher to retrieve a document from the SMP server
+using JWT-based authorization. The JWT token is obtained from the authorization server via TLS mutual authentication (mTLS).
+
+In scenarios where binding between the JWT token and the client certificate is required; as specified in RFC 8705;
+the DefaultURLFetcher must be configured with both a keystore and truststore. This ensures proper mTLS setup with the
+SMP server, enabling SMP to validate DDC certificate with the JWT token.
+
+[source,java]
+----
+// load keystore and truststore for TLS mutual authentication to jwt authorization server/
+KeyStore tlsKeystore = CommonUtil.loadKeystoreFromFile("ddc-client.p12",  KEYSTORE_TYPE, PASSWD);
+KeyStore tlsTruststore = CommonUtil.loadKeystoreFromFile("truststore.p12",  KEYSTORE_TYPE, PASSWD);
+// JWT authorization server URL
+String url = "https://localhost:8443/realms/OOTS/protocol/openid-connect/token";
+// Document URI for which the JWT token is requested
+URI documentURI = URI.create("http://localhost:8080/smp/private-domain/ehealth-actorid-qns::0088:7770010100777:test:SMP001");
+
+// configure JWT authorization token fetcher
+JWTAuthorizationTokenFetcher fetcher = new JWTAuthorizationTokenFetcher.Builder()
+        .clientId("my-client-id")
+        .tlsKeystore(tlsKeystore, CLIENT_CERT_ALIAS, KEY_PASSWD.toCharArray())
+        .tlsTruststore(tlsTruststore)
+        .build();
+// configure JWTCredentialProvider
+JwtTokenCredentialProvider jwtCredentialProvider = new JwtTokenCredentialProvider.Builder()
+        .jwtFetcher(fetcher)
+        .authorizationServerURI(url)
+        .build();
+// configure DefaultURLFetcher with JWT authorization
+DefaultURLFetcher documentFetcher = new DefaultURLFetcher.Builder()
+        .credentialProvider(jwtCredentialProvider)
+        .tlsKeystore(clientKeystore, CLIENT_CERT_ALIAS, KEY_PASSWD.toCharArray())  // the truststore and keystore are used for TLS mutual
+        .tlsTruststore(clientTruststore) // authentication to the SMP server when JWT token is used as described in RFC 8705
+        .build();
+
+// fetcj the document using the DefaultURLFetcher
+documentFetcher.fetch(documentURI);
+
+----
+
 
 == How to use the dynamic discovery client
 
@@ -649,6 +723,22 @@ List<DocumentIdentifier> documents = serviceGroup.getDocumentIdentifiers();
 ----
 SMPServiceMetadata serviceMetadata = smpClient.getServiceMetadata(participantIdentifier, new SMPDocumentIdentifier("urn::epsos:services== epsos-21", "epsos-docid-qns"));
 SMPEndpoint endpoint = serviceMetadata.getEndpoints().get(0);
+----
+
+== Define target DNS server for lookup
+
+The Dynamic Discovery Client (DDC) performs DNS lookups using the system-configured DNS server by default. To override this behavior, users can supply a custom implementation of the DefaultBDXRLocator, enabling the use of a specific DNS server for resolution.
+Example of configuring a custom DNS server:
+[source,java]
+----
+ DefaultBDXRLocator testBDXRLocator = new DefaultBDXRLocator.Builder()
+                    .dnsLookup(new DefaultDNSLookup.Builder()
+                            .nameserverPort(port)
+                            .nameserver(nameserver).build())
+                    .addTopDnsDomain("acc.edelivery.tech.ec.europa.eu")
+                    .addDnsLookupTypes(Collections.singletonList(DNSLookupType.NAPTR))
+                    .build();
+
 ----
 
 
@@ -733,8 +823,12 @@ The DefaultDNSLookup is implementation of the IDNSLookup interface. This is DNSJ
 Below is a list of configuration options:
 
 - **requiredURLSchemas**: (Default: "http" and "https" ) Only results with the given URL schema will be returned. If the lookup discovers publisher URL with different schema, the result is ignored.
-- **requiredNaptrServices**: (Default: "Meta:SMP) When using NAPTR lookup, results with the given NAPTR service will be returned and all other naptr records are ignored. Example if the NAPTR record has service "meta:cppa3" and required services are "Meta:SMP" and "oasis-bdxr-smp-2" the result is ignored." The service name is case-insensitive.  The returned results follows the order of the required service list.
+- **requiredNaptrServices**: (Default: "empty) When using NAPTR lookup, results with the given NAPTR service will be returned and all other naptr records are ignored. Example if the NAPTR record has service "meta:cppa3" and required services are "Meta:SMP" and "oasis-bdxr-smp-2" the result is ignored." The service name is case-insensitive.  The returned results follows the order of the required service list. When the list is empty, it returns all naptr records
 - **requiredNaptrFlagsList**: (Default: "u") When using NAPTR lookup, results with the given NAPTR flags will be returned and all other naptr records are ignored.
+- **nameserver**: (Default: null) The DNS server address. If just nameserver is provided without port, the default DNS port 53 is used (If Port nad nameserver are not provided, the default system DNS configuration is used).
+- **nameserverPort**: (Default: null) The DNS server port (If just port is provided without nameserver, the localhost is used as nameserver host) (If Port nad nameserver are not provided, the default system DNS configuration is used).
+
+
 
 == StaticMapMetadataLocator
 

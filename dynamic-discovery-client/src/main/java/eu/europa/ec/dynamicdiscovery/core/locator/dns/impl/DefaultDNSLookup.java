@@ -27,18 +27,19 @@ import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.NAPTRRecord;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.SimpleResolver;
 
 import java.net.URI;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
-import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * Default implementation of the {@link IDNSLookup} interface.
@@ -55,48 +56,73 @@ public class DefaultDNSLookup implements IDNSLookup {
     final List<String> requiredURLSchemas;
     final List<String> requiredNaptrServices;
     final List<String> requiredNaptrFlags;
+    final String nameserver;
+    final Integer nameserverPort;
 
     protected DefaultDNSLookup(Builder builder) {
         this.requiredURLSchemas = new ArrayList<>(builder.requiredURLSchemas);
         this.requiredNaptrServices = new ArrayList<>(builder.requiredNaptrServices);
         this.requiredNaptrFlags = new ArrayList<>(builder.requiredNaptrFlags);
+        this.nameserver = builder.nameserver;
+        this.nameserverPort = builder.nameserverPort;
     }
 
 
     public List<PublisherLookupResult> getURLFromNaptrRecord(SMPParticipantIdentifier identifier,
                                                              List<Record> records,
-                                                             List<String> services,
+                                                             List<String> requiredServices,
                                                              List<String> schemas,
                                                              List<String> flagsList) {
-        List<PublisherLookupResult> result = new ArrayList<>();
+        List<PublisherLookupResult> result = requiredServices.isEmpty()?
+                convertAllRecordsToResult(identifier, records, schemas, flagsList):
+                convertRecordsWithRequiredServices(identifier, records, requiredServices, schemas, flagsList);
+        if (result.isEmpty()){
+            LOG.warn("No NAPTR Record found for services: [{}], schemas: [{}], flags: [{}].",
+                    requiredServices, schemas, flagsList);
+        }
+        return result;
+    }
 
-        // respect the order of the services
-        for (String service : services) {
+    private List<PublisherLookupResult> convertRecordsWithRequiredServices(SMPParticipantIdentifier identifier, List<Record> records, List<String> requiredServices, List<String> schemas, List<String> flagsList) {
+        List<PublisherLookupResult> result = new ArrayList<>();
+        for (String service : requiredServices) {
             NAPTRRecord naptrRecord = (NAPTRRecord) records.stream()
-                    .filter(r -> StringUtils.equalsIgnoreCase(((NAPTRRecord) r).getService(), service))
+                    .filter(r -> Strings.CI.equals(((NAPTRRecord) r).getService(), service))
                     .findFirst()
                     .orElse(null);
             if (naptrRecord == null) {
                 continue;
             }
-            String recordDescription = naptrRecord.rdataToString();
-            if (!validNaptrFlags(naptrRecord.getFlags(), flagsList)) {
-                LOG.debug("NAPTR Record: [{}] does not have any of required flag [{}].", recordDescription, flagsList);
-                continue;
-            }
-            String smpAddress = resolveNaptrValue(naptrRecord.getRegexp(), StringUtils.removeEnd(naptrRecord.getName().toString(), "."));
-            URI uri = URI.create(smpAddress);
-
-            if (!StringUtils.containsAnyIgnoreCase(uri.getScheme(), schemas.toArray(new String[0]))) {
-                LOG.debug("NAPTR Record: [{}] does not have any URL of required schema [{}].", recordDescription, schemas);
-                continue;
-            }
+            URI uri = getURIFromNaptrRecord(schemas, flagsList, naptrRecord);
+            if (uri == null) continue;
             result.add(new PublisherLookupResult(identifier, uri, service, DNSLookupType.NAPTR));
         }
+        return result;
+    }
 
-        if (result.isEmpty()){
-            LOG.warn("No NAPTR Record found for services: [{}], schemas: [{}], flags: [{}].",
-                    services, schemas, flagsList);
+    private URI getURIFromNaptrRecord(List<String> schemas, List<String> flagsList, NAPTRRecord naptrRecord) {
+        String recordDescription = naptrRecord.rdataToString();
+        if (!validNaptrFlags(naptrRecord.getFlags(), flagsList)) {
+            LOG.debug("NAPTR Record: [{}] does not have any of required flag [{}].", recordDescription, flagsList);
+            return null;
+        }
+        String smpAddress = resolveNaptrValue(naptrRecord.getRegexp(), Strings.CI.removeEnd(naptrRecord.getName().toString(), "."));
+        URI uri = URI.create(smpAddress);
+
+        if (!Strings.CI.containsAny(uri.getScheme(), schemas.toArray(new String[0]))) {
+            LOG.debug("NAPTR Record: [{}] does not have any URL of required schema [{}].", recordDescription, schemas);
+            return null;
+        }
+        return uri;
+    }
+    private List<PublisherLookupResult> convertAllRecordsToResult(SMPParticipantIdentifier identifier, List<Record> records, List<String> schemas, List<String> flagsList) {
+        // get all records
+        List<PublisherLookupResult> result = new ArrayList<>();
+        for (Record record : records) {
+            NAPTRRecord naptrRecord = (NAPTRRecord) record;
+            URI uri = getURIFromNaptrRecord(schemas, flagsList, naptrRecord);
+            if (uri == null) continue;
+            result.add(new PublisherLookupResult(identifier, uri, naptrRecord.getService(), DNSLookupType.NAPTR));
         }
         return result;
     }
@@ -202,6 +228,16 @@ public class DefaultDNSLookup implements IDNSLookup {
         Lookup lookupClient;
         try {
             lookupClient = new Lookup(uri, dnsType);
+
+            if (StringUtils.isNotBlank(nameserver) ||  nameserverPort != null) {
+                String localNameserver = StringUtils.isNotBlank(nameserver)?StringUtils.trim(nameserver): "localhost";
+                int port = nameserverPort != null? nameserverPort:53;
+                LOG.debug("Using DNS nameserver: [{}:{}] for DNS lookup", localNameserver, port);
+                SimpleResolver resolver = new SimpleResolver(localNameserver ); // localhost's DNS
+                resolver.setPort(port);
+                lookupClient.setResolver(resolver);
+            }
+
             lookupClient.setCache(null);
             records = lookupClient.run();
 
@@ -234,6 +270,8 @@ public class DefaultDNSLookup implements IDNSLookup {
         List<String> requiredURLSchemas = new ArrayList<>();
         List<String> requiredNaptrServices = new ArrayList<>();
         List<String> requiredNaptrFlags = new ArrayList<>();
+        String nameserver;
+        Integer nameserverPort;
 
         public DefaultDNSLookup.Builder addRequiredNaptrURLSchema(String schema) {
             this.requiredURLSchemas.add(StringUtils.removeEnd(schema, ":"));
@@ -269,15 +307,23 @@ public class DefaultDNSLookup implements IDNSLookup {
             return this;
         }
 
+        public Builder nameserver(String nameserver) {
+            this.nameserver = nameserver;
+            return this;
+        }
+
+        public Builder nameserverPort(Integer nameserverPort) {
+            this.nameserverPort = nameserverPort;
+            return this;
+        }
+
         public DefaultDNSLookup build() {
             validate();
             return new DefaultDNSLookup(this);
         }
 
         private void validate() {
-            if (requiredNaptrServices.isEmpty()) {
-                requiredNaptrServices.addAll(DEFAULT_NAPTR_SERVICES);
-            }
+
             if (requiredURLSchemas.isEmpty()) {
                 requiredURLSchemas.addAll(DEFAULT_SCHEMAS);
             }

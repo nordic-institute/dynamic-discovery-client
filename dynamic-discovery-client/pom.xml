@@ -59,6 +59,9 @@
                                 <xjbSource>
                                     ${project.basedir}/src/main/resources/xjb/peppolSMPBinding.xjb
                                 </xjbSource>
+                                <xjbSource>
+                                    ${project.basedir}/src/main/resources/xjb/peppolBusinessCardBinding.xjb
+                                </xjbSource>
                             </xjbSources>
                             <sources>
                                 <source>
@@ -72,6 +75,9 @@
                                 </source>
                                 <source>
                                     ${project.basedir}/src/main/resources/xsd/peppol/peppol-smp-types-v1.xsd
+                                </source>
+                                <source>
+                                    ${project.basedir}/src/main/resources/xsd/peppol/peppol-directory-business-card-20180621.xsd
                                 </source>
                             </sources>
                             <clearOutputDir>false</clearOutputDir>
@@ -132,6 +138,14 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

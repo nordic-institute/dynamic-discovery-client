@@ -30,6 +30,7 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
 
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * Main SMP  DDC interface for the Dynamic Discovery Service. The implementation of the
@@ -47,32 +48,34 @@ public interface ISMPDynamicDiscoveryService extends IDynamicDiscoveryService<SM
     /**
      * Method returns endpoint for given participant, document, process identifiers and transport profile.
      * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     * The first transport option that matches the criteria will be returned and the remaining options in the list will be ignored.
      *
      * @param participantIdentifier participant identifier to discover endpoint
      * @param documentIdentifier the target document identifier (or action identifier for AS4)
      * @param processId process identifier (or service identifier for AS4)
      * @param processIdScheme process identifier scheme
-     * @param transportProfile transport profile to define the transport protocol
+     * @param transportProfiles a list of transport profile to match against; the order of the transport options is important, the first match being returned
      * @return endpoint for given parameters or null if no endpoint is found.
      * @throws TechnicalException if any error occurs during the lookup
      */
     SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier,
                                  SMPDocumentIdentifier documentIdentifier,
-                                 String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+                                 String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException;
 
     /**
      * Method returns endpoint for given serviceMetadata with process identifiers and transport profile.
      * If redirectionEnabled is set to true and returned Endpoint contains redirect it tris to resolve the redirect as well.
+     * The first transport option that matches the criteria will be returned and the remaining options in the list will be ignored.
      *
      * @param serviceMetadata serviceMetadata
      * @param processId process identifier (or service identifier for AS4)
      * @param processIdScheme process identifier scheme
-     * @param transportProfile transport profile to define the transport protocol
+     * @param transportProfiles a list of transport profile to match against; the order of the transport options is important, the first match being returned
      * @return endpoint for given parameters or null if no endpoint is found.
      * @throws TechnicalException if any error occurs during the lookup
      */
     SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
-                                 String processId, String processIdScheme, String transportProfile) throws TechnicalException;
+                                 String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException;
 
 
     /**

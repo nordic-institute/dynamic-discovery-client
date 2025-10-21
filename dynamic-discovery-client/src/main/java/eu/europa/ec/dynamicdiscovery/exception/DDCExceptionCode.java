@@ -26,7 +26,8 @@ public enum DDCExceptionCode {
     SERVICE_GROUP("Service group error"),
     SERVICE_METADATA("Service metadata error"),
     INVALID_DATA("Invalid query data"),
-    GENERIC_ERROR("Invalid configuration data");
+    GENERIC_ERROR("Invalid configuration data"),
+    AUTHORIZATION_ERROR("Invalid authorization data"),;
 
     final String message;
 
