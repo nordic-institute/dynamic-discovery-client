@@ -14,14 +14,14 @@ A copy of the Licence is available in the LICENSE.txt file or at:
 
 ## Compatibility Notice
 
-The LGPL v. 2.1 is compatible with several other open source licences. Please check the compatibility of the licence under which you intend to distribute your
-modifications or derivative works before doing so.
+The LGPL v. 2.1 is compatible with several other open source licences. Please check the compatibility of the licence
+under which you intend to distribute your modifications or derivative works before doing so.
 
 ## Third-Party Components
 
 This product includes dynamically linked software developed by third parties which is provided under their respective licences:
 
-### commons-cli:commons-cli:1.10.0
+### commons-cli:commons-cli:1.11.0
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
@@ -42,14 +42,14 @@ This product includes dynamically linked software developed by third parties whi
 - Copyright:
   - Copyright (c) 2024
 
-### net.bytebuddy:byte-buddy:1.17.8
+### net.bytebuddy:byte-buddy:1.18.3
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
 - Copyright:
   - Copyright (c) 2024
 
-### org.apache.commons:commons-lang3:3.18.0
+### org.apache.commons:commons-lang3:3.20.0
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
@@ -63,7 +63,7 @@ This product includes dynamically linked software developed by third parties whi
 - Copyright:
   - Copyright (c) 2024
 
-### org.bouncycastle:bcpkix-jdk18on:1.82
+### org.bouncycastle:bcpkix-jdk18on:1.83
 - License: Bouncy Castle Licence
 - Url: https://www.bouncycastle.org/licence.html
 - File: license/third-party-licenses/Bouncy Castle Licence.txt
