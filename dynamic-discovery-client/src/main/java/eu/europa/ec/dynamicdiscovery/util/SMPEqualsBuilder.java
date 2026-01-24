@@ -57,7 +57,7 @@ public class SMPEqualsBuilder {
 
 
     public Boolean build() {
-        return Boolean.valueOf(isEquals());
+        return isEquals();
     }
 
     public boolean isEquals() {

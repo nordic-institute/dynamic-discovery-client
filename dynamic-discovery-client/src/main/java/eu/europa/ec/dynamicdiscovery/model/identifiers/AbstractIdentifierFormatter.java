@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,15 +61,30 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @author Joze Rihtarsic
  * @since 4.3
  */
-public abstract class AbstractIdentifierFormatter<T> {
+public abstract class AbstractIdentifierFormatter<T, S> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIdentifierFormatter.class);
 
-    protected AbstractFormatterType defaultFormatter = new OasisSMPFormatterType();
+    protected AbstractFormatterType defaultFormatter;
 
     protected List<String> caseSensitiveSchemas;
     protected List<FormatterType> formatterTypes = new ArrayList<>();
-
     protected Integer maxSchemeLength = null;
+
+
+    protected AbstractIdentifierFormatter (AbstractBuilder<S> builder) {
+        // default constructor
+        this.formatterTypes.addAll(builder.formatterTypes);
+        this.defaultFormatter = builder.defaultFormatter;
+        this.caseSensitiveSchemas = builder.caseSensitiveSchemas;
+        this.maxSchemeLength = builder.maxSchemeLength;
+        if (this.formatterTypes.isEmpty()) {
+            LOG.warn("No formatter types defined for identifier formatter. Using default formatter: [{}]", this.defaultFormatter.getClass().getName());
+        }
+        if (this.defaultFormatter == null) {
+            LOG.warn("Default formatter is null. Using default OasisSMPFormatterType.");
+            this.defaultFormatter = new OasisSMPFormatterType.Builder().build();
+        }
+    }
 
     /**
      * Formats the object according to formatTemplate. If template is 'blank' the scheme and identifier are concatenated
@@ -207,7 +222,9 @@ public abstract class AbstractIdentifierFormatter<T> {
         nIdentifier = isCaseInsensitiveSchema(nScheme)? lowerCase(nIdentifier): nIdentifier;
         FormatterType formatter = findFormatter(nScheme, identifier);
 
-        return formatter.dnsLookupFormat(nScheme, nIdentifier, dnsLookupHashType);
+        String hashPart = formatter.dnsLookupHash(nScheme, nIdentifier, dnsLookupHashType, true);
+        String suffixPart = formatter.dnsLookupSuffix(nScheme, nIdentifier, dnsLookupHashType);
+        return hashPart + ((isEmpty(suffixPart) ? "" : "." + suffixPart));
     }
 
     /**
@@ -220,9 +237,8 @@ public abstract class AbstractIdentifierFormatter<T> {
     public String dnsLookupHash(String scheme, String value, DNSLookupHashType dnsLookupHashType) {
         // find the formatter
         FormatterType formatter = findFormatter(scheme, value);
-        return formatter.dnsLookupHash(scheme, value, dnsLookupHashType);
+        return formatter.dnsLookupHash(scheme, value, dnsLookupHashType, false);
     }
-
 
     /**
      * Parse identifier.
@@ -258,8 +274,8 @@ public abstract class AbstractIdentifierFormatter<T> {
     /**
      * Method parses the object then it validates if scheme is case-sensitive and lower case the values accordingly.
      *
-     * @param value
-     * @return
+     * @param value the identifier object with scheme and identifier values
+     * @return the normalized identifier object
      */
     public T normalizeIdentifier(final String value) {
         T result = parse(value);
@@ -356,7 +372,7 @@ public abstract class AbstractIdentifierFormatter<T> {
         return caseSensitiveSchemas;
     }
 
-    public AbstractIdentifierFormatter<T> caseSensitiveSchemas(List<String> caseSensitiveSchemas) {
+    public AbstractIdentifierFormatter<T, S> caseSensitiveSchemas(List<String> caseSensitiveSchemas) {
         this.caseSensitiveSchemas = caseSensitiveSchemas;
         return this;
     }
@@ -370,6 +386,7 @@ public abstract class AbstractIdentifierFormatter<T> {
     }
 
     public void setSchemeMandatory(boolean schemeMandatory) {
+        this.formatterTypes.forEach(formatterType -> formatterType.setSchemeMandatory(schemeMandatory));
         this.defaultFormatter.setSchemeMandatory(schemeMandatory);
     }
 
@@ -378,6 +395,7 @@ public abstract class AbstractIdentifierFormatter<T> {
     }
 
     public void setSchemeValidationPattern(Pattern schemeValidationPattern) {
+        this.formatterTypes.forEach(formatterType -> formatterType.setSchemeValidationPattern(schemeValidationPattern));
         this.defaultFormatter.setSchemeValidationPattern(schemeValidationPattern);
     }
 
@@ -388,5 +406,40 @@ public abstract class AbstractIdentifierFormatter<T> {
     public void setMaxSchemeLength(Integer maxSchemeLength) {
         this.maxSchemeLength = maxSchemeLength;
     }
+
+
+
+    protected static abstract class AbstractBuilder<S> {
+        protected List<FormatterType> formatterTypes = new ArrayList<>();
+        protected AbstractFormatterType defaultFormatter = new OasisSMPFormatterType.Builder().build();
+        protected List<String> caseSensitiveSchemas = new ArrayList<>();
+        protected Integer maxSchemeLength = null;
+
+        public AbstractBuilder<S> addFormatterTypes(FormatterType... formatterTypes) {
+            if (formatterTypes != null && formatterTypes.length > 0) {
+                this.formatterTypes.addAll(Arrays.asList(formatterTypes));
+            }
+            return this;
+        }
+
+        public AbstractBuilder<S> defaultFormatter(AbstractFormatterType defaultFormatter) {
+            this.defaultFormatter = defaultFormatter;
+            return this;
+        }
+
+        public AbstractBuilder<S> caseSensitiveSchemas(List<String> caseSensitiveSchemas) {
+
+            this.caseSensitiveSchemas = caseSensitiveSchemas;
+            return this;
+        }
+
+        public AbstractBuilder<S> setMaxSchemeLength(Integer maxSchemeLength) {
+            this.maxSchemeLength = maxSchemeLength;
+            return this;
+        }
+
+        public abstract S build();
+    }
+
 }
 

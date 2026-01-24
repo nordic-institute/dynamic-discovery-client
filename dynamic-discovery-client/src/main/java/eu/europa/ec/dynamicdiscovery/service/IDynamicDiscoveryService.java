@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
- * dynamic-discovery-cli
+ * dynamic-discovery-client
  * %%
- * Copyright (C) 2016 - 2023 European Commission | eDelivery | Dynamic Discovery Client
+ * Copyright (C) 2016 - 2025 European Commission | eDelivery | Dynamic Discovery Client
  * %%
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,53 +19,51 @@
  */
 package eu.europa.ec.dynamicdiscovery.service;
 
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.core.reader.IMetadataReader;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.reader.IDocumentReader;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceGroup;
-import eu.europa.ec.dynamicdiscovery.model.SMPServiceMetadata;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 
-import java.util.List;
 
 /**
- * @author Flávio W. R. Santos
+ * Main interface for the Dynamic Discovery Service. The implementation of the
+ * interface  is responsible for discovering the endpoints of a given participant, document and process.
+ *
+ * @author Flávio W. R. SANTOS
+ * @author Joze RIHTARSIC
+ * @since 1.0
  */
-public interface IDynamicDiscoveryService {
-
-    void setRedirectionEnabled(boolean redirectionEnabled);
-    void setDefaultEndpointForEmptyProcess(boolean defaultEndpointForEmptyProcess);
-
-    SMPServiceGroup getServiceGroup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException;
-
-    SMPServiceMetadata getServiceMetadata(SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier documentIdentifier) throws TechnicalException;
-
-    SMPEndpoint discoverEndpoint(SMPParticipantIdentifier participantIdentifier,
-                                 SMPDocumentIdentifier documentIdentifier,
-                                 String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException;
-
-    SMPEndpoint discoverEndpoint(SMPServiceMetadata serviceMetadata,
-                                        String processId, String processIdScheme, List<String> transportProfiles) throws TechnicalException;
+public interface IDynamicDiscoveryService<R, S> {
 
 
+    /**
+     * Get the resource (e.g. service group) for the given resource/participant identifier.
+     *
+     * @param resourceIdentifier resource/participant identifier
+     * @return get target resource object
+     * @throws TechnicalException if any error occurs during the lookup
+     */
+    R getResource(SMPParticipantIdentifier resourceIdentifier) throws TechnicalException;
 
-    void setMetadataLocator(IMetadataLocator metadataLocator);
+    /**
+     * Get the sub-resource (e.g. service metadata) for the given resource/participant and souresource/document identifier.
+     *
+     * @param resourceIdentifier    resource/participant identifier
+     * @param subresourceIdentifier subresource/document identifier
+     * @return get target sub-resource object
+     * @throws TechnicalException if any error occurs during the lookup
+     */
+    S getSubresource(SMPParticipantIdentifier resourceIdentifier, SMPDocumentIdentifier subresourceIdentifier) throws TechnicalException;
 
-    void setMetadataProvider(IMetadataProvider metadataProvider);
 
-    void setMetadataFetcher(IMetadataFetcher metadataFetcher);
+    IPublisherLocator getPublisherLocator();
 
-    void setMetadataReader(IMetadataReader metadataReader);
+    IDocumentRequestProvider getDocumentRequestProvider();
 
-    IMetadataLocator getMetadataLocator();
+    IDocumentFetcher getDocumentFetcher();
 
-    IMetadataProvider getMetadataProvider();
-
-    IMetadataFetcher getMetadataFetcher();
-
-    IMetadataReader getMetadataReader();
+    IDocumentReader<R, S> getDocumentReader();
 }

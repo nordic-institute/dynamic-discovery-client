@@ -34,6 +34,6 @@ import java.util.regex.Pattern;
 public class URNFormatterType extends TemplateFormatterType {
 
     public URNFormatterType(Pattern splitRegularExpression) {
-        super(null, "${scheme}:${identifier}", "${identifier}", splitRegularExpression, DNSLookupFormatType.ALL_IN_HASH);
+        super(null, SPLIT_GROUP_SCHEME_TAG + ":" + SPLIT_GROUP_IDENTIFIER_TAG, SPLIT_GROUP_IDENTIFIER_TAG, splitRegularExpression, DNSLookupFormatType.ALL_IN_HASH);
     }
 }

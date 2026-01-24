@@ -1,0 +1,269 @@
+/*-
+ * #%L
+ * dynamic-discovery-client
+ * %%
+ * Copyright (C) 2016 - 2025 European Commission | eDelivery | Dynamic Discovery Client
+ * %%
+ * Licensed under the LGPL, Version 2.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package eu.europa.ec.dynamicdiscovery.service.impl;
+
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis10.OasisSMP10Extension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.oasis20.OasisSMP20Extension;
+import eu.europa.ec.dynamicdiscovery.core.extension.impl.peppol.PeppolSMPExtension;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
+import eu.europa.ec.dynamicdiscovery.core.reader.ISMPDocumentReader;
+import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import eu.europa.ec.dynamicdiscovery.model.SMPEndpoint;
+import eu.europa.ec.dynamicdiscovery.model.SMPTransportProfile;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPProcessIdentifier;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
+import static eu.europa.ec.dynamicdiscovery.util.DNSUtils.createMockPublisherLookupNaptrResult;
+import static org.apache.commons.lang3.StringUtils.trim;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+
+class DynamicDiscoveryServiceImplTest {
+
+    IDocumentFetcher metadataFetcher = Mockito.mock(IDocumentFetcher.class);
+    IPublisherLocator metadataLocator = Mockito.mock(IPublisherLocator.class);
+    ISMPDocumentReader metadataReader = new DefaultBDXRReader.Builder()
+            .build();
+
+    DynamicDiscoveryService testInstance = new DynamicDiscoveryService.Builder()
+            .addExtension(new OasisSMP10Extension())
+            .addExtension(new OasisSMP20Extension())
+            .addExtension(new PeppolSMPExtension())
+            .publisherLocator(metadataLocator)
+            .documentFetcher(metadataFetcher)
+            .documentReader(metadataReader)
+            .build();
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "oasis-smp-1.0, signed_service_metadata_signed_valid_iso6523, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl," +
+                    " bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://test.erechnung.gv.at/as4/msh/",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_draft, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_final, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "peppol, signed_service_metadata_valid_iso6523_wildcard, " +
+                    "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0, cenbii-procid-ubl, " +
+                    "peppol-transport-as4-v2_0, " +
+                    "https://localhost:8080/as4"})
+    void testDiscoverEndpoint(String standard, String resourceName, String processIdentifierValue, String processIdentifierScheme, String transportProfileID, String result) throws TechnicalException, URISyntaxException {
+
+        String smpURI = "http://example.local:1234/";
+        FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
+        SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
+        SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
+        InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
+        assertNotNull(serviceMetadataStream);
+        // given
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(new SMPParticipantIdentifier(processIdentifierValue, processIdentifierScheme), smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
+        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(any());
+        Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
+        // when
+        SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
+                processIdentifierValue, processIdentifierScheme, List.of(transportProfileID));
+        // then
+        assertNotNull(endpoint);
+        assertNotNull(endpoint.getTransportProfile());
+        assertNotNull(endpoint.getProcessIdentifier());
+        assertEquals(result, endpoint.getAddress());
+        assertEquals(transportProfileID, trim(endpoint.getTransportProfile().getIdentifier()));
+        assertEquals(processIdentifierValue, trim(endpoint.getProcessIdentifier().getIdentifier()));
+        assertEquals(processIdentifierScheme, trim(endpoint.getProcessIdentifier().getScheme()));
+        assertNotNull(endpoint.getCertificate());
+
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "oasis-smp-1.0, signed_service_metadata_redirection, " +
+                    "http://serviceMetadata2.eu/busdox-actoridupis%3A%3A0010%3A5798000000001/services/busdox-docidqns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3AInvoice-2%3A%3AInvoice%23%23UBL-2.0",
+            "oasis-smp-2.0, service_metadata_unsigned_redirection, " +
+                    "https://ap.example.com/iso6523-actorid-upis::9915:123456789/services/bdx-docid-qns::Invoice:ver2.0",
+            "peppol, signed_service_metadata_redirection, " +
+                    "http://serviceMetadata2.eu/busdox-actoridupis%3A%3A0010%3A5798000000001/services/busdox-docidqns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3AInvoice-2%3A%3AInvoice%23%23UBL-2.0"
+    })
+    void testDiscoverEndpointWithRedirectDisabled(String standard, String resourceName, String redirectURL) throws TechnicalException, URISyntaxException {
+
+        String anyString = "anyString";
+        String smpURI = "http://example.local:1234/";
+        List<String> anyTransportProfile = List.of("transportProfile");
+        FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
+        SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
+        SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
+        InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
+        assertNotNull(serviceMetadataStream);
+        // given
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
+        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(any());
+        Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
+
+        // when
+        testInstance.setRedirectionEnabled(false); // make sure it is disabled
+        SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
+                anyString, anyString, anyTransportProfile);
+        // then
+        assertNotNull(endpoint);
+        assertNotNull(endpoint.getRedirect());
+        assertEquals(redirectURL, endpoint.getRedirect().getRedirectUrl());
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "oasis-smp-1.0,signed_service_metadata_redirection, signed_service_metadata_signed_valid_iso6523, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl," +
+                    " bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://test.erechnung.gv.at/as4/msh/",
+            "oasis-smp-2.0, service_metadata_unsigned_redirection, service_metadata_unsigned_valid_iso6523_draft, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "oasis-smp-2.0, service_metadata_unsigned_redirection, service_metadata_unsigned_valid_iso6523_final, " +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "peppol, signed_service_metadata_redirection, signed_service_metadata_valid_iso6523_wildcard, " +
+                    "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0, cenbii-procid-ubl, " +
+                    "peppol-transport-as4-v2_0, " +
+                    "https://localhost:8080/as4"})
+    void testDiscoverEndpointRedirectionEnabled(String standard, String resourceName,
+                                                String redirectedResourceName, String processIdentifierValue, String processIdentifierScheme, String transportProfileID, String result) throws TechnicalException, URISyntaxException {
+
+        String smpURI = "http://example.local:1234/";
+        FetcherResponse fetcherResponse1 = Mockito.mock(FetcherResponse.class);
+        FetcherResponse fetcherResponse2 = Mockito.mock(FetcherResponse.class);
+        SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
+        SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
+        InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
+        InputStream serviceMetadataRedirectedStream = getResourceAsStream(standard, redirectedResourceName);
+
+        // given
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
+        // first return serviceMetadataStream and then serviceMetadataRedirectedStream
+        Mockito.doReturn(fetcherResponse1, fetcherResponse2).when(metadataFetcher).fetch(any());
+        Mockito.doReturn(serviceMetadataStream).when(fetcherResponse1).getInputStream();
+        Mockito.doReturn(serviceMetadataRedirectedStream).when(fetcherResponse2).getInputStream();
+
+        // when
+        testInstance.setRedirectionEnabled(true); // make sure it is enabled
+        SMPEndpoint endpoint = testInstance.discoverEndpoint(resourceId, subresourceId,
+                processIdentifierValue, processIdentifierScheme, List.of(transportProfileID));
+        // then
+        Mockito.verify(metadataFetcher, Mockito.times(2)).fetch(any());
+        assertNotNull(endpoint);
+        assertNotNull(endpoint.getTransportProfile());
+        assertNotNull(endpoint.getProcessIdentifier());
+        assertEquals(result, endpoint.getAddress());
+        assertEquals(transportProfileID, trim(endpoint.getTransportProfile().getIdentifier()));
+        assertEquals(processIdentifierValue, trim(endpoint.getProcessIdentifier().getIdentifier()));
+        assertEquals(processIdentifierScheme, trim(endpoint.getProcessIdentifier().getScheme()));
+        assertNotNull(endpoint.getCertificate());
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "oasis-smp-1.0, signed_service_metadata_signed_valid_iso6523, " +
+                    "eDelivery_SMP_TEST_4.cer,," +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl," +
+                    " bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://test.erechnung.gv.at/as4/msh/",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_draft, " +
+                    "eDelivery_SMP_TEST_2.cer,," +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "oasis-smp-2.0, service_metadata_unsigned_valid_iso6523_final, " +
+                    "eDelivery_SMP_TEST_2.cer,," +
+                    "urn:www.cenbii.eu:profile:bii05:ver2.0, cenbii-procid-ubl, " +
+                    "bdxr-transport-ebms3-as4-v1p0, " +
+                    "https://ap.example.com/as4",
+            "peppol, signed_service_metadata_valid_iso6523_wildcard, " +
+                    "eDelivery_SMP_TEST_3.cer,," +
+                    "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0, cenbii-procid-ubl, " +
+                    "peppol-transport-as4-v2_0, " +
+                    "https://localhost:8080/as4"})
+    void testCertificateExists(String standard, String resourceName,
+                               String certificateName, String certificateCode,
+                               String processIdentifierValue, String processIdentifierScheme, String transportProfileID, String result) throws TechnicalException, URISyntaxException, IOException, CertificateException {
+        // load certificate from string
+        X509Certificate certificate = readCertificate(certificateName);
+
+        String smpURI = "http://example.local:1234/";
+        FetcherResponse fetcherResponse = Mockito.mock(FetcherResponse.class);
+        SMPParticipantIdentifier resourceId = Mockito.mock(SMPParticipantIdentifier.class);
+        SMPDocumentIdentifier subresourceId = Mockito.mock(SMPDocumentIdentifier.class);
+        SMPProcessIdentifier processIdentifierId = new SMPProcessIdentifier(processIdentifierValue, processIdentifierScheme);
+        SMPTransportProfile transportProfile = new SMPTransportProfile(transportProfileID);
+        InputStream serviceMetadataStream = getResourceAsStream(standard, resourceName);
+        assertNotNull(serviceMetadataStream);
+        // given
+        List<PublisherLookupResult> publisherLookupResult = createMockPublisherLookupNaptrResult(resourceId, smpURI);
+        Mockito.doReturn(publisherLookupResult).when(metadataLocator).lookup(any());
+        Mockito.doReturn(fetcherResponse).when(metadataFetcher).fetch(any());
+        Mockito.doReturn(serviceMetadataStream).when(fetcherResponse).getInputStream();
+
+        // when
+        testInstance.certificateExists(certificate, null,
+                resourceId, subresourceId,
+                processIdentifierId, transportProfile);
+    }
+
+
+    private static InputStream getResourceAsStream(String standard, String resourceName) {
+        return DynamicDiscoveryServiceImplTest.class
+                .getResourceAsStream("/response/" + standard + "/" + resourceName + ".xml");
+    }
+
+    public static X509Certificate readCertificate(String certName) throws CertificateException, IOException {
+        String certificateResource = "/certificate/" + certName;
+        InputStream certificateStream = DynamicDiscoveryServiceImplTest.class.getResource
+                (certificateResource).openStream();
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        return (X509Certificate) factory.generateCertificate(certificateStream);
+    }
+}

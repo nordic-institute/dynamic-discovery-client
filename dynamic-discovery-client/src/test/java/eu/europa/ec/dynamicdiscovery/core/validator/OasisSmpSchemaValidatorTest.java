@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Joze Rihtarsic
- * @since 5.0
+ * @since 2.0
  */
 @ExtendWith(MockitoExtension.class)
 class OasisSmpSchemaValidatorTest {

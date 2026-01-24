@@ -33,8 +33,8 @@
             <sma:Certificate>
                 <smb:Subject>CN=EXAMPLE AP,C=NO</smb:Subject>
                 <smb:Issuer>CN=EXAMPLE AP,C=NO</smb:Issuer>
-                <smb:ActivationDate>2018-04-12</smb:ActivationDate>
-                <smb:ExpirationDate>2020-04-12</smb:ExpirationDate>
+                <smb:ActivationDate>2024-04-12</smb:ActivationDate>
+                <smb:ExpirationDate>2030-04-12</smb:ExpirationDate>
                 <smb:ContentBinaryObject mimeCode="application/base64">
                     MIICwDCCAaigAwIBAgIEWs7kiDANBgkqhkiG9w0BAQsFADAiMQswCQYDVQQGEwJO
                     TzETMBEGA1UEAwwKRVhBTVBMRSBBUDAeFw0xODA0MTIwNDQ2MDBaFw0yMDA0MTIw
