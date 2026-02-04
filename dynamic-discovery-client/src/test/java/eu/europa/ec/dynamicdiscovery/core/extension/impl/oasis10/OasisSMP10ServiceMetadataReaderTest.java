@@ -36,7 +36,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
@@ -134,7 +134,7 @@ class OasisSMP10ServiceMetadataReaderTest {
         Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("signed_service_metadata_signed_valid_iso6523");
         ISignatureValidator signatureValidator = Mockito.mock(ISignatureValidator.class);
         X509Certificate cert = Mockito.mock(X509Certificate.class);
-        SignatureValidationContext context = Mockito.mock(SignatureValidationContext.class);;
+        SignatureValidationContext context = Mockito.mock(SignatureValidationContext.class);
         Mockito.doReturn(cert).when(signatureValidator).verify(Mockito.any(Document.class), Mockito.eq(context));
         // when
         SMPServiceMetadata result = testInstance.parseAndValidateSignature(doc, signatureValidator, context);
@@ -167,7 +167,7 @@ class OasisSMP10ServiceMetadataReaderTest {
         Document doc = CommonUtil.getOasisSMP10DocumentFromXmlFile("signed_service_metadata_signed_valid_iso6523");
         ISignatureValidator signatureValidator = Mockito.mock(ISignatureValidator.class);
         SignatureException signatureException = Mockito.mock(SignatureException.class);
-        SignatureValidationContext context = Mockito.mock(SignatureValidationContext.class);;
+        SignatureValidationContext context = Mockito.mock(SignatureValidationContext.class);
         Mockito.doThrow(signatureException).when(signatureValidator).verify(Mockito.any(Document.class), Mockito.eq(context));
         // when
         SignatureException technicalException = assertThrows(SignatureException.class,

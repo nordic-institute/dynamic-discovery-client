@@ -20,401 +20,65 @@
 package eu.europa.ec.dynamicdiscovery.core.fetcher.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.core.fetcher.IMetadataFetcher;
-import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
-import eu.europa.ec.dynamicdiscovery.core.security.IProxyConfiguration;
-import eu.europa.ec.dynamicdiscovery.exception.*;
-import eu.europa.ec.dynamicdiscovery.util.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.hc.client5.http.UnsupportedSchemeException;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.Credentials;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.IDocumentFetcher;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
-import org.apache.hc.client5.http.io.HttpClientConnectionManager;
-import org.apache.hc.client5.http.routing.HttpRoutePlanner;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.HttpRequest;
-import org.apache.hc.core5.http.config.RegistryBuilder;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
-import org.apache.hc.core5.ssl.SSLContexts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import java.io.*;
-import java.net.SocketException;
+import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.*;
-
-import static org.apache.commons.lang3.StringUtils.lowerCase;
-import static org.apache.commons.lang3.StringUtils.startsWithAny;
 
 /**
+ * The default implementation of the {@link IDocumentFetcher} interface. This class is responsible for fetching the
+ * metadata from the SMP server using the provided URI. It also handles the authentication and proxy settings.
+ *
  * @author Flávio W. R. Santos
  * @author Erlend Klakegg Bergheim
  * @author Sebastian-Ion TINCU
+ * @author Joze RIHTARSIC
  * @since 1.13
  */
-public class DefaultURLFetcher implements IMetadataFetcher {
-    static final Logger LOG = LoggerFactory.getLogger(DefaultURLFetcher.class);
+public class DefaultURLFetcher extends AbstractURLFetcher {
 
-    private final IProxyConfiguration proxyConfiguration;
-    private final ICredentialProvider credentialProvider;
-
-    private final HttpRoutePlanner routePlanner;
-
-    private final HttpClientConnectionManager connectionManager;
-
-    /**
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher() {
-        this(null, null, null, null);
-    }
-
-    /**
-     * @param proxyConfiguration
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(IProxyConfiguration proxyConfiguration) {
-
-        this(null, null, null, proxyConfiguration);
-    }
-
-    /**
-     * @param routePlanner
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(HttpRoutePlanner routePlanner) {
-        this(null, routePlanner, null, null);
-    }
-
-    /**
-     * @param proxyConfiguration
-     * @deprecated Use the DefaultURLFetcher.Builder to build the fetcher
-     */
-    @Deprecated
-    public DefaultURLFetcher(HttpRoutePlanner routePlanner, IProxyConfiguration proxyConfiguration) {
-        this(null, routePlanner, null, proxyConfiguration);
-    }
-
-    private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
-                              HttpRoutePlanner routePlanner,
-                              IProxyConfiguration proxyConfiguration) {
-        this(connectionManager, routePlanner, null, proxyConfiguration);
-    }
-
-    private DefaultURLFetcher(HttpClientConnectionManager connectionManager,
-                              HttpRoutePlanner routePlanner,
-                              ICredentialProvider credentialProvider,
-                              IProxyConfiguration proxyConfiguration) {
-        this.routePlanner = routePlanner;
-        this.proxyConfiguration = proxyConfiguration;
-        this.connectionManager = connectionManager;
-        this.credentialProvider = credentialProvider;
+    private DefaultURLFetcher(Builder builder) {
+        super(builder);
     }
 
     @Override
-    public FetcherResponse fetch(URI participantUnderSmpURI) throws TechnicalException {
-        LOG.debug("Fetch data for participantURI [{}]", participantUnderSmpURI);
+    public FetcherResponse fetch(URI documentURI) throws TechnicalException {
+        LOG.debug("Fetch data for participantURI [{}]", documentURI);
 
-        HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                .setConnectionManager(connectionManager)
-                .setRoutePlanner(routePlanner);
-        RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
-
-        // set authentication for target uri
-        BasicCredentialsProvider credentialsProvider = buildAuthenticationForTarget(participantUnderSmpURI, null);
-        // set proxy
-        String participantUnderSmpURIHost = participantUnderSmpURI.getHost();
-        if (proxyConfiguration != null && !proxyConfiguration.isNonProxyHost(participantUnderSmpURIHost)) {
-            LOG.debug("Fetch data using proxy");
-            HttpHost proxyHost = proxyConfiguration.getProxyHost(participantUnderSmpURIHost);
-            // set proxy authentication
-            credentialsProvider = buildAuthenticationForTarget(
-                    proxyHost,
-                    proxyConfiguration.getProxyCredentials(),
-                    credentialsProvider);
-            requestConfigBuilder.setProxy(proxyHost);
-        }
-
-        if (credentialProvider != null) {
-            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-        }
-
-        HttpGet httpGet = new HttpGet(participantUnderSmpURI);
-        httpGet.setConfig(requestConfigBuilder.build());
+        String targetHostname = documentURI.getHost();
+        RequestConfig requestConfig = createRequestConfig(targetHostname);
+        CloseableHttpClient httpClient = createHttpClient(documentURI);
+        HttpGet httpGet = new HttpGet(documentURI);
+        httpGet.setConfig(requestConfig);
 
         try {
-            return connect(httpClientBuilder.build(), httpGet);
+            InputStream inputStream = connect(httpClient, httpGet);
+            return new FetcherResponse(inputStream, documentURI);
         } catch (TechnicalException e) {
-            e.setSmpExceptionCode(SMPExceptionCode.SERVICE_GROUP);
+            e.setSmpExceptionCode(DDCExceptionCode.SERVICE_GROUP);
             throw e;
         }
     }
 
-    private BasicCredentialsProvider buildAuthenticationForTarget(URI targetUri, BasicCredentialsProvider provider) {
-        if (credentialProvider == null) {
-            LOG.debug("No credential provider set for target url [{}].", targetUri);
-            return provider;
-        }
+    public static class Builder extends AbstractFetcherBuilder<Builder> {
 
-        return buildAuthenticationForTarget(
-                new HttpHost(targetUri.getScheme(), targetUri.getHost(), targetUri.getPort()),
-                credentialProvider.getCredentials(), provider);
-    }
-
-    private BasicCredentialsProvider buildAuthenticationForTarget(HttpHost targetHost,
-                                                                  Credentials credentials,
-                                                                  BasicCredentialsProvider provider) {
-        if (credentials == null) {
-            LOG.debug("No credential provided for target url [{}].", targetHost);
-            return provider;
-        }
-
-        if (StringUtils.equalsIgnoreCase(targetHost.getSchemeName(), "http")) {
-            LOG.warn("Unsafe use of credentials for uri [{}].", targetHost);
-        }
-        if (provider == null) {
-            provider = new BasicCredentialsProvider();
-        }
-
-        AuthScope authScope = new AuthScope(targetHost);
-        provider.setCredentials(authScope, credentials);
-        return provider;
-    }
-
-    /**
-     * Connect to the SMP server and retrieve the data.
-     *
-     * @param httpClient the http client to connect to the SMP server
-     * @param httpGet    the http get request configuration
-     * @return the fetcher response containing the data
-     * @throws TechnicalException the technical exception
-     */
-    public FetcherResponse connect(CloseableHttpClient httpClient, HttpGet httpGet) throws TechnicalException {
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            switch (response.getCode()) {
-                case 200:
-                    try (final BufferedInputStream bufferedInputStream = new BufferedInputStream(response.getEntity().getContent())) {
-                        return toInMemoryFetcherResponse(bufferedInputStream);
-                    }
-                case 404:
-                    throw new DNSLookupException("SMP lookup address " + httpGet.getUri() + " not found - response 404");
-                default:
-                    throw new DNSLookupException("Got Http error code " + response.getCode() + " trying to access SMP URL:" + httpGet.getUri());
-            }
-        } catch (DNSLookupException exc) {
-            throw exc;
-        } catch (SSLException exc) {
-            throw new ConnectionException("Error occurred while retrieving [" + httpGet.getRequestUri() + "]: Error: [" + ExceptionUtils.getRootCauseMessage(exc) + "]", exc);
-        } catch (SocketException | UnsupportedSchemeException exc) {
-            throw new ConnectionException("TLS Error occurred while retrieving [" + httpGet.getRequestUri() + "]: Error: [" + ExceptionUtils.getRootCauseMessage(exc) + "]", exc);
-        } catch (Exception exc) {
-            String message = "It was not able to retrieve data from SMP server using NAPTR record according to OASIS BDX specification.";
-            String uri = lowerCase(getUriFromHttpRequest(httpGet));
-            if (startsWithAny(uri, "http://b-", "https://b-")) {
-                message = "It was not able to retrieve data from SMP server using CNAME record according to PEPPOL BUSDOX specification.";
-            }
-            throw new DNSLookupException(message, exc);
-        }
-    }
-
-    /**
-     * Convert input stream to in-memory fetcher response.
-     *
-     * @param inputStream input stream from the document source
-     * @return in-memory fetcher response
-     * @throws IOException if an I/O error occurs
-     */
-    public FetcherResponse toInMemoryFetcherResponse(InputStream inputStream) throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            IOUtils.copy(inputStream, baos);
-            return new FetcherResponse(new ByteArrayInputStream(baos.toByteArray()));
-        }
-    }
-
-
-    public String getUriFromHttpRequest(HttpRequest httpRequest) {
-        try {
-            return httpRequest.getUri().toString();
-        } catch (URISyntaxException e) {
-            LOG.error("Error occurred while resolving http get url", e);
-        }
-        return null;
-    }
-
-    /**
-     * Default Fetcher builder
-     */
-    public static class Builder {
-
-        private SSLContextBuilder sslContextBuilder = null;
-        private SSLContext sslContext = null;
-        private String[] tlsVersions;
-        private String[] tlsCipherSuites;
-        private boolean noHostnameValidation;
-
-        private boolean httpSchemeEnabled = true;
-        private boolean httpsSchemeEnabled = true;
-
-        private IProxyConfiguration proxyConfiguration;
-        private ICredentialProvider credentialProvider;
-        private HttpRoutePlanner routePlanner;
 
         public Builder() {
-            sslContextBuilder = SSLContexts.custom();
+            super();
         }
 
-        /**
-         * Creates a Builder that uses an existing SSLContext
-         *
-         * @param sslContext is the sslContext to be used
-         * @return builder
-         */
         public Builder(SSLContext sslContext) {
-            this.sslContext = sslContext;
+            super(sslContext);
         }
 
-        /**
-         * Set list of allowed TLS versions as TLSv1.1, TLSv1.2, TLSv1.3 etc
-         *
-         * @param tlsVersions is array of allowed TLS versions
-         * @return builder
-         */
-        public Builder tlsVersions(final String... tlsVersions) {
-            this.tlsVersions = tlsVersions;
-            return this;
-        }
-
-        /**
-         * Set the server truststore
-         *
-         * @param truststore truststore with server trust anchors such as server certificate or issuer chain of server certificate
-         * @return this builder
-         * @throws NoSuchAlgorithmException
-         * @throws KeyStoreException
-         */
-
-        public Builder tlsTruststore(final KeyStore truststore) throws NoSuchAlgorithmException, KeyStoreException {
-            if (this.sslContextBuilder == null) {
-                throw new IllegalStateException("A truststore cannot be added if a SSLContext is set in Builder constructor");
-            }
-            this.sslContextBuilder.loadTrustMaterial(truststore, null);
-            return this;
-        }
-
-        /**
-         * Set client keystore with the client key for mutual TLS authentication
-         *
-         * @param keystore keystore
-         * @param password password for the certificate
-         * @return this builder
-         * @throws UnrecoverableKeyException
-         * @throws NoSuchAlgorithmException
-         * @throws KeyStoreException
-         */
-        public Builder tlsKeystore(final KeyStore keystore, final char[] password) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-            if (this.sslContextBuilder == null) {
-                throw new IllegalStateException("A keystore cannot be added if a SSLContext is set in the Builder constructor");
-            }
-            this.sslContextBuilder.loadKeyMaterial(keystore, password);
-            return this;
-        }
-
-        /**
-         * Allowed cipher suites
-         *
-         * @param tlsCipherSuites
-         * @return this builder
-         */
-        public Builder tlsCipherSuites(final String... tlsCipherSuites) {
-            this.tlsCipherSuites = tlsCipherSuites;
-            return this;
-        }
-
-        /**
-         * Set not host validation - should be used only for testing purposes.
-         *
-         * @param noHostnameValidation
-         * @return this builder
-         */
-        public Builder noHostnameValidation(final boolean noHostnameValidation) {
-            this.noHostnameValidation = noHostnameValidation;
-            return this;
-        }
-
-        /**
-         * Set proxy configuration.
-         *
-         * @param proxyConfiguration
-         * @return this builder
-         */
-        public Builder proxyConfiguration(final IProxyConfiguration proxyConfiguration) {
-            this.proxyConfiguration = proxyConfiguration;
-            return this;
-        }
-
-        /**
-         * Set credential provider for target url authentication
-         *
-         * @param credentialProvider
-         * @return this builder
-         */
-        public Builder credentialProvider(final ICredentialProvider credentialProvider) {
-            this.credentialProvider = credentialProvider;
-            return this;
-        }
-
-        /**
-         * Enhanced proxy settings
-         *
-         * @param routePlanner
-         * @return this builder
-         */
-        public Builder routePlanner(final HttpRoutePlanner routePlanner) {
-            this.routePlanner = routePlanner;
-            return this;
-        }
-
-        /**
-         * enable/disable to use http scheme
-         *
-         * @param enableHttpScheme
-         * @return this builder
-         */
-        public Builder httpSchemeEnabled(final boolean enableHttpScheme) {
-            this.httpSchemeEnabled = enableHttpScheme;
-            return this;
-        }
-
-        /**
-         * enable/disable to use https scheme
-         *
-         * @param httpsSchemeEnabled
-         * @return this builder
-         */
-        public Builder httpsSchemeEnabled(final boolean httpsSchemeEnabled) {
-            this.httpsSchemeEnabled = httpsSchemeEnabled;
+        @Override
+        protected Builder self() {
             return this;
         }
 
@@ -423,37 +87,9 @@ public class DefaultURLFetcher implements IMetadataFetcher {
          *
          * @return configured URL fetcher
          */
+        @Override
         public DefaultURLFetcher build() {
-
-            RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
-            if (httpSchemeEnabled) {
-                registryBuilder.register("http", new PlainConnectionSocketFactory());
-            }
-            if (httpsSchemeEnabled) {
-                registryBuilder.register("https", buildSSLConnectionSocketFactory());
-            }
-
-            final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(registryBuilder.build());
-            return new DefaultURLFetcher(connectionManager, routePlanner, credentialProvider, proxyConfiguration);
-        }
-
-        private SSLConnectionSocketFactory buildSSLConnectionSocketFactory() {
-            try {
-                SSLConnectionSocketFactoryBuilder builder = SSLConnectionSocketFactoryBuilder.create()
-                        .setCiphers(this.tlsCipherSuites)
-                        .setTlsVersions(this.tlsVersions)
-                        .setHostnameVerifier(this.noHostnameValidation ? NoopHostnameVerifier.INSTANCE : new DefaultHostnameVerifier());
-
-                if (this.sslContextBuilder != null) {
-                    builder = builder.setSslContext(this.sslContextBuilder.build());
-                }
-                if (this.sslContext != null) {
-                    builder = builder.setSslContext(this.sslContext);
-                }
-                return builder.build();
-            } catch (KeyManagementException | NoSuchAlgorithmException e) {
-                throw new DDCRuntimeException("TLS configuration error: " + ExceptionUtils.getRootCauseMessage(e), e);
-            }
+            return new DefaultURLFetcher(this);
         }
     }
 }

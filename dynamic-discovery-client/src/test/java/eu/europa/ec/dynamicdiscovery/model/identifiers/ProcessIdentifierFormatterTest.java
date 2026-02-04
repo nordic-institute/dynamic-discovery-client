@@ -140,7 +140,7 @@ class ProcessIdentifierFormatterTest {
 
     // input parameters
 
-    ProcessIdentifierFormatter testInstance = new ProcessIdentifierFormatter();
+    ProcessIdentifierFormatter testInstance = new ProcessIdentifierFormatter.Builder().build();
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("documentIdentifierCases")

@@ -26,10 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -40,7 +38,7 @@ import java.security.cert.CertificateFactory;
  */
 public class CommonUtil {
 
-    private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(() -> AbstractXMLResponseReader.createDocumentBuilder());
+    private static final ThreadLocal<DocumentBuilder> threadLocalDocumentBuilder = ThreadLocal.withInitial(AbstractXMLResponseReader::createDocumentBuilder);
     static final Logger LOG = LoggerFactory.getLogger(CommonUtil.class);
     static final String ROOT_RESPONSE = "/response";
     public static final String OASIS_SMP_10 = "oasis-smp-1.0";
@@ -93,18 +91,18 @@ public class CommonUtil {
     }
 
     public static String getStringFromXmlBytes(byte[] ba) throws Exception {
-        return new String(ba, "UTF-8");
+        return new String(ba, StandardCharsets.UTF_8);
     }
 
-    public static InputStream getInputStreamFromOasisSMP10XmlResource(String fileName) throws Exception {
+    public static InputStream getInputStreamFromOasisSMP10XmlResource(String fileName) {
         return getISForName(fileName, OASIS_SMP_10);
     }
 
-    public static InputStream getInputStreamFromOasisSMP20XmlResource(String fileName) throws Exception {
+    public static InputStream getInputStreamFromOasisSMP20XmlResource(String fileName) {
         return getISForName(fileName, OASIS_SMP_20);
     }
 
-    public static InputStream getInputStreamFromPeppolResource(String fileName) throws Exception {
+    public static InputStream getInputStreamFromPeppolResource(String fileName) {
         return getISForName(fileName, PEPPOL);
     }
 
@@ -121,7 +119,14 @@ public class CommonUtil {
         return keyStore;
     }
 
-    public static Certificate loadCertificate(String certFilename) throws IOException, CertificateException {
+    public static KeyStore loadKeystoreFromFile(String fileName, String type, String password) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance(type);
+        keyStore.load(new FileInputStream(fileName), StringUtils.isBlank(password) ? null : password.toCharArray());
+        return keyStore;
+    }
+
+
+    public static Certificate loadCertificate(String certFilename) throws CertificateException {
         InputStream fis = CommonUtil.class.getResourceAsStream(certFilename);
         BufferedInputStream bis = new BufferedInputStream(fis);
         CertificateFactory cf = CertificateFactory.getInstance("X.509");

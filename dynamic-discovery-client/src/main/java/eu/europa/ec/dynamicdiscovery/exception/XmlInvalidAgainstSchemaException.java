@@ -24,7 +24,7 @@ package eu.europa.ec.dynamicdiscovery.exception;
  */
 public class XmlInvalidAgainstSchemaException extends Exception {
 
-    public XmlInvalidAgainstSchemaException(String message, Exception e) {
+    public XmlInvalidAgainstSchemaException(String message, Throwable e) {
         super(message, e);
     }
 }

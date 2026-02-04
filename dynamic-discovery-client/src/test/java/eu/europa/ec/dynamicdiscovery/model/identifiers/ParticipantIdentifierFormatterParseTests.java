@@ -62,7 +62,7 @@ class ParticipantIdentifierFormatterParseTests {
     }
 
 
-    ParticipantIdentifierFormatter testInstance = new ParticipantIdentifierFormatter();
+    ParticipantIdentifierFormatter testInstance = new ParticipantIdentifierFormatter.Builder().initDefault().build();
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("partyIdentifierTestArguments")

@@ -32,23 +32,30 @@ public class TestCaseConstants {
     //  public static final String SMP_APP_CONTEXT="cipa-smp-full-webapp/";
 
     public static final String SMP_STATIC_DOMAIN = "http://localhost:8090/cipa-smp-full-webapp/";
-    public static final String SMP_DOMAIN = "http://localhost:8090/";
+    public static final String PUBLISHER_URL_01 = "http://localhost:8090/";
+    public static final String PUBLISHER_URL_02 = "http://smp.ec.europa.eu/";
 
-    public static final String SMP_DOMAIN_ALIAS = "http://smp.ec.europa.eu/";
+    public static final String PARTY_9925_0367302178_FILE_RESOURCE = "service_group_valid_iso6523";
+    public static final String PARTY_9925_0367302178_SERVICE_GROUP_URL = "/iso6523-actorid-upis%3A%3A9925%3A0367302178";
+    public static final String PARTY_9925_0367302178_NAPTR_QUERY = "ZR2ZGDOAGAVSHSQ2MRHXEZV2H6ATTQBF4JJ4J7VJNPYMRDZ3UG4Q.iso6523-actorid-upis";
+    public static final String PARTY_9925_0367302178_CNAME_QUERY = "B-ed520c91b58f3e9f19714d8170aac5af.iso6523-actorid-upis";
 
-    public static final String SERVICE_GROUP_URL_9925_0367302178 = "/iso6523-actorid-upis%3A%3A9925%3A0367302178";
+    public static final String PARTY_URL_URN_POLAND_NCPB_FILE_SM = "service_group_urn_poland_ncpb";
+    public static final String PARTY_URL_URN_POLAND_NCPB_SERVICE_GROUP_URL = "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb";
+    public static final String PARTY_URL_URN_POLAND_NCPB_NAPTR_QUERY = "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ.ehealth-actorid-qns";
 
-    public static final String SERVICE_GROUP_URL_URN_POLAND_NCPB = "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb";
 
     public static final String SERVICE_METADATA_URL_URN_POLAND_NCPB = "/ehealth-actorid-qns%3A%3Aurn%3Apoland%3Ancpb/services/ehealth-resid-qns%3A%3Aurn%3A%3Aepsos%23%23services%3Aextended%3Aepsos%3A%3A107";
 
-    public static final String SIGNED_SERVICE_METADATA_URL_URN_POLAND_NCPB = SERVICE_METADATA_URL_URN_POLAND_NCPB;
 
     public static final String SERVICE_METADATA_URL_9915_123456789 = "/iso6523-actorid-upis%3A%3A9915%3A123456789/services/bdxr-docid-qns%3A%3Aurn%3Aoasis%3Anames%3Aspecification%3Aubl%3Aschema%3Axsd%3ACreditNote-2%3A%3ACreditNote%23%23urn%3Awww.cenbii.eu%3Atransaction%3Abiitrns014%3Aver2.0%3Aextended%3Aurn%3Awww.peppol.eu%3Abis%3Apeppol5a%3Aver2.0%3A%3A2.1";
 
     // ---------------------------------------------------------
     // The identifiers below matches the XML examples
-    public static final SMPParticipantIdentifier PARTICIPANT_IDENTIFIER_ISO6253_01 = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+
+    public static final SMPParticipantIdentifier PARTY_9925_0367302178_IDENTIFIER = new SMPParticipantIdentifier("9925:0367302178", "iso6523-actorid-upis");
+    public static final SMPParticipantIdentifier PARTY_URL_URN_POLAND_NCPB_IDENTIFIER = new SMPParticipantIdentifier("urn:poland:ncpb", "ehealth-actorid-qns");
+
     public static final SMPParticipantIdentifier PARTICIPANT_IDENTIFIER_ISO6253_02 = new SMPParticipantIdentifier("9915:123456789", "iso6523-actorid-upis");
     public static final SMPDocumentIdentifier DOCUMENT_IDENTIFIER_001 = new SMPDocumentIdentifier("urn::epsos:services##epsos-21", "bdx-docid-qns");
     public static final SMPDocumentIdentifier DOCUMENT_IDENTIFIER_002 = new SMPDocumentIdentifier("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "bdx-docid-qns");
