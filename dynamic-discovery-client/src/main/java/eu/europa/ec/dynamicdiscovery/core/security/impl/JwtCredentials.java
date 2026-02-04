@@ -21,9 +21,14 @@ package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.hc.client5.http.auth.Credentials;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Represents JWT credentials used for authentication.
@@ -55,7 +60,7 @@ public class JwtCredentials implements Credentials, Serializable {
 
     @Override
     public Principal getUserPrincipal() {
-        return this::getAccessToken; // JWT tokens do not have a specific user principal
+        return () -> "jwtfp:" + tokenFingerprint(accessToken); // JWT tokens do not have a specific user principal. Avoid leaking the raw JWT
     }
 
     @Override
@@ -125,12 +130,28 @@ public class JwtCredentials implements Credentials, Serializable {
     @Override
     public String toString() {
         return "JwtCredentials{" +
-                "accessToken='" + accessToken + '\'' +
+                "accessToken='[redacted fingerprint=" + tokenFingerprint(accessToken) + "]'" +
                 ", expiresIn=" + expiresIn +
                 ", refreshExpiresIn=" + refreshExpiresIn +
                 ", tokenType='" + tokenType + '\'' +
                 ", notBeforePolicy=" + notBeforePolicy +
                 ", scope='" + scope + '\'' +
                 '}';
+    }
+
+    private static String tokenFingerprint(String token) {
+        if (token == null) return "null";
+        if (token.isEmpty()) return "empty";
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+
+            int bytesToEncode = Math.min(12, hash.length);
+            byte[] truncated = Arrays.copyOf(hash, bytesToEncode);
+            return Hex.toHexString(truncated);
+        } catch (NoSuchAlgorithmException e) {
+            return "unavailable";
+        }
     }
 }
