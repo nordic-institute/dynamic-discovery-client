@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.niis.dynamic-discovery</groupId>
         <artifactId>dynamic-discovery-parent</artifactId>
-        <version>2.4</version>
+        <version>3.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>dynamic-discovery-cli</artifactId>
@@ -15,9 +15,8 @@
     <description>Dynamic Discovery command-line interface</description>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sonar.skip>true</sonar.skip>
     </properties>
 
     <licenses>
@@ -48,9 +47,12 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <finalName>ddc</finalName>
+                    <finalName>ddc-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <mainClass>eu.europa.ec.ddc.DdcMain</mainClass>
@@ -74,14 +76,9 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>dynamic-discovery-client</artifactId>
         </dependency>
-        <!-- dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>

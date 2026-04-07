@@ -24,13 +24,13 @@ package eu.europa.ec.dynamicdiscovery.exception;
  */
 public class TechnicalException extends Exception {
 
-    protected SMPExceptionCode smpExceptionCode;
+    protected DDCExceptionCode smpExceptionCode;
 
     protected TechnicalException(String message) {
         super(message);
     }
 
-    protected TechnicalException(SMPExceptionCode smpExceptionCode, String message) {
+    protected TechnicalException(DDCExceptionCode smpExceptionCode, String message) {
         super(message);
         this.smpExceptionCode = smpExceptionCode;
     }
@@ -39,16 +39,16 @@ public class TechnicalException extends Exception {
         super(message, cause);
     }
 
-    protected TechnicalException(SMPExceptionCode smpExceptionCode, String message, Throwable cause) {
+    protected TechnicalException(DDCExceptionCode smpExceptionCode, String message, Throwable cause) {
         super(message, cause);
         this.smpExceptionCode = smpExceptionCode;
     }
 
-    public SMPExceptionCode getSmpExceptionCode() {
+    public DDCExceptionCode getSmpExceptionCode() {
         return smpExceptionCode;
     }
 
-    public void setSmpExceptionCode(SMPExceptionCode smpExceptionCode) {
+    public void setSmpExceptionCode(DDCExceptionCode smpExceptionCode) {
         this.smpExceptionCode = smpExceptionCode;
     }
 }

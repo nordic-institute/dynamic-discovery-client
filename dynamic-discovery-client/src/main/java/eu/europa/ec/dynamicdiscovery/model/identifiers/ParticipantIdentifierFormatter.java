@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,10 @@
 package eu.europa.ec.dynamicdiscovery.model.identifiers;
 
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.EBCorePartyIdFormatterType;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.types.OasisSMPFormatterType;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.PeppolPartyIdFormatterType;
+
+import java.util.regex.Pattern;
 
 /**
  * Formatter for the ParticipantIdentifier with default "ebCoreParty" split regular expression and
@@ -29,15 +32,20 @@ import eu.europa.ec.dynamicdiscovery.model.identifiers.types.PeppolPartyIdFormat
  * @author Joze Rihtarsic
  * @since 2.0
  */
-public class ParticipantIdentifierFormatter extends AbstractIdentifierFormatter<SMPParticipantIdentifier> {
+public class ParticipantIdentifierFormatter extends AbstractIdentifierFormatter<SMPParticipantIdentifier, ParticipantIdentifierFormatter> {
 
-    public ParticipantIdentifierFormatter() {
-        addFormatterTypes(new EBCorePartyIdFormatterType());
-        setDefaultFormatter(new PeppolPartyIdFormatterType());
-        this.defaultFormatter = new PeppolPartyIdFormatterType();
+
+    /**
+     * Protected constructor for ParticipantIdentifierFormatter.
+     * Use {@link Builder} to create an instance.
+     *
+     * @param builder the builder instance
+     */
+    protected ParticipantIdentifierFormatter(Builder builder) {
+        super(builder);
     }
 
-    public void setWildcardEnabled(boolean enable){
+    public void setWildcardEnabled(boolean enable) {
         this.formatterTypes.forEach(formatterType -> formatterType.setWildcardEnabled(enable));
         getDefaultFormatter().setWildcardEnabled(enable);
     }
@@ -62,4 +70,29 @@ public class ParticipantIdentifierFormatter extends AbstractIdentifierFormatter<
         identifierObject.setScheme(scheme);
         identifierObject.setIdentifier(identifier);
     }
+
+    /**
+     * Builder class for creating instances of ProcessIdentifierFormatter.
+     * This class extends AbstractBuilder to provide a fluent interface for building the formatter.
+     */
+    public static class Builder extends AbstractBuilder<ParticipantIdentifierFormatter> {
+        @Override
+        public ParticipantIdentifierFormatter build() {
+            return new ParticipantIdentifierFormatter(this);
+        }
+
+       public Builder initDefault() {
+            formatterTypes.clear();
+            formatterTypes.add(new EBCorePartyIdFormatterType());
+            formatterTypes.add(new PeppolPartyIdFormatterType.Builder().build());
+            defaultFormatter = new OasisSMPFormatterType.Builder()
+                    .schemeMandatory(false)
+                    .wildcardEnabled(true)
+                    .schemeMaxLength(25)
+                    .schemeValidationPattern(Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+-[a-zA-Z0-9]+$"))
+                    .build();
+            return this;
+        }
+    }
+
 }

@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,22 +19,22 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupFormatType;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.MalformedIdentifierException;
-import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.FormatterType;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.types.TemplateFormatterType;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
+import eu.europa.ec.dynamicdiscovery.util.DNSUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -43,18 +43,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.xbill.DNS.NAPTRRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
-import org.xbill.DNS.TextParseException;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static eu.europa.ec.dynamicdiscovery.util.DNSUtils.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.spy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Flávio W. R. Santos
@@ -63,6 +64,8 @@ import static org.mockito.Mockito.spy;
 @ExtendWith(MockitoExtension.class)
 class DefaultBDXRLocatorTest {
 
+    private static final String TEST_IDENTIFIER_SCHEME_PEPPOL = "iso6523-actorid-upis";
+    private static final String TEST_IDENTIFIER_VALUE_PEPPOL = "0088:123456789";
 
     private static Stream<Arguments> testNaptrLookupArguments() {
         return Stream.of(
@@ -70,56 +73,47 @@ class DefaultBDXRLocatorTest {
                         "urn:brazil:saopaulo",
                         "country-state-qns",
                         null,
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTR wildcard",
                         "*",
                         "country-state-qns",
                         null,
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "*.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "*.country-state-qns." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTRCaseInsensitiveScheme",
                         "urn:brazil:SAOPAULO",
                         "country-state-qns",
                         null,
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "2CDN5ANIHSX2W6D2ZA5YSSGR2BXVLCGTLS6STIYM2CZYHB3L7GMA.country-state-qns." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTRCaseSensitiveScheme",
                         "urn:brazil:SAOPAULO",
                         "country-state-qns",
                         "country-state-qns",
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "CLUO32PLJFDWG7L4MMX63A7GZSOVTBUGACULASCQO7JEGFWE4GTA.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "CLUO32PLJFDWG7L4MMX63A7GZSOVTBUGACULASCQO7JEGFWE4GTA.country-state-qns." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTROasisPartyType",
                         "urn:brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered",
                         null,
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTROasisPartyTypeNormalized",
                         "brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTROasisPartyTypeCaseInsensitive",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTROasisPartyTypeCaseSensitive",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "CSIEEUZW4CTHXGR2O5NCGGWYV7KBUGCNPPPVIMJOMTNMJ7BUEEYQ.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "CSIEEUZW4CTHXGR2O5NCGGWYV7KBUGCNPPPVIMJOMTNMJ7BUEEYQ." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupNAPTROasisPartyTypeEmptyScheme",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo",
                         null,
                         null,
-                        "http://smp-mock-1.ehealth.eu:8888",
-                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ.ehealth.acc.edelivery.tech.ec.europa.eu")
+                        "XN536BJVZUJJWWJZPQN5KAM6LFPK4ZZD2VL4AXQRELT5HTCJ6LEQ." + TEST_TOP_DOMAIN_02)
         );
     }
 
@@ -129,276 +123,250 @@ class DefaultBDXRLocatorTest {
                         "urn:brazil:saopaulo",
                         "country-state-qns",
                         null,
-                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupCNameCaseInsentitive",
                         "urn:BRAZIL:saoPaulo",
                         "country-state-qns",
                         null,
-                        "http://B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "B-5cc29a6e1d849a3089cb7d8b192e55b7.country-state-qns." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupCNameCaseSentitive",
                         "urn:BRAZIL:saoPaulo",
                         "country-state-qns",
                         "country-state-qns",
-                        "http://B-66dc923ee75a737cae33562297567763.country-state-qns.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "B-66dc923ee75a737cae33562297567763.country-state-qns." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupCNAMEOasisPartyType",
                         "urn:brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered",
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "B-761c04e661616234cd81659d456b0cf6." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalized",
                         "brazil:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "B-761c04e661616234cd81659d456b0cf6." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalizedCaseInsensitive",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "B-761c04e661616234cd81659d456b0cf6." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNormalizedCaseSensitie",
                         "BRAZIL:saopaulo",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn",
-                        "http://B-dbb71b7c50103af1f3bb6dc67e3b5781.ehealth.acc.edelivery.tech.ec.europa.eu"),
+                        "B-dbb71b7c50103af1f3bb6dc67e3b5781." + TEST_TOP_DOMAIN_02),
                 Arguments.of("testLookupCNAMEOasisPartyTypeNullScheme",
                         "urn:oasis:names:tc:ebcore:partyid-type:unregistered:urn:brazil:saopaulo",
                         null,
                         null,
-                        "http://B-761c04e661616234cd81659d456b0cf6.ehealth.acc.edelivery.tech.ec.europa.eu")
-        );
-    }
-
-    private static Stream<Arguments> testWildCardTests() {
-        return Stream.of(
-                Arguments.of("Enable for peppol type schema ",
-                        true,
-                        "valid-Scheme-value",
-                        "ehealth.acc.edelivery.tech.ec.europa.eu",
-                        "*.valid-scheme-value.ehealth.acc.edelivery.tech.ec.europa.eu"),
-                Arguments.of("Null schema",
-                        true,
-                        null,
-                        "ehealth.acc.edelivery.tech.ec.europa.eu",
-                        "*.ehealth.acc.edelivery.tech.ec.europa.eu"),
-                Arguments.of("ebCoreParty schema",
-                        true,
-                        "urn:oasis:names:tc:ebcore:partyid-type:unregistered",
-                        "ehealth.acc.edelivery.tech.ec.europa.eu",
-                        "*.ehealth.acc.edelivery.tech.ec.europa.eu"),
-                Arguments.of("ebCoreParty schema disabled",
-                        false,
-                        "urn:oasis:names:tc:ebcore:partyid-type:unregistered",
-                        "ehealth.acc.edelivery.tech.ec.europa.eu",
-                        "NPTVY7VWFTCMVQSPQFM535B5PIAZ4H62CAESQJDEB3JCHF3VTHNQ.ehealth.acc.edelivery.tech.ec.europa.eu"),
-                Arguments.of("ebCoreParty schema disabled",
-                        false,
-                        "valid-scheme-value",
-                        "ehealth.acc.edelivery.tech.ec.europa.eu",
-                        "NBEIRQHLWF7TOQUYWZPOFADVE3AGMCKMOAN4Y7V34HAQSX2JJ7AQ.valid-scheme-value.ehealth.acc.edelivery.tech.ec.europa.eu")
+                        "B-761c04e661616234cd81659d456b0cf6." + TEST_TOP_DOMAIN_02)
         );
     }
 
     @Captor
-    ArgumentCaptor<String> dnsRecordUrlCaptor;
+    ArgumentCaptor<String> stringArgumentCaptor;
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("testNaptrLookupArguments")
-    void testLookupNAPTR(String name, String partyId, String partyScheme, String caseSensitiveScheme, String expectedUrl, String expectedDomain) throws Exception {
+    void testLookupNAPTRWithIdentifierValueAndScheme(String name, String partyId, String partyScheme, String caseSensitiveScheme, String expectedDomain) throws Exception {
         //GIVEN
-        DefaultBDXRLocator defaultBDXRLocator = lookupNAPTR(caseSensitiveScheme);
+        String publisherID = "http://" + UUID.randomUUID() + ".eu:8888/";
+        DefaultBDXRLocator testInstance = buildPublisherLocator(caseSensitiveScheme, DNSLookupType.NAPTR, TEST_NAPTR_SERVICE_SMP1, publisherID);
         //WHEN
-        URI uri = defaultBDXRLocator.lookup(partyId, partyScheme);
+        List<PublisherLookupResult> results = testInstance.lookup(partyId, partyScheme);
         //THEN
-        assertEquals(expectedUrl, uri.toString());
-        assertEquals(expectedDomain, dnsRecordUrlCaptor.getValue());
+        assertEquals(1, results.size());
+        assertEquals(publisherID, results.get(0).getUrl().toString());
+        verify(testInstance).naptrLookupForDomain(any(SMPParticipantIdentifier.class), stringArgumentCaptor.capture());
+        assertEquals(expectedDomain, stringArgumentCaptor.getValue());
     }
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("testNaptrLookupArguments")
-    void testLookupNAPTRWithIdentifier(String name, String partyId, String partyScheme, String caseSensitiveScheme, String expectedUrl, String expectedDomain) throws Exception {
+    void testLookupNAPTRWithIdentifier(String name, String partyId, String partyScheme, String caseSensitiveScheme, String expectedDomain) throws Exception {
         //GIVEN
+        String publisherURL = "http://" + UUID.randomUUID() + ".eu:8888/";
+        DefaultBDXRLocator testInstance = buildPublisherLocator(caseSensitiveScheme, DNSLookupType.NAPTR, "Meta:SMP", publisherURL);
         SMPParticipantIdentifier identifier = new SMPParticipantIdentifier(partyId, partyScheme);
-        DefaultBDXRLocator defaultBDXRLocator = lookupNAPTR(caseSensitiveScheme);
         //WHEN
-        URI uri = defaultBDXRLocator.lookup(identifier);
+        List<PublisherLookupResult> results = testInstance.lookup(identifier);
         //THEN
-        assertEquals(expectedUrl, uri.toString());
-        assertEquals(expectedDomain, dnsRecordUrlCaptor.getValue());
-    }
-
-
-    @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("testCNameLookupArguments")
-    void testLookupCNAME(String name, String partyId, String partyScheme, String caseSensitiveScheme, String expectedDomain) throws Exception {
-        //GIVEN
-        DefaultBDXRLocator defaultBDXRLocator = lookupCNAME(caseSensitiveScheme);
-
-        //WHEN
-        URI uri = defaultBDXRLocator.lookup(partyId, partyScheme);
-
-        //THEN
-        assertEquals(expectedDomain, uri.toString());
+        assertEquals(1, results.size());
+        assertEquals(publisherURL, results.get(0).getUrl().toString());
+        verify(testInstance).naptrLookupForDomain(any(SMPParticipantIdentifier.class), stringArgumentCaptor.capture());
+        assertEquals(expectedDomain, stringArgumentCaptor.getValue());
     }
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("testCNameLookupArguments")
-    void testLookupCNAMEWithIdentifier(String name, String partyId, String partyScheme, String caseSensitive, String expectedDomain) throws Exception {
+    void testLookupCNAMEWithIdentifierValueAndScheme(String name, String partyId, String partyScheme, String caseSensitiveScheme, String expectedDomain) throws Exception {
         //GIVEN
-        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier(partyId, partyScheme);
-        DefaultBDXRLocator defaultBDXRLocator = lookupCNAME(caseSensitive);
-
+        DefaultBDXRLocator testInstance = buildPublisherLocator(caseSensitiveScheme, DNSLookupType.CNAME, null, null);
         //WHEN
-        URI uri = defaultBDXRLocator.lookup(identifier);
-
+        List<PublisherLookupResult> results = testInstance.lookup(partyId, partyScheme);
         //THEN
-        assertEquals(expectedDomain, uri.toString());
-    }
-
-    private DefaultBDXRLocator lookupNAPTR(String caseSensitiveScheme) throws Exception {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .addCaseSensitiveSchema(caseSensitiveScheme)
-                .wildcardEnabled(true)
-                .build();
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-
-        return defaultBDXRLocator;
-    }
-
-    private DefaultBDXRLocator lookupCNAME(String caseSensitiveScheme) throws Exception {
-        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder().build());
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .addDnsLookupType(DNSLookupType.CNAME)
-                .dnsLookup(idnsLookup)
-                .addCaseSensitiveSchema(caseSensitiveScheme)
-                .build();
-
-        Mockito.doReturn(false).when(idnsLookup).dnsRecordNotExists(
-                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture(), any(DNSLookupType.class));
-
-        return defaultBDXRLocator;
-    }
-
-    @Test
-    void testInvalidScheme() {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .schemeValidationPattern(Pattern.compile("just-this-scheme"))
-                .build();
-
-        MalformedIdentifierException result = assertThrows(MalformedIdentifierException.class,
-                () -> defaultBDXRLocator.lookup("identifier", "wrong-this-scheme"));
-
-        MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString("Scheme Identifier"));
-
-    }
-
-    @Test
-    void testValidScheme() throws TechnicalException {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .schemeValidationPattern(Pattern.compile("just-this-scheme"))
-                .build();
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-        // when
-        URI uri = defaultBDXRLocator.lookup("identifier", "just-this-scheme");
-        //THEN
-        assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
-    }
-
-    @Test
-    void testValidNoScheme() throws TechnicalException {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .build();
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-        // when
-        URI uri = defaultBDXRLocator.lookup("valid-No-Scheme-Identifier", null);
-        //THEN
-        assertEquals("R75GQKYPOXUS66JUTXJNIQQCGKNVYSJCZJU27OKQJBWBXOV3S3BA.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
-        assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
+        assertEquals(1, results.size());
+        verify(testInstance.getDnsLookup())
+                .dnsRecordExists(any(SMPParticipantIdentifier.class), stringArgumentCaptor.capture(), eq(DNSLookupType.CNAME));
+        assertEquals(expectedDomain, stringArgumentCaptor.getValue());
+        assertEquals("http://" + expectedDomain + "/", results.get(0).getUrl().toString());
     }
 
     @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("testWildCardTests")
-    void testWildcardEnabled(String name, boolean enable, String schema, String topDomain, String expectedResult) throws TechnicalException {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain(topDomain)
-                .wildcardEnabled(enable)
-                .build();
-        String targetUrl = "http://smp-mock-1.ehealth.eu:8888";
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn(targetUrl).when(defaultBDXRLocator).naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-        // when
-        URI uri = defaultBDXRLocator.lookup("*", schema);
+    @MethodSource("testCNameLookupArguments")
+    void testLookupCNAMEWithIdentifier(String name, String partyId, String partyScheme, String caseSensitiveScheme, String expectedDomain) throws Exception {
+        //GIVEN
+        DefaultBDXRLocator testInstance = buildPublisherLocator(caseSensitiveScheme, DNSLookupType.CNAME, null, null);
+        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier(partyId, partyScheme);
+        //WHEN
+        List<PublisherLookupResult> results = testInstance.lookup(identifier);
         //THEN
-        assertEquals(expectedResult, dnsRecordUrlCaptor.getValue());
-        assertEquals(targetUrl, uri.toString());
+        assertEquals(1, results.size());
+        verify(testInstance.getDnsLookup())
+                .dnsRecordExists(any(SMPParticipantIdentifier.class), stringArgumentCaptor.capture(), eq(DNSLookupType.CNAME));
+        assertEquals(expectedDomain, stringArgumentCaptor.getValue());
+        assertEquals("http://" + expectedDomain + "/", results.get(0).getUrl().toString());
     }
 
-    @Test
-    void testMandatoryScheme() {
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .schemeMandatory(true)
-                .build();
+    @ParameterizedTest
+    @CsvSource({"ResourceSchemeMandatory enabled, true, true",
+            "ResourceSchemeMandatory disabled, false, false"})
+    void testResourceSchemeMandatory(String name, boolean enable, boolean throwError) throws Exception {
 
-        MalformedIdentifierException result = assertThrows(MalformedIdentifierException.class, () -> defaultBDXRLocator.lookup("valid-No-Scheme-Identifier", null));
+        // no need to add mockito stubs when error is expected
+        boolean addDNSClientMock = !throwError;
+        final DefaultBDXRLocator testInstance = buildNaptrPublisherLocator(addDNSClientMock);
+        testInstance.getResourceIdentifierFormatter().setSchemeMandatory(enable);
+
+        if (throwError) {
+            //WHEN
+            MalformedIdentifierException result = assertThrows(MalformedIdentifierException.class,
+                    () -> testInstance.lookup(TEST_IDENTIFIER_VALUE_PEPPOL, null));
+            // then
+            assertThat(result.getMessage(), containsString("Invalid Identifier"));
+        } else {
+            //WHEN
+            List<PublisherLookupResult> results = testInstance.lookup(TEST_IDENTIFIER_VALUE_PEPPOL, null);
+            // then
+            assertEquals(1, results.size());
+            verify(testInstance).naptrLookupForDomain(any(SMPParticipantIdentifier.class), stringArgumentCaptor.capture());
+            assertEquals("OWX2CZAOQ6EB4UMD3GCVN36IF5KXBTEMIBNB3HAY3ZJFWYOU4J7A.ehealth.acc.edelivery.tech.ec.europa.eu", stringArgumentCaptor.getValue());
+            assertEquals(TEST_PUBLISHER_URL, results.get(0).getUrl().toString());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"Wildcard enabled, true,iso6523-actorid-upis, *.iso6523-actorid-upis.ehealth.acc.edelivery.tech.ec.europa.eu",
+            "Wildcard enabled, true,, *.ehealth.acc.edelivery.tech.ec.europa.eu",
+            "Wildcard enabled, true, urn:oasis:names:tc:ebcore:partyid-type:unregistered, *.ehealth.acc.edelivery.tech.ec.europa.eu",
+            "Wildcard enabled, false, urn:oasis:names:tc:ebcore:partyid-type:unregistered, B-5ca89d645e0c61390281b8d7f857fd3c.ehealth.acc.edelivery.tech.ec.europa.eu",
+            "Wildcard disabled, false, test-test-test, B-3389dae361af79b04c9c8e7057f60cc6.test-test-test.ehealth.acc.edelivery.tech.ec.europa.eu"})
+    void testWildcardCNAMEEnabled(String name, boolean enable, String idScheme, String expectedDomain) throws Exception {
+        //GIVEN
+        String targetUrl = TEST_PUBLISHER_URL;
+        final DefaultBDXRLocator testInstance = buildPublisherLocator(null, DNSLookupType.CNAME, null, null);
+        testInstance.getResourceIdentifierFormatter().setWildcardEnabled(enable);
+
+        //WHEN
+        List<PublisherLookupResult> results = testInstance.lookup("*", idScheme);
         //THEN
-        assertEquals("Invalid Identifier: [::valid-No-Scheme-Identifier]. Can not detect schema!", result.getMessage());
+        assertEquals(1, results.size());
+        verify(testInstance.getDnsLookup()).dnsRecordExists(any(SMPParticipantIdentifier.class),
+                stringArgumentCaptor.capture(), eq(DNSLookupType.CNAME));
+        assertEquals(expectedDomain, stringArgumentCaptor.getValue());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "just-this-scheme, just-this-scheme, false, ",
+            ".*-scheme, just-this-scheme, false, ",
+            "(just-this-scheme|just-that-scheme), just-this-scheme, false, ",
+            "just-this-scheme, wrong-this-scheme, true,  has invalid scheme [wrong-this-scheme]",
+            "just-this-scheme, wrong-this-scheme, true,   has invalid scheme [wrong-this-scheme]"})
+    void testInvalidScheme(String pattern, String scheme, boolean throwException, String expectedMessage) throws Exception {
+
+        DefaultBDXRLocator testInstance = buildNaptrPublisherLocator(!throwException);
+        testInstance.getResourceIdentifierFormatter().setSchemeValidationPattern(Pattern.compile(pattern));
+
+        if (throwException) {
+            MalformedIdentifierException result = assertThrows(MalformedIdentifierException.class,
+                    () -> testInstance.lookup(TEST_IDENTIFIER_VALUE_PEPPOL, scheme));
+
+            assertThat(result.getMessage(), containsString(expectedMessage));
+        } else {
+            //WHEN
+            List<PublisherLookupResult> results = testInstance.lookup(TEST_IDENTIFIER_VALUE_PEPPOL, scheme);
+            //THEN
+            assertEquals(1, results.size());
+        }
     }
 
 
-    @Test
-    void testCustomFormatter() throws TechnicalException {
+    @ParameterizedTest
+    @CsvSource({"'^(?i)mailto.*$','${scheme}-->${identifier}','${identifier}','^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$',SCHEMA_AFTER_HASH, " +
+            "test@mailtest.eu, mailto,  ISE6IXAPSALNUFQ3XCFNHH3NC6EOK3RDK5OJ5OCCWNMD2E2OZJUQ.mailto",
+            "'^(?i)mailto.*$','${scheme}-->${identifier}','${identifier}','^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$',SCHEMA_AFTER_HASH, " +
+                    "mailto-->test@mailtest.eu,,ISE6IXAPSALNUFQ3XCFNHH3NC6EOK3RDK5OJ5OCCWNMD2E2OZJUQ.mailto",
+            "'^(?i)mailto.*$','${scheme}-->${identifier}','${identifier}','^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$',ALL_IN_HASH, " +
+                    "test@mailtest.eu, mailto,  LBOHF5726ZKZEPAMMJLKW52B3VYBP4XOLVXXAEID7IEUKFJWXFCQ",
+            "'^(?i)mailto.*$','${scheme}:${identifier}','${identifier}','^(?i)\\s*:?(?<scheme>mailto):(?<identifier>.+)?\\s*$',SCHEMA_AFTER_HASH, " +
+                    "test@mailtest.eu, mailto,  ISE6IXAPSALNUFQ3XCFNHH3NC6EOK3RDK5OJ5OCCWNMD2E2OZJUQ.mailto",
+            "'^(?i)mailto.*$','${scheme}:${identifier}','${identifier}','^(?i)\\s*:?(?<scheme>mailto):(?<identifier>.+)?\\s*$',SCHEMA_AFTER_HASH, " +
+                    "mailto:test@mailtest.eu, , ISE6IXAPSALNUFQ3XCFNHH3NC6EOK3RDK5OJ5OCCWNMD2E2OZJUQ.mailto"})
+    void testTemplateFormatterType(Pattern matchSchema,
+                                   String formatTemplate,
+                                   String formatTemplateNullScheme,
+                                   Pattern splitRegularExpression,
+                                   DNSLookupFormatType dnsLookupFormatType,
+                                   String identifier, String scheme, String expectedDomain
+    ) throws Exception {
 
-        FormatterType customFormatter = new TemplateFormatterType(Pattern.compile("^(?i)mailto.*$"),
-                "${scheme}-->${identifier}", "${identifier}",
-                Pattern.compile("^(?i)\\s*(-->)?(?<scheme>mailto)-->(?<identifier>.+)?\\s*$"),
-                DNSLookupFormatType.SCHEMA_AFTER_HASH);
+        FormatterType customFormatter = new TemplateFormatterType(matchSchema,
+                formatTemplate, formatTemplateNullScheme,
+                splitRegularExpression,
+                dnsLookupFormatType);
 
 
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .addFormatterType(customFormatter)
-                .build();
+        DefaultBDXRLocator testInstance = buildNaptrPublisherLocator(true);
+        testInstance.getResourceIdentifierFormatter().addFormatterTypes(customFormatter);
 
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator)
-                .naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-        // when
-        URI uri = defaultBDXRLocator.lookup("identifier", "mailto");
+        List<PublisherLookupResult> results = testInstance.lookup(identifier, scheme);
         //THEN
-        assertEquals("FBKDPW4MLYKUDKSJOCFUVPKRMQVAMW3G4S5MBEA6OW2EZYWQZ27A.mailto.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
-        assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
+        assertEquals(1, results.size());
+        verify(testInstance).naptrLookupForDomain(any(SMPParticipantIdentifier.class), stringArgumentCaptor.capture());
+        assertEquals(expectedDomain + "." + TEST_TOP_DOMAIN_02, stringArgumentCaptor.getValue());
     }
 
-    @Test
-    void testCustomFormatterNormalize() throws TechnicalException {
+    @ParameterizedTest
+    @CsvSource({"'Test two services', 'Meta:SMP,oasis-bdxr-smp-2','Meta:SMP,oasis-bdxr-smp-2',2,'Meta:SMP,oasis-bdxr-smp-2'",
+            "'Respect required order', 'Meta:SMP,oasis-bdxr-smp-2','oasis-bdxr-smp-2,Meta:SMP,',2,'oasis-bdxr-smp-2,Meta:SMP'",
+            "'Intersect 01', 'oasis-bdxr-smp-2','oasis-bdxr-smp-2,Meta:SMP,',1,'oasis-bdxr-smp-2'",
+            "'Intersect 02', 'Meta:SMP,oasis-bdxr-smp-2','oasis-bdxr-smp-2,',1,'oasis-bdxr-smp-2'"
+    })
+    void testDiscoverMultipleNaptrServices(String name, String naptrServices, String requiredNaptrServices, int expectedCount, String expected) throws Exception {
+        List<String> existingNaptrServices = Arrays.asList(naptrServices.split(","));
+        List<String> requiredServices = Arrays.asList(requiredNaptrServices.split(","));
+        List<String> expectedResult = Arrays.asList(expected.split(","));
 
-        FormatterType customFormatter = new TemplateFormatterType(Pattern.compile("^(?i)mailto.*$"),
-                "${scheme}-->${identifier}", "${identifier}",
-                Pattern.compile("^(?i)\\s*(?<scheme>mailto)-->(?<identifier>.+)?\\s*$"),
-                DNSLookupFormatType.SCHEMA_AFTER_HASH);
+        //GIVEN
+        DefaultBDXRLocator testInstance = buildPublisherLocator(null,
+                Collections.singletonList(DNSLookupType.NAPTR),
+                existingNaptrServices, TEST_PUBLISHER_URL, true);
+        ((DefaultDNSLookup) testInstance.getDnsLookup()).setRequiredNaptrServices(requiredServices);
 
-
-        DefaultBDXRLocator defaultBDXRLocator = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain("ehealth.acc.edelivery.tech.ec.europa.eu")
-                .addFormatterType(customFormatter)
-                .build();
-
-        defaultBDXRLocator = spy(defaultBDXRLocator);
-        Mockito.doReturn("http://smp-mock-1.ehealth.eu:8888").when(defaultBDXRLocator)
-                .naptrLookupFetcher(any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-        // when
-        URI uri = defaultBDXRLocator.lookup("mailto-->identifier", null);
+        //WHEN
+        List<PublisherLookupResult> results = testInstance.lookup(TEST_IDENTIFIER_VALUE_PEPPOL, TEST_IDENTIFIER_SCHEME_PEPPOL);
         //THEN
-        assertEquals("FBKDPW4MLYKUDKSJOCFUVPKRMQVAMW3G4S5MBEA6OW2EZYWQZ27A.mailto.ehealth.acc.edelivery.tech.ec.europa.eu", dnsRecordUrlCaptor.getValue());
-        assertEquals("http://smp-mock-1.ehealth.eu:8888", uri.toString());
+        assertEquals(expectedCount, results.size());
+        // all results should have the same URL
+        results.forEach(publisherLookupResult -> {
+            assertEquals(TEST_PUBLISHER_URL, publisherLookupResult.getUrl().toString());
+            assertEquals(DNSLookupType.NAPTR, publisherLookupResult.getDnsLookupType());
+        });
+        // respect the order of the expected services
+        IntStream.range(0, expectedCount)
+                .forEachOrdered(
+                        i -> assertEquals(expectedResult.get(i), results.get(i).getServiceType())
+                );
     }
 
     @Test
@@ -439,6 +407,7 @@ class DefaultBDXRLocatorTest {
 
     @Test
     void testConfigurationAddList() {
+        IDNSLookup mockLookup = Mockito.mock(IDNSLookup.class);
         DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
                 .addTopDnsDomains(Collections.singletonList("test.top.local"))
                 .addDnsLookupTypes(Collections.singletonList(DNSLookupType.NAPTR))
@@ -450,108 +419,83 @@ class DefaultBDXRLocatorTest {
         assertEquals(DNSLookupType.NAPTR, testInstance.getDnsLookupTypeList().get(0));
     }
 
-    @Test
-    void testAddRequiredNaptrServiceHttpBindingWithSMP20Service() throws TextParseException, TechnicalException {
+    private DefaultBDXRLocator buildNaptrPublisherLocator(boolean addMockStub)
+            throws Exception {
+        return buildPublisherLocator(null, DNSLookupType.NAPTR, TEST_NAPTR_SERVICE_SMP1, TEST_PUBLISHER_URL, addMockStub);
 
-        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier("test-id", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-        String topDomain = "test.acc.edelivery.tech.ec.europa.eu";
-        Name dnsDomain = Name.fromString("NX2X2AQZGOQ6F7V5CDQZO4AH4UXBFG6POIF6TGE6RUGZM4Z3TCUQ."+topDomain+".");
-
-
-        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder()
-                .addRequiredNaptrService("oasis-bdxr-smp-2")
-                .addRequiredNaptrService("meta:smp")
-                .addRequiredNaptrServiceHttpBinding("oasis-bdxr-smp-2","bdxr-smp-2")
-                .addRequiredNaptrServiceHttpBinding("meta:smp","bdxr-smp-2")
-                .build());
-
-        DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain(topDomain)
-                .addDnsLookupType(DNSLookupType.NAPTR)
-                .dnsLookup(idnsLookup)
-                .build();
-
-        List<Record> records = new ArrayList<>();
-
-        records.add(new NAPTRRecord(
-                dnsDomain,
-                0, 0L, 10, 10, "U", "oasis-bdxr-smp-2","!^.*$!http://smp-mock-1.ehealth.eu:8888!",dnsDomain));
-        Mockito.doReturn(records).when(idnsLookup).getAllNaptrRecords(
-                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-
-        URI uriResult = testInstance.lookup(identifier);
-
-        assertEquals("http://smp-mock-1.ehealth.eu:8888/bdxr-smp-2", uriResult.toString());
     }
 
-    @Test
-    void testAddRequiredNaptrServiceHttpBindingWithSMP10Service() throws TextParseException, TechnicalException {
 
-        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier("test-id", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-        String topDomain = "test.acc.edelivery.tech.ec.europa.eu";
-        Name dnsDomain = Name.fromString("NX2X2AQZGOQ6F7V5CDQZO4AH4UXBFG6POIF6TGE6RUGZM4Z3TCUQ."+topDomain+".");
+    private DefaultBDXRLocator buildPublisherLocator(String caseSensitiveScheme,
+                                                     DNSLookupType type,
+                                                     String service,
+                                                     String publisherURL
+    ) throws Exception {
+        return buildPublisherLocator(caseSensitiveScheme, type, service, publisherURL, true);
 
-
-        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder()
-                .addRequiredNaptrService("oasis-bdxr-smp-2")
-                .addRequiredNaptrService("meta:smp")
-                .addRequiredNaptrServiceHttpBinding("oasis-bdxr-smp-2","bdxr-smp-2")
-                .addRequiredNaptrServiceHttpBinding("meta:smp","bdxr-smp-2")
-                .build());
-
-        DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain(topDomain)
-                .addDnsLookupType(DNSLookupType.NAPTR)
-                .dnsLookup(idnsLookup)
-                .build();
-
-        List<Record> records = new ArrayList<>();
-
-        records.add(new NAPTRRecord(
-                dnsDomain,
-                0, 0L, 10, 10, "U", "Meta:SMP","!^.*$!http://smp-mock-1.ehealth.eu:8888!",dnsDomain));
-        Mockito.doReturn(records).when(idnsLookup).getAllNaptrRecords(
-                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-
-        URI uriResult = testInstance.lookup(identifier);
-
-        assertEquals("http://smp-mock-1.ehealth.eu:8888/bdxr-smp-2", uriResult.toString());
     }
 
-    @Test
-    void testAddRequiredNaptrServiceHttpBindingWithSMP20Priority() throws TextParseException, TechnicalException {
+    /**
+     * Build a publisher locator and mock the  idnsLookup for the lookup. The
+     * locator iw wrapped in a spy object to allow the verification of the method calls.
+     *
+     * @param caseSensitiveScheme case sensitive scheme
+     * @param type                DNSLookupType type
+     * @param service
+     * @param publisherURL
+     * @param addMockitoStubbing  add mockito stubbing for DNS client
+     * @return DefaultBDXRLocator
+     * @throws Exception exception
+     */
+    private DefaultBDXRLocator buildPublisherLocator(String caseSensitiveScheme, DNSLookupType type, String service, String publisherURL,
+                                                     boolean addMockitoStubbing) throws Exception {
+        return buildPublisherLocator(caseSensitiveScheme, Collections.singletonList(type), Collections.singletonList(service), publisherURL, addMockitoStubbing);
+    }
 
-        SMPParticipantIdentifier identifier = new SMPParticipantIdentifier("test-id", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-        String topDomain = "test.acc.edelivery.tech.ec.europa.eu";
-        Name dnsDomain = Name.fromString("NX2X2AQZGOQ6F7V5CDQZO4AH4UXBFG6POIF6TGE6RUGZM4Z3TCUQ."+topDomain+".");
-
-
-        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder()
-                .addRequiredNaptrService("oasis-bdxr-smp-2")
-                .addRequiredNaptrService("meta:smp")
-                .addRequiredNaptrServiceHttpBinding("oasis-bdxr-smp-2","bdxr-smp-2")
-                .addRequiredNaptrServiceHttpBinding("meta:smp","bdxr-smp-2")
-                .build());
-
+    /**
+     * Build a publisher locator and mock the  idnsLookup for the lookup. The
+     * locator iw wrapped in a spy object to allow the verification of the method calls.
+     *
+     * @param caseSensitiveScheme case sensitive scheme
+     * @param types               DNSLookupType type
+     * @param services
+     * @param publisherURL
+     * @param addMockitoStubbing  add mockito stubbing for DNS client
+     * @return DefaultBDXRLocator
+     * @throws Exception exception
+     */
+    private DefaultBDXRLocator buildPublisherLocator(String caseSensitiveScheme, List<DNSLookupType> types, List<String> services, String publisherURL,
+                                                     boolean addMockitoStubbing) throws Exception {
+        DefaultDNSLookup idnsLookup = spy(new DefaultDNSLookup.Builder().build());
         DefaultBDXRLocator testInstance = new DefaultBDXRLocator.Builder()
-                .addTopDnsDomain(topDomain)
-                .addDnsLookupType(DNSLookupType.NAPTR)
+                .addTopDnsDomain(TEST_TOP_DOMAIN_02)
+                .addDnsLookupTypes(types)
                 .dnsLookup(idnsLookup)
+                .addResourceCaseSensitiveSchema(caseSensitiveScheme)
                 .build();
+        testInstance = spy(testInstance);
 
-        List<Record> records = new ArrayList<>();
+        if (!addMockitoStubbing) {
+            return testInstance;
+        }
+        // mock idnsLookup
+        if (types.contains(DNSLookupType.NAPTR)) {
 
-        records.add(new NAPTRRecord(
-                dnsDomain,
-                0, 0L, 10, 10, "U", "Meta:SMP","!^.*$!http://smp-1.edelivery.eu:8888!",dnsDomain));
-        records.add(new NAPTRRecord(
-                dnsDomain,
-                0, 0L, 10, 10, "U", "oasis-bdxr-smp-2","!^.*$!http://smp-2.edelivery.eu:8888!",dnsDomain));
-        Mockito.doReturn(records).when(idnsLookup).getAllNaptrRecords(
-                any(SMPParticipantIdentifier.class), dnsRecordUrlCaptor.capture());
-
-        URI uriResult = testInstance.lookup(identifier);
-
-        assertEquals("http://smp-2.edelivery.eu:8888/bdxr-smp-2", uriResult.toString());
+            Name domainName = Mockito.mock(Name.class);
+            doReturn(true).when(domainName).isAbsolute();
+            List<Record> records = new ArrayList<>();
+            for (String naptrService : services) {
+                String naptrValue = String.format(DNSUtils.NAPTR_FORMAT, publisherURL);
+                Record record = new NAPTRRecord(domainName, 0, 60, 10, 100, "U", naptrService, naptrValue, domainName);
+                records.add(record);
+            }
+            Mockito.doReturn(records).when(idnsLookup).getAllRecordsForType(any(SMPParticipantIdentifier.class), anyString(), any(DNSLookupType.class));
+        }
+        if (types.contains(DNSLookupType.CNAME)) {
+            // return  domain exists
+            Mockito.doReturn(true).when(idnsLookup).dnsRecordExists(
+                    any(SMPParticipantIdentifier.class), anyString(), any(DNSLookupType.class));
+        }
+        return testInstance;
     }
 }
