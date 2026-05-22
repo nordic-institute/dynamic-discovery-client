@@ -19,20 +19,28 @@
     <!--Main template to match the root element of the XML file -->
     <xsl:template match="/licenseSummary">
         <!-- add the Copyright of the application -->
-        <xsl:text>Copyright 2017, 2024 European Union
+        <xsl:text># NOTICE
 
-Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the European Commission - subsequent versions of the EUPL (the "Licence");
-You may not use this work except in compliance with the Licence.
-You may obtain a copy of the Licence at:
+This project is licensed under the GNU Lesser General Public License version 2.1 (LGPL‑2.1) (the "Licence").
 
-[https://joinup.ec.europa.eu/software/page/eupl](https://joinup.ec.europa.eu/software/page/eupl)
+## Copyright Notice
 
-Unless required by applicable law or agreed to in writing, software distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the Licence for the specific language governing permissions and limitations under the Licence.
+Copyright 2017-2026 European Union
 
-This product includes dynamically linked software developed by third parties which is provided under their respective licences:
-</xsl:text>
+## Licence
+
+This software is distributed under the terms of the Licence.
+A copy of the Licence is available in the LICENSE.txt file or at:
+[https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
+
+## Compatibility Notice
+
+The LGPL v. 2.1 is compatible with several other open source licences. Please check the compatibility of the licence
+under which you intend to distribute your modifications or derivative works before doing so.
+
+## Third-Party Components
+
+This product includes dynamically linked software developed by third parties which is provided under their respective licences:</xsl:text>
         <!-- apply the templates to the dependencies -->
         <xsl:apply-templates select="dependencies/dependency"/>
         <!-- include the licenses in the notice file -->
@@ -40,11 +48,11 @@ This product includes dynamically linked software developed by third parties whi
     </xsl:template>
 
 
-<!-- This template will be called with a list of dependencies to be included -->
+    <!-- This template will be called with a list of dependencies to be included -->
     <xsl:template match="dependency">
         <xsl:value-of
                 select="concat( $newline,$newline,
-                '***', groupId, ':', artifactId, ':', version, '*** ',
+                '### ', groupId, ':', artifactId, ':', version ,
                 $newline)"/>
 
         <xsl:apply-templates select="licenses/license"/>
@@ -54,7 +62,7 @@ This product includes dynamically linked software developed by third parties whi
         <xsl:apply-templates select="developers/developer"/>
     </xsl:template>
 
-<!-- This template will be called with a list of licenses to be included -->
+    <!-- This template will be called with a list of licenses to be included -->
     <xsl:template match="license">
         <xsl:value-of select="concat(
         '- License: ', name, $newline,
@@ -66,7 +74,7 @@ This product includes dynamically linked software developed by third parties whi
     </xsl:template>
     <xsl:template match="inceptionYear">
         <xsl:value-of select="concat(
-        '  - Copyright (c) ', . , ' - 2024'
+        '  - Copyright (c) ', . , ' - 2026'
         )"/>
     </xsl:template>
     <!-- This template will be called with a list of organizations to be included -->
