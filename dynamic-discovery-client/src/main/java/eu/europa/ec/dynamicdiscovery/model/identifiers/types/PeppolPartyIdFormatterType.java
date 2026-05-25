@@ -30,7 +30,8 @@ import java.util.regex.Pattern;
 public class PeppolPartyIdFormatterType extends OasisSMPFormatterType {
     static final Pattern PEPPOL_SCHEME_PATTERN = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+-[a-zA-Z0-9]+$");
     static final int PEPPOL_SCHEME_MAX_SIZE = 25;
-    static final int PEPPOL_VALUE_MAX_SIZE = 50;
+    // new Peppol max length is 135: see the Peppol SMP specification on Identifiers 4.4.0
+    static final int PEPPOL_VALUE_MAX_SIZE = 135;
 
 
     public PeppolPartyIdFormatterType() {

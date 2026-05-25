@@ -1,82 +1,90 @@
-Copyright 2017, 2024 European Union
+# NOTICE
 
-Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the European Commission - subsequent versions of the EUPL (the "Licence");
-You may not use this work except in compliance with the Licence.
-You may obtain a copy of the Licence at:
+This project is licensed under the GNU Lesser General Public License version 2.1 (LGPL‑2.1) (the "Licence").
 
-[https://joinup.ec.europa.eu/software/page/eupl](https://joinup.ec.europa.eu/software/page/eupl)
+## Copyright Notice
 
-Unless required by applicable law or agreed to in writing, software distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the Licence for the specific language governing permissions and limitations under the Licence.
+Copyright 2017-2026 European Union
+
+## Licence
+
+This software is distributed under the terms of the Licence.
+A copy of the Licence is available in the LICENSE.txt file or at:
+[https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
+
+## Compatibility Notice
+
+The LGPL v. 2.1 is compatible with several other open source licences. Please check the compatibility of the licence
+under which you intend to distribute your modifications or derivative works before doing so.
+
+## Third-Party Components
 
 This product includes dynamically linked software developed by third parties which is provided under their respective licences:
 
-
-***commons-cli:commons-cli:1.6.0*** 
+### commons-cli:commons-cli:1.11.0
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
 - Copyright:
   - Copyright (c) 2024
 
-***dnsjava:dnsjava:3.6.3*** 
+### dnsjava:dnsjava:3.6.3
 - License: BSD-3-Clause
 - Url: https://opensource.org/licenses/BSD-3-Clause
 - File: license/third-party-licenses/BSD-3-Clause.txt
 - Copyright:
   - Copyright (c) 2024
 
-***jakarta.xml.bind:jakarta.xml.bind-api:2.3.3*** 
-- License: Eclipse Distribution License - v 1.0
+### jakarta.xml.bind:jakarta.xml.bind-api:2.3.3
+- License: BSD-3-Clause
 - Url: http://www.eclipse.org/org/documents/edl-v10.php
-- File: license/third-party-licenses/Eclipse Distribution License - v 1.0.txt
+- File: license/third-party-licenses/BSD-3-Clause.txt
 - Copyright:
   - Copyright (c) 2024
 
-***net.bytebuddy:byte-buddy:1.15.11*** 
-- License: Apache License, Version 2.0
-- Url: https://www.apache.org/licenses/LICENSE-2.0.txt
-- File: license/third-party-licenses/Apache License, Version 2.0.txt
-- Copyright:
-  - Copyright (c) 2024
-
-***org.apache.commons:commons-lang3:3.14.0*** 
+### net.bytebuddy:byte-buddy:1.18.3
 - License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
 - File: license/third-party-licenses/Apache-2.0.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.apache.httpcomponents.client5:httpclient5:5.3.1*** 
-- License: Apache License, Version 2.0
+### org.apache.commons:commons-lang3:3.20.0
+- License: Apache-2.0
 - Url: https://www.apache.org/licenses/LICENSE-2.0.txt
-- File: license/third-party-licenses/Apache License, Version 2.0.txt
+- File: license/third-party-licenses/Apache-2.0.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.bouncycastle:bcpkix-jdk18on:1.78.1*** 
+### org.apache.httpcomponents.client5:httpclient5:5.3.1
+- License: Apache-2.0
+- Url: https://www.apache.org/licenses/LICENSE-2.0.txt
+- File: license/third-party-licenses/Apache-2.0.txt
+- Copyright:
+  - Copyright (c) 2024
+
+### org.bouncycastle:bcpkix-jdk18on:1.83
 - License: Bouncy Castle Licence
 - Url: https://www.bouncycastle.org/licence.html
 - File: license/third-party-licenses/Bouncy Castle Licence.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.glassfish.jaxb:jaxb-runtime:2.3.9*** 
-- License: Eclipse Distribution License - v 1.0
+### org.glassfish.jaxb:jaxb-runtime:2.3.9
+- License: BSD-3-Clause
 - Url: http://www.eclipse.org/org/documents/edl-v10.php
-- File: license/third-party-licenses/Eclipse Distribution License - v 1.0.txt
+- File: license/third-party-licenses/BSD-3-Clause.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.slf4j:slf4j-api:2.0.17*** 
+### org.slf4j:slf4j-api:2.0.17
 - License: MIT
 - Url: https://opensource.org/license/mit
 - File: license/third-party-licenses/MIT.txt
 - Copyright:
   - Copyright (c) 2024
 
-***org.slf4j:slf4j-simple:2.0.17*** 
+### org.slf4j:slf4j-simple:2.0.17
 - License: MIT
 - Url: https://opensource.org/license/mit
 - File: license/third-party-licenses/MIT.txt
