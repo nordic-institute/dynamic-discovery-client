@@ -34,7 +34,9 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -67,10 +69,10 @@ public class JWTAuthorizationTokenFetcher extends AbstractURLFetcher {
         StringBuilder bodyBuilder = new StringBuilder("grant_type=")
                 .append(GRANT_TYPE_CLIENT_CREDENTIALS)
                 .append("&client_id=")
-                .append(clientId);
+                .append(URLEncoder.encode(clientId, StandardCharsets.UTF_8));
         if (StringUtils.isNotBlank(scopes)) {
             bodyBuilder.append("&scope=")
-                    .append(scopes);
+                    .append(URLEncoder.encode(scopes, StandardCharsets.UTF_8));
         }
 
         String body = bodyBuilder.toString();
