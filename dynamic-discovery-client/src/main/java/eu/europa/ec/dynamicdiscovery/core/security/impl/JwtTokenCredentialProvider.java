@@ -62,7 +62,7 @@ public class JwtTokenCredentialProvider implements ICredentialProvider {
             throw new DDCAuthorizationException(errMsg , e);
         }
         if (response == null || response.getJwtCredentials() == null) {
-            return null;
+            throw new DDCAuthorizationException("No JWT credentials were returned or they could not be parsed from URL [" + authorizationServerUri + "]");
         }
         return response.getJwtCredentials();
     }
