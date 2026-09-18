@@ -318,7 +318,7 @@
                         <configuration>
                             <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
                             <removeOrphanLicenseFiles>true</removeOrphanLicenseFiles>
-                            <excludedGroups>com.smartbear.*|eu.europa.ec.*</excludedGroups>
+                            <excludedGroups>org.niis.*|com.smartbear.*|eu.europa.ec.*</excludedGroups>
                             <excludeTransitiveDependencies>true</excludeTransitiveDependencies>
                             <excludedScopes>test</excludedScopes>
                             <includeTransitiveDependencies>false</includeTransitiveDependencies>
