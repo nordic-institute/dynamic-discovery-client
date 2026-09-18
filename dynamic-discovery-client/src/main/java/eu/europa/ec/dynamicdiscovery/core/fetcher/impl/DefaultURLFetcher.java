@@ -51,6 +51,8 @@ public class DefaultURLFetcher extends AbstractURLFetcher {
     public FetcherResponse fetch(URI documentURI) throws TechnicalException {
         LOG.debug("Fetch data for participantURI [{}]", documentURI);
 
+        validateUriScheme(documentURI);
+
         String targetHostname = documentURI.getHost();
         RequestConfig requestConfig = createRequestConfig(targetHostname);
         CloseableHttpClient httpClient = createHttpClient(documentURI);

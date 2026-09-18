@@ -73,12 +73,34 @@ public abstract class AbstractURLFetcher implements IDocumentFetcher {
     protected final ICredentialProvider credentialProvider;
     protected final HttpRoutePlanner routePlanner;
     protected final HttpClientConnectionManager connectionManager;
+    protected final boolean httpSchemeEnabled;
+    protected final boolean httpsSchemeEnabled;
 
     protected AbstractURLFetcher(AbstractFetcherBuilder<?> builder) {
         this.connectionManager = builder.buildHttpClientConnectionManager();
         this.routePlanner = builder.routePlanner;
         this.credentialProvider = builder.credentialProvider;
         this.proxyConfiguration = builder.proxyConfiguration;
+        this.httpSchemeEnabled = builder.httpSchemeEnabled;
+        this.httpsSchemeEnabled = builder.httpsSchemeEnabled;
+    }
+
+    /**
+     * Validates that the URI scheme is enabled for this fetcher. The disabled scheme is not registered
+     * in the connection socket factory registry, but the http client failure mode for a missing scheme
+     * varies between httpclient versions — failing fast here gives a deterministic, clear error.
+     *
+     * @param documentURI the URI to fetch the document from
+     * @throws ConnectionException if the URI scheme is disabled for this fetcher
+     */
+    protected void validateUriScheme(URI documentURI) throws ConnectionException {
+        String scheme = documentURI.getScheme();
+        if (!httpSchemeEnabled && Strings.CI.equals(scheme, "http")) {
+            throw new ConnectionException("Can not fetch document from URL [" + documentURI + "]: http protocol is not supported!");
+        }
+        if (!httpsSchemeEnabled && Strings.CI.equals(scheme, "https")) {
+            throw new ConnectionException("Can not fetch document from URL [" + documentURI + "]: https protocol is not supported!");
+        }
     }
 
 

@@ -86,6 +86,7 @@ public class JWTAuthorizationTokenFetcher extends AbstractURLFetcher {
      * @throws TechnicalException If an error occurs during the fetch.
      */
     public JwtResponse fetchToken(URI tokenEndpoint, String requestBody) throws TechnicalException {
+        validateUriScheme(tokenEndpoint);
         String targetHostname = tokenEndpoint.getHost();
         RequestConfig requestConfig = createRequestConfig(targetHostname);
         CloseableHttpClient httpClient = createHttpClient(tokenEndpoint);
@@ -110,10 +111,12 @@ public class JWTAuthorizationTokenFetcher extends AbstractURLFetcher {
 
         public Builder() {
             super();
+            this.httpSchemeEnabled = false;
         }
 
         public Builder(SSLContext sslContext) {
             super(sslContext);
+            this.httpSchemeEnabled = false;
         }
 
         @Override
