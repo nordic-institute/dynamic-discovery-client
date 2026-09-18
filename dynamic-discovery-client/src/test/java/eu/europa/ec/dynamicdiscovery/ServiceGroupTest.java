@@ -26,8 +26,8 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.UnmarshalException;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.UnmarshalException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 
@@ -68,7 +68,7 @@ class ServiceGroupTest {
     }
 
     @Test
-    void serviceGroupNotValidTest() throws Exception {
+    void serviceGroupNotValidTest() {
         InputStream inputStream = getClass().getResourceAsStream("/response/oasis-smp-1.0/service_group_urn_poland_ncpb_not_valid.xml");
         FetcherResponse fetcherResponse = new FetcherResponse(inputStream);
 

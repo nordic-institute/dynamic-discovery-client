@@ -20,8 +20,8 @@
   -->
 
 
-<jaxb:bindings version="2.0"
-               xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+<jaxb:bindings version="3.0"
+               xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
                xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
     <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://busdox.org/serviceMetadata/publishing/1.0/" >

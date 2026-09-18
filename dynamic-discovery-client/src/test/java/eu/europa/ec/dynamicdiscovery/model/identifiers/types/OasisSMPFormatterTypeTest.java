@@ -65,7 +65,7 @@ class OasisSMPFormatterTypeTest {
         );
     }
 
-    OasisSMPFormatterType testInstance = new OasisSMPFormatterType();
+    OasisSMPFormatterType testInstance = new OasisSMPFormatterType.Builder().build();
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("participantIdentifierPositiveCases")

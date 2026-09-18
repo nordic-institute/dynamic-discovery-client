@@ -62,7 +62,6 @@ public class SMPDocumentIdentifier extends IdentifierType {
         return "DocumentIdentifier{" +
                 "identifier='" + identifier + '\'' +
                 ", scheme='" + scheme + '\'' +
-                ", documentIdentifierSmpURI='" + documentIdentifierSmpURI + '\'' +
                 '}';
     }
 

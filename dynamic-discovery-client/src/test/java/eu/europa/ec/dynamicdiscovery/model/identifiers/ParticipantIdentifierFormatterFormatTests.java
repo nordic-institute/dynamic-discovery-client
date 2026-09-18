@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,17 @@
  */
 package eu.europa.ec.dynamicdiscovery.model.identifiers;
 
+import eu.europa.ec.dynamicdiscovery.exception.MalformedIdentifierException;
+import eu.europa.ec.dynamicdiscovery.model.identifiers.types.OasisSMPFormatterType;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,16 +73,79 @@ class ParticipantIdentifierFormatterFormatTests {
         );
     }
 
-    ParticipantIdentifierFormatter testInstance = new ParticipantIdentifierFormatter();
 
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("partyIdentifierTestArguments")
-    void testFormat(String name, SMPParticipantIdentifier participantIdentifierType, String formattedIdentifier, String uriFormattedIdentifier) {
-
+    void testFormat(String name, SMPParticipantIdentifier participantIdentifierType,
+                    String formattedIdentifier, String uriFormattedIdentifier) {
+        System.out.println("Testing Format: [" + name + "] with identifier: [" + participantIdentifierType + "]");
+        ParticipantIdentifierFormatter testInstance = new ParticipantIdentifierFormatter.Builder().initDefault().build();
         String result = testInstance.format(participantIdentifierType);
         String uriResult = testInstance.urlEncodedFormat(participantIdentifierType);
 
         assertEquals(formattedIdentifier, result);
         assertEquals(uriFormattedIdentifier, uriResult);
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @CsvSource(value = {
+            "Valid identifier, t-t-t::1234:abcd, true, ''",
+            "Bad scheme length, test-test-test::1234:abcd, false, 'A scheme identifier MUST NOT exceed 10 characters!'",
+            "Bad Value length, t-t-t::1234:abcdefghijklmnoprst, false, 'A identifier value MUST NOT exceed 15 characters!'",
+            "Bad scheme pattern, test-t::1234:abcd, false, 'Identifier: [test-t::1234:abcd] has invalid scheme [test-t] (Check the length or scheme pattern)!'",
+            "Bad Value pattern, t-t-t::1234-abcd, false, 'Identifier value [1234-abcd] is illegal.'",
+            "Missing scheme, 1234:abcd, false, 'Invalid Identifier: [1234:abcd]. Can not detect schema!'",
+            "ebCore unregistered,urn:oasis:names:tc:ebcore:partyid-type:unregistered:domain:ec.europa.eu,false, 'Can not detect schema!'",
+    })
+    void testParseFailOnlyOasisFormatter(String name, String formattedIdentifier, boolean isValid, String containsErrorMessage) {
+        System.out.println("Testing ParseFailOnlyOasisFormatter: [" + name + "] with identifier: [" + formattedIdentifier + "]");
+        ParticipantIdentifierFormatter identifierFormatter = new ParticipantIdentifierFormatter.Builder()
+                .defaultFormatter(new OasisSMPFormatterType.Builder()
+                        .wildcardEnabled(false)
+                        .valueMaxLength(15)
+                        .schemeMandatory(true)
+                        .schemeMaxLength(10)
+                        .schemeValidationPattern(Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+-[a-zA-Z0-9]+$"))
+                        .valueValidationPattern(Pattern.compile("^[0-9]{4}:[a-zA-Z0-9]+$"))
+                        .build())
+                .build();
+
+        if (isValid) {
+            SMPParticipantIdentifier result = identifierFormatter.parse(formattedIdentifier);
+            Assertions.assertNotNull(result, "Expected valid identifier for: " + formattedIdentifier);
+        } else {
+            MalformedIdentifierException result = Assertions.assertThrows(MalformedIdentifierException.class, () -> identifierFormatter.parse(formattedIdentifier));
+            MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString(containsErrorMessage));
+        }
+    }
+
+    /**
+     * Test parsing of the default formatter.
+     * <p>
+     * This test uses the default formatter settings for parsing ebCorePartyIdentifier and peppol party identifiers.
+     */
+    @ParameterizedTest(name = "{index}: {0}")
+    @CsvSource(value = {
+            "Valid identifier, t-t-t::1234:abcd, true, ''",
+            "ebCore unregistered,urn:oasis:names:tc:ebcore:partyid-type:unregistered:domain:ec.europa.eu,true, ''",
+            "ebCore invalid unregistered,urn:oasis:names:tc:ebcore:partyid:unregistered:domain:ec.europa.eu,false, 'Invalid Identifier: '",
+            "Bad scheme length, test-test1234567890-test1234567890::1234:abcd, false, 'A scheme identifier MUST NOT exceed 25 characters!'",
+            "The Peppol  largest OK length, iso6523-actorid-upis::1234:1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890, true, ''",
+            "Bad Peppol Value length, iso6523-actorid-upis::1234:12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901, false, 'A identifier value MUST NOT exceed 135 characters!'",
+            "Bad scheme pattern, test-t::1234:abcd, false, 'Identifier: [test-t::1234:abcd] has invalid scheme [test-t] (Check the length or scheme pattern)!'",
+    })
+    void testParseDefaultFormatter(String name, String formattedIdentifier, boolean isValid, String containsErrorMessage) {
+        System.out.println("Testing ParseDefaultFormatter: [" + name + "] with identifier: [" + formattedIdentifier + "]");
+        ParticipantIdentifierFormatter identifierFormatter = new ParticipantIdentifierFormatter.Builder().initDefault()
+                .build();
+        identifierFormatter.setSchemeMandatory(true);
+
+        if (isValid) {
+            SMPParticipantIdentifier result = identifierFormatter.parse(formattedIdentifier);
+            Assertions.assertNotNull(result, "Expected valid identifier for: " + formattedIdentifier);
+        } else {
+            MalformedIdentifierException result = Assertions.assertThrows(MalformedIdentifierException.class, () -> identifierFormatter.parse(formattedIdentifier));
+            MatcherAssert.assertThat(result.getMessage(), CoreMatchers.containsString(containsErrorMessage));
+        }
     }
 }

@@ -28,5 +28,6 @@ package eu.europa.ec.dynamicdiscovery.enums;
 public enum DNSLookupType {
 
     CNAME,
-    NAPTR
+    NAPTR,
+    NONE
 }

@@ -20,7 +20,7 @@
   -->
 
 
-<jaxb:bindings version="2.0" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb">
+<jaxb:bindings version="3.0" xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb">
 
     <!--  bind various namespaces to dedicated packages to prevent object collision -->
     <jaxb:bindings scd="x-schema::tns" xmlns:tns="http://docs.oasis-open.org/bdxr/ns/SMP/2/ServiceGroup" >

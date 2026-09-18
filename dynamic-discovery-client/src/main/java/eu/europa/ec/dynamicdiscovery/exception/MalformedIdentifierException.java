@@ -31,7 +31,7 @@ public class MalformedIdentifierException extends IllegalArgumentException {
         return "Malformed identifier, scheme and id should be delimited by double colon: "+malformedId;
     }
 
-    public MalformedIdentifierException(String malformedId, Exception cause){
+    public MalformedIdentifierException(String malformedId, Throwable cause){
         super(buildMessage(malformedId), cause);
     }
 

@@ -19,6 +19,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.util;
 
+import eu.europa.ec.dynamicdiscovery.enums.DNSLookupHashType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,5 +40,15 @@ class HashUtilTest {
    void testCNAMEHash() throws Exception {
         String participantId = HashUtil.getMD5Hash("urn:poland:ncpb");
         assertEquals("b-adb4c6d3821d142c684b13ed269fad65", "b-" + participantId);
+    }
+
+    @Test
+    void testDnsDiscoveryHash() throws Exception {
+        String value = "urn:poland:ncpb";
+        DNSLookupHashType dnsType = DNSLookupHashType.SHA256_BASE32;
+        boolean withPrefix = true;
+        String expectedHash = "DALXFO3CDYE5ZSLF5WAVCYQ3XGERI6ONUBJU5WAH3T77THFWCGEQ";
+        String result = HashUtil.getDnsDiscoveryHash(value, dnsType, withPrefix);
+        assertEquals(dnsType.getPrefix() + expectedHash, result);
     }
 }

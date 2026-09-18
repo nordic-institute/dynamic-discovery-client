@@ -21,16 +21,15 @@ package eu.europa.ec.dynamicdiscovery.core.extension.impl;
 
 import eu.europa.ec.dynamicdiscovery.core.extension.IObjectReader;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.AbstractXMLResponseReader;
-import eu.europa.ec.dynamicdiscovery.exception.BindException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
+import eu.europa.ec.dynamicdiscovery.exception.DocumentParseException;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
-import gen.eu.europa.ec.ddc.api.smp20.ServiceGroup;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,9 +45,9 @@ import java.io.OutputStream;
  */
 public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> {
     // The exception code to target action for the exception
-    SMPExceptionCode smpExceptionCode;
+    DDCExceptionCode smpExceptionCode;
 
-    protected AbstractObjectReader(SMPExceptionCode smpExceptionCode) {
+    protected AbstractObjectReader(DDCExceptionCode smpExceptionCode) {
         this.smpExceptionCode = smpExceptionCode;
     }
 
@@ -73,7 +72,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
             // to remove xmlDeclaration
             jaxbMarshaller.marshal(jaxbObject, outputStream);
         } catch (JAXBException e) {
-            throw new BindException(smpExceptionCode, "Error occurred while serializing the ServiceGroup", e);
+            throw new DocumentParseException(smpExceptionCode, "Error occurred while serializing the ServiceGroup", e);
         }
     }
 
@@ -87,7 +86,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
         try {
             return getUnmarshaller().unmarshal(document);
         } catch (JAXBException e) {
-            throw new BindException(smpExceptionCode, "Error occurred while parsing the document", e);
+            throw new DocumentParseException(smpExceptionCode, "Error occurred while parsing the document", e);
         }
     }
 
@@ -99,7 +98,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
             Document document = db.parse(inputStream);
             return parseNativeAny(document);
         } catch (SAXException | IOException e) {
-            throw new BindException(smpExceptionCode, "Error occurred while SignedServiceMetadata serviceGroup", e);
+            throw new DocumentParseException(smpExceptionCode, "Error occurred while SignedServiceMetadata serviceGroup", e);
         }
     }
 
@@ -110,7 +109,7 @@ public abstract class AbstractObjectReader<T, C> implements IObjectReader<T, C> 
             getMarshaller().marshal(sourceObject, document);
             return document;
         } catch (JAXBException e) {
-            throw new BindException(SMPExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
+            throw new DocumentParseException(DDCExceptionCode.SERVICE_GROUP, "Error occurred while parsing serviceGroup", e);
         }
     }
 }

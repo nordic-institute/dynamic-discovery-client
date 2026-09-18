@@ -19,28 +19,30 @@
  */
 package eu.europa.ec.ddc;
 
-
-import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
-import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
+import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.JWTAuthorizationTokenFetcher;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.core.locator.dns.impl.DefaultDNSLookup;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.DefaultBDXRLocator;
 import eu.europa.ec.dynamicdiscovery.core.locator.impl.StaticMapMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.provider.IMetadataProvider;
-import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.IDocumentRequestProvider;
+import eu.europa.ec.dynamicdiscovery.core.provider.impl.DefaultDocumentRequestProvider;
 import eu.europa.ec.dynamicdiscovery.core.reader.impl.DefaultBDXRReader;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.AccessTokenCredentialProvider;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.JwtTokenCredentialProvider;
 import eu.europa.ec.dynamicdiscovery.enums.DNSLookupType;
+import eu.europa.ec.dynamicdiscovery.exception.DDCExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.DDCRuntimeException;
 import eu.europa.ec.dynamicdiscovery.exception.DNSLookupException;
-import eu.europa.ec.dynamicdiscovery.exception.SMPExceptionCode;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPDocumentIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.service.impl.DynamicDiscoveryService;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.util.Args;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.Record;
 
@@ -56,6 +58,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static eu.europa.ec.ddc.CliOptions.*;
@@ -66,6 +69,7 @@ import static org.apache.commons.lang3.StringUtils.split;
  * Main class for the Dynamic Discovery Client (DDC) command line interface
  */
 public class DdcMain {
+    private static final String LOG_ERROR = "[ERROR] ";
 
     public static void main(String[] args) throws RuntimeException {
 
@@ -73,17 +77,19 @@ public class DdcMain {
         Options commands = CliOptions.getCommandList();
 
         CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = null;//not a good practice, it serves it purpose
+        CommandLine cmd;//not a good practice, it serves it purpose
 
         try {
             cmd = parser.parse(commands, args, true);
         } catch (ParseException e) {
-            System.out.println("ERROR: " + e.getMessage() + "\n\n");
+            System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
             printCommandHelp(commands);
+            return;
         }
 
-        if (cmd.getOptions() == null || cmd.getOptions().length == 0) {
+        if (cmd == null || cmd.getOptions() == null || cmd.getOptions().length == 0) {
             printCommandHelp(commands);
+            return;
         }
 
         if (cmd.hasOption(COMMAND_DNS.getOption())) {
@@ -91,7 +97,7 @@ public class DdcMain {
             try {
                 cmd = parser.parse(options, args);
             } catch (ParseException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
                 printHelpOptions(options, COMMAND_DNS.getName());
                 System.exit(1);
             }
@@ -105,7 +111,7 @@ public class DdcMain {
             try {
                 cmd = parser.parse(options, args);
             } catch (ParseException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
                 printHelpOptions(options, COMMAND_GET.getName());
                 System.exit(1);
             }
@@ -113,7 +119,7 @@ public class DdcMain {
                 ddc.runGet(cmd);
             } catch (TechnicalException | IOException | UnrecoverableKeyException | NoSuchAlgorithmException |
                      KeyStoreException | URISyntaxException e) {
-                System.out.println("ERROR: " + e.getMessage() + "\n\n");
+                System.out.println(LOG_ERROR + e.getMessage() + "\n\n");
             }
         } else {
             printCommandHelp(commands);
@@ -162,6 +168,12 @@ public class DdcMain {
         // read parameters
         SMPParticipantIdentifier participantIdentifier = getResourceIdentifier(cmd);
         String domain = cmd.getOptionValue(OPTION_DNS_DOMAIN.getOption());
+        String nameserver = cmd.getOptionValue(OPTION_DNS_NAMESERVER.getOption());
+        String nameserverPort  = cmd.getOptionValue(OPTION_DNS_NAMESERVER_PORT.getOption());
+        Integer port = null;
+        if (StringUtils.isNotEmpty(nameserverPort)) {
+            port = Integer.parseInt(nameserverPort);
+        }
         String smpurl = cmd.getOptionValue(OPTIONS_SMP_URL.getOption());
         List<String> naptrServices = getNaptrServices(cmd);
         List<DNSLookupType> dnsLookupTypes = getDNSLookupTypes(cmd);
@@ -179,10 +191,12 @@ public class DdcMain {
         KeyStore truststore = getTruststore(cmd);
         KeyStore keyStore = getKeystore(cmd);
 
-        IMetadataLocator testBDXRLocator;
-        if (StringUtils.isBlank(smpurl)){
+        IPublisherLocator testBDXRLocator;
+        if (StringUtils.isBlank(smpurl)) {
             // configure DNS lookup client if SMP URL is not provided
             DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
+                    .nameserverPort(port)
+                    .nameserver(nameserver)
                     .addRequiredNaptrServices(naptrServices)
                     .build();
             // configure BDXR locator
@@ -206,28 +220,84 @@ public class DdcMain {
                 throw new IllegalArgumentException("Keystore key password is not defined");
             }
             testURLFetcherBuilder.tlsKeystore(keyStore, pwd.toCharArray());
+            testURLFetcherBuilder.noHostnameValidation(cmd.hasOption(OPTION_NO_TLS_HOSTNAME_VALIDATION.getOption()));
+        }
+
+
+
+        JwtTokenCredentialProvider jwtTokenCredentialProvider = buildJwtTokenCredentialProvider(cmd, truststore, keyStore);
+        if (jwtTokenCredentialProvider != null) {
+            if (accessTokenCredentialProvider != null) {
+                throw new IllegalArgumentException("Both JWT and Access Token authentication are configured. Please use only one.");
+            }
+            testURLFetcherBuilder.credentialProvider(jwtTokenCredentialProvider);
         }
         DefaultURLFetcher testURLFetcher = testURLFetcherBuilder.build();
 
-        DynamicDiscovery smpClient = DynamicDiscoveryBuilder.newInstance()
-                .provider(new DefaultProvider.Builder().build())
-                .reader(new DefaultBDXRReader.Builder().build())
-                .fetcher(testURLFetcher)
-                .locator(testBDXRLocator)
+        DynamicDiscoveryService smpClient = new DynamicDiscoveryService.Builder()
+                .documentRequestProvider(new DefaultDocumentRequestProvider.Builder().build())
+                .documentReader(new DefaultBDXRReader.Builder().build())
+                .documentFetcher(testURLFetcher)
+                .publisherLocator(testBDXRLocator)
                 .build();
 
         // lookup and download data
-        URI uri = smpClient.getService().getMetadataLocator().lookup(participantIdentifier);
-        if (uri == null) {
+        List<PublisherLookupResult> lookupResults = smpClient.getPublisherLocator().lookup(participantIdentifier);
+        if (lookupResults == null || lookupResults.isEmpty()) {
             throw new DDCRuntimeException("Can not resolve party identifier");
         }
 
-        IMetadataProvider metadataProvider = smpClient.getService().getMetadataProvider();
+        IDocumentRequestProvider metadataProvider = smpClient.getDocumentRequestProvider();
+        for (PublisherLookupResult lookupResult : lookupResults) {
+            try {
+                downloadResource(smpClient, metadataProvider, participantIdentifier, subresourceIdentifier, lookupResult, outputFilePath);
+                break;
+            } catch (TechnicalException e) {
+                System.out.println("Error downloading resource from: " + lookupResult.getUrl() + " - " + e.getMessage());
+            }
+        }
+    }
 
-        uri = subresourceIdentifier == null ? metadataProvider.resolveForParticipantIdentifier(uri, participantIdentifier) :
-                metadataProvider.resolveServiceMetadata(uri, participantIdentifier, subresourceIdentifier);
 
-        FetcherResponse response = smpClient.getService().getMetadataFetcher().fetch(uri);
+    protected JwtTokenCredentialProvider buildJwtTokenCredentialProvider(CommandLine cmd, KeyStore tlsTruststore, KeyStore tlsKeystore) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+        String jwtAuthorizationUrl = cmd.getOptionValue(OPTIONS_JWT_AUTHORIZATION_SERVER_URL.getOption());
+        if (StringUtils.isBlank(jwtAuthorizationUrl)) {
+            return null; // no JWT authentication configured
+        }
+        String jwtClientId = cmd.getOptionValue(OPTIONS_JWT_CLIENT_ID.getOption());
+        String jwtScope = cmd.getOptionValue(OPTIONS_JWT_SCOPE.getOption());
+        String passwd = cmd.getOptionValue(OPTIONS_KEYSTORE_KEY_PASSWORD.getOption());
+        boolean noTlsHostnameValidation = cmd.hasOption(OPTION_NO_TLS_HOSTNAME_VALIDATION.getOption());
+        Args.notBlank(jwtAuthorizationUrl, "JWT authorization server URL");
+        Args.notBlank(jwtClientId, "jwt claim: client id");
+        Objects.requireNonNull(tlsKeystore, "tls keystore must not be null");
+        Objects.requireNonNull(tlsTruststore, "tls truststore must not be null");
+
+        JWTAuthorizationTokenFetcher fetcher = new JWTAuthorizationTokenFetcher.Builder()
+                .clientId(jwtClientId)
+                .scopes(jwtScope)
+                .tlsKeystore(tlsKeystore, passwd.toCharArray())
+                .tlsTruststore(tlsTruststore)
+                .noHostnameValidation(noTlsHostnameValidation)
+                .build();
+// configure JWTCredentialProvider
+        return new JwtTokenCredentialProvider.Builder()
+                .jwtFetcher(fetcher)
+                .authorizationServerURI(jwtAuthorizationUrl)
+                .build();
+    }
+
+    protected void downloadResource(DynamicDiscoveryService smpClient, IDocumentRequestProvider metadataProvider,
+                                    SMPParticipantIdentifier participantIdentifier, SMPDocumentIdentifier subresourceIdentifier,
+                                    PublisherLookupResult lookupResult, String outputFilePath) throws TechnicalException, IOException {
+
+        URI url;
+        if (subresourceIdentifier == null) {
+            url = metadataProvider.createRequestForResource(lookupResult, participantIdentifier).getResourceUri();
+        } else {
+            url = metadataProvider.createRequestForSubresource(lookupResult, participantIdentifier, subresourceIdentifier).getSubresourceUri();
+        }
+        FetcherResponse response = (FetcherResponse) smpClient.getDocumentFetcher().fetch(url);
         Files.copy(response.getInputStream(), Paths.get(outputFilePath), StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -237,9 +307,17 @@ public class DdcMain {
         String domain = cmd.getOptionValue("domain");
         List<String> naptrServices = getNaptrServices(cmd);
         List<DNSLookupType> dnsLookupTypes = getDNSLookupTypes(cmd);
+        String nameserver = cmd.getOptionValue(OPTION_DNS_NAMESERVER.getOption());
+        String nameserverPort  = cmd.getOptionValue(OPTION_DNS_NAMESERVER_PORT.getOption());
+        Integer port = null;
+        if (StringUtils.isNotEmpty(nameserverPort)) {
+            port = Integer.parseInt(nameserverPort);
+        }
 
         // configure ddc client
         DefaultDNSLookup testDNSLookup = new DefaultDNSLookup.Builder()
+                .nameserverPort(port)
+                .nameserver(nameserver)
                 .addRequiredNaptrServices(naptrServices)
                 .build();
 
@@ -277,7 +355,7 @@ public class DdcMain {
                 }
             }
         } catch (DNSLookupException e) {
-            if (e.getSmpExceptionCode() != SMPExceptionCode.INVALID_DNS_TYPE) {
+            if (e.getSmpExceptionCode() != DDCExceptionCode.INVALID_DNS_TYPE) {
                 throw e;
             }
         }

@@ -1,6 +1,6 @@
 [![Go to Harmony Community Slack](https://img.shields.io/badge/Go%20to%20Community%20Slack-grey.svg)](https://harmonyedelivery.slack.com/)
 [![Get invited](https://img.shields.io/badge/No%20Slack-Get%20invited-green.svg)](https://edelivery.digital/harmony-edelivery-access-community)
-[![License badge](https://img.shields.io/badge/license-LGPL-blue.svg)](LICENSE.md)
+[![License badge](https://img.shields.io/badge/license-LGPL-blue.svg)](License.txt)
 [![Documentation badge](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://github.com/nordic-institute/harmony-common/tree/main/doc)
 [![Support badge](https://img.shields.io/badge/support-sof-yellowgreen.svg)](https://edelivery.digital/contact)
 

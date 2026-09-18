@@ -32,7 +32,7 @@ import java.util.List;
 public class SignatureValidationContext {
     public enum CertificateValidationStrategy {
         /**
-         * The certificate is validated against the trust store.
+         * The certificate is validated against the truststore.
          */
         TRUSTSTORE,
         /**
@@ -40,7 +40,7 @@ public class SignatureValidationContext {
          */
         TRUSTED_CERTIFICATES,
         /**
-         * The certificate is validated against the trusted certificates and the trust store.
+         * The certificate is validated against the trusted certificates and the truststore.
          */
         CERTIFICATE_SUBJECT_VALIDATION_AND_TRUSTSTORE
 

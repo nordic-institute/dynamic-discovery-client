@@ -35,6 +35,9 @@ public enum CliOptions {
     OPTION_SUBRESOURCE_IDENTIFIER("si", "subresource-identifier", true, false, "Subresource identifier: ex: Invoice"),
     OPTION_SUBRESOURCE_SCHEME("ss", "subresource-scheme", true, false, "Subresource scheme :org:xml"),
     OPTION_DNS_DOMAIN("d", "domain", true, false, "Network DNS domain: eq.: acc.edelivery.tech.ec.europa.eu"),
+    OPTION_DNS_NAMESERVER("n", "nameserver", true, false, "Network DNS nameserver, if not provided system default is used"),
+    OPTION_DNS_NAMESERVER_PORT("p", "port", true, false, "Network DNS nameserver port, if not provided system default is used"),
+
     OPTION_NAPTR_SERVICE("s", "services", true, false, "Comma separated NAPTR service value as: Meta:SMP,meta:cppa"),
     OPTION_OUTPUT("o", "output", true, false, "Output filename. If file already exists it is overwritten." +
             " If not provided, output is printed to console"),
@@ -47,7 +50,11 @@ public enum CliOptions {
     OPTION_KEYSTORE_FILEPATH("kf", "keystore-filepath", true, false, "Client TLS keystore file path"),
     OPTION_KEYSTORE_PASSWORD("kp", "keystore-password", true, false, "Client TLS keystore password"),
     OPTION_KEYSTORE_TYPE("kt", "keystore-type", true, false, "Client TLS keystore type: Default PKCS12"),
+    OPTION_NO_TLS_HOSTNAME_VALIDATION("nthv", "no-tls-hostname-validation", false, false, "if provided skip  hostname and the CN of the TLS server certificate validation"),
     OPTIONS_KEYSTORE_KEY_PASSWORD("kkp", "keystore-key-password", true, false, "Client TLS keystore alias password"),
+    OPTIONS_JWT_AUTHORIZATION_SERVER_URL("jwta", "jwt-url", true, false, "JWT authorization server URL, used for JWT authentication"),
+    OPTIONS_JWT_CLIENT_ID("jwtc", "jwt-client-id", true, false, "JWT client ID, used for JWT authentication"),
+    OPTIONS_JWT_SCOPE("jwts", "jwt-scopes", true, false, "JWT scope, used for JWT authentication"),
     OPTIONS_SMP_URL("smp", "smp-url", true, false, "If provided, SMP URL is used instead of DNS discovery"),;
     private final Option option;
 
@@ -105,6 +112,8 @@ public enum CliOptions {
         options.addOption(OPTION_DNS_DOMAIN.getOption());
         options.addOption(OPTION_RECORD_TYPE.getOption());
         options.addOption(OPTION_NAPTR_SERVICE.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER_PORT.getOption());
         return options;
     }
 
@@ -125,6 +134,8 @@ public enum CliOptions {
         options.addOption(OPTION_RECORD_TYPE.getOption());
         options.addOption(OPTION_NAPTR_SERVICE.getOption());
         options.addOption(OPTION_OUTPUT.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER.getOption());
+        options.addOption(OPTION_DNS_NAMESERVER_PORT.getOption());
 
         options.addOption(OPTION_TRUSTSTORE_FILEPATH.getOption());
         options.addOption(OPTION_TRUSTSTORE_PASSWORD.getOption());
@@ -132,9 +143,14 @@ public enum CliOptions {
         options.addOption(OPTION_KEYSTORE_FILEPATH.getOption());
         options.addOption(OPTION_KEYSTORE_PASSWORD.getOption());
         options.addOption(OPTION_KEYSTORE_TYPE.getOption());
+        options.addOption(OPTIONS_KEYSTORE_KEY_PASSWORD.getOption());
+        options.addOption(OPTION_NO_TLS_HOSTNAME_VALIDATION.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_NAME.getOption());
         options.addOption(OPTION_ACCESS_TOKEN_VALUE.getOption());
         options.addOption(OPTIONS_SMP_URL.getOption());
+        options.addOption(OPTIONS_JWT_AUTHORIZATION_SERVER_URL.getOption());
+        options.addOption(OPTIONS_JWT_CLIENT_ID.getOption());
+        options.addOption(OPTIONS_JWT_SCOPE.getOption());
         return options;
     }
 }

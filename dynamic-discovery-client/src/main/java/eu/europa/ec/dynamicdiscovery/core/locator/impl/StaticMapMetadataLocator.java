@@ -7,9 +7,9 @@
  * Licensed under the LGPL, Version 2.1 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * [PROJECT_HOME]\license\lgpl2-1\license.txt or https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,8 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.locator.impl;
 
-import eu.europa.ec.dynamicdiscovery.core.locator.IMetadataLocator;
-import eu.europa.ec.dynamicdiscovery.core.locator.dns.IDNSLookup;
+import eu.europa.ec.dynamicdiscovery.core.locator.IPublisherLocator;
+import eu.europa.ec.dynamicdiscovery.core.locator.PublisherLookupResult;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.identifiers.SMPParticipantIdentifier;
 import org.slf4j.Logger;
@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,14 +44,13 @@ import java.util.Map;
  * @author Joze RIHTARSIC
  * @since 1.14
  */
-public class StaticMapMetadataLocator implements IMetadataLocator {
+public class StaticMapMetadataLocator implements IPublisherLocator {
     private static final Logger LOG = LoggerFactory.getLogger(StaticMapMetadataLocator.class);
     final URI defaultURI;
     Map<SMPParticipantIdentifier, URI> mapExceptionsUri;
 
     public StaticMapMetadataLocator(String defaultURI) throws URISyntaxException {
         this(new URI(defaultURI), null);
-
     }
 
     public StaticMapMetadataLocator(URI defaultURI) {
@@ -62,23 +63,14 @@ public class StaticMapMetadataLocator implements IMetadataLocator {
     }
 
     @Override
-    public URI lookup(String participantId, String participantScheme) throws TechnicalException {
-        return lookup(new SMPParticipantIdentifier(participantId, participantScheme));
-    }
-
-    @Override
-    public URI lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
+    public List<PublisherLookupResult> lookup(SMPParticipantIdentifier participantIdentifier) throws TechnicalException {
         if (mapExceptionsUri != null && mapExceptionsUri.containsKey(participantIdentifier)) {
             URI uri = mapExceptionsUri.get(participantIdentifier);
             LOG.debug("Return uri [{}] for participant [{}]!", uri, participantIdentifier);
-            return uri;
+            return Collections.singletonList(new PublisherLookupResult(participantIdentifier, uri, null));
         }
         LOG.debug("Return default uri [{}] for participant identifier [{}]!", defaultURI, participantIdentifier);
-        return defaultURI;
+        return Collections.singletonList(new PublisherLookupResult(participantIdentifier, defaultURI, null));
     }
 
-    @Override
-    public IDNSLookup getDnsLookup() {
-        return null;
-    }
 }
