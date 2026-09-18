@@ -24,6 +24,7 @@ import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.JWTAuthorizationTokenFetc
 import eu.europa.ec.dynamicdiscovery.core.security.ICredentialProvider;
 import eu.europa.ec.dynamicdiscovery.exception.DDCAuthorizationException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.net.URI;
@@ -48,7 +49,10 @@ public class JwtTokenCredentialProvider implements ICredentialProvider {
 
     public JwtCredentials getCredentials() {
         if (jwtCredentials == null || jwtCredentials.isExpired()) {
-            jwtCredentials = fetchJwtCredentials();
+            JwtCredentials fetched = fetchJwtCredentials();
+            // expires_in is optional in RFC 6749. Without it the token lifetime is unknown, so it is not cached
+            jwtCredentials = fetched.getExpiresIn() > 0 ? fetched : null;
+            return fetched;
         }
         return jwtCredentials;
     }
@@ -64,7 +68,18 @@ public class JwtTokenCredentialProvider implements ICredentialProvider {
         if (response == null || response.getJwtCredentials() == null) {
             throw new DDCAuthorizationException("No JWT credentials were returned or they could not be parsed from URL [" + authorizationServerUri + "]");
         }
-        return response.getJwtCredentials();
+        JwtCredentials credentials = response.getJwtCredentials();
+        validate(credentials);
+        return credentials;
+    }
+
+    private void validate(JwtCredentials credentials) {
+        if (StringUtils.isBlank(credentials.getAccessToken())) {
+            throw new DDCAuthorizationException("The token response from URL [" + authorizationServerUri + "] does not contain an access token");
+        }
+        if (StringUtils.isNotBlank(credentials.getTokenType()) && !"Bearer".equalsIgnoreCase(credentials.getTokenType())) {
+            throw new DDCAuthorizationException("Unsupported token type [" + credentials.getTokenType() + "] returned from URL [" + authorizationServerUri + "], only Bearer tokens are supported");
+        }
     }
 
     public static class Builder {

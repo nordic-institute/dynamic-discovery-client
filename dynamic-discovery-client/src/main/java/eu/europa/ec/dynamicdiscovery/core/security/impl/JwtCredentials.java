@@ -19,6 +19,7 @@
  */
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.bouncycastle.util.Arrays;
@@ -37,6 +38,7 @@ import java.security.NoSuchAlgorithmException;
  * @author Joze Rihtarsic
  * @since 3.1
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class JwtCredentials implements Credentials, Serializable {
 
     private final long receivedAtEpochSeconds = System.currentTimeMillis() / 1000;

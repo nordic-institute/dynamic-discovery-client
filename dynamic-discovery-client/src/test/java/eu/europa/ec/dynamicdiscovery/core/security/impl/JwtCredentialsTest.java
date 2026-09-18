@@ -1,13 +1,29 @@
 package eu.europa.ec.dynamicdiscovery.core.security.impl;
 
+import eu.europa.ec.dynamicdiscovery.core.fetcher.JwtResponse;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class JwtCredentialsTest {
+
+    @Test
+    void unknownResponseFieldsAreIgnored() {
+        String json = "{\"access_token\":\"token\",\"token_type\":\"Bearer\",\"expires_in\":3600,"
+                + "\"ext_expires_in\":3600,\"session_state\":\"abc\"}";
+        JwtResponse response = new JwtResponse(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
+
+        JwtCredentials credentials = response.getJwtCredentials();
+
+        assertNotNull(credentials, "Unknown fields in the token response must be ignored");
+        assertEquals("token", credentials.getAccessToken());
+        assertEquals(3600, credentials.getExpiresIn());
+    }
 
     @Test
     void expiresInIsRelativeToTokenReceiptTime() {

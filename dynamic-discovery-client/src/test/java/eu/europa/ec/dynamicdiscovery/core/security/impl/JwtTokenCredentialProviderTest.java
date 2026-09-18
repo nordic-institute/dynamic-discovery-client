@@ -40,6 +40,69 @@ class JwtTokenCredentialProviderTest {
     }
 
     @Test
+    void doesNotCacheCredentialsWithoutExpiresIn() throws Exception {
+        JWTAuthorizationTokenFetcher fetcher = mock(JWTAuthorizationTokenFetcher.class);
+        JwtResponse response = mock(JwtResponse.class);
+        JwtCredentials credentials = new JwtCredentials();
+        credentials.setAccessToken("token");
+        when(fetcher.fetch(AUTHORIZATION_SERVER)).thenReturn(response);
+        when(response.getJwtCredentials()).thenReturn(credentials);
+
+        JwtTokenCredentialProvider provider = buildProvider(fetcher);
+
+        assertSame(credentials, provider.getCredentials());
+        assertSame(credentials, provider.getCredentials());
+        verify(fetcher, times(2)).fetch(AUTHORIZATION_SERVER);
+    }
+
+    @Test
+    void throwsWhenAccessTokenIsBlank() throws Exception {
+        JWTAuthorizationTokenFetcher fetcher = mock(JWTAuthorizationTokenFetcher.class);
+        JwtResponse response = mock(JwtResponse.class);
+        JwtCredentials credentials = new JwtCredentials();
+        credentials.setAccessToken(" ");
+        credentials.setExpiresIn(3600);
+        when(fetcher.fetch(AUTHORIZATION_SERVER)).thenReturn(response);
+        when(response.getJwtCredentials()).thenReturn(credentials);
+
+        JwtTokenCredentialProvider provider = buildProvider(fetcher);
+
+        DDCAuthorizationException exception = assertThrows(DDCAuthorizationException.class, provider::getCredentials);
+        assertTrue(exception.getMessage().contains("does not contain an access token"));
+    }
+
+    @Test
+    void throwsWhenTokenTypeIsNotBearer() throws Exception {
+        JWTAuthorizationTokenFetcher fetcher = mock(JWTAuthorizationTokenFetcher.class);
+        JwtResponse response = mock(JwtResponse.class);
+        JwtCredentials credentials = new JwtCredentials();
+        credentials.setAccessToken("token");
+        credentials.setTokenType("MAC");
+        when(fetcher.fetch(AUTHORIZATION_SERVER)).thenReturn(response);
+        when(response.getJwtCredentials()).thenReturn(credentials);
+
+        JwtTokenCredentialProvider provider = buildProvider(fetcher);
+
+        DDCAuthorizationException exception = assertThrows(DDCAuthorizationException.class, provider::getCredentials);
+        assertTrue(exception.getMessage().contains("Unsupported token type [MAC]"));
+    }
+
+    @Test
+    void acceptsBearerTokenTypeIgnoringCase() throws Exception {
+        JWTAuthorizationTokenFetcher fetcher = mock(JWTAuthorizationTokenFetcher.class);
+        JwtResponse response = mock(JwtResponse.class);
+        JwtCredentials credentials = new JwtCredentials();
+        credentials.setAccessToken("token");
+        credentials.setTokenType("bearer");
+        when(fetcher.fetch(AUTHORIZATION_SERVER)).thenReturn(response);
+        when(response.getJwtCredentials()).thenReturn(credentials);
+
+        JwtTokenCredentialProvider provider = buildProvider(fetcher);
+
+        assertSame(credentials, provider.getCredentials());
+    }
+
+    @Test
     void throwsWhenResponseIsNull() throws Exception {
         JWTAuthorizationTokenFetcher fetcher = mock(JWTAuthorizationTokenFetcher.class);
         when(fetcher.fetch(AUTHORIZATION_SERVER)).thenReturn(null);
