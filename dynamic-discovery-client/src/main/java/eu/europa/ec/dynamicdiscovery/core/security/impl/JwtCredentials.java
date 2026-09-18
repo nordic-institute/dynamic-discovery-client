@@ -39,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class JwtCredentials implements Credentials, Serializable {
 
+    private final long receivedAtEpochSeconds = System.currentTimeMillis() / 1000;
 
     @JsonProperty("access_token")
     private String accessToken;
@@ -118,13 +119,18 @@ public class JwtCredentials implements Credentials, Serializable {
     }
 
     /**
-     * Checks if the JWT token is expired based on the current time.
+     * Checks whether the JWT token has expired relative to the time these credentials were received.
+     * The OAuth {@code expires_in} response field is a duration in seconds, not an absolute timestamp, so it must be
+     * measured from token receipt time. The {@code not-before-policy} field has different semantics: it is commonly an
+     * absolute policy timestamp (or {@code 0}) used by the authorization server to invalidate tokens issued before a
+     * policy change. Using it as the starting point for {@code expires_in} would therefore make a normal token appear
+     * immediately expired and cause the credential provider to fetch a new token for every request.
      *
      * @return true if the token is expired, false otherwise
      */
     public boolean isExpired() {
         long currentTime = System.currentTimeMillis() / 1000; // Convert to seconds
-        return (expiresIn > 0 && (currentTime - notBeforePolicy) >= expiresIn);
+        return expiresIn > 0 && currentTime - receivedAtEpochSeconds >= expiresIn;
     }
 
     @Override

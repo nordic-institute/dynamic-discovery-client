@@ -10,6 +10,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class JwtCredentialsTest {
 
     @Test
+    void expiresInIsRelativeToTokenReceiptTime() {
+        JwtCredentials credentials = new JwtCredentials();
+        credentials.setExpiresIn(3600);
+        credentials.setNotBeforePolicy(0);
+
+        assertFalse(credentials.isExpired());
+    }
+
+    @Test
     void fingerprintIsDeterministicAndChangesWithToken() {
         JwtCredentials credentials1 = new JwtCredentials();
         JwtCredentials credentials2 = new JwtCredentials();
