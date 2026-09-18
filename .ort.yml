@@ -1,0 +1,30 @@
+---
+excludes:
+  paths:
+    - pattern: ".mvn/**"
+      reason: "BUILD_TOOL_OF"
+      comment: "This directory contains Maven build tool."
+
+    - pattern: ".ort.yml"
+      reason: "DOCUMENTATION_OF"
+      comment: "The file is a oss review toolkit configuration file."
+
+    - pattern: "img/**"
+      reason: "DOCUMENTATION_OF"
+      comment: "Contains images used in the documentation."
+
+    - pattern: "license/**"
+      reason: "DOCUMENTATION_OF"
+      comment: "Contains only text files of different third-party licenses."
+
+    - pattern: "Notice.md"
+      reason: "DOCUMENTATION_OF"
+      comment: "Third-party license notice file."
+
+    - pattern: "mvnw"
+      reason: "BUILD_TOOL_OF"
+      comment: "Apache Maven Wrapper startup batch script."
+
+    - pattern: "mvnw.cmd"
+      reason: "BUILD_TOOL_OF"
+      comment: "Apache Maven Wrapper startup batch script."
