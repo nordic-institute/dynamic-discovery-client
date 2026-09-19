@@ -44,12 +44,6 @@ resolutions:
     - message: ".*LGPL-2.0-only in Maven:org.niis.dynamic-discovery:.*"
       reason: "CANT_FIX_EXCEPTION"
       comment: "Scanner false positive."
-    # --- Third-party licence catalogue in the root pom.xml (9 violations) ---
-    # Maven field values naming DEPENDENCY licences: dependency <licenses> entries and the
-    # notice-file plugin catalogue
-    # <value>Apache-2.0,BSD-2-Clause,EPL-1.0,EPL-2.0,GPL-2.0-or-later,LGPL-2.1+,MIT</value>.
-    # DOFCG §3: code-level licence fields are code, not a licence header on the file.
-    # Scoped to dynamic-discovery-parent, the project the root pom.xml belongs to.
     - message: ".*CDDL-1.0 in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
       reason: "CANT_FIX_EXCEPTION"
       comment: "Listed in the notice-file plugin's third-party licence catalogue value. Names a dependency's licence, not the licence of pom.xml."
