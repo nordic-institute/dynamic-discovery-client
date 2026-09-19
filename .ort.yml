@@ -35,9 +35,3 @@ excludes:
 
 resolutions:
   rule_violations:
-    - message: ".*EUPL-1.2.*"
-      reason: "LICENSE_ACQUIRED_EXCEPTION"
-      comment: "EUPL-1.2 is the main license of the project and therefore will not be an issue."
-    - message: ".*EUPL-1.1.*"
-      reason: "LICENSE_ACQUIRED_EXCEPTION"
-      comment: "EUPL-1.2 is the main license of the project and EUPL-1.1 is upward compatible and therefore not an issue."
