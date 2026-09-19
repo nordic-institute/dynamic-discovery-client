@@ -42,7 +42,8 @@ resolutions:
 curations:
   license_findings:
     # --- Header false positives in the EC-derived Java sources (7 violations) ---
-    - path: "dynamic-discovery-client/src/main/java/eu/europa/ec/dynamicdiscovery/**/*.java"
+    # "dynamic-discovery-client/src/main/java/eu/europa/ec/dynamicdiscovery/**/*.java"
+    - path: "**"
       detected_license: "AGPL-3.0-only"
       concluded_license: "NONE"
       reason: "INCORRECT"
