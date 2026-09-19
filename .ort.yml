@@ -35,3 +35,89 @@ excludes:
 
 resolutions:
   rule_violations:
+
+curations:
+  license_findings:
+    # --- Header false positives in the EC-derived Java sources (7 violations) ---
+    - path: "dynamic-discovery-client/src/main/java/eu/europa/ec/dynamicdiscovery/**/*.java"
+      detected_license: "AGPL-3.0-only"
+      concluded_license: "NONE"
+      reason: "INCORRECT"
+      comment: "82.61% partial match on the Apache-style header boilerplate. The header at line 7 reads 'Licensed under the LGPL, Version 2.1'; no AGPL text appears anywhere in the file."
+    - path: "dynamic-discovery-client/src/main/java/eu/europa/ec/dynamicdiscovery/**/*.java"
+      detected_license: "LGPL-2.0-only"
+      concluded_license: "NONE"
+      reason: "INCORRECT"
+      comment: "Line 11 is a pointer to the license text, not a license grant. ScanCode matches LGPL-2.0-only on the 'old-licenses' path segment of the URL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt, which resolves to LGPL 2.1. The file's grant is on line 7, 'Licensed under the LGPL, Version 2.1', detected as LGPL-2.1-only at 100%. No LGPL-2.0 grant or text appears in the file."
+
+    # --- Third-party licence catalogue in the root POM (9 violations) ---
+    # These are Maven field values naming DEPENDENCY licences: dependency <licenses>
+    # entries, and the notice-file plugin catalogue
+    # <value>Apache-2.0,BSD-2-Clause,EPL-1.0,EPL-2.0,GPL-2.0-or-later,LGPL-2.1+,MIT</value>.
+    # DOFCG §3: code-level licence fields are code, not a licence header on the file.
+    # NOTE: pom.xml's own LGPL-2.1-only finding is the real <licenses> declaration —
+    # it is deliberately NOT curated.
+
+    - path: "pom.xml"
+      detected_license: "GPL-2.0-only"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Maven field value naming a dependency's licence (appears as part of
+        'GPL-2.0-only OR CDDL-1.1' dual-licence entries). Not a grant covering pom.xml."
+
+    - path: "pom.xml"
+      detected_license: "GPL-2.0-or-later"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Listed in the notice-file plugin's third-party licence
+        Names a dependency's licence, not the licence of pom.xml."
+
+    - path: "pom.xml"
+      detected_license: "GPL-2.0-only WITH Classpath-exception-2.0"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Maven field value from a dependency's dual-licence entry
+        ('CDDL-1.0 OR GPL-2.0-only WITH Classpath-exception-2.0'). Not
+        pom.xml."
+
+    - path: "pom.xml"
+      detected_license: "CDDL-1.0"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Maven field value from dependency dual-licence entries
+        ('CDDL-1.0 OR GPL-2.0-only ...'). Not a grant covering pom.xml."
+
+    - path: "pom.xml"
+      detected_license: "CDDL-1.1"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Maven field value from dependency dual-licence entries
+        ('GPL-2.0-only OR CDDL-1.1'). Not a grant covering pom.xml."
+
+    - path: "pom.xml"
+      detected_license: "EPL-1.0"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value.
+        Names a dependency's licence, not the licence of pom.xml."
+
+    - path: "pom.xml"
+      detected_license: "EPL-2.0"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Listed in the notice-file plugin's third-party licence
+        Names a dependency's licence, not the licence of pom.xml."
+
+    - path: "pom.xml"
+      detected_license: "LGPL-2.0-or-later"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Maven field value naming a dependency's licence. The project's own licence
+        is LGPL-2.1-only, declared separately in the root <licenses> block."
+
+    - path: "pom.xml"
+      detected_license: "LGPL-2.1-or-later"
+      concluded_license: "NONE"
+      reason: "CODE"
+      comment: "Maven field value naming a dependency's licence (the ca
+        as 'LGPL-2.1+'). The project's own licence is LGPL-2.1-only, not the '+' form."
