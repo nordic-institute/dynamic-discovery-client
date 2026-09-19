@@ -1,0 +1,105 @@
+---
+excludes:
+  paths:
+    - pattern: ".mvn/**"
+      reason: "BUILD_TOOL_OF"
+      comment: "This directory contains Maven build tool."
+
+    - pattern: ".ort.yml"
+      reason: "DOCUMENTATION_OF"
+      comment: "The file is a oss review toolkit configuration file."
+
+    - pattern: "dynamic-discovery-client/src/test/**"
+      reason: "TEST_OF"
+      comment: "This directory contains tests."
+
+    - pattern: "img/**"
+      reason: "DOCUMENTATION_OF"
+      comment: "Contains images used in the documentation."
+
+    - pattern: "license/**"
+      reason: "DOCUMENTATION_OF"
+      comment: "Contains only text files of different third-party licenses."
+
+    - pattern: "Notice.md"
+      reason: "DOCUMENTATION_OF"
+      comment: "Third-party license notice file."
+
+    - pattern: "mvnw"
+      reason: "BUILD_TOOL_OF"
+      comment: "Apache Maven Wrapper startup batch script."
+
+    - pattern: "mvnw.cmd"
+      reason: "BUILD_TOOL_OF"
+      comment: "Apache Maven Wrapper startup batch script."
+
+resolutions:
+  rule_violations:
+    - message: "copyleft-LGPL license LGPL-2.1-only in Maven:org.niis.dynamic-discovery:.*"
+      reason: "LICENSE_ACQUIRED_EXCEPTION"
+      comment: "LGPL-2.1-only is this project's main licence so LGPL-style copyleft in 
+        project code is OK. The code is distributed as an LGPL-2.1 library, which is 
+        its intended licence."
+    - message: ".*AGPL-3.0-only in Maven:org.niis.dynamic-discovery:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Scanner false positive. 82.61% partial match on the Apache-style header 
+        boilerplate. The header at line 7 reads 'Licensed under the LGPL, Version 2.1'; 
+        no AGPL text appears anywhere in the file."
+    - message: ".*LGPL-2.0-only in Maven:org.niis.dynamic-discovery:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Scanner false positive. Line 11 is a pointer to the license text, not 
+        a license grant. ScanCode matches LGPL-2.0-only on the 'old-licenses' path segment 
+        of the URL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt, which resolves 
+        to LGPL 2.1. The file's grant is on line 7, 'Licensed under the LGPL, Version 2.1', 
+        detected as LGPL-2.1-only at 100%. No LGPL-2.0 grant or text appears in the file."
+    - message: ".*CDDL-1.0 in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value. 
+        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2), 
+        not the licence of pom.xml."
+    - message: ".*CDDL-1.1 in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value. 
+        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2),
+        not the licence of pom.xml."
+    - message: ".*EPL-1.0 in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value.
+        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2),
+        not the licence of pom.xml."
+    - message: ".*EPL-2.0 in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value.
+        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2),
+        not the licence of pom.xml."
+    - message: ".* GPL-2.0-only in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value.
+        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2),
+        not the licence of pom.xml."
+    - message: ".* GPL-2.0-or-later in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value. 
+        Stale entry inherited from upstream pom.xml, no dependency carries this license."
+    - message: ".*GPL-2.0-only WITH Classpath-exception-2.0 in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value.
+        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2),
+        not the licence of pom.xml."
+    - message: ".*LGPL-2.0-or-later in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value.
+        Stale entry inherited from upstream pom.xml, no dependency carries this license."
+    - message: ".*LGPL-2.1-or-later in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
+      reason: "CANT_FIX_EXCEPTION"
+      comment: "Listed in the notice-file plugin's third-party licence catalogue value.
+        Stale entry inherited from upstream pom.xml, no dependency carries this license."
+    - message: "copyleft-strong license GPL-1.0-or-later in Maven:org.glassfish.jaxb:.*"
+      reason: "LICENSE_ACQUIRED_EXCEPTION"
+      comment: "Dual licence, choice taken. The only GPL-1.0-or-later detection is in
+        META-INF/NOTICE.md line 168, which lists testng (6.14.2) as third-party content
+        used by the JAXB project — 'License: Apache-2.0 AND (MIT OR GPL-1.0+)'. testng is
+        a build/test dependency of JAXB and is not shipped in this artifact. The existing
+        DOS clearance (id 17561) already removed the bare GPL-1.0-or-later partial match
+        (score 50) and retained the dual expression. Therefore, the choice rests with
+        the licensee; MIT is chosen. jaxb-runtime's own licence is BSD-3-Clause."
