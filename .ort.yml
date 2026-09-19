@@ -35,6 +35,9 @@ excludes:
 
 resolutions:
   rule_violations:
+    - message: "copyleft-LGPL license LGPL-2.1-only in Maven:org.niis.dynamic-discovery:.*"
+      reason: "LICENSE_ACQUIRED_EXCEPTION"
+      comment: "LGPL-2.1-only is this project's main licence so LGPL-style copyleft in project code is OK. The code is distributed as an LGPL-2.1 library, which is its intended licence."
 
 curations:
   license_findings:
