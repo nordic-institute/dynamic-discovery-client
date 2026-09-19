@@ -84,7 +84,8 @@ resolutions:
     - message: ".*GPL-2.0-only WITH Classpath-exception-2.0 in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
       reason: "CANT_FIX_EXCEPTION"
       comment: "Listed in the notice-file plugin's third-party licence catalogue value.
-        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2), not the licence of pom.xml."
+        Names a dependency's licence (org.eclipse.jetty.toolchain:jetty-jakarta-servlet-api@5.0.2),
+        not the licence of pom.xml."
     - message: ".*LGPL-2.0-or-later in Maven:org.niis.dynamic-discovery:dynamic-discovery-parent:.*"
       reason: "CANT_FIX_EXCEPTION"
       comment: "Listed in the notice-file plugin's third-party licence catalogue value.
