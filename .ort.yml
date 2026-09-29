@@ -33,6 +33,11 @@ excludes:
       reason: "BUILD_TOOL_OF"
       comment: "Apache Maven Wrapper startup batch script."
 
+  scopes:
+    - pattern: "test.*"
+      reason: "TEST_DEPENDENCY_OF"
+      comment: "Test-only dependencies are not distributed."
+
 resolutions:
   rule_violations:
     - message: "copyleft-LGPL license LGPL-2.1-only in Maven:org.niis.dynamic-discovery:.*"
@@ -103,3 +108,14 @@ resolutions:
         DOS clearance (id 17561) already removed the bare GPL-1.0-or-later partial match
         (score 50) and retained the dual expression. Therefore, the choice rests with
         the licensee; MIT is chosen. jaxb-runtime's own licence is BSD-3-Clause."
+    - message: "free-restricted license LicenseRef-scancode-un-cefact-2016 in Maven:org.niis.dynamic-discovery:.*"
+      reason: "NOT_MODIFIED_EXCEPTION"
+      comment: "UN/CEFACT specification licence on a third-party schema module shipped
+        verbatim: dynamic-discovery-client/src/main/resources/xsd/bdx-smp-2.0/common/
+        CCTS_CCT_SchemaModule-2.0.xsd (100% match, lines 23-45). The licence grants
+        perpetual, irrevocable permission to copy and redistribute in whole or in part
+        without restriction; its only condition is that the document is not modified and
+        the copyright notice and permission paragraph are retained. The file is bundled
+        unmodified with its notice intact, so the condition is satisfied. A resolution
+        rather than a curation is deliberate: the licence is real and must stay in the
+        NOTICE file and SBOM."
