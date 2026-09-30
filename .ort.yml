@@ -10,9 +10,9 @@ excludes:
       comment: "The file is a oss review toolkit configuration file."
 
     - pattern: "3RD-PARTY-NOTICES.txt"
-      reason: "OTHER"
+      reason: "DOCUMENTATION_OF"
       comment: "File including 3rd party license notices."
-      
+
     - pattern: "dynamic-discovery-client/src/test/**"
       reason: "TEST_OF"
       comment: "This directory contains tests."
